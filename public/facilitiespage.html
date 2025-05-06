@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facilities</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        body {
+            background-image: url("homepage.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 70vh;
+
+        }
+    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPU Booking System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css" />
+
+</head>
+
+<body>
+
+    <header class="top-bar-container">
+        <div class="container d-flex align-items-center justify-content-between flex-wrap">
+            <div class="container d-flex justify-content-center align-items-center flex-wrap text-center">
+                <img src="cpu-logo.png" alt="CPU Logo" class="logo me-3" />
+                <div class="text-white">
+                    <h1 class="fs-4 mb-0">CENTRAL PHILIPPINE UNIVERSITY</h1>
+                    <p class="mb-0 fs-6">EQUIPMENT AND FACILITY BOOKING SERVICES</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <nav class="nav-bar bg-white">
+        <div class="container d-flex justify-content-between align-items-center py-2 flex-wrap">
+            <div class="nav-links d-flex flex-wrap align-items-center">
+                <a href="#">Home</a>
+                <a href="facilitiespage.html">Facilities</a>
+                <a href="#">Resources</a>
+                <a href="#">My Bookings</a>
+                <a href="#">Customer Feedback</a>
+            </div>
+            <button class="btn btn-warning fw-bold">Book Now</button>
+        </div>
+    </nav>
+
+    <div class="facilities-container py-5 px-3">
+        <div class="container">
+            <div class="row">
+                <!-- Left: Facility Categories -->
+                <div class="col-md-3 mb-4">
+                    <div class="bg-white rounded shadow p-3">
+                        <h5 class="text-center fw-bold mb-3">Facility Categories</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-dark text-decoration-none d-block py-2">Event Halls</a></li>
+                            <li><a href="#" class="text-dark text-decoration-none d-block py-2">Gymnasiums</a></li>
+                            <li><a href="#" class="text-dark text-decoration-none d-block py-2">Lecture Rooms</a></li>
+                            <li><a href="#" class="text-dark text-decoration-none d-block py-2">Computer
+                                    Laboratories</a></li>
+                            <li><a href="#" class="text-dark text-decoration-none d-block py-2">Conference Rooms</a>
+                            </li>
+                            <li><a href="#" class="text-dark text-decoration-none d-block py-2">AV Rooms</a></li>
+                            <li><a href="#" class="text-dark text-decoration-none d-block py-2">Courts</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Right: Facility Listings -->
+                <div class="col-md-9">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class=" fw-bold text-white">All Available Facilities</h5>
+                        <div class="d-flex">
+                            <select class="form-select me-2" style="width: 120px;">
+                                <option>Layout</option>
+                                <option>Grid</option>
+                                <option>List</option>
+                            </select>
+                            <select class="form-select" style="width: 120px;">
+                                <option>Show All</option>
+                                <option>Available</option>
+                                <option>Unavailable</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Facility Card -->
+                    <div class="bg-white rounded shadow p-3 d-flex mb-3">
+                        <div class="me-3">
+                            <div style="width: 120px; height: 100px; background: #ccc;"></div>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold">Facility Name</h6>
+                            <p class="mb-1 text-muted">Under [Dept. Name]</p>
+                            <p class="mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                            <p class="mb-1"><strong>Rental Fee:</strong> ₱400.00</p>
+                            <p class="mb-2"><strong>Status:</strong> Available</p>
+
+                        </div>
+                    </div>
+
+
+                    <div class="bg-white rounded shadow p-3 d-flex mb-3">
+                        <div class="me-3">
+                            <div style="width: 120px; height: 100px; background: #ccc;"></div>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold">Facility Name</h6>
+                            <p class="mb-1 text-muted">Under [Dept. Name]</p>
+                            <p class="mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                            <p class="mb-1"><strong>Rental Fee:</strong> ₱400.00</p>
+                            <p class="mb-2"><strong>Status:</strong> Available</p>
+
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded shadow p-3 d-flex mb-3">
+                        <div class="me-3">
+                            <div style="width: 120px; height: 100px; background: #ccc;"></div>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold">Facility Name</h6>
+                            <p class="mb-1 text-muted">Under [Dept. Name]</p>
+                            <p class="mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                            <p class="mb-1"><strong>Rental Fee:</strong> ₱400.00</p>
+                            <p class="mb-2"><strong>Status:</strong> Available</p>
+
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded shadow p-3 d-flex mb-3">
+                        <div class="me-3">
+                            <div style="width: 120px; height: 100px; background: #ccc;"></div>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold">Facility Name</h6>
+                            <p class="mb-1 text-muted">Under [Dept. Name]</p>
+                            <p class="mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                            <p class="mb-1"><strong>Rental Fee:</strong> ₱400.00</p>
+                            <p class="mb-2"><strong>Status:</strong> Available</p>
+
+                        </div>
+                    </div>
+
+                    <!------------Just a boundary for the facilities container----------------------->
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    <footer class="footer-container text-white py-3" style="background-color: #003366;position: relative;
+    bottom: 0; width: 100%; text-align:center;">
+        <div class="container text-center">
+            <p class="mb-0">© 2025 Central Philippine University | All Rights Reserved</p>
+        </div>
+    </footer>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
