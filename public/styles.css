@@ -76,7 +76,6 @@ body {
     margin: 180px auto 0;
     /* Leaves space for the fixed top bar */
     background-color: rgba(255, 255, 255, 0.85);
-    /* Optional */
     padding: 20px;
     border-radius: 10px;
 }
