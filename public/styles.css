@@ -16,32 +16,12 @@ body {
 .top-bar-container {
     width: 100%;
     height: 130px;
-    background-color: #1571B7;
+    background-color: #003366;
     padding: 10px 10px;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
-}
-
-.top-bar {
-    background-color: #1571B7;
-    color: white;
-    padding: 0 20px;
-    text-align: center;
-    align-items: center;
-    font-size: 18px;
-}
-
-.top-bar a {
-    color: white;
-    text-decoration: none;
-    margin: 0 15px;
-}
-
-.top-bar a:hover {
-    text-decoration: overline;
-    text-decoration-color: rgb(244, 202, 19);
 }
 
 /* NAV BAR */
@@ -55,7 +35,6 @@ body {
     align-items: center;
 
 }
-
 
 .nav-links a {
     color: #003366;
