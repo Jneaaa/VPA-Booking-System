@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Catalog - Facilities</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            /* Light grey background */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            /* Ensures footer stays at the bottom */
+        }
+
+        /* Header Bar */
+        .top-bar-container {
+            background-color: #041A4B;
+            /* Dark blue from the image */
+            padding: 1rem 0;
+            color: white;
+        }
+
+        .top-bar-container .container {
+            max-width: 1200px;
+        }
+
+        .top-bar-container .header-logo {
+            width: 60px;
+            /* Adjust size to match the image */
+            margin-right: 1rem;
+        }
+
+        .top-bar-container h1 {
+            font-size: 1.25rem;
+            /* Equivalent to Bootstrap fs-5 */
+            margin-bottom: 0;
+        }
+
+        .top-bar-container p {
+            font-size: 1rem;
+            /* Equivalent to Bootstrap fs-6 */
+            margin-bottom: 0;
+        }
+
+        .top-bar-container .text-white a {
+            color: white !important;
+            text-decoration: underline;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .05);
+            /* Subtle shadow for nav */
+        }
+
+        .nav-bar .container {
+            max-width: 1200px;
+        }
+
+        .nav-bar .nav-links a,
+        .nav-bar .dropdown-toggle {
+            color: #333;
+            text-decoration: none;
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-bar .nav-links a:hover,
+        .nav-bar .dropdown-toggle:hover {
+            color: #e0a800;
+            
+        }
+
+        .nav-bar .btn-warning {
+            background-color: #ffc107;
+           
+            border-color: #ffc107;
+            color: #333;
+           
+            font-weight: bold;
+            padding: 0.5rem 1.5rem;
+        }
+
+        .nav-bar .btn-warning:hover {
+            background-color: #e0a800;
+            border-color: #e0a800;
+        }
+
+       
+        .catalog-hero-section {
+            background-image: url('homepage.jpg');
+            background-size: cover;
+            background-position: center;
+            min-height: 170px;
+            display: flex;
+            align-items: flex-end;
+            padding-bottom: 20px;
+            position: relative;
+            z-index: 0;
+        }
+
+        .catalog-hero-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        .catalog-hero-content {
+            position: relative;
+            z-index: 2;
+            color: white;
+            padding-left: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .catalog-hero-content h2 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .catalog-hero-content .dropdown-toggle {
+            background-color: white;
+            color: #041A4B;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            font-weight: bold;
+        }
+
+        .catalog-hero-content .dropdown-menu {
+            border-radius: 0.25rem;
+        }
+
+        .catalog-hero-content .dropdown-item {
+            color: #041A4B;
+        }
+
+        .main-catalog-section {
+            padding: 3rem 0;
+            flex-grow: 1;
+        }
+
+        .main-catalog-section .container {
+            max-width: 1200px;
+        }
+
+        .sidebar-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-card h5 {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .filter-list a {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #555;
+            text-decoration: none;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #eee;
+            transition: color 0.2s ease;
+        }
+
+        .filter-list a:last-child {
+            border-bottom: none;
+
+        }
+
+        .filter-list a:hover {
+            color: #041A4B;
+            font-weight: bold;
+        }
+
+        .filter-list a.active {
+            color: #041A4B;
+            font-weight: bold;
+            text-decoration: none;
+
+        }
+
+        .filter-list .count-badge {
+            background-color: #f0f0f0;
+            color: #777;
+            padding: 0.2em 0.6em;
+            border-radius: 0.75rem;
+            font-size: 0.8em;
+        }
+
+
+        .quick-links-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-links-card p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .quick-links-card .btn-outline-primary {
+            border-color: #041A4B;
+            color: #041A4B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            position: relative;
+          
+        }
+
+        .quick-links-card .btn-outline-primary:hover {
+            background-color: #041A4B;
+            color: white;
+        }
+
+        .quick-links-card .btn-outline-primary .bi {
+            margin-right: 0.5rem;
+        }
+
+        .quick-links-card .badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 0.35em 0.6em;
+            font-size: 0.75em;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+        }
+
+
+      
+        .right-content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .right-content-header h4 {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0;
+        }
+
+        .filter-sort-dropdowns .dropdown-toggle {
+            background-color: white;
+            border: 1px solid #ced4da;
+            color: #333;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .filter-sort-dropdowns .dropdown-menu {
+            min-width: 100%;
+        }
+
+        .facility-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            /* Align image and text at the top */
+        }
+
+        .facility-card-img {
+            width: 180px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            margin-right: 1.5rem;
+        }
+
+        .facility-card-details {
+            flex-grow: 1
+        }
+
+        .facility-card-details h5 {
+            font-weight: bold;
+            color: #041A4B;
+            margin-bottom: 0.5rem;
+        }
+
+        .facility-card-details p {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 0.75rem;
+        }
+
+        .facility-card-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #777;
+            margin-bottom: 0.75rem;
+        }
+
+        .facility-card-meta div {
+            display: flex;
+            align-items: center;
+        }
+
+        .facility-card-meta .bi {
+            margin-right: 0.3rem;
+        }
+
+        .facility-card-actions {
+            text-align: right;
+            min-width: 150px;
+            margin-left: 1rem;
+        }
+
+        .facility-card-actions .rental-fee {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #041A4B;
+            margin-bottom: 0.75rem;
+        }
+
+        .facility-card-actions .btn {
+            display: block;
+            /* Make buttons stack vertically */
+            width: 100%;
+            margin-bottom: 0.5rem;
+            /* Space between buttons */
+        }
+
+        .facility-card-actions .btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .load-more-btn {
+            background-color: #041A4B;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.25rem;
+            font-weight: bold;
+        }
+
+        .load-more-btn:hover {
+            background-color: #002c6b;
+        }
+
+       
+        footer {
+            background-color: #041A4B;
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: auto;
+           
+        }
+
+        footer p {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
+        
+        @media (max-width: 767.98px) {
+            .catalog-hero-content {
+                padding-left: 1rem;
+            }
+
+            .right-content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .filter-sort-dropdowns {
+                width: 100%;
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .filter-sort-dropdowns .dropdown {
+                flex-grow: 1;
+            }
+
+            .facility-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .facility-card-img {
+                width: 100%;
+                height: 180px;
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+
+            .facility-card-actions {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 1.5rem;
+                text-align: center;
+            }
+
+            .facility-card-actions .btn {
+                display: inline-block;
+                width: auto;
+                margin: 0.25rem;
+            }
+
+            .facility-card-meta {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top-bar-container">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <img src="cpu-logo.png" class="header-logo" alt="CPU Logo">
+                <div>
+                    <h1 class="fs-5 mb-0">Central Philippine University</h1>
+                    <p class="fs-6 mb-0">Equipment and Facility Booking Services</p>
+                </div>
+            </div>
+            <div class="text-white small">
+                <span>Are you an Admin? <a href="#" class="text-white text-decoration-underline">Log in here.</a></span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav-bar">
+        <div class="container d-flex justify-content-between align-items-center py-2">
+            <div class="nav-links d-flex flex-wrap align-items-center gap-3">
+                <a href="index.html" class="text-dark text-decoration-none">Home</a>
+                <div class="dropdown">
+                    <a class="dropdown-toggle text-dark text-decoration-none" href="#" role="button"
+                        data-bs-toggle="dropdown">Booking Catalog</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="facilities.html">About Facilities</a></li>
+                        <li><a class="dropdown-item" href="equipmentpage.html">About Equipment</a></li>
+                        <li><a class="dropdown-item" href="extraservicespage.html">About Services</a></li>
+                        <li><a class="dropdown-item" href="bookingcatalog.html">Booking Catalog</a></li>
+                    </ul>
+                </div>
+                <a href="mybookings.html" class="text-dark text-decoration-none">My Bookings</a>
+                <a href="#" class="text-dark text-decoration-none">Reservation Policies</a>
+                <a href="feedbackpage.html" class="text-dark text-decoration-none">Rate Our Services</a>
+            </div>
+            <a href="#" class="btn btn-warning fw-bold">Book Now</a>
+        </div>
+    </nav>
+
+    <section class="catalog-hero-section">
+        <div class="catalog-hero-content">
+            <h2>Facilities Catalog</h2>
+        </div>
+    </section>
+
+
+    <main class="main-catalog-section">
+
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-4">
+                    <div class="quick-links-card mb-4">
+                        <p class="mb-2">Not sure when to book?<br>View available timeslots here.</p>
+                        <a href="#" class="btn btn-outline-primary d-flex align-items-center mb-3">
+                            <i class="bi bi-calendar-event"></i> Events Calendar
+                        </a>
+                        <a href="mybookingpage.html" class="btn btn-outline-primary d-flex align-items-center">
+                            <i class="bi bi-receipt"></i> Your Requisition Form
+                            <span class="badge rounded-pill bg-danger ms-auto">4</span>
+                        </a>
+                    </div>
+                    <div class="dropdown mb-3">
+                        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Choose Catalog
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Facilities</a></li>
+                            <li><a class="dropdown-item" href="#">Equipment</a></li>
+                            <li><a class="dropdown-item" href="#">Services</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h5>Browse by Category</h5>
+                        <div class="filter-list" id="categoryFilterList">
+                            <a href="#" class="filter-item active" data-category="All">Show All <span
+                                    class="count-badge" id="count-All">12</span></a>
+                            <a href="#" class="filter-item" data-category="Buildings">Buildings <span
+                                    class="count-badge" id="count-Buildings">12</span></a>
+                            <a href="#" class="filter-item" data-category="Complex">Complex <span class="count-badge"
+                                    id="count-Complex">2</span></a>
+                            <a href="#" class="filter-item" data-category="Halls">Halls <span class="count-badge"
+                                    id="count-Halls">4</span></a>
+                            <a href="#" class="filter-item" data-category="Residencies">Residencies <span
+                                    class="count-badge" id="count-Residencies">3</span></a>
+                            <a href="#" class="filter-item" data-category="Classrooms">Classrooms <span
+                                    class="count-badge" id="count-Classrooms">43</span></a>
+                            <a href="#" class="filter-item" data-category="Laboratories">Laboratories <span
+                                    class="count-badge" id="count-Laboratories">5</span></a>
+                            <a href="#" class="filter-item" data-category="Gymnasiums">Gymnasiums <span
+                                    class="count-badge" id="count-Gymnasiums">3</span></a>
+                            <a href="#" class="filter-item" data-category="Outdoor Courts">Outdoor Courts <span
+                                    class="count-badge" id="count-Outdoor Courts">2</span></a>
+                            <a href="#" class="filter-item" data-category="Swimming Pools">Swimming Pools <span
+                                    class="count-badge" id="count-Swimming Pools">1</span></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-9 col-md-8">
+                    <div class="right-content-header">
+                        <h4 id="currentCategoryTitle">All Facilities</h4>
+                        <div class="d-flex gap-2 filter-sort-dropdowns">
+                            <div class="dropdown">
+                                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    All Facilities
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Action</a></li>
+                                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    List Layout
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Grid</a></li>
+                                    <li><a class="dropdown-item" href="#">List</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    Filter By
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Price (Low to High)</a></li>
+                                    <li><a class="dropdown-item" href="#">Price (High to Low)</a></li>
+                                    <li><a class="dropdown-item" href="#">Alphabetical (A-Z)</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="facilitiesContainer">
+                        <div class="facility-card" data-category="Halls">
+                            <img src="https://via.placeholder.com/180x120/FFC107/FFFFFF?text=Hall"
+                                class="facility-card-img" alt="Facility Image">
+                            <div class="facility-card-details">
+                                <h5>Facility Name 1 (Halls)</h5>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.Lorem
+                                    ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</p>
+                                <div class="facility-card-meta">
+                                    <div><i class="bi bi-tag"></i> CategoryType</div>
+                                    <div><i class="bi bi-building"></i> Department</div>
+                                </div>
+                            </div>
+                            <div class="facility-card-actions">
+                                <div class="rental-fee">₱750.00</div>
+                                <button class="btn btn-sm btn-primary">Add to Form</button>
+                                <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
+                            </div>
+                        </div>
+
+                        <div class="facility-card" data-category="Classrooms">
+                            <img src="https://via.placeholder.com/180x120/007bff/FFFFFF?text=Classroom"
+                                class="facility-card-img" alt="Facility Image">
+                            <div class="facility-card-details">
+                                <h5>Facility Name 2 (Classroom)</h5>
+                                <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+                                    veniam.</p>
+                                <div class="facility-card-meta">
+                                    <div><i class="bi bi-tag"></i> Education</div>
+                                    <div><i class="bi bi-building"></i> Academic Affairs</div>
+                                </div>
+                            </div>
+                            <div class="facility-card-actions">
+                                <div class="rental-fee">₱300.00</div>
+                                <button class="btn btn-sm btn-primary">Add to Form</button>
+                                <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
+                            </div>
+                        </div>
+
+                        <div class="facility-card" data-category="Gymnasiums">
+                            <img src="https://via.placeholder.com/180x120/28a745/FFFFFF?text=Gymnasium"
+                                class="facility-card-img" alt="Facility Image">
+                            <div class="facility-card-details">
+                                <h5>Facility Name 3 (Gymnasium)</h5>
+                                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+                                    ea commodo consequat.</p>
+                                <div class="facility-card-meta">
+                                    <div><i class="bi bi-tag"></i> Sports</div>
+                                    <div><i class="bi bi-building"></i> Athletics</div>
+                                </div>
+                            </div>
+                            <div class="facility-card-actions">
+                                <div class="rental-fee">₱1500.00</div>
+                                <button class="btn btn-sm btn-primary">Add to Form</button>
+                                <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
+                            </div>
+                        </div>
+
+                        <div class="facility-card" data-category="Halls">
+                            <img src="https://via.placeholder.com/180x120/FFC107/FFFFFF?text=Hall+2"
+                                class="facility-card-img" alt="Facility Image">
+                            <div class="facility-card-details">
+                                <h5>Facility Name 4 (Halls)</h5>
+                                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+                                    fugiat nulla pariatur.</p>
+                                <div class="facility-card-meta">
+                                    <div><i class="bi bi-tag"></i> CategoryType</div>
+                                    <div><i class="bi bi-building"></i> Department</div>
+                                </div>
+                            </div>
+                            <div class="facility-card-actions">
+                                <div class="rental-fee">₱900.00</div>
+                                <button class="btn btn-sm btn-primary">Add to Form</button>
+                                <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
+                            </div>
+                        </div>
+
+                        <div class="facility-card" data-category="Laboratories">
+                            <img src="https://via.placeholder.com/180x120/6f42c1/FFFFFF?text=Lab"
+                                class="facility-card-img" alt="Facility Image">
+                            <div class="facility-card-details">
+                                <h5>Facility Name 5 (Laboratory)</h5>
+                                <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
+                                    mollit anim id est laborum.</p>
+                                <div class="facility-card-meta">
+                                    <div><i class="bi bi-tag"></i> Science</div>
+                                    <div><i class="bi bi-building"></i> Research</div>
+                                </div>
+                            </div>
+                            <div class="facility-card-actions">
+                                <div class="rental-fee">₱800.00</div>
+                                <button class="btn btn-sm btn-primary">Add to Form</button>
+                                <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
+                            </div>
+                        </div>
+
+                        <div class="facility-card" data-category="Buildings">
+                            <img src="https://via.placeholder.com/180x120/fd7e14/FFFFFF?text=Building"
+                                class="facility-card-img" alt="Facility Image">
+                            <div class="facility-card-details">
+                                <h5>Facility Name 6 (Building)</h5>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                                    incididunt ut labore.</p>
+                                <div class="facility-card-meta">
+                                    <div><i class="bi bi-tag"></i> General</div>
+                                    <div><i class="bi bi-building"></i> Campus Admin</div>
+                                </div>
+                            </div>
+                            <div class="facility-card-actions">
+                                <div class="rental-fee">₱1000.00</div>
+                                <button class="btn btn-sm btn-primary">Add to Form</button>
+                                <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn load-more-btn">Load More</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Central Philippine University | All Rights Reserved</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterItems = document.querySelectorAll('.filter-item');
+            const facilitiesContainer = document.getElementById('facilitiesContainer');
+            const currentCategoryTitle = document.getElementById('currentCategoryTitle');
+            const facilityCards = facilitiesContainer.querySelectorAll('.facility-card');
+            const categoryCounts = {
+                "All": 0,
+                "Buildings": 0,
+                "Complex": 0,
+                "Halls": 0,
+                "Residencies": 0,
+                "Classrooms": 0,
+                "Laboratories": 0,
+                "Gymnasiums": 0,
+                "Outdoor Courts": 0,
+                "Swimming Pools": 0
+            };
+
+
+            facilityCards.forEach(card => {
+                const category = card.dataset.category;
+                if (categoryCounts.hasOwnProperty(category)) {
+                    categoryCounts[category]++;
+                }
+                categoryCounts["All"]++;
+            });
+
+            for (const category in categoryCounts) {
+                const badgeElement = document.getElementById(`count-${category.replace(/\s/g, '')}`);
+                if (badgeElement) {
+                    badgeElement.textContent = categoryCounts[category];
+                }
+            }
+
+
+            filterItems.forEach(item => {
+                item.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    filterItems.forEach(li => li.classList.remove('active'));
+
+
+                    this.classList.add('active');
+
+                    const selectedCategory = this.dataset.category;
+                    currentCategoryTitle.textContent = selectedCategory + ' Facilities';
+
+                    facilityCards.forEach(card => {
+                        const cardCategory = card.dataset.category;
+                        if (selectedCategory === 'All' || cardCategory === selectedCategory) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            document.querySelector('.filter-item.active').click();
+        });
+    </script>
+</body>
+
+</html>

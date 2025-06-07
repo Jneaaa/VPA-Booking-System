@@ -24,6 +24,7 @@ body {
     z-index: 1000;
 }
 
+
 /* NAV BAR */
 .nav-bar {
     width: 100%;
@@ -99,7 +100,7 @@ body {
 }
 
 /* HERO TEXT */
-.hero-text {
+.hero-text p {
     max-width: 800px;
     font-size: 1.2rem;
     margin-bottom: 20px;
