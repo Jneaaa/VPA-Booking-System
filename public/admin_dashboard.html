@@ -41,7 +41,7 @@
       width: 250px;
       background: #f8f9fa; /* Change sidebar background color to match Total Requisitions card */
       padding: 1rem;
-      padding-top: 70px; /* Increase padding to lower sidebar objects further */
+      padding-top: 60px; /* Reduced top padding */
       border-right: 1px solid #e0e0e0; /* Match nav-bar border */
       border-top: 1px solid #e0e0e0; /* Add a border at the top */
     }
@@ -81,6 +81,10 @@
       background-color: #041A4B !important; /* Change button color to #041A4B */
       border-color: #041A4B !important; /* Match border color */
     }
+    #sidebar .text-center {
+      margin-top: 20px; /* Increased spacing above profile section */
+      margin-bottom: 5px; /* Reduced spacing below profile section */
+    }
   </style>
 </head>
 <body>
@@ -88,16 +92,18 @@
   <!-- Top Bar -->
   <header id="topbar" class="d-flex justify-content-between align-items-center">
     <div class="title">
-      <img src="cpu-logo.png" alt="CPU Logo" class="me-2" style="width: 30px; height: 30px;"> <!-- Updated logo -->
+      <img src="cpu-logo.png" alt="CPU Logo" class="me-2" style="width: 50px; height: 50px;"> <!-- Increased size -->
       CPU Facilities and Equipment Management
     </div>
-    <div>
-      <button class="btn btn-outline-light btn-sm me-2">
-        <i class="bi bi-bell-fill"></i> <!-- Updated notification icon -->
-      </button>
-      <button class="btn btn-outline-light btn-sm">
-        Logout
-      </button>
+    <div class="d-flex align-items-center">
+      <i class="bi bi-envelope-fill fs-3 me-3"></i> <!-- Enlarged mail icon -->
+      <div class="dropdown">
+        <i class="bi bi-three-dots fs-3" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;"></i> <!-- Three dots icon -->
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+          <li><a class="dropdown-item" href="#">Account Settings</a></li>
+          <li><a class="dropdown-item" href="#">Logout</a></li>
+        </ul>
+      </div>
     </div>
   </header>
 
@@ -176,7 +182,7 @@
           <div class="card text-bg-light mb-3">
             <div class="card-body">
               <h5 class="card-title">Total Requisitions</h5>
-              <p class="card-text fs-3">245</p>
+              <p class="card-text fs-3 fw-bold">245</p>
             </div>
           </div>
         </div>
@@ -184,7 +190,7 @@
           <div class="card text-bg-light mb-3">
             <div class="card-body">
               <h5 class="card-title">Approved Bookings</h5>
-              <p class="card-text fs-3">112</p>
+              <p class="card-text fs-3 fw-bold">112</p>
             </div>
           </div>
         </div>
@@ -192,7 +198,7 @@
           <div class="card text-bg-light mb-3">
             <div class="card-body">
               <h5 class="card-title">Pending Requests</h5>
-              <p class="card-text fs-3">16</p>
+              <p class="card-text fs-3 fw-bold">16</p>
             </div>
           </div>
         </div>
