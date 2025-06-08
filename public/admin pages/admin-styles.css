@@ -1,0 +1,122 @@
+:root {
+    
+  /* Primary Color Scheme */
+  --cpu-primary: #003366;          /* Main CPU blue */
+  --cpu-primary-hover: #004a94;    /* Hover state for primary elements */
+  --cpu-primary-light: rgba(0, 51, 102, 0.1); /* Light background variants */
+  
+  /* Secondary Color Scheme */
+  --cpu-secondary: #f2b123;        /* Gold accent color */
+  --cpu-secondary-hover: #be8200;  /* Gold hover state */
+  
+  /* Neutral Colors */
+  --cpu-white: #ffffff;
+  --cpu-light-bg: #f5f7f8; /* Navbar background */
+  --cpu-text-dark: #333333;   
+  --light-gray: #f8f9fa;     /* Default text color */
+  
+  /* Functional Colors */
+  --cpu-border-accent: #f2b123;    /* Navbar bottom border */
+  --cpu-shadow: rgba(0, 0, 0, 0.1); /* Shadow color */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: var(--cpu-text-dark);
+}
+
+.text-primary {
+    color: var(--cpu-primary) !important;
+}
+
+  #topbar {
+    background: var(--cpu-primary);
+    color: white;
+    padding: 0.75rem 1rem;
+    z-index: 10;
+    height: 60px; /* Fixed height */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  #notificationIcon {
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  #notificationIcon:hover {
+    transform: scale(1.1);
+    color: var(--cpu-secondary); /* Change color on hover */
+  }
+  #notificationIcon.active {
+    color: var(--cpu-secondary); /* Change color when active */
+  }
+
+  #notificationBox {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    z-index: 20;
+  }
+
+  #notificationBox p {
+    color: black; /* Changed text color to black */
+  }
+
+  #layout {
+    margin-left: 250px;
+    margin-top: 60px; /* Add top margin to match */
+    display: flex;
+    flex: 1;
+  }
+
+  #sidebar {
+    position: fixed;
+    padding-top: 0.5rem; /* Reduce top padding */
+    top: 60px; /* Match topbar height */
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    height: calc(100% - 60px); /* Subtract topbar height */
+    width: 250px;
+    background: var(--light-gray);
+    padding: 1rem;
+    padding-top: 1rem; /* Reduce extra padding */
+    border-right: 1px solid #e0e0e0;
+    overflow-y: auto;
+  }
+  
+
+  #sidebar .nav-link {
+    color: rgb(82, 82, 82);
+    border-radius: 5px;
+    margin-bottom: 5px;
+    transition: all 0.2s ease;
+  }
+  #sidebar .nav-link:hover, 
+  #sidebar .nav-link.active {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  #sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+  }
+
+  #main {
+    flex-grow: 1;
+    padding: 2rem;
+  }

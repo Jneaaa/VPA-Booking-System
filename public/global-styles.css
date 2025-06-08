@@ -1,14 +1,42 @@
+:root {
+    
+    /* Primary Color Scheme */
+    --cpu-primary: #003366;          /* Main CPU blue */
+    --cpu-primary-hover: #004a94;    /* Hover state for primary elements */
+    --cpu-primary-light: rgba(0, 51, 102, 0.1); /* Light background variants */
+    
+    /* Secondary Color Scheme */
+    --cpu-secondary: #f2b123;        /* Gold accent color */
+    --cpu-secondary-hover: #be8200;  /* Gold hover state */
+    
+    /* Neutral Colors */
+    --cpu-white: #ffffff;
+    --cpu-light-bg: #f5f7f8; /* Navbar background */
+    --cpu-text-dark: #333333;   
+    --light-gray: #f8f9fa;     /* Default text color */
+    
+    /* Functional Colors */
+    --cpu-border-accent: #f2b123;    /* Navbar bottom border */
+    --cpu-shadow: rgba(0, 0, 0, 0.1); /* Shadow color */
+}
+
+/* Applied Styles */
 body {
     margin: 0;
     font-family: Arial, sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    }
+    color: var(--cpu-text-dark);
+}
+
+.text-primary {
+    color: var(--cpu-primary) !important;
+}
 
 .top-header-bar {
-    background-color: #003366;
-    color: white;
+    background-color: var(--cpu-primary);
+    color: var(--cpu-white);
     padding: 10px 0;
 }
 
@@ -19,45 +47,37 @@ body {
 
 .top-header-bar .cpu-brand img {
     height: 60px;
-    /* Adjust height of CPU logo */
     margin-right: 15px;
 }
 
 .top-header-bar .cpu-brand .title {
     font-size: 1.5rem;
-    /* Larger font for main title */
     font-weight: bold;
     line-height: 1.2;
 }
 
 .top-header-bar .cpu-brand .subtitle {
     font-size: 1rem;
-    /* Smaller font for subtitle */
     line-height: 1.2;
 }
 
 .top-header-bar .admin-login a {
-    color: white;
+    color: var(--cpu-white);
     text-decoration: underline;
 }
 
-
 .main-navbar {
-    background-color: rgb(241, 241, 245);
-
-    border-bottom: 3px solid #f2b123;
-
+    background-color: var(--cpu-light-bg);
+    border-bottom: 3px solid var(--cpu-border-accent);
     padding: 0.5rem 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-
+    box-shadow: 0 2px 5px var(--cpu-shadow);
     position: sticky;
-
     top: 0;
     z-index: 1020;
 }
 
 .main-navbar .nav-link {
-    color: #003366;
+    color: var(--cpu-primary);
     padding: 0.5rem 1rem;
     font-size: 0.95rem;
     transition: color 0.2s ease-in-out;
@@ -65,12 +85,12 @@ body {
 
 .main-navbar .nav-link:hover,
 .main-navbar .nav-link.active {
-    color: #be8200;
+    color: var(--cpu-secondary-hover);
 }
 
 .main-navbar .btn-book-now {
-    background-color: #f2b123;
-    color: #003366;
+    background-color: var(--cpu-secondary);
+    color: var(--cpu-primary);
     border: none;
     font-weight: bold;
     padding: 0.5rem 1.5rem;
@@ -79,8 +99,7 @@ body {
 }
 
 .main-navbar .btn-book-now:hover {
-    background-color: #e0a51c;
-
+    background-color: var(--cpu-secondary-hover);
 }
 
 .main-content-wrapper {
@@ -89,35 +108,35 @@ body {
 }
 
 .btn-primary {
-    background-color:#003366;
-    border-color: #003366;
-    color: white;
+    background-color: var(--cpu-primary);
+    border-color: var(--cpu-primary);
+    color: var(--cpu-white);
 }
 
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:active {
-    background-color: #004a94;
-    border-color: #004a94;
+    background-color: var(--cpu-primary-hover);
+    border-color: var(--cpu-primary-hover);
 }
 
 .btn-outline-summary {
-    color: #003366;
-    border-color: #003366;
+    color: var(--cpu-primary);
+    border-color: var(--cpu-primary);
     background-color: transparent;
 }
 
 .btn-outline-summary:hover,
 .btn-outline-summary:focus,
 .btn-outline-summary:active {
-    background-color: #003366;
-    color: #ffffff;
-    border-color: #003366;
+    background-color: var(--cpu-primary);
+    color: var(--cpu-white);
+    border-color: var(--cpu-primary);
 }
 
 .footer-container {
-    background-color: #003366;
-    color: #fff;
+    background-color: var(--cpu-primary);
+    color: var(--cpu-white);
     padding: 1rem 0;
     margin-top: 3rem;
-  }
+}
