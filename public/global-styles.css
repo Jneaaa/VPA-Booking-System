@@ -1,3 +1,11 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    }
+
 .top-header-bar {
     background-color: #003366;
     color: white;
@@ -79,3 +87,37 @@
     flex-grow: 1;
     padding: 20px 0;
 }
+
+.btn-primary {
+    background-color:#003366;
+    border-color: #003366;
+    color: white;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: #004a94;
+    border-color: #004a94;
+}
+
+.btn-outline-summary {
+    color: #003366;
+    border-color: #003366;
+    background-color: transparent;
+}
+
+.btn-outline-summary:hover,
+.btn-outline-summary:focus,
+.btn-outline-summary:active {
+    background-color: #003366;
+    color: #ffffff;
+    border-color: #003366;
+}
+
+.footer-container {
+    background-color: #003366;
+    color: #fff;
+    padding: 1rem 0;
+    margin-top: 3rem;
+  }
