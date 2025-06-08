@@ -7,50 +7,35 @@
   <title>Central Philippine University Booking</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="header.css">
   <style>
+
     body {
-      font-family: sans-serif;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-image: url("cpu-pic1.jpg");
-      background-size: cover;
-
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      text-align: center;
-      padding-top: 200px;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: rgba(0, 0, 0, 0.4);
+    background-image: url("homepage.jpg");
+    background-size: cover;
+    background-position: relative;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     }
 
-    .top-bar-container {
-      background-color: #041A4B;
-      padding: 1rem 0;
-    }
+    body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Adjust opacity as needed */
+    z-index: -1;
 
-    .nav-bar {
-      background-color: #ffffff;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .navbar .nav-link:hover,
-    .navbar .nav-link.active,
-    .nav-links .nav-link:hover,
-    .nav-links .nav-link.active {
-      color: #f2b123 !important;
-    }
-
-    .nav-links .dropdown-toggle::after {
-      vertical-align: middle;
-      margin-left: .255em;
-    }
-
-
-    .dropdown-menu {
-      min-width: 200px;
-      white-space: normal;
-
-    }
+  }
 
     .hero-section {
       min-height: 50vh;
@@ -58,9 +43,8 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-      padding: 6rem 2rem 2rem;
-
+      height: 70vh;
+      margin-bottom: 50px;
     }
 
     .hero-section h2 {
@@ -74,17 +58,19 @@
     }
 
     .catalog-section {
-      background-color: rgba(255, 255, 255, .6);
+      background-color: white;
       margin-top: -100px;
       border-radius: 0.5rem;
       padding: 3rem;
       box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
       position: relative;
       z-index: 1;
-      width: 70%;
-      max-width: 960px;
       margin-left: auto;
       margin-right: auto;
+      width: 90%;
+      margin-bottom: 5%;
+      max-width: 1100px;
+
     }
 
     .catalog-section h4 {
@@ -102,12 +88,13 @@
       text-align: center;
       padding: 1.5rem;
       border-radius: 0.5rem;
-      background-color: #f8f9fa;
+      background-color: #003366;
       box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
       height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      
     }
 
     .catalog-card img {
@@ -120,31 +107,32 @@
 
     .catalog-card h6 {
       font-size: 1.25rem;
-      color: #041A4B;
+      color: white;
       margin-bottom: 0.5rem;
     }
 
     .catalog-card p {
       font-size: 0.9rem;
-      color: #555;
+      color: white;
       flex-grow: 1;
     }
 
     .catalog-card .btn {
-      background-color: #041A4B;
-      color: #fff;
+      background-color: #f2b123;
+      color: black;
       border: none;
       padding: 0.5rem 1.5rem;
       font-size: 0.9rem;
+      font-weight: bold;
       margin-top: 1rem;
     }
 
     .catalog-card .btn:hover {
-      background-color: #002c6b;
+      background-color: #be8200;
     }
 
     .footer-container {
-      background-color: #041A4B;
+      background-color: #003366;
       color: #fff;
       padding: 1rem 0;
       margin-top: 3rem;
@@ -153,51 +141,68 @@
     .container {
       max-width: 1200px;
     }
+
   </style>
 </head>
 
 <body>
-  <header class="top-bar-container">
+  <header class="top-header-bar">
     <div class="container d-flex justify-content-between align-items-center">
-      <div class="d-flex align-items-center">
-        <img src="cpu-logo.png" alt="CPU Logo" style="width: 100px; height: 100px; margin-right: 1rem;">
-        <div class="text-white">
-          <h1 class="fs-5 mb-0">Central Philippine University</h1>
-          <p class="fs-6 mb-0">Equipment and Facility Booking Services</p>
+        <div class="cpu-brand">
+            <img src="cpu-logo.png" alt="CPU Logo">
+            <div>
+                <div class="title">Central Philippine University</div>
+                <div class="subtitle">Equipment and Facility Booking Services</div>
+            </div>
         </div>
-      </div>
-      <div class="text-white small">
-        <span>Are you an Admin? <a href="#" class="text-white text-decoration-underline">Log in here.</a></span>
-      </div>
+        <div class="admin-login">
+            <span>Are you an Admin? <a href="admin pages/adminlogin.html">Login here.</a></span>
+        </div>
     </div>
-  </header>
+</header>
 
-  <nav class="nav-bar border-bottom">
-    <div class="container d-flex justify-content-between align-items-center py-2">
-      <div class="nav-links d-flex flex-wrap align-items-center gap-3">
-        <a href="index.html" class="nav-link text-dark text-decoration-none">Home</a>
-        <div class="dropdown">
-          <a class="nav-link dropdown-toggle text-dark text-decoration-none" href="#" role="button"
-            data-bs-toggle="dropdown" aria-expanded="false">Booking Catalog</a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="facilities.html">About Facilities</a></li>
-            <li><a class="dropdown-item" href="equipmentpage.html">About Equipment</a></li>
-            <li><a class="dropdown-item" href="extraservicespage.html">About Services</a></li>
-            <li><a class="dropdown-item" href="bookingcatalog.html">Booking Catalog</a></li>
-          </ul>
+<nav class="navbar navbar-expand-lg main-navbar">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="index.html">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" aria-current="page" href="#" id="navbarDropdown"
+                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Booking Catalog
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="facilities.html">About Facilities</a></li>
+                        <li><a class="dropdown-item" href="equipmentpage.html">About Equipment</a></li>
+                        <li><a class="dropdown-item" href="extraservicespage.html">About Services</a></li>
+                        <li><a class="dropdown-item" href="bookingcatalog.html">Booking Catalog</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="mybookingpage.html">My Bookings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Reservation Policies</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="feedbackpage.html">Rate Our Services</a>
+                </li>
+            </ul>
+            <a href="bookingpage.html" class="btn btn-book-now ms-lg-3">Book Now</a>
         </div>
-        <a href="mybookingpage.html" class="nav-link text-dark text-decoration-none">My Bookings</a>
-        <a href="#" class="nav-link text-dark text-decoration-none">Reservation Policies</a>
-        <a href="feedbackpage.html" class="nav-link text-dark text-decoration-none">Rate Our Services</a>
-      </div>
-      <a href="bookingpage.html" class="btn btn-warning fw-bold">Book Now</a>
     </div>
-  </nav>
+</nav>
 
   <section class="hero-section text-white text-center">
     <h2 class="fw-bold">Simplify the way you book university facilities,<br>equipment, and services — all in one
       platform,<br>anytime, anywhere.</h2>
-    <a href="bookingpage.html" class="btn btn-warning mt-3 fw-bold">Start Booking</a>
+    <a href="bookingcatalog.html" class="btn btn-warning mt-3 fw-bold">Start Booking</a>
   </section>
 
   <section class="catalog-section container text-center">

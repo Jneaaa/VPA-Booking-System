@@ -9,15 +9,16 @@
     <style>
         body {
             background: url('cpu-pic1.jpg') center/cover no-repeat fixed;
-            min-height: 100vh;
+            
             display: flex;
             flex-direction: column;
+            margin: 0;
+            font-family: Arial, sans-serif;
         }
 
 
         .top-header-bar {
-            background-color: #041A4B;
-
+            background-color: #003366;
             color: white;
             padding: 10px 0;
         }
@@ -53,7 +54,7 @@
 
 
         .main-navbar {
-            background-color: #003366;
+            background-color: rgb(241, 241, 245);
 
             border-bottom: 3px solid #f2b123;
 
@@ -67,7 +68,7 @@
         }
 
         .main-navbar .nav-link {
-            color: white;
+            color: #003366;
             padding: 0.5rem 1rem;
             font-size: 0.95rem;
             transition: color 0.2s ease-in-out;
@@ -75,7 +76,7 @@
 
         .main-navbar .nav-link:hover,
         .main-navbar .nav-link.active {
-            color: #f2b123;
+            color: #be8200;
         }
 
         .main-navbar .btn-book-now {
@@ -187,14 +188,14 @@
     <div class="top-header-bar">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="cpu-brand">
-                <img src="https://www.cpu.edu.ph/wp-content/uploads/2016/06/CPU-Seal-1.png" alt="CPU Logo">
+                <img src="cpu-logo.png" alt="CPU Logo">
                 <div>
                     <div class="title">Central Philippine University</div>
                     <div class="subtitle">Equipment and Facility Booking Services</div>
                 </div>
             </div>
             <div class="admin-login">
-                <span>Are you an Admin? <a href="#">Login here.</a></span>
+                <span>Are you an Admin? <a href="admin pages/adminlogin.html">Login here.</a></span>
             </div>
         </div>
     </div>
