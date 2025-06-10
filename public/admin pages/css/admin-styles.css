@@ -5,6 +5,14 @@
   --cpu-primary-hover: #004a94;    /* Hover state for primary elements */
   --cpu-primary-light: rgba(0, 51, 102, 0.1); /* Light background variants */
   
+  /* Button Colors */
+  --btn-primary: #135ba3;
+  --btn-primary-hover: #3671ca;
+  --btn-primary-border: #135ba3;
+  --btn-secondary: #dadada;    
+  --btn-secondary-hover: #a3a3a3;
+  --btn-secondary-border: #bbbbbb; 
+  
   /* Secondary Color Scheme */
   --cpu-secondary: #f2b123;        /* Gold accent color */
   --cpu-secondary-hover: #be8200;  /* Gold hover state */
@@ -20,6 +28,8 @@
   --cpu-shadow: rgba(0, 0, 0, 0.1); /* Shadow color */
 }
 
+/* Admin styles */
+
 body {
     display: flex;
     flex-direction: column;
@@ -29,9 +39,20 @@ body {
     color: var(--cpu-text-dark);
 }
 
+#layout {
+  margin-left: 250px;
+  margin-top: 60px; /* Add top margin to match */
+  display: flex;
+  flex: 1;
+}
+
+/* General styles */
+
 .text-primary {
     color: var(--cpu-primary) !important;
 }
+
+/* Topbar styles */
 
   #topbar {
     background: var(--cpu-primary);
@@ -45,44 +66,7 @@ body {
     right: 0;
   }
 
-  #notificationIcon {
-    cursor: pointer;
-    transition: transform 0.2s ease, color 0.2s ease;
-  }
-  #notificationIcon:hover {
-    transform: scale(1.1);
-    color: var(--cpu-secondary); /* Change color on hover */
-  }
-  #notificationIcon.active {
-    color: var(--cpu-secondary); /* Change color when active */
-  }
-
-  #notificationBox {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    width: 300px;
-    max-height: 400px;
-    overflow-y: auto;
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
-    z-index: 20;
-  }
-
-  #notificationBox p {
-    color: black; /* Changed text color to black */
-  }
-
-  #layout {
-    margin-left: 250px;
-    margin-top: 60px; /* Add top margin to match */
-    display: flex;
-    flex: 1;
-  }
+  /* Sidebar styles */
 
   #sidebar {
     position: fixed;
@@ -99,7 +83,6 @@ body {
     border-right: 1px solid #e0e0e0;
     overflow-y: auto;
   }
-  
 
   #sidebar .nav-link {
     color: rgb(82, 82, 82);
@@ -197,7 +180,7 @@ body {
       height: 15px;
     }
 
-    /* Card styles */
+    /* Dashboard Card styles */
     .stat-card {
       transition: transform 0.2s ease;
     }
@@ -213,15 +196,7 @@ body {
       color: black;
     }
 
-    .btn-primary {
-      background-color: var(--cpu-primary);
-      border-color: var(--cpu-primary);
-    }
 
-    .btn-primary:hover {
-      background-color: var(--cpu-primary-hover); /* Slightly darker shade for hover */
-      border-color: var(--cpu-primary-hover);
-    }
 
     #dropdownMenuButton {
       cursor: pointer;
@@ -236,7 +211,7 @@ body {
     }
 
     
-  /* Notification styles with stronger specificity */
+  /* Topbar notification styles */
   #notificationDropdown.dropdown-menu {
     width: 300px !important;
     padding: 0 !important;
@@ -317,9 +292,7 @@ body {
     cursor: pointer !important;
     position: relative !important;
   }
-
-  /*Dropdown button styles */
-
+  /*Topbar Dropdown button styles */
   #dropdownMenuButton i.bi-three-dots {
     transition: color 0.2s ease;
     color: currentColor; /* Inherits color from parent */
@@ -331,3 +304,100 @@ body {
   #dropdownMenuButton.show i.bi-three-dots { /* 'show' class is added by Bootstrap when dropdown is open */
     color: var(--cpu-secondary) !important;
   }
+  /* Button styles */
+  .facility-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+.btn-manage, .btn-primary {
+    background-color: var(--btn-primary);
+    border: solid 1px var(--btn-primary-border);
+    color: white;
+    font-weight: bold;
+    flex: 1;
+}
+
+.btn-secondary {
+    background-color: var(--btn-secondary);
+    border: solid 1px var(--btn-secondary-border);
+    color: var(--cpu-text-dark);
+    flex: 1;
+}
+
+.btn-secondary:hover {
+    background-color: var(--btn-secondary-hover);
+    color: var(--cpu-text-dark);
+}
+
+.btn-manage:hover, .btn-primary:hover {
+    background-color: var(--btn-primary-hover);
+    color: white;
+}
+.btn-delete {
+    flex: 1;
+}
+/* Search bar styles (Facilities Page) */
+.search-container {
+    position: relative;
+}
+.search-container i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+.search-container input {
+    padding-left: 35px;
+}
+
+.btn.btn-outline-danger.btn-delete {
+  background-color: #ffebee !important;
+  }
+
+  .btn.btn-outline-danger.btn-delete:hover {
+  background-color: rgb(209, 60, 60) !important;
+  }
+
+  /* Status indicator styles */
+  .status-available, 
+    .status-unavailable, 
+    .status-reserved {
+        color: white !important;
+        font-weight: bold;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        display: inline-block;
+        font-size: 0.8rem;
+    }
+    .status-available {
+        background-color: #28a745; 
+    }
+    .status-unavailable {
+        background-color: #dc3545; 
+    }
+    .status-reserved {
+        background-color: #fd7e14;
+    }
+    /* Facility card styles */
+    .facility-card img { object-fit: cover; height: 150px; width: 100%; }
+    .facility-card .card { height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .facility-card .card:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); }
+  
+    .list-view .facility-card {
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+    .list-view .facility-card .card {
+        flex-direction: row;
+    }
+    .list-view .facility-card .card-img-top {
+        width: 200px;
+        height: 100%;
+        border-radius: 0;
+    }
+    .list-view .facility-card .card-body {
+        flex: 1;
+    }

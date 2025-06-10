@@ -3,41 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-
+  <title>Your Dashboard - Manage Facilities</title>
   <!-- Combined CSS resources -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/admin-styles.css">
-  <style>
-    .status-available, 
-    .status-unavailable, 
-    .status-reserved {
-        color: white !important;
-        font-weight: bold;
-        padding: 0.25rem 0.5rem;
-        border-radius: 1rem;
-        display: inline-block;
-        font-size: 0.8rem;
-    }
-
-    .status-available {
-        background-color: #28a745; /* Green */
-    }
-
-    .status-unavailable {
-        background-color: #dc3545; /* Red */
-    }
-
-    .status-reserved {
-        background-color: #fd7e14; /* Orange */
-    }
-    .facility-card img { object-fit: cover; height: 150px; width: 100%; }
-    .facility-card .card { height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .facility-card .card:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); }
-
-  </style>
 </head>
 <body>
   <!-- Top Bar -->
@@ -145,9 +116,10 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Manage Facilities</h2>
             <div>
-                <button class="btn btn-secondary me-2">Manage Facilities</button>
-                <a href="add-facility.html" class="btn btn-primary">Add New Facility</a>
-            </div>
+                <a href="add-facility.html" class="btn btn-primary">
+                    <i class="bi bi-plus-circle-fill me-2"></i>Add New Facility
+                </a>
+             </div>
         </div>
 
         <!-- Filters -->
@@ -171,61 +143,79 @@
                     <option value="all">All Departments</option>
                     <option value="IT">IT Department</option>
                     <option value="HR">HR Department</option>
-                    <!-- Add more as needed -->
                 </select>
+            </div>
+            <div class="col-md-3">
+                <select id="categoryFilter" class="form-select">
+                    <option value="all">All Categories</option>
+                    <option value="Sports">Sports Facility</option>
+                    <option value="Conference">Conference Room</option>
+                    <option value="Religious">Religious Facility</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="search-container">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search Facilities...">
+                </div>
             </div>
         </div>
 
         <!-- Facilities List -->
         <div id="facilityContainer" class="row g-3">
-            <!-- Example Facility Card -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="IT">
+            <!-- Volleyball Court -->
+            <div class="col-md-4 facility-card" data-status="available" data-department="IT" data-category="Sports" data-title="Volleyball Court">
                 <div class="card">
                     <img src="assets/volleyball-court.jpg" class="card-img-top" alt="Facility Cover">
                     <div class="card-body">
                         <h5 class="card-title">Volleyball Court</h5>
                         <p class="card-text">Indoor volleyball court located inside the University Gym, featuring a standard playing surface, regulation net, and ample space for training, classes, or recreational games. Bleacher seating available for spectators.</p>
-                        <p><strong>Category:</strong> Laboratory<br><strong>Subcategory:</strong> Computer</p>
+                        <p><strong>Category:</strong> Sports Facility<br><strong>Subcategory:</strong> Court</p>
                         <p><strong>Department:</strong> IT</p>
                         <p class="status-available">Available</p>
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-sm btn-outline-primary">Manage</button>
-                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        <div class="facility-actions">
+                            <button class="btn btn-manage">Manage</button>
+                            <button class="btn btn-outline-danger btn-delete">Delete</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- More facility cards -->
-            <div class="col-md-4 facility-card" data-status="reserved" data-department="HR">
+            <!-- Conference Room -->
+            <div class="col-md-4 facility-card" data-status="reserved" data-department="HR" data-category="Conference" data-title="Conference Room (2nd Floor)">
                 <div class="card">
                     <img src="assets/conference-room.jpg" class="card-img-top" alt="Facility Cover">
                     <div class="card-body">
                         <h5 class="card-title">Conference Room (2nd Floor)</h5>
                         <p class="card-text">A formal meeting space equipped with tables, chairs, projector, and whiteboard. Ideal for seminars, presentations, academic discussions, and organizational meetings. Located in Henrilous Library, 2nd Floor.</p>
-                        <p><strong>Category:</strong> Conference Room<br><strong>Subcategory:</strong> Standard</p>
+                        <p><strong>Category:</strong> Conference Room<br><strong>Subcategory:</strong> Meeting Space</p>
                         <p><strong>Department:</strong> HR</p>
                         <p class="status-reserved">Reserved</p>
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-sm btn-outline-primary">Manage</button>
-                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        <div class="facility-actions">
+                            <button class="btn btn-manage">Manage</button>
+                            <button class="btn btn-outline-danger btn-delete">Delete</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4 facility-card" data-status="unavailable" data-department="IT">
+            <!-- University Church -->
+            <div class="col-md-4 facility-card" data-status="unavailable" data-department="IT" data-category="Religious" data-title="University Church">
                 <div class="card">
                     <img src="assets/uni-church.jpg" class="card-img-top" alt="Facility Cover">
                     <div class="card-body">
                         <h5 class="card-title">University Church</h5>
                         <p class="card-text">A spacious, multi-purpose venue within campus grounds used for religious services, ceremonies, and university events. Equipped with audio systems, seating, and a peaceful atmosphere suitable for gatherings and reflections.</p>
-                        <p><strong>Category:</strong> Specialized<br><strong>Subcategory:</strong> Infrastructure</p>
+                        <p><strong>Category:</strong> Religious Facility<br><strong>Subcategory:</strong> Worship Space</p>
                         <p><strong>Department:</strong> IT</p>
                         <p class="status-unavailable">Unavailable</p>
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-sm btn-outline-primary">Manage</button>
-                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        <div class="facility-actions">
+                            <button class="btn btn-manage">Manage</button>
+                            <button class="btn btn-outline-danger btn-delete">Delete</button>
                         </div>
                     </div>
                 </div>
@@ -265,31 +255,137 @@
       </div>
     </div>
   </div>
-  <!-- Combined JS resources -->
+ <!-- Combined JS resources -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
   <script src="js/global.js"></script>
   <script>
-    // Simple filtering logic
     document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('#statusFilter, #departmentFilter').forEach(filter => {
-        filter.addEventListener('change', filterFacilities);
-      });
-
-      function filterFacilities() {
-        const status = document.getElementById('statusFilter').value;
-        const department = document.getElementById('departmentFilter').value;
-
-        document.querySelectorAll('.facility-card').forEach(card => {
-          const cardStatus = card.dataset.status;
-          const cardDept = card.dataset.department;
-          const matchesStatus = (status === 'all' || cardStatus === status);
-          const matchesDept = (department === 'all' || cardDept === department);
-
-          card.style.display = (matchesStatus && matchesDept) ? 'block' : 'none';
+        const facilityContainer = document.getElementById('facilityContainer');
+        const searchInput = document.getElementById('searchInput');
+        const layoutSelect = document.getElementById('layoutSelect');
+        const statusFilter = document.getElementById('statusFilter');
+        const departmentFilter = document.getElementById('departmentFilter');
+        const categoryFilter = document.getElementById('categoryFilter');
+        
+        // Filter facilities based on all criteria
+        function filterFacilities() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const status = statusFilter.value;
+            const department = departmentFilter.value;
+            const category = categoryFilter.value;
+            const layout = layoutSelect.value;
+            
+            // Apply layout view
+            facilityContainer.className = `row g-3 ${layout === 'list' ? 'list-view' : ''}`;
+            
+            document.querySelectorAll('.facility-card').forEach(card => {
+                const cardStatus = card.dataset.status;
+                const cardDept = card.dataset.department;
+                const cardCategory = card.dataset.category;
+                const cardTitle = card.dataset.title.toLowerCase();
+                const cardText = card.querySelector('.card-text').textContent.toLowerCase();
+                
+                const matchesSearch = cardTitle.includes(searchTerm) || 
+                                    cardText.includes(searchTerm);
+                const matchesStatus = (status === 'all' || cardStatus === status);
+                const matchesDept = (department === 'all' || cardDept === department);
+                const matchesCategory = (category === 'all' || cardCategory === category);
+                
+                card.style.display = (matchesSearch && matchesStatus && matchesDept && matchesCategory) ? 
+                                    'block' : 'none';
+            });
+        }
+        
+        // Add event listeners for all filter controls
+        [searchInput, layoutSelect, statusFilter, departmentFilter, categoryFilter].forEach(control => {
+            control.addEventListener('change', filterFacilities);
         });
-      }
+        searchInput.addEventListener('input', filterFacilities);
+        
+        // Add confirmation dialog for delete buttons
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to delete this facility?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+        
+        // Initialize the view
+        filterFacilities();
+        
+        // Add functionality to the "Manage" buttons
+        document.querySelectorAll('.btn-manage').forEach(button => {
+            button.addEventListener('click', function() {
+                const card = this.closest('.facility-card');
+                const facilityName = card.querySelector('.card-title').textContent;
+                alert(`Managing facility: ${facilityName}`);
+                // In a real implementation, this would open an edit modal or redirect
+                // window.location.href = `/manage-facility?id=${card.dataset.facilityId}`;
+            });
+        });
     });
-  </script>
+</script>
+
+<!-- Modal for Facility Management -->
+<div class="modal fade" id="manageFacilityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Manage Facility</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Facility management form would go here -->
+                <form id="facilityForm">
+                    <div class="mb-3">
+                        <label for="facilityName" class="form-label">Facility Name</label>
+                        <input type="text" class="form-control" id="facilityName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="facilityDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="facilityDescription" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="facilityCategory" class="form-label">Category</label>
+                            <select class="form-select" id="facilityCategory">
+                                <option value="Sports">Sports Facility</option>
+                                <option value="Conference">Conference Room</option>
+                                <option value="Religious">Religious Facility</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="facilitySubcategory" class="form-label">Subcategory</label>
+                            <input type="text" class="form-control" id="facilitySubcategory">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="facilityDepartment" class="form-label">Department</label>
+                            <select class="form-select" id="facilityDepartment">
+                                <option value="IT">IT Department</option>
+                                <option value="HR">HR Department</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="facilityStatus" class="form-label">Status</label>
+                            <select class="form-select" id="facilityStatus">
+                                <option value="available">Available</option>
+                                <option value="reserved">Reserved</option>
+                                <option value="unavailable">Unavailable</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
