@@ -10,10 +10,29 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
   <link rel="stylesheet" href="admin-styles.css">
+  <link rel="stylesheet" href="../global-styles.css">
 
   <style>
 
     /* Calendar styles */
+
+  .fc-timegrid-slot {
+    height: 2.5em; /* Make time slots taller */
+  }
+  
+  .fc-timegrid-event {
+    font-size: 0.85rem;
+    padding: 2px 4px;
+  }
+  
+  .fc-timegrid-axis {
+    background-color: #f8f9fa;
+  }
+  
+  .fc-col-header-cell {
+    background-color: #dad8e0;
+  }
+
     .fc-event {
       color: white !important;
       border-radius: 5px !important;
@@ -69,6 +88,17 @@
       border-radius: 50%;
       width: 15px;
       height: 15px;
+    }
+
+    /* Card styles */
+    .stat-card {
+      transition: transform 0.2s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    .stat-card i {
+      color: gray !important; /* Force icon color to gray */
     }
 
     .calendar-container {
@@ -179,12 +209,8 @@
       </ul>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Calendar Section -->
     <main id="main">
-      <div class="d-flex justify-content-between align-items-center mb-1">
-
-      </div>
-      <!-- Calendar Section -->
       <section>
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h2 class="fw-bold">Events Calendar</h2>
@@ -202,9 +228,6 @@
                 <li><button class="dropdown-item" data-filter="all"><i class="bi bi-eye me-2"></i>Show All</button></li>
               </ul>
             </div>
-            <a href="calendar.html" class="btn btn-primary">
-              <i class="bi bi-calendar-week me-1"></i> Open Calendar
-            </a>
           </div>
         </div>
 
@@ -253,66 +276,93 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize Calendar
       const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-        initialView: 'dayGridMonth',
-        height: 450,
-        buttonText: {
-          today: 'Today' // Added buttonText configuration
-        },
+        initialView: 'timeGridWeek', // Default to week view
         headerToolbar: {
-          start: 'title',
-          center: '',
-          end: 'today prev,next'
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay' // Add all three view options
+        },
+        views: {
+          timeGridDay: {
+            titleFormat: { year: 'numeric', month: 'long', day: 'numeric' },
+            dayHeaderFormat: { weekday: 'long' }
+          },
+          timeGridWeek: {
+            titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
+          }
+        },
+        height: 600, // Increase height to accommodate time slots
+        slotMinTime: '07:00:00', // Start calendar at 7am
+        slotMaxTime: '20:00:00', // End calendar at 8pm
+        nowIndicator: true, // Show current time indicator
+        allDaySlot: false, // Hide all-day slot
+        buttonText: {
+          today: 'Today',
+          month: 'Month',
+          week: 'Week',
+          day: 'Day'
         },
         events: [
           {
             id: '1',
             title: 'CPU Event',
-            start: new Date(),
+            start: new Date(new Date().setHours(9, 0, 0)),
+            end: new Date(new Date().setHours(11, 0, 0)),
             description: 'A university-wide event for all students.',
-            time: '9:00 AM - 11:00 AM',
             classNames: ['event-university']
           },
           {
             id: '2',
             title: 'Facility Rental',
             start: new Date(new Date().setDate(new Date().getDate() + 2)),
+            end: new Date(new Date().setDate(new Date().getDate() + 2)),
             description: 'Rental of the university gymnasium.',
-            time: '1:00 PM - 3:00 PM',
             classNames: ['event-facility']
           },
           {
             id: '3',
             title: 'Equipment Rental',
             start: new Date(new Date().setDate(new Date().getDate() + 5)),
+            end: new Date(new Date().setDate(new Date().getDate() + 5)),
             description: 'Rental of sound system equipment.',
-            time: '2:00 PM - 4:00 PM',
             classNames: ['event-equipment']
           },
           {
             id: '4',
             title: 'External Conference',
             start: new Date(new Date().setDate(new Date().getDate() + 7)),
+            end: new Date(new Date().setDate(new Date().getDate() + 7)),
             description: 'An external conference hosted by a partner organization.',
-            time: '10:00 AM - 12:00 PM',
             classNames: ['event-external']
           }
         ],
         eventClick: function(info) {
           const modal = new bootstrap.Modal(document.getElementById('eventModal'));
           document.getElementById('eventTitle').textContent = info.event.title;
-          document.getElementById('eventDate').textContent = info.event.start.toLocaleDateString('en-US', {
+          
+          // Format date based on whether it's an all-day event
+          const startDate = info.event.start;
+          const endDate = info.event.end || startDate;
+          
+          document.getElementById('eventDate').textContent = startDate.toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
             day: 'numeric'
           });
-          document.getElementById('eventTime').textContent = info.event.extendedProps.time || '10:00 AM - 12:00 PM';
+          
+          // Format time if not all-day
+          const timeOptions = { hour: '2-digit', minute: '2-digit' };
+          const startTime = startDate.toLocaleTimeString('en-US', timeOptions);
+          const endTime = endDate.toLocaleTimeString('en-US', timeOptions);
+          document.getElementById('eventTime').textContent = `${startTime} - ${endTime}`;
+          
           document.getElementById('eventDescription').textContent = info.event.extendedProps.description || 'No description available.';
           modal.show();
         }
       });
       calendar.render();
-
+  
       // Event Filtering
       document.querySelectorAll('[data-filter]').forEach(filter => {
         filter.addEventListener('click', () => {

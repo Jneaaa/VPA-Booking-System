@@ -15,6 +15,24 @@
   <style>
 
     /* Calendar styles */
+
+  .fc-timegrid-slot {
+    height: 2.5em; /* Make time slots taller */
+  }
+  
+  .fc-timegrid-event {
+    font-size: 0.85rem;
+    padding: 2px 4px;
+  }
+  
+  .fc-timegrid-axis {
+    background-color: #f8f9fa;
+  }
+  
+  .fc-col-header-cell {
+    background-color: #dad8e0;
+  }
+
     .fc-event {
       color: white !important;
       border-radius: 5px !important;
@@ -109,6 +127,90 @@
     #dropdownMenuButton.active {
       color: var(--cpu-secondary); /* Change color when active */
     }
+
+    
+  /* Notification styles with stronger specificity */
+  #notificationDropdown.dropdown-menu {
+    width: 300px !important;
+    padding: 0 !important;
+    border: 1px solid rgba(0,0,0,.15) !important;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  #notificationDropdown .dropdown-header {
+    padding: 0.5rem 1rem !important;
+    font-weight: 600 !important;
+    border-bottom: 1px solid #dee2e6 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  #notificationDropdown .notification-item {
+    display: block !important;
+    padding: 10px 15px !important;
+    border-bottom: 1px solid #eee !important;
+    transition: background-color 0.2s !important;
+    color: #212529 !important;
+    text-decoration: none !important;
+    white-space: normal !important;
+  }
+  
+  #notificationDropdown .notification-item:hover {
+    background-color: #f8f9fa !important;
+  }
+  
+  #notificationDropdown .notification-item.unread {
+    background-color: #fff8e1 !important; /* Light yellow for unread */
+  }
+  
+  #notificationDropdown .notification-title {
+    font-weight: 500 !important;
+    margin-bottom: 5px !important;
+    color: #212529 !important;
+  }
+  
+  #notificationDropdown .notification-text {
+    color: #495057 !important;
+    margin-bottom: 3px !important;
+  }
+  
+  #notificationDropdown .notification-time {
+    font-size: 0.8rem !important;
+    color: #6c757d !important;
+  }
+  
+  #notificationDropdown .dropdown-divider {
+    margin: 0 !important;
+  }
+  
+  #notificationDropdown .view-all-item {
+    text-align: center !important;
+    padding: 0.5rem !important;
+  }
+  
+  .notification-badge {
+    position: absolute !important;
+    top: -5px !important;
+    right: -5px !important;
+    background-color: #dc3545 !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 0.7rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none !important;
+  }
+  
+  /* Make sure the bell icon is clickable */
+  #notificationIcon {
+    cursor: pointer !important;
+    position: relative !important;
+  }
+
   </style>
 </head>
 <body>
@@ -119,13 +221,36 @@
       <img src="../cpu-logo.png" alt="CPU Logo" class="me-2" style="height: 40px;">
       <span class="fw-bold">CPU Facilities and Equipment Management</span>
     </div>
+
     <div class="d-flex align-items-center">
+
+      <!--Notifications-->
       <div class="position-relative me-3">
-        <i class="bi bi-bell fs-4" id="notificationIcon"></i>
-        <div id="notificationBox">
-          <p class="mb-0">No new notifications.</p>
+        <div class="dropdown">
+          <i class="bi bi-bell fs-4 position-relative" id="notificationIcon" data-bs-toggle="dropdown" aria-expanded="false"></i>
+          <span class="notification-badge">1</span>
+          <ul class="dropdown-menu dropdown-menu-end p-0" id="notificationDropdown" aria-labelledby="notificationIcon">
+            <li class="dropdown-header">Notifications</li>
+            <li>
+              <a href="#" class="notification-item unread d-block" data-notification-id="1">
+                <div class="notification-title">New Facility Request</div>
+                <div class="notification-text">John Smith requested the Main Auditorium for March 15, 2024</div>
+                <div class="notification-time">2 minutes ago</div>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="notification-item d-block">
+                <div class="notification-title">Booking Approved</div>
+                <div class="notification-text">Your equipment request for the sound system has been approved</div>
+                <div class="notification-time">3 hours ago</div>
+              </a>
+            </li>
+            <li><hr class="dropdown-divider m-0"></li>
+            <li><a href="#" class="dropdown-item view-all-item text-center">View all notifications</a></li>
+          </ul>
         </div>
       </div>
+
       <div class="dropdown">
         <button class="btn btn-link p-0 text-white" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
           <i class="bi bi-three-dots fs-4"></i>
@@ -312,66 +437,93 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize Calendar
       const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-        initialView: 'dayGridMonth',
-        height: 450,
-        buttonText: {
-          today: 'Today' // Added buttonText configuration
-        },
+        initialView: 'timeGridWeek', // Default to week view
         headerToolbar: {
-          start: 'title',
-          center: '',
-          end: 'today prev,next'
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay' // Add all three view options
+        },
+        views: {
+          timeGridDay: {
+            titleFormat: { year: 'numeric', month: 'long', day: 'numeric' },
+            dayHeaderFormat: { weekday: 'long' }
+          },
+          timeGridWeek: {
+            titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
+          }
+        },
+        height: 450, // Increase height to accommodate time slots
+        slotMinTime: '07:00:00', // Start calendar at 7am
+        slotMaxTime: '20:00:00', // End calendar at 8pm
+        nowIndicator: true, // Show current time indicator
+        allDaySlot: false, // Hide all-day slot
+        buttonText: {
+          today: 'Today',
+          month: 'Month',
+          week: 'Week',
+          day: 'Day'
         },
         events: [
           {
             id: '1',
             title: 'CPU Event',
-            start: new Date(),
+            start: new Date(new Date().setHours(9, 0, 0)),
+            end: new Date(new Date().setHours(11, 0, 0)),
             description: 'A university-wide event for all students.',
-            time: '9:00 AM - 11:00 AM',
             classNames: ['event-university']
           },
           {
             id: '2',
             title: 'Facility Rental',
             start: new Date(new Date().setDate(new Date().getDate() + 2)),
+            end: new Date(new Date().setDate(new Date().getDate() + 2)),
             description: 'Rental of the university gymnasium.',
-            time: '1:00 PM - 3:00 PM',
             classNames: ['event-facility']
           },
           {
             id: '3',
             title: 'Equipment Rental',
             start: new Date(new Date().setDate(new Date().getDate() + 5)),
+            end: new Date(new Date().setDate(new Date().getDate() + 5)),
             description: 'Rental of sound system equipment.',
-            time: '2:00 PM - 4:00 PM',
             classNames: ['event-equipment']
           },
           {
             id: '4',
             title: 'External Conference',
             start: new Date(new Date().setDate(new Date().getDate() + 7)),
+            end: new Date(new Date().setDate(new Date().getDate() + 7)),
             description: 'An external conference hosted by a partner organization.',
-            time: '10:00 AM - 12:00 PM',
             classNames: ['event-external']
           }
         ],
         eventClick: function(info) {
           const modal = new bootstrap.Modal(document.getElementById('eventModal'));
           document.getElementById('eventTitle').textContent = info.event.title;
-          document.getElementById('eventDate').textContent = info.event.start.toLocaleDateString('en-US', {
+          
+          // Format date based on whether it's an all-day event
+          const startDate = info.event.start;
+          const endDate = info.event.end || startDate;
+          
+          document.getElementById('eventDate').textContent = startDate.toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
             day: 'numeric'
           });
-          document.getElementById('eventTime').textContent = info.event.extendedProps.time || '10:00 AM - 12:00 PM';
+          
+          // Format time if not all-day
+          const timeOptions = { hour: '2-digit', minute: '2-digit' };
+          const startTime = startDate.toLocaleTimeString('en-US', timeOptions);
+          const endTime = endDate.toLocaleTimeString('en-US', timeOptions);
+          document.getElementById('eventTime').textContent = `${startTime} - ${endTime}`;
+          
           document.getElementById('eventDescription').textContent = info.event.extendedProps.description || 'No description available.';
           modal.show();
         }
       });
       calendar.render();
-
+  
       // Event Filtering
       document.querySelectorAll('[data-filter]').forEach(filter => {
         filter.addEventListener('click', () => {
@@ -386,6 +538,38 @@
           });
         });
       });
+        
+  // Notification functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const notificationItems = document.querySelectorAll('#notificationDropdown .notification-item');
+    const notificationBadge = document.querySelector('.notification-badge');
+    
+    notificationItems.forEach(item => {
+      item.addEventListener('click', function(e) {
+        if (this.classList.contains('unread')) {
+          this.classList.remove('unread');
+          updateNotificationBadge();
+        }
+        // Prevent default only if it's not the "View all" link
+        if (!this.classList.contains('view-all-item')) {
+          e.preventDefault();
+          // In real implementation, you would handle the click:
+          // window.location.href = '/request-details?id=' + this.dataset.notificationId;
+        }
+      });
+    });
+    
+    function updateNotificationBadge() {
+      const unreadCount = document.querySelectorAll('#notificationDropdown .notification-item.unread').length;
+      
+      if (unreadCount > 0) {
+        notificationBadge.textContent = unreadCount;
+        notificationBadge.style.display = 'flex';
+      } else {
+        notificationBadge.style.display = 'none';
+      }
+    }
+  });
     });
   </script>
 </body>
