@@ -111,6 +111,7 @@
 
     <!-- Main Content -->
     <main id="main">
+        <div class="container-fluid bg-light rounded p-4">
       <div class="container-fluid">
         <!-- Header & Controls -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -122,62 +123,64 @@
              </div>
         </div>
 
-        <!-- Filters -->
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <select id="layoutSelect" class="form-select">
-                    <option value="grid">Grid Layout</option>
-                    <option value="list">List Layout</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select id="statusFilter" class="form-select">
-                    <option value="all">All Statuses</option>
-                    <option value="available">Available</option>
-                    <option value="unavailable">Unavailable</option>
-                    <option value="reserved">Reserved</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select id="departmentFilter" class="form-select">
-                    <option value="all">All Departments</option>
-                    <option value="IT">IT Department</option>
-                    <option value="HR">HR Department</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select id="categoryFilter" class="form-select">
-                    <option value="all">All Categories</option>
-                    <option value="Sports">Sports Facility</option>
-                    <option value="Conference">Conference Room</option>
-                    <option value="Religious">Religious Facility</option>
-                </select>
-            </div>
+       <!-- Filters & Search Bar -->
+<div class="row mb-3 g-2">  <!-- Changed gutter to g-2 (smaller gap between columns) -->
+    <div class="col-sm-6 col-md-2 col-lg-2">  <!-- Added responsive breakpoints -->
+        <select id="layoutSelect" class="form-select">
+            <option value="grid">Grid Layout</option>
+            <option value="list">List Layout</option>
+        </select>
+    </div>
+    <div class="col-sm-6 col-md-2 col-lg-2">
+        <select id="statusFilter" class="form-select">
+            <option value="all">All Statuses</option>
+            <option value="available">Available</option>
+            <option value="unavailable">Unavailable</option>
+            <option value="reserved">Reserved</option>
+        </select>
+    </div>
+    <div class="col-sm-6 col-md-2 col-lg-2">
+        <select id="departmentFilter" class="form-select">
+            <option value="all">All Departments</option>
+            <option value="CCS">CCS Department</option>
+            <option value="CBA">CBA Department</option>
+            <option value="CAS">CAS Department</option>
+        </select>
+    </div>
+    <div class="col-sm-6 col-md-2 col-lg-2">
+        <select id="categoryFilter" class="form-select">
+            <option value="all">All Categories</option>
+            <option value="Sports">Sports Venues</option>
+            <option value="Rooms">Rooms</option>
+            <option value="Buildings">Buildings</option>
+        </select>
+    </div>
+    <div class="col-sm-12 col-md-4 col-lg-4">
+        <div class="search-container">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" class="form-control" placeholder="Search Facilities...">
         </div>
-        
-        <!-- Search Bar -->
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <div class="search-container">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search Facilities...">
-                </div>
-            </div>
-        </div>
+    </div>
+</div>
 
         <!-- Facilities List -->
         <div id="facilityContainer" class="row g-3">
             <!-- Volleyball Court -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="IT" data-category="Sports" data-title="Volleyball Court">
+            <div class="col-md-4 facility-card" data-status="available" data-department="CBA" data-category="Sports" data-title="Volleyball Court">
                 <div class="card">
                     <img src="assets/volleyball-court.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body">
-                        <h5 class="card-title">Volleyball Court</h5>
-                        <p class="card-text">Indoor volleyball court located inside the University Gym, featuring a standard playing surface, regulation net, and ample space for training, classes, or recreational games. Bleacher seating available for spectators.</p>
-                        <p><strong>Category:</strong> Sports Facility<br><strong>Subcategory:</strong> Court</p>
-                        <p><strong>Department:</strong> IT</p>
-                        <p class="status-available">Available</p>
-                        <div class="facility-actions">
+                    <div class="card-body d-flex flex-column">
+                        <div>
+                            <h5 class="card-title">Volleyball Court</h5>
+                            <p class="card-text text-muted mb-2">
+                                <i class="bi bi-tag-fill text-primary"></i> Sports Facility | 
+                                <i class="bi bi-diagram-2-fill text-primary"></i> Court | 
+                                <i class="bi bi-building-fill text-primary"></i> CBA
+                            </p>
+                            <p class="status-available">Available</p>
+                            <p class="card-text mb-3">Indoor volleyball court located inside the University Gym, featuring a standard playing surface, regulation net, and ample space for training, classes, or recreational games. Bleacher seating available for spectators.</p>
+                        </div>
+                        <div class="facility-actions mt-auto pt-3">
                             <button class="btn btn-manage">Manage</button>
                             <button class="btn btn-outline-danger btn-delete">Delete</button>
                         </div>
@@ -186,16 +189,21 @@
             </div>
 
             <!-- Conference Room -->
-            <div class="col-md-4 facility-card" data-status="reserved" data-department="HR" data-category="Conference" data-title="Conference Room (2nd Floor)">
+            <div class="col-md-4 facility-card" data-status="reserved" data-department="CCS" data-category="Rooms" data-title="Conference Room (2nd Floor)">
                 <div class="card">
                     <img src="assets/conference-room.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body">
-                        <h5 class="card-title">Conference Room (2nd Floor)</h5>
-                        <p class="card-text">A formal meeting space equipped with tables, chairs, projector, and whiteboard. Ideal for seminars, presentations, academic discussions, and organizational meetings. Located in Henrilous Library, 2nd Floor.</p>
-                        <p><strong>Category:</strong> Conference Room<br><strong>Subcategory:</strong> Meeting Space</p>
-                        <p><strong>Department:</strong> HR</p>
-                        <p class="status-reserved">Reserved</p>
-                        <div class="facility-actions">
+                    <div class="card-body d-flex flex-column">
+                        <div>
+                            <h5 class="card-title">Conference Room (2nd Floor)</h5>
+                            <p class="card-text text-muted mb-2">
+                                <i class="bi bi-tag-fill text-primary"></i> Room | 
+                                <i class="bi bi-diagram-2-fill text-primary"></i> Conference | 
+                                <i class="bi bi-building-fill text-primary"></i> CCS
+                            </p>
+                            <p class="status-reserved">Reserved</p>
+                            <p class="card-text mb-3">A formal meeting space equipped with tables, chairs, projector, and whiteboard. Ideal for seminars, presentations, academic discussions, and organizational meetings. Located in Henrilous Library, 2nd Floor.</p>
+                        </div>
+                        <div class="facility-actions mt-auto pt-3">
                             <button class="btn btn-manage">Manage</button>
                             <button class="btn btn-outline-danger btn-delete">Delete</button>
                         </div>
@@ -204,16 +212,21 @@
             </div>
 
             <!-- University Church -->
-            <div class="col-md-4 facility-card" data-status="unavailable" data-department="IT" data-category="Religious" data-title="University Church">
+            <div class="col-md-4 facility-card" data-status="unavailable" data-department="CAS" data-category="Buildings" data-title="University Church">
                 <div class="card">
                     <img src="assets/uni-church.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body">
-                        <h5 class="card-title">University Church</h5>
-                        <p class="card-text">A spacious, multi-purpose venue within campus grounds used for religious services, ceremonies, and university events. Equipped with audio systems, seating, and a peaceful atmosphere suitable for gatherings and reflections.</p>
-                        <p><strong>Category:</strong> Religious Facility<br><strong>Subcategory:</strong> Worship Space</p>
-                        <p><strong>Department:</strong> IT</p>
-                        <p class="status-unavailable">Unavailable</p>
-                        <div class="facility-actions">
+                    <div class="card-body d-flex flex-column">
+                        <div>
+                            <h5 class="card-title">University Church</h5>
+                            <p class="card-text text-muted mb-2">
+                                <i class="bi bi-tag-fill text-primary"></i> Building | 
+                                <i class="bi bi-diagram-2-fill text-primary"></i> Church | 
+                                <i class="bi bi-building-fill text-primary"></i> CAS
+                            </p>
+                            <p class="status-unavailable">Unavailable</p>
+                            <p class="card-text mb-3">A spacious, multi-purpose venue within campus grounds used for religious services, ceremonies, and university events. Equipped with audio systems, seating, and a peaceful atmosphere suitable for gatherings and reflections.</p>
+                        </div>
+                        <div class="facility-actions mt-auto pt-3">
                             <button class="btn btn-manage">Manage</button>
                             <button class="btn btn-outline-danger btn-delete">Delete</button>
                         </div>
@@ -221,6 +234,7 @@
                 </div>
             </div>
         </div>
+      </div>
       </div>
     </main>
   </div>
