@@ -10,6 +10,9 @@
             --primary-color: #041A4B;
             --primary-transparent: rgba(4, 26, 75, 0.4);
             --primary-hover: #082d77;
+            --yellow-color: #f2b023ab;
+            --yellow-border: #d1a648;
+            --yellow-hover: #ffc341ab;
             --secondary-color: #6c757d;
             --secondary-hover: #5a6268;
             --text-color: #333;
@@ -140,7 +143,7 @@
         .home-button {
             width: 100%;
             padding: 12px;
-            background-color: #e2e1dc;
+            background-color: var(--yellow-color);
             color: var(--text-color);
             border: none;
             border-radius: var(--border-radius);
@@ -151,14 +154,14 @@
             text-decoration: none;
             display: inline-block;
             box-shadow: 0 2px 3px rgba(0, 0, 0, 0.50);
-            border: solid 1px var(--primary-transparent);
+            border: solid 1px var(--yellow-border);
 
         }
 
         .home-button:hover {
-            background-color: var(--light-gray);
-            border: solid 1px var(--primary-transparent);
-            color: var(--secondary-hover);
+            background-color: var(--yellow-hover);
+            border: solid 1px var(--yellow-border);
+            color: var(--text-color);
         }
         
         @media (max-width: 768px) {
