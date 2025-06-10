@@ -211,6 +211,18 @@
     position: relative !important;
   }
 
+  #dropdownMenuButton i.bi-three-dots {
+    transition: color 0.2s ease;
+    color: currentColor; /* Inherits color from parent */
+  }
+
+  #dropdownMenuButton:hover i.bi-three-dots,
+  #dropdownMenuButton:focus i.bi-three-dots,
+  #dropdownMenuButton.active i.bi-three-dots,
+  #dropdownMenuButton.show i.bi-three-dots { /* 'show' class is added by Bootstrap when dropdown is open */
+    color: var(--cpu-secondary) !important;
+  }
+
   </style>
 </head>
 <body>
