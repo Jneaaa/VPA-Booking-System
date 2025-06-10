@@ -9,9 +9,9 @@
   --btn-primary: #135ba3;
   --btn-primary-hover: #3671ca;
   --btn-primary-border: #135ba3;
-  --btn-secondary: #dadada;    
-  --btn-secondary-hover: #a3a3a3;
-  --btn-secondary-border: #bbbbbb; 
+  --btn-secondary: #f1b739;    
+  --btn-secondary-hover: #f3c45f;
+  --btn-secondary-border: #cea348; 
   
   /* Secondary Color Scheme */
   --cpu-secondary: #f2b123;        /* Gold accent color */
@@ -321,12 +321,12 @@ body {
     background-color: var(--btn-secondary);
     border: solid 1px var(--btn-secondary-border);
     color: var(--cpu-text-dark);
-    flex: 1;
 }
 
 .btn-secondary:hover {
     background-color: var(--btn-secondary-hover);
-    color: var(--cpu-text-dark);
+    border: solid 1px var(--btn-secondary-hover);
+    color: white;
 }
 
 .btn-manage:hover, .btn-primary:hover {
@@ -336,6 +336,11 @@ body {
 .btn-delete {
     flex: 1;
 }
+
+.btn-flex {
+  flex: 1 !important;
+}
+
 /* Search bar styles (Facilities Page) */
 .search-container {
     position: relative;
