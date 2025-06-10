@@ -4,238 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
-
   <!-- Combined CSS resources -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="admin-styles.css">
-  <link rel="stylesheet" href="../global-styles.css">
-
-  <style>
-
-    /* Calendar styles */
-
-  .fc-timegrid-slot {
-    height: 2.5em; /* Make time slots taller */
-  }
-  
-  .fc-timegrid-event {
-    font-size: 0.85rem;
-    padding: 2px 4px;
-  }
-  
-  .fc-timegrid-axis {
-    background-color: #f8f9fa;
-  }
-  
-  .fc-col-header-cell {
-    background-color: #dad8e0;
-  }
-
-    .fc-event {
-      color: white !important;
-      border-radius: 5px !important;
-      padding: 2px 4px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      border: none !important;
-    }
-    .event-university { background-color: var(--cpu-secondary) !important; }
-    .event-facility { background-color: var(--cpu-primary) !important; }
-    .event-equipment { background-color: var(--cpu-primary) !important; }
-    .event-external { background-color: #6c757d !important; }
-
-    .fc-daygrid-day-number,
-    .fc-col-header-cell,
-    .fc-col-header-cell-cushion {
-      text-decoration: none;
-      color: black !important;
-    }
-
-    .fc-daygrid-day-number {
-      border-radius: 3px;
-      padding: 2px;
-    }
-
-    .fc-col-header-cell {
-      background-color: #dad8e0;
-      border-radius: 0; /* Remove rounded corners */
-      padding: 5px;
-    }
-
-    .fc-daygrid-day {
-      background-color: #f9f9f9;
-      border: 1px solid #e0e0e0;
-    }
-
-    .fc-day-today {
-      background-color: #d9e4e9 !important; /* Light blue for today's date */
-    }
-
-    /* Profile image styles */
-    .profile-img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-    }
-    .status-indicator {
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      background: green;
-      border: 2px solid white;
-      border-radius: 50%;
-      width: 15px;
-      height: 15px;
-    }
-
-    /* Card styles */
-    .stat-card {
-      transition: transform 0.2s ease;
-    }
-    .stat-card:hover {
-      transform: translateY(-5px);
-    }
-    .stat-card i {
-      color: gray !important; /* Force icon color to gray */
-    }
-
-    .calendar-container {
-      background-color: var(--light-gray);
-      color: black;
-    }
-
-    .btn-primary {
-      background-color: var(--cpu-primary);
-      border-color: var(--cpu-primary);
-    }
-
-    .btn-primary:hover {
-      background-color: var(--cpu-primary-hover); /* Slightly darker shade for hover */
-      border-color: var(--cpu-primary-hover);
-    }
-
-    #dropdownMenuButton {
-      cursor: pointer;
-      transition: transform 0.2s ease, color 0.2s ease;
-    }
-    #dropdownMenuButton:hover {
-      transform: scale(1.1);
-      color: var(--cpu-secondary); /* Change color on hover */
-    }
-    #dropdownMenuButton.active {
-      color: var(--cpu-secondary); /* Change color when active */
-    }
-
-    
-  /* Notification styles with stronger specificity */
-  #notificationDropdown.dropdown-menu {
-    width: 300px !important;
-    padding: 0 !important;
-    border: 1px solid rgba(0,0,0,.15) !important;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    max-height: 400px;
-    overflow-y: auto;
-  }
-  
-  #notificationDropdown .dropdown-header {
-    padding: 0.5rem 1rem !important;
-    font-weight: 600 !important;
-    border-bottom: 1px solid #dee2e6 !important;
-    margin-bottom: 0 !important;
-  }
-  
-  #notificationDropdown .notification-item {
-    display: block !important;
-    padding: 10px 15px !important;
-    border-bottom: 1px solid #eee !important;
-    transition: background-color 0.2s !important;
-    color: #212529 !important;
-    text-decoration: none !important;
-    white-space: normal !important;
-  }
-  
-  #notificationDropdown .notification-item:hover {
-    background-color: #f8f9fa !important;
-  }
-  
-  #notificationDropdown .notification-item.unread {
-    background-color: #fff8e1 !important; /* Light yellow for unread */
-  }
-  
-  #notificationDropdown .notification-title {
-    font-weight: 500 !important;
-    margin-bottom: 5px !important;
-    color: #212529 !important;
-  }
-  
-  #notificationDropdown .notification-text {
-    color: #495057 !important;
-    margin-bottom: 3px !important;
-  }
-  
-  #notificationDropdown .notification-time {
-    font-size: 0.8rem !important;
-    color: #6c757d !important;
-  }
-  
-  #notificationDropdown .dropdown-divider {
-    margin: 0 !important;
-  }
-  
-  #notificationDropdown .view-all-item {
-    text-align: center !important;
-    padding: 0.5rem !important;
-  }
-  
-  .notification-badge {
-    position: absolute !important;
-    top: -5px !important;
-    right: -5px !important;
-    background-color: #dc3545 !important;
-    color: white !important;
-    border-radius: 50% !important;
-    width: 18px !important;
-    height: 18px !important;
-    font-size: 0.7rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    pointer-events: none !important;
-  }
-  
-  /* Make sure the bell icon is clickable */
-  #notificationIcon {
-    cursor: pointer !important;
-    position: relative !important;
-  }
-
-  #dropdownMenuButton i.bi-three-dots {
-    transition: color 0.2s ease;
-    color: currentColor; /* Inherits color from parent */
-  }
-
-  #dropdownMenuButton:hover i.bi-three-dots,
-  #dropdownMenuButton:focus i.bi-three-dots,
-  #dropdownMenuButton.active i.bi-three-dots,
-  #dropdownMenuButton.show i.bi-three-dots { /* 'show' class is added by Bootstrap when dropdown is open */
-    color: var(--cpu-secondary) !important;
-  }
-
-  </style>
+  <link rel="stylesheet" href="css/admin-styles.css">
 </head>
 <body>
-
   <!-- Top Bar -->
   <header id="topbar" class="d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center">
       <img src="../cpu-logo.png" alt="CPU Logo" class="me-2" style="height: 40px;">
       <span class="fw-bold">CPU Facilities and Equipment Management</span>
     </div>
-
     <div class="d-flex align-items-center">
-
       <!--Notifications-->
       <div class="position-relative me-3">
         <div class="dropdown">
@@ -262,7 +44,7 @@
           </ul>
         </div>
       </div>
-
+      <!-- Dropdown Menu -->
       <div class="dropdown">
         <button class="btn btn-link p-0 text-white" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
           <i class="bi bi-three-dots fs-4"></i>
@@ -275,14 +57,13 @@
       </div>
     </div>
   </header>
-
   <!-- Main Layout -->
   <div id="layout">
     <!-- Sidebar -->
     <nav id="sidebar">
       <div class="text-center mb-4">
         <div class="position-relative d-inline-block">
-          <img src="admin-pic.jpg" alt="Admin Profile" class="profile-img rounded-circle">
+          <img src="assets/admin-pic.jpg" alt="Admin Profile" class="profile-img rounded-circle">
           <span class="status-indicator"></span>
         </div>
         <h5 class="mt-3 mb-1">John Doe</h5>
@@ -327,7 +108,6 @@
         </li>
       </ul>
     </nav>
-
     <!-- Main Content -->
     <main id="main">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -336,7 +116,6 @@
           <i class="bi bi-gear me-1"></i> Manage Requests
         </a>
       </div>
-      
       <!-- Stats Cards -->
       <div class="row g-4 mb-4">
         <div class="col-md-4">
@@ -379,7 +158,6 @@
           </div>
         </div>
       </div>
-
       <!-- Calendar Section -->
       <section>
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -403,13 +181,11 @@
             </a>
           </div>
         </div>
-
         <div id="calendar" class="border rounded p-3 calendar-container">
         </div>
       </section>
     </main>
   </div>
-
   <!-- Event Modal -->
   <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -440,149 +216,10 @@
       </div>
     </div>
   </div>
-
   <!-- Combined JS resources -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize Calendar
-      const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-        initialView: 'timeGridWeek', // Default to week view
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay' // Add all three view options
-        },
-        views: {
-          timeGridDay: {
-            titleFormat: { year: 'numeric', month: 'long', day: 'numeric' },
-            dayHeaderFormat: { weekday: 'long' }
-          },
-          timeGridWeek: {
-            titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
-          }
-        },
-        height: 450, // Increase height to accommodate time slots
-        slotMinTime: '07:00:00', // Start calendar at 7am
-        slotMaxTime: '20:00:00', // End calendar at 8pm
-        nowIndicator: true, // Show current time indicator
-        allDaySlot: false, // Hide all-day slot
-        buttonText: {
-          today: 'Today',
-          month: 'Month',
-          week: 'Week',
-          day: 'Day'
-        },
-        events: [
-          {
-            id: '1',
-            title: 'CPU Event',
-            start: new Date(new Date().setHours(9, 0, 0)),
-            end: new Date(new Date().setHours(11, 0, 0)),
-            description: 'A university-wide event for all students.',
-            classNames: ['event-university']
-          },
-          {
-            id: '2',
-            title: 'Facility Rental',
-            start: new Date(new Date().setDate(new Date().getDate() + 2)),
-            end: new Date(new Date().setDate(new Date().getDate() + 2)),
-            description: 'Rental of the university gymnasium.',
-            classNames: ['event-facility']
-          },
-          {
-            id: '3',
-            title: 'Equipment Rental',
-            start: new Date(new Date().setDate(new Date().getDate() + 5)),
-            end: new Date(new Date().setDate(new Date().getDate() + 5)),
-            description: 'Rental of sound system equipment.',
-            classNames: ['event-equipment']
-          },
-          {
-            id: '4',
-            title: 'External Conference',
-            start: new Date(new Date().setDate(new Date().getDate() + 7)),
-            end: new Date(new Date().setDate(new Date().getDate() + 7)),
-            description: 'An external conference hosted by a partner organization.',
-            classNames: ['event-external']
-          }
-        ],
-        eventClick: function(info) {
-          const modal = new bootstrap.Modal(document.getElementById('eventModal'));
-          document.getElementById('eventTitle').textContent = info.event.title;
-          
-          // Format date based on whether it's an all-day event
-          const startDate = info.event.start;
-          const endDate = info.event.end || startDate;
-          
-          document.getElementById('eventDate').textContent = startDate.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          });
-          
-          // Format time if not all-day
-          const timeOptions = { hour: '2-digit', minute: '2-digit' };
-          const startTime = startDate.toLocaleTimeString('en-US', timeOptions);
-          const endTime = endDate.toLocaleTimeString('en-US', timeOptions);
-          document.getElementById('eventTime').textContent = `${startTime} - ${endTime}`;
-          
-          document.getElementById('eventDescription').textContent = info.event.extendedProps.description || 'No description available.';
-          modal.show();
-        }
-      });
-      calendar.render();
-  
-      // Event Filtering
-      document.querySelectorAll('[data-filter]').forEach(filter => {
-        filter.addEventListener('click', () => {
-          const filterType = filter.getAttribute('data-filter');
-          
-          calendar.getEvents().forEach(event => {
-            if (filterType === 'all') {
-              event.setProp('display', 'auto');
-            } else {
-              event.setProp('display', event.classNames.includes(`event-${filterType}`) ? 'auto' : 'none');
-            }
-          });
-        });
-      });
-        
-  // Notification functionality
-  document.addEventListener('DOMContentLoaded', function() {
-    const notificationItems = document.querySelectorAll('#notificationDropdown .notification-item');
-    const notificationBadge = document.querySelector('.notification-badge');
-    
-    notificationItems.forEach(item => {
-      item.addEventListener('click', function(e) {
-        if (this.classList.contains('unread')) {
-          this.classList.remove('unread');
-          updateNotificationBadge();
-        }
-        // Prevent default only if it's not the "View all" link
-        if (!this.classList.contains('view-all-item')) {
-          e.preventDefault();
-          // In real implementation, you would handle the click:
-          // window.location.href = '/request-details?id=' + this.dataset.notificationId;
-        }
-      });
-    });
-    
-    function updateNotificationBadge() {
-      const unreadCount = document.querySelectorAll('#notificationDropdown .notification-item.unread').length;
-      
-      if (unreadCount > 0) {
-        notificationBadge.textContent = unreadCount;
-        notificationBadge.style.display = 'flex';
-      } else {
-        notificationBadge.style.display = 'none';
-      }
-    }
-  });
-    });
-  </script>
+  <script src="js/global.js"></script>
+  <script src="js/calendar.js"> </script>
 </body>
 </html>

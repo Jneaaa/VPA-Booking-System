@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CPU Facility Booking - Admin Login</title>
     <style>
+
         :root {
-            --primary-color: #007BFF;
-            --primary-hover: #0056b3;
+            --primary-color: #041A4B;
+            --primary-transparent: rgba(4, 26, 75, 0.4);
+            --primary-hover: #082d77;
             --secondary-color: #6c757d;
             --secondary-hover: #5a6268;
             --text-color: #333;
@@ -119,7 +121,7 @@
         .login-button {
             width: 100%;
             padding: 12px;
-            background-color: #041A4B;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             border-radius: var(--border-radius);
@@ -128,18 +130,18 @@
             cursor: pointer;
             transition: background-color 0.3s;
             margin-bottom: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.50);
         }
         
         .login-button:hover {
-            background-color: #03153A;
+            background-color: var(--primary-hover);
         }
         
         .home-button {
             width: 100%;
             padding: 12px;
-            background-color: #f7b900;
-            color: black;
+            background-color: #e2e1dc;
+            color: var(--text-color);
             border: none;
             border-radius: var(--border-radius);
             font-size: 1rem;
@@ -148,12 +150,15 @@
             transition: background-color 0.3s, color 0.3s;
             text-decoration: none;
             display: inline-block;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 2px solid #e0a800;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.50);
+            border: solid 1px var(--primary-transparent);
+
         }
-        
+
         .home-button:hover {
-            background-color: #e0a800;
+            background-color: var(--light-gray);
+            border: solid 1px var(--primary-transparent);
+            color: var(--secondary-hover);
         }
         
         @media (max-width: 768px) {
