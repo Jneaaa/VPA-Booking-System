@@ -205,7 +205,7 @@ body {
       transform: translateY(-5px);
     }
     .stat-card i {
-      color: gray !important; /* Force icon color to gray */
+      color: var(--cpu-primary) !important; /* Force icon color to gray */
     }
 
     .calendar-container {

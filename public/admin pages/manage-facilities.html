@@ -11,12 +11,32 @@
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/admin-styles.css">
   <style>
-    .status-available { color: green; font-weight: bold; }
-    .status-unavailable { color: red; font-weight: bold; }
-    .status-reserved { color: orange; font-weight: bold; }
+    .status-available, 
+    .status-unavailable, 
+    .status-reserved {
+        color: white !important;
+        font-weight: bold;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        display: inline-block;
+        font-size: 0.8rem;
+    }
+
+    .status-available {
+        background-color: #28a745; /* Green */
+    }
+
+    .status-unavailable {
+        background-color: #dc3545; /* Red */
+    }
+
+    .status-reserved {
+        background-color: #fd7e14; /* Orange */
+    }
     .facility-card img { object-fit: cover; height: 150px; width: 100%; }
     .facility-card .card { height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease; }
     .facility-card .card:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); }
+
   </style>
 </head>
 <body>
@@ -123,7 +143,7 @@
       <div class="container-fluid">
         <!-- Header & Controls -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Active Facilities Overview</h2>
+            <h2>Manage Facilities</h2>
             <div>
                 <button class="btn btn-secondary me-2">Manage Facilities</button>
                 <a href="add-facility.html" class="btn btn-primary">Add New Facility</a>
@@ -161,10 +181,10 @@
             <!-- Example Facility Card -->
             <div class="col-md-4 facility-card" data-status="available" data-department="IT">
                 <div class="card">
-                    <img src="https://via.placeholder.com/300x150" class="card-img-top" alt="Facility Cover">
+                    <img src="assets/volleyball-court.jpg" class="card-img-top" alt="Facility Cover">
                     <div class="card-body">
-                        <h5 class="card-title">Computer Lab A</h5>
-                        <p class="card-text">A high-end computer lab with 30 PCs.</p>
+                        <h5 class="card-title">Volleyball Court</h5>
+                        <p class="card-text">Indoor volleyball court located inside the University Gym, featuring a standard playing surface, regulation net, and ample space for training, classes, or recreational games. Bleacher seating available for spectators.</p>
                         <p><strong>Category:</strong> Laboratory<br><strong>Subcategory:</strong> Computer</p>
                         <p><strong>Department:</strong> IT</p>
                         <p class="status-available">Available</p>
@@ -179,10 +199,10 @@
             <!-- More facility cards -->
             <div class="col-md-4 facility-card" data-status="reserved" data-department="HR">
                 <div class="card">
-                    <img src="https://via.placeholder.com/300x150" class="card-img-top" alt="Facility Cover">
+                    <img src="assets/conference-room.jpg" class="card-img-top" alt="Facility Cover">
                     <div class="card-body">
-                        <h5 class="card-title">Conference Room B</h5>
-                        <p class="card-text">Medium conference room with projector.</p>
+                        <h5 class="card-title">Conference Room (2nd Floor)</h5>
+                        <p class="card-text">A formal meeting space equipped with tables, chairs, projector, and whiteboard. Ideal for seminars, presentations, academic discussions, and organizational meetings. Located in Henrilous Library, 2nd Floor.</p>
                         <p><strong>Category:</strong> Conference Room<br><strong>Subcategory:</strong> Standard</p>
                         <p><strong>Department:</strong> HR</p>
                         <p class="status-reserved">Reserved</p>
@@ -196,10 +216,10 @@
 
             <div class="col-md-4 facility-card" data-status="unavailable" data-department="IT">
                 <div class="card">
-                    <img src="https://via.placeholder.com/300x150" class="card-img-top" alt="Facility Cover">
+                    <img src="assets/uni-church.jpg" class="card-img-top" alt="Facility Cover">
                     <div class="card-body">
-                        <h5 class="card-title">Server Room</h5>
-                        <p class="card-text">Main server room with restricted access.</p>
+                        <h5 class="card-title">University Church</h5>
+                        <p class="card-text">A spacious, multi-purpose venue within campus grounds used for religious services, ceremonies, and university events. Equipped with audio systems, seating, and a peaceful atmosphere suitable for gatherings and reflections.</p>
                         <p><strong>Category:</strong> Specialized<br><strong>Subcategory:</strong> Infrastructure</p>
                         <p><strong>Department:</strong> IT</p>
                         <p class="status-unavailable">Unavailable</p>
