@@ -12,7 +12,7 @@ class AdminAuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|string',
+            'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
@@ -29,5 +29,22 @@ class AdminAuthController extends Controller
             'token' => $token,
             'admin' => $admin->makeHidden('hashed_password') // Don't return password
         ]);
+
+        
     }
+
+    public function profile(Request $request)
+    {
+        return response()->json([
+            'admin' => $request->user() // Returns the authenticated admin
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Logged out']);
+    }
+
+
 }
