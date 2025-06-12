@@ -149,7 +149,7 @@ body {
     }
 
     .fc-col-header-cell {
-      background-color: #dad8e0;
+      background-color: #e8eaeb;
       border-radius: 0; /* Remove rounded corners */
       padding: 5px;
     }
@@ -160,7 +160,7 @@ body {
     }
 
     .fc-day-today {
-      background-color: #d9e4e9 !important; /* Light blue for today's date */
+      background-color: #e8eaeb !important; /* Light blue for today's date */
     }
 
     /* Profile image styles */
@@ -322,6 +322,17 @@ body {
     border: solid 1px var(--btn-secondary-border);
     color: var(--cpu-text-dark);
 }
+
+.btn-secondary:active,
+.btn-secondary.active {
+ background-color: #d4a017 !important;
+ border-color: #b8932f !important;
+}
+
+.btn-secondary.dropdown-toggle.show {
+  background-color: #d4a017;
+  border-color: #b8932f;
+ }
 
 .btn-secondary:hover {
     background-color: var(--btn-secondary-hover);
