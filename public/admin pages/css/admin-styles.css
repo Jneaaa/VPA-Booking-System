@@ -196,6 +196,27 @@ body {
       color: black;
     }
 
+    .nav-link {
+      color: var(--btn-primary)
+     }
+     
+     .nav-link.active {
+      color: var(--cpu-secondary-hover) !important;
+     }
+
+     .btn-outline-primary {
+      color: var(--btn-primary)
+     }
+     
+     .btn-outline-primary:hover {
+      background-color: var(--btn-primary-hover);
+      color: white;
+     }
+     
+     /* For active/clicked state */
+     .btn-outline-primary:active {
+      color: var(--btn-primary-hover)
+     }
 
 
     #dropdownMenuButton {
