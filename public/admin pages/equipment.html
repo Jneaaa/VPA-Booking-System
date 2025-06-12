@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Dashboard - Manage Facilities</title>
+  <title>Your Dashboard - Manage Equipment</title>
   <!-- Combined CSS resources -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -27,8 +27,8 @@
             <li class="dropdown-header">Notifications</li>
             <li>
               <a href="#" class="notification-item unread d-block" data-notification-id="1">
-                <div class="notification-title">New Facility Request</div>
-                <div class="notification-text">John Smith requested the Main Auditorium for March 15, 2024</div>
+                <div class="notification-title">New Equipment Request</div>
+                <div class="notification-text">John Smith requested a Microphone for March 15, 2024</div>
                 <div class="notification-time">2 minutes ago</div>
               </a>
             </li>
@@ -89,13 +89,13 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active" href="manage-facilities.html">
+          <a class="nav-link" href="facilities.html">
             <i class="bi bi-building me-2"></i>
             Facilities
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="manage-equipment.html">
+          <a class="nav-link active" href="equipment.html">
             <i class="bi bi-tools me-2"></i>
             Equipment
           </a>
@@ -115,17 +115,17 @@
       <div class="container-fluid">
         <!-- Header & Controls -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Manage Facilities</h2>
+            <h2>Manage Equipment</h2>
             <div>
-                <a href="add-facility.html" class="btn btn-primary">
-                    <i class="bi bi-plus-circle-fill me-2"></i>Add New Facility
+                <a href="add-equipment.html" class="btn btn-primary">
+                    <i class="bi bi-plus-circle-fill me-2"></i>Add New Equipment
                 </a>
              </div>
         </div>
 
        <!-- Filters & Search Bar -->
-<div class="row mb-3 g-2">  <!-- Changed gutter to g-2 (smaller gap between columns) -->
-    <div class="col-sm-6 col-md-2 col-lg-2">  <!-- Added responsive breakpoints -->
+<div class="row mb-3 g-2">
+    <div class="col-sm-6 col-md-2 col-lg-2">
         <select id="layoutSelect" class="form-select">
             <option value="grid">Grid Layout</option>
             <option value="list">List Layout</option>
@@ -150,35 +150,34 @@
     <div class="col-sm-6 col-md-2 col-lg-2">
         <select id="categoryFilter" class="form-select">
             <option value="all">All Categories</option>
-            <option value="Sports">Sports Venues</option>
-            <option value="Rooms">Rooms</option>
-            <option value="Buildings">Buildings</option>
+            <option value="Audio">Audio Equipment</option>
+            <option value="Visual">Visual Equipment</option>
+            <option value="Lighting">Lighting Equipment</option>
         </select>
     </div>
     <div class="col-sm-12 col-md-4 col-lg-4">
         <div class="search-container">
             <i class="bi bi-search"></i>
-            <input type="text" id="searchInput" class="form-control" placeholder="Search Facilities...">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search Equipment...">
         </div>
     </div>
 </div>
 
-        <!-- Facilities List -->
+        <!-- Equipment List -->
         <div id="facilityContainer" class="row g-3">
-            <!-- Volleyball Court -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="CBA" data-category="Sports" data-title="Volleyball Court">
+            <!-- Microphone -->
+            <div class="col-md-4 facility-card" data-status="available" data-department="CBA" data-category="Audio" data-title="Microphone">
                 <div class="card">
-                    <img src="assets/volleyball-court.jpg" class="card-img-top" alt="Facility Cover">
+                    <img src="assets/microphone.jpg" class="card-img-top" alt="Equipment Cover">
                     <div class="card-body d-flex flex-column">
                         <div>
-                            <h5 class="card-title">Volleyball Court</h5>
+                            <h5 class="card-title">Microphone</h5>
                             <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Sports Facility | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Court | 
+                                <i class="bi bi-tag-fill text-primary"></i> Audio Equipment | 
                                 <i class="bi bi-building-fill text-primary"></i> CBA
                             </p>
                             <p class="status-available">Available</p>
-                            <p class="card-text mb-3">Indoor volleyball court located inside the University Gym, featuring a standard playing surface, regulation net, and ample space for training, classes, or recreational games. Bleacher seating available for spectators.</p>
+                            <p class="card-text mb-3">High-quality microphone suitable for lectures, presentations, and performances. Includes adjustable stand and noise-canceling features.</p>
                         </div>
                         <div class="facility-actions mt-auto pt-3">
                             <button class="btn btn-manage btn-flex">Manage</button>
@@ -188,20 +187,19 @@
                 </div>
             </div>
 
-            <!-- Conference Room -->
-            <div class="col-md-4 facility-card" data-status="reserved" data-department="CCS" data-category="Rooms" data-title="Conference Room (2nd Floor)">
+            <!-- Projector -->
+            <div class="col-md-4 facility-card" data-status="reserved" data-department="CCS" data-category="Visual" data-title="Projector">
                 <div class="card">
-                    <img src="assets/conference-room.jpg" class="card-img-top" alt="Facility Cover">
+                    <img src="assets/projector.jpg" class="card-img-top" alt="Equipment Cover">
                     <div class="card-body d-flex flex-column">
                         <div>
-                            <h5 class="card-title">Conference Room (2nd Floor)</h5>
+                            <h5 class="card-title">Projector</h5>
                             <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Room | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Conference | 
+                                <i class="bi bi-tag-fill text-primary"></i> Visual Equipment | 
                                 <i class="bi bi-building-fill text-primary"></i> CCS
                             </p>
                             <p class="status-reserved">Reserved</p>
-                            <p class="card-text mb-3">A formal meeting space equipped with tables, chairs, projector, and whiteboard. Ideal for seminars, presentations, academic discussions, and organizational meetings. Located in Henrilous Library, 2nd Floor.</p>
+                            <p class="card-text mb-3">High-definition projector suitable for presentations, lectures, and events. Includes HDMI and VGA connectivity options.</p>
                         </div>
                         <div class="facility-actions mt-auto pt-3">
                             <button class="btn btn-manage btn-flex">Manage</button>
@@ -211,20 +209,19 @@
                 </div>
             </div>
 
-            <!-- University Church -->
-            <div class="col-md-4 facility-card" data-status="unavailable" data-department="CAS" data-category="Buildings" data-title="University Church">
+            <!-- Stage Lights -->
+            <div class="col-md-4 facility-card" data-status="unavailable" data-department="CAS" data-category="Lighting" data-title="Stage Lights">
                 <div class="card">
-                    <img src="assets/uni-church.jpg" class="card-img-top" alt="Facility Cover">
+                    <img src="assets/stage-lights.jpg" class="card-img-top" alt="Equipment Cover">
                     <div class="card-body d-flex flex-column">
                         <div>
-                            <h5 class="card-title">University Church</h5>
+                            <h5 class="card-title">Stage Lights</h5>
                             <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Building | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Church | 
+                                <i class="bi bi-tag-fill text-primary"></i> Lighting Equipment | 
                                 <i class="bi bi-building-fill text-primary"></i> CAS
                             </p>
                             <p class="status-unavailable">Unavailable</p>
-                            <p class="card-text mb-3">A spacious, multi-purpose venue within campus grounds used for religious services, ceremonies, and university events. Equipped with audio systems, seating, and a peaceful atmosphere suitable for gatherings and reflections.</p>
+                            <p class="card-text mb-3">Professional stage lighting equipment for performances and events. Includes adjustable brightness and color settings.</p>
                         </div>
                         <div class="facility-actions mt-auto pt-3">
                             <button class="btn btn-manage btn-flex">Manage</button>
@@ -234,21 +231,20 @@
                 </div>
             </div>
 
-            <!-- Additional Facility Cards (9 more to make 12 total) -->
-            <!-- Basketball Court -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="CBA" data-category="Sports" data-title="Basketball Court">
+            <!-- Additional Equipment Cards -->
+            <!-- Speaker System -->
+            <div class="col-md-4 facility-card" data-status="available" data-department="CBA" data-category="Audio" data-title="Speaker System">
                 <div class="card">
-                    <img src="assets/basketball-court.jpg" class="card-img-top" alt="Facility Cover">
+                    <img src="assets/speaker-system.jpg" class="card-img-top" alt="Equipment Cover">
                     <div class="card-body d-flex flex-column">
                         <div>
-                            <h5 class="card-title">Basketball Court</h5>
+                            <h5 class="card-title">Speaker System</h5>
                             <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Sports Facility | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Court | 
+                                <i class="bi bi-tag-fill text-primary"></i> Audio Equipment | 
                                 <i class="bi bi-building-fill text-primary"></i> CBA
                             </p>
                             <p class="status-available">Available</p>
-                            <p class="card-text mb-3">Outdoor basketball court with hardwood flooring, regulation hoops, and scoreboard. Suitable for official games and practice sessions. Located near the University Gymnasium.</p>
+                            <p class="card-text mb-3">Portable speaker system with Bluetooth connectivity and high-quality sound output. Ideal for events and gatherings.</p>
                         </div>
                         <div class="facility-actions mt-auto pt-3">
                             <button class="btn btn-manage btn-flex">Manage</button>
@@ -258,20 +254,19 @@
                 </div>
             </div>
 
-            <!-- Computer Lab 1 -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="CCS" data-category="Rooms" data-title="Computer Lab 1">
+            <!-- LED Screen -->
+            <div class="col-md-4 facility-card" data-status="available" data-department="CCS" data-category="Visual" data-title="LED Screen">
                 <div class="card">
-                    <img src="assets/computer-lab.jpg" class="card-img-top" alt="Facility Cover">
+                    <img src="assets/led-screen.jpg" class="card-img-top" alt="Equipment Cover">
                     <div class="card-body d-flex flex-column">
                         <div>
-                            <h5 class="card-title">Computer Lab 1</h5>
+                            <h5 class="card-title">LED Screen</h5>
                             <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Room | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Laboratory | 
+                                <i class="bi bi-tag-fill text-primary"></i> Visual Equipment | 
                                 <i class="bi bi-building-fill text-primary"></i> CCS
                             </p>
                             <p class="status-available">Available</p>
-                            <p class="card-text mb-3">Modern computer laboratory equipped with 30 high-performance workstations, projector, and whiteboard. Ideal for programming classes, research, and workshops. Located in CCS Building, Room 201.</p>
+                            <p class="card-text mb-3">Large LED screen for presentations and events. Features high resolution and multiple input options.</p>
                         </div>
                         <div class="facility-actions mt-auto pt-3">
                             <button class="btn btn-manage btn-flex">Manage</button>
@@ -281,227 +276,19 @@
                 </div>
             </div>
 
-            <!-- Audio Visual Room -->
-            <div class="col-md-4 facility-card" data-status="reserved" data-department="CAS" data-category="Rooms" data-title="Audio Visual Room">
+            <!-- Spotlight -->
+            <div class="col-md-4 facility-card" data-status="reserved" data-department="CAS" data-category="Lighting" data-title="Spotlight">
                 <div class="card">
-                    <img src="assets/av-room.jpg" class="card-img-top" alt="Facility Cover">
+                    <img src="assets/spotlight.jpg" class="card-img-top" alt="Equipment Cover">
                     <div class="card-body d-flex flex-column">
                         <div>
-                            <h5 class="card-title">Audio Visual Room</h5>
+                            <h5 class="card-title">Spotlight</h5>
                             <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Room | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Media | 
+                                <i class="bi bi-tag-fill text-primary"></i> Lighting Equipment | 
                                 <i class="bi bi-building-fill text-primary"></i> CAS
                             </p>
                             <p class="status-reserved">Reserved</p>
-                            <p class="card-text mb-3">Specialized room with high-quality audio and video equipment, including projector, sound system, and theater-style seating. Perfect for film screenings, presentations, and multimedia classes. Capacity: 50 persons.</p>
-                        </div>
-                        <div class="facility-actions mt-auto pt-3">
-                            <button class="btn btn-manage btn-flex">Manage</button>
-                            <button class="btn btn-outline-danger btn-delete">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tennis Court -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="CBA" data-category="Sports" data-title="Tennis Court">
-                <div class="card">
-                    <img src="assets/tennis-court.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body d-flex flex-column">
-                        <div>
-                            <h5 class="card-title">Tennis Court</h5>
-                            <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Sports Facility | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Court | 
-                                <i class="bi bi-building-fill text-primary"></i> CBA
-                            </p>
-                            <p class="status-available">Available</p>
-                            <p class="card-text mb-3">Outdoor tennis court with synthetic grass surface and professional net. Available for classes, training, and recreational use. Equipment can be rented from the Sports Office.</p>
-                        </div>
-                        <div class="facility-actions mt-auto pt-3">
-                            <button class="btn btn-manage btn-flex">Manage</button>
-                            <button class="btn btn-outline-danger btn-delete">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Faculty Lounge -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="CCS" data-category="Rooms" data-title="Faculty Lounge">
-                <div class="card">
-                    <img src="assets/faculty-lounge.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body d-flex flex-column">
-                        <div>
-                            <h5 class="card-title">Faculty Lounge</h5>
-                            <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Room | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Lounge | 
-                                <i class="bi bi-building-fill text-primary"></i> CCS
-                            </p>
-                            <p class="status-available">Available</p>
-                            <p class="card-text mb-3">Comfortable lounge area for faculty members, equipped with sofas, tables, coffee machine, and refrigerator. Ideal for meetings, breaks, and informal discussions. Located on the 3rd floor of the CCS Building.</p>
-                        </div>
-                        <div class="facility-actions mt-auto pt-3">
-                            <button class="btn btn-manage btn-flex">Manage</button>
-                            <button class="btn btn-outline-danger btn-delete">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Science Laboratory -->
-            <div class="col-md-4 facility-card" data-status="unavailable" data-department="CAS" data-category="Rooms" data-title="Science Laboratory">
-                <div class="card">
-                    <img src="assets/science-lab.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body d-flex flex-column">
-                        <div>
-                            <h5 class="card-title">Science Laboratory</h5>
-                            <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Room | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Laboratory | 
-                                <i class="bi bi-building-fill text-primary"></i> CAS
-                            </p>
-                            <p class="status-unavailable">Unavailable</p>
-                            <p class="card-text mb-3">Fully equipped science laboratory for chemistry and biology experiments. Contains fume hoods, microscopes, and all necessary equipment for undergraduate research and classes. Under maintenance until next week.</p>
-                        </div>
-                        <div class="facility-actions mt-auto pt-3">
-                            <button class="btn btn-manage btn-flex">Manage</button>
-                            <button class="btn btn-outline-danger btn-delete">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Swimming Pool -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="CBA" data-category="Sports" data-title="Swimming Pool">
-                <div class="card">
-                    <img src="assets/swimming-pool.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body d-flex flex-column">
-                        <div>
-                            <h5 class="card-title">Swimming Pool</h5>
-                            <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Sports Facility | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Pool | 
-                                <i class="bi bi-building-fill text-primary"></i> CBA
-                            </p>
-                            <p class="status-available">Available</p>
-                            <p class="card-text mb-3">Olympic-sized swimming pool with 8 lanes, diving boards, and spectator seating. Used for physical education classes, swimming competitions, and recreational swimming. Lifeguard on duty during open hours.</p>
-                        </div>
-                        <div class="facility-actions mt-auto pt-3">
-                            <button class="btn btn-manage btn-flex">Manage</button>
-                            <button class="btn btn-outline-danger btn-delete">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Library Study Room -->
-            <div class="col-md-4 facility-card" data-status="reserved" data-department="CCS" data-category="Rooms" data-title="Library Study Room">
-                <div class="card">
-                    <img src="assets/study-room.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body d-flex flex-column">
-                        <div>
-                            <h5 class="card-title">Library Study Room</h5>
-                            <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Room | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Study | 
-                                <i class="bi bi-building-fill text-primary"></i> CCS
-                            </p>
-                            <p class="status-reserved">Reserved</p>
-                            <p class="card-text mb-3">Quiet study room in the library with tables, chairs, and power outlets. Ideal for group study sessions or individual work. Capacity: 8 persons. Reservations required during exam periods.</p>
-                        </div>
-                        <div class="facility-actions mt-auto pt-3">
-                            <button class="btn btn-manage btn-flex">Manage</button>
-                            <button class="btn btn-outline-danger btn-delete">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Amphitheater -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="CAS" data-category="Buildings" data-title="Amphitheater">
-                <div class="card">
-                    <img src="assets/amphitheater.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body d-flex flex-column">
-                        <div>
-                            <h5 class="card-title">Amphitheater</h5>
-                            <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Building | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Outdoor | 
-                                <i class="bi bi-building-fill text-primary"></i> CAS
-                            </p>
-                            <p class="status-available">Available</p>
-                            <p class="card-text mb-3">Open-air amphitheater with stone seating for 200 people. Used for outdoor performances, lectures, and special events. Equipped with basic sound system and lighting for evening events.</p>
-                        </div>
-                        <div class="facility-actions mt-auto pt-3">
-                            <button class="btn btn-manage btn-flex">Manage</button>
-                            <button class="btn btn-outline-danger btn-delete">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Music Room -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="CBA" data-category="Rooms" data-title="Music Room">
-                <div class="card">
-                    <img src="assets/music-room.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body d-flex flex-column">
-                        <div>
-                            <h5 class="card-title">Music Room</h5>
-                            <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Room | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Arts | 
-                                <i class="bi bi-building-fill text-primary"></i> CBA
-                            </p>
-                            <p class="status-available">Available</p>
-                            <p class="card-text mb-3">Soundproof room equipped with piano, music stands, and audio equipment. Used for music classes, choir practice, and individual rehearsals. Instruments available for checkout.</p>
-                        </div>
-                        <div class="facility-actions mt-auto pt-3">
-                            <button class="btn btn-manage btn-flex">Manage</button>
-                            <button class="btn btn-outline-danger btn-delete">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lecture Hall A -->
-            <div class="col-md-4 facility-card" data-status="reserved" data-department="CCS" data-category="Rooms" data-title="Lecture Hall A">
-                <div class="card">
-                    <img src="assets/lecture-hall.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body d-flex flex-column">
-                        <div>
-                            <h5 class="card-title">Lecture Hall A</h5>
-                            <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Room | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Lecture | 
-                                <i class="bi bi-building-fill text-primary"></i> CCS
-                            </p>
-                            <p class="status-reserved">Reserved</p>
-                            <p class="card-text mb-3">Large lecture hall with tiered seating for 120 students. Equipped with projector, sound system, and multiple whiteboards. Ideal for large classes, guest lectures, and departmental meetings.</p>
-                        </div>
-                        <div class="facility-actions mt-auto pt-3">
-                            <button class="btn btn-manage btn-flex">Manage</button>
-                            <button class="btn btn-outline-danger btn-delete">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Art Studio -->
-            <div class="col-md-4 facility-card" data-status="available" data-department="CAS" data-category="Rooms" data-title="Art Studio">
-                <div class="card">
-                    <img src="assets/art-studio.jpg" class="card-img-top" alt="Facility Cover">
-                    <div class="card-body d-flex flex-column">
-                        <div>
-                            <h5 class="card-title">Art Studio</h5>
-                            <p class="card-text text-muted mb-2">
-                                <i class="bi bi-tag-fill text-primary"></i> Room | 
-                                <i class="bi bi-diagram-2-fill text-primary"></i> Studio | 
-                                <i class="bi bi-building-fill text-primary"></i> CAS
-                            </p>
-                            <p class="status-available">Available</p>
-                            <p class="card-text mb-3">Bright studio space with north-facing windows, easels, and art supplies. Suitable for painting, drawing, and sculpture classes. Sink and storage cabinets available for student use.</p>
+                            <p class="card-text mb-3">High-intensity spotlight for stage performances and events. Adjustable beam and color settings.</p>
                         </div>
                         <div class="facility-actions mt-auto pt-3">
                             <button class="btn btn-manage btn-flex">Manage</button>
@@ -514,7 +301,7 @@
 
         <!-- Pagination Controls -->
         <div class="d-flex justify-content-center mt-4">
-            <nav aria-label="Facilities pagination">
+            <nav aria-label="Equipment pagination">
                 <ul class="pagination">
                     <li class="page-item disabled" id="prevPage">
                         <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
@@ -704,7 +491,7 @@
         // Add confirmation dialog for delete buttons
         document.querySelectorAll('.btn-delete').forEach(button => {
             button.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to delete this facility?')) {
+                if (!confirm('Are you sure you want to delete this equipment?')) {
                     e.preventDefault();
                 }
             });
@@ -714,10 +501,10 @@
         document.querySelectorAll('.btn-manage').forEach(button => {
             button.addEventListener('click', function() {
                 const card = this.closest('.facility-card');
-                const facilityName = card.querySelector('.card-title').textContent;
-                alert(`Managing facility: ${facilityName}`);
+                const equipmentName = card.querySelector('.card-title').textContent;
+                alert(`Managing equipment: ${equipmentName}`);
                 // In a real implementation, this would open an edit modal or redirect
-                // window.location.href = `/manage-facility?id=${card.dataset.facilityId}`;
+                // window.location.href = `/manage-equipment?id=${card.dataset.facilityId}`;
             });
         });
         
@@ -726,19 +513,19 @@
     });
 </script>
 
-<!-- Modal for Facility Management -->
+<!-- Modal for Equipment Management -->
 <div class="modal fade" id="manageFacilityModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Manage Facility</h5>
+                <h5 class="modal-title">Manage Equipment</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Facility management form would go here -->
+                <!-- Equipment management form would go here -->
                 <form id="facilityForm">
                     <div class="mb-3">
-                        <label for="facilityName" class="form-label">Facility Name</label>
+                        <label for="facilityName" class="form-label">Equipment Name</label>
                         <input type="text" class="form-control" id="facilityName">
                     </div>
                     <div class="mb-3">
@@ -749,17 +536,11 @@
                         <div class="col-md-6 mb-3">
                             <label for="facilityCategory" class="form-label">Category</label>
                             <select class="form-select" id="facilityCategory">
-                                <option value="Sports">Sports Facility</option>
-                                <option value="Conference">Conference Room</option>
-                                <option value="Religious">Religious Facility</option>
+                                <option value="Audio">Audio Equipment</option>
+                                <option value="Visual">Visual Equipment</option>
+                                <option value="Lighting">Lighting Equipment</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="facilitySubcategory" class="form-label">Subcategory</label>
-                            <input type="text" class="form-control" id="facilitySubcategory">
-                        </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="facilityDepartment" class="form-label">Department</label>
                             <select class="form-select" id="facilityDepartment">
@@ -767,6 +548,8 @@
                                 <option value="HR">HR Department</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="facilityStatus" class="form-label">Status</label>
                             <select class="form-select" id="facilityStatus">

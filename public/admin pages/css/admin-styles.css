@@ -429,3 +429,28 @@ body {
     .list-view .facility-card .card-body {
         flex: 1;
     }
+
+/* System log styles */
+
+.log-container {
+  background-color: var(--light-gray);
+  padding: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.list-group-item {
+  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 0.5rem;
+  border-radius: 5px;
+}
+
+.list-group-item strong {
+  color: var(--cpu-primary);
+}
+
+.list-group-item em {
+  color: var(--cpu-secondary);
+}
