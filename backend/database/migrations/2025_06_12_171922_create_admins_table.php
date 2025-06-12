@@ -12,11 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('admins', function (Blueprint $table) {
-            $table->id();
+            $table->id('admin_id')->autoIncrement();
             $table->string('username')->unique();
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->string('middle_name')->nullable();
+            $table->unsignedTinyInteger('role_id');
+            $table->string('school_id')->nullable();
             $table->string('email')->unique();
-            $table->string('password');
+            $table->string('contact_number')->nullable();
+            $table->string('hashed_password');
             $table->timestamps();
+
+            // Foreign key constraint
+            $table->foreign('role_id')
+            ->references('role_id')
+            ->on('admin_roles')
+            ->onDelete('cascade');
         });
     }
 
