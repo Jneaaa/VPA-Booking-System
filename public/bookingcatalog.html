@@ -13,15 +13,13 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
-            /* Light grey background */
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            /* Ensures footer stays at the bottom */
         }
-       
+
         .catalog-hero-section {
             background-image: url('homepage.jpg');
             background-size: cover;
@@ -162,7 +160,7 @@
             padding: 0.75rem 1rem;
             font-weight: 500;
             position: relative;
-          
+
         }
 
         .quick-links-card .btn-outline-primary:hover {
@@ -186,7 +184,6 @@
         }
 
 
-      
         .right-content-header {
             display: flex;
             justify-content: space-between;
@@ -212,7 +209,7 @@
             min-width: 100%;
         }
 
-        .facility-card {
+        .catalog-card {
             background: white;
             padding: 1.5rem;
             border-radius: 0.5rem;
@@ -220,10 +217,10 @@
             margin-bottom: 1.5rem;
             display: flex;
             align-items: flex-start;
-            /* Align image and text at the top */
+           
         }
 
-        .facility-card-img {
+        .catalog-card-img {
             width: 180px;
             height: 120px;
             object-fit: cover;
@@ -231,23 +228,23 @@
             margin-right: 1.5rem;
         }
 
-        .facility-card-details {
+        .catalog-card-details {
             flex-grow: 1
         }
 
-        .facility-card-details h5 {
+        .catalog-card-details h5 {
             font-weight: bold;
             color: #041A4B;
             margin-bottom: 0.5rem;
         }
 
-        .facility-card-details p {
+        .catalog-card-details p {
             font-size: 0.9rem;
             color: #555;
             margin-bottom: 0.75rem;
         }
 
-        .facility-card-meta {
+        .catalog-card-meta {
             display: flex;
             gap: 1rem;
             font-size: 0.85rem;
@@ -255,37 +252,36 @@
             margin-bottom: 0.75rem;
         }
 
-        .facility-card-meta div {
+        .catalog-card-meta div {
             display: flex;
             align-items: center;
         }
 
-        .facility-card-meta .bi {
+        .catalog-card-meta .bi {
             margin-right: 0.3rem;
         }
 
-        .facility-card-actions {
+        .catalog-card-actions {
             text-align: right;
             min-width: 150px;
             margin-left: 1rem;
         }
 
-        .facility-card-actions .rental-fee {
+        .catalog-card-actions .rental-fee {
             font-size: 1.25rem;
             font-weight: bold;
             color: #041A4B;
             margin-bottom: 0.75rem;
         }
 
-        .facility-card-actions .btn {
+        .catalog-card-actions .btn {
             display: block;
-            /* Make buttons stack vertically */
             width: 100%;
             margin-bottom: 0.5rem;
-            /* Space between buttons */
+    
         }
 
-        .facility-card-actions .btn:last-child {
+        .catalog-card-actions .btn:last-child {
             margin-bottom: 0;
         }
 
@@ -302,14 +298,14 @@
             background-color: #002c6b;
         }
 
-       
+
         footer {
             background-color: #041A4B;
             color: white;
             text-align: center;
             padding: 1.5rem 0;
             margin-top: auto;
-           
+
         }
 
         footer p {
@@ -317,7 +313,7 @@
             font-size: 0.9rem;
         }
 
-        
+
         @media (max-width: 767.98px) {
             .catalog-hero-content {
                 padding-left: 1rem;
@@ -339,33 +335,33 @@
                 flex-grow: 1;
             }
 
-            .facility-card {
+            .catalog-card {
                 flex-direction: column;
                 align-items: center;
                 text-align: center;
             }
 
-            .facility-card-img {
+            .catalog-card-img {
                 width: 100%;
                 height: 180px;
                 margin-right: 0;
                 margin-bottom: 1rem;
             }
 
-            .facility-card-actions {
+            .catalog-card-actions {
                 width: 100%;
                 margin-left: 0;
                 margin-top: 1.5rem;
                 text-align: center;
             }
 
-            .facility-card-actions .btn {
+            .catalog-card-actions .btn {
                 display: inline-block;
                 width: auto;
                 margin: 0.25rem;
             }
 
-            .facility-card-meta {
+            .catalog-card-meta {
                 justify-content: center;
             }
         }
@@ -387,7 +383,7 @@
             </div>
         </div>
     </header>
-    
+
     <nav class="navbar navbar-expand-lg main-navbar">
         <div class="container">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -428,7 +424,7 @@
 
     <section class="catalog-hero-section">
         <div class="catalog-hero-content">
-            <h2>Facilities Catalog</h2>
+            <h2 id="catalogHeroTitle">Facilities Catalog</h2>
         </div>
     </section>
 
@@ -449,41 +445,21 @@
                         </a>
                     </div>
                     <div class="dropdown mb-3">
-                        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
+                        <button class="btn dropdown-toggle" type="button" id="chooseCatalogDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             Choose Catalog
                         </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Facilities</a></li>
-                            <li><a class="dropdown-item" href="#">Equipment</a></li>
-                            <li><a class="dropdown-item" href="#">Services</a></li>
+                        <ul class="dropdown-menu" aria-labelledby="chooseCatalogDropdown">
+                            <li><a class="dropdown-item" href="#" data-catalog-type="facilities">Facilities</a></li>
+                            <li><a class="dropdown-item" href="#" data-catalog-type="equipment">Equipment</a></li>
+                            <li><a class="dropdown-item" href="#" data-catalog-type="services">Services</a></li>
                         </ul>
                     </div>
 
                     <div class="sidebar-card">
                         <h5>Browse by Category</h5>
                         <div class="filter-list" id="categoryFilterList">
-                            <a href="#" class="filter-item active" data-category="All">Show All <span
-                                    class="count-badge" id="count-All">12</span></a>
-                            <a href="#" class="filter-item" data-category="Buildings">Buildings <span
-                                    class="count-badge" id="count-Buildings">12</span></a>
-                            <a href="#" class="filter-item" data-category="Complex">Complex <span class="count-badge"
-                                    id="count-Complex">2</span></a>
-                            <a href="#" class="filter-item" data-category="Halls">Halls <span class="count-badge"
-                                    id="count-Halls">4</span></a>
-                            <a href="#" class="filter-item" data-category="Residencies">Residencies <span
-                                    class="count-badge" id="count-Residencies">3</span></a>
-                            <a href="#" class="filter-item" data-category="Classrooms">Classrooms <span
-                                    class="count-badge" id="count-Classrooms">43</span></a>
-                            <a href="#" class="filter-item" data-category="Laboratories">Laboratories <span
-                                    class="count-badge" id="count-Laboratories">5</span></a>
-                            <a href="#" class="filter-item" data-category="Gymnasiums">Gymnasiums <span
-                                    class="count-badge" id="count-Gymnasiums">3</span></a>
-                            <a href="#" class="filter-item" data-category="Outdoor Courts">Outdoor Courts <span
-                                    class="count-badge" id="count-Outdoor Courts">2</span></a>
-                            <a href="#" class="filter-item" data-category="Swimming Pools">Swimming Pools <span
-                                    class="count-badge" id="count-Swimming Pools">1</span></a>
-                        </div>
+                            </div>
                     </div>
                 </div>
 
@@ -493,7 +469,7 @@
                         <div class="d-flex gap-2 filter-sort-dropdowns">
                             <div class="dropdown">
                                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
+                                    aria-expanded="false" id="filterByCatalogDropdown">
                                     All Facilities
                                 </button>
                                 <ul class="dropdown-menu">
@@ -526,120 +502,193 @@
                         </div>
                     </div>
 
-                    <div id="facilitiesContainer">
-                        <div class="facility-card" data-category="Halls">
+                    <div id="catalogItemsContainer">
+                        <div class="catalog-card" data-category="Halls" data-catalog-type="facilities">
                             <img src="https://via.placeholder.com/180x120/FFC107/FFFFFF?text=Hall"
-                                class="facility-card-img" alt="Facility Image">
-                            <div class="facility-card-details">
+                                class="catalog-card-img" alt="Facility Image">
+                            <div class="catalog-card-details">
                                 <h5>Facility Name 1 (Halls)</h5>
                                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.Lorem
                                     ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</p>
-                                <div class="facility-card-meta">
+                                <div class="catalog-card-meta">
                                     <div><i class="bi bi-tag"></i> CategoryType</div>
                                     <div><i class="bi bi-building"></i> Department</div>
                                 </div>
                             </div>
-                            <div class="facility-card-actions">
+                            <div class="catalog-card-actions">
                                 <div class="rental-fee">₱750.00</div>
                                 <button class="btn btn-sm btn-primary">Add to Form</button>
                                 <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
                             </div>
                         </div>
 
-                        <div class="facility-card" data-category="Classrooms">
+                        <div class="catalog-card" data-category="Classrooms" data-catalog-type="facilities">
                             <img src="https://via.placeholder.com/180x120/007bff/FFFFFF?text=Classroom"
-                                class="facility-card-img" alt="Facility Image">
-                            <div class="facility-card-details">
+                                class="catalog-card-img" alt="Facility Image">
+                            <div class="catalog-card-details">
                                 <h5>Facility Name 2 (Classroom)</h5>
                                 <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
                                     veniam.</p>
-                                <div class="facility-card-meta">
+                                <div class="catalog-card-meta">
                                     <div><i class="bi bi-tag"></i> Education</div>
                                     <div><i class="bi bi-building"></i> Academic Affairs</div>
                                 </div>
                             </div>
-                            <div class="facility-card-actions">
+                            <div class="catalog-card-actions">
                                 <div class="rental-fee">₱300.00</div>
                                 <button class="btn btn-sm btn-primary">Add to Form</button>
                                 <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
                             </div>
                         </div>
 
-                        <div class="facility-card" data-category="Gymnasiums">
+                        <div class="catalog-card" data-category="Gymnasiums" data-catalog-type="facilities">
                             <img src="https://via.placeholder.com/180x120/28a745/FFFFFF?text=Gymnasium"
-                                class="facility-card-img" alt="Facility Image">
-                            <div class="facility-card-details">
+                                class="catalog-card-img" alt="Facility Image">
+                            <div class="catalog-card-details">
                                 <h5>Facility Name 3 (Gymnasium)</h5>
                                 <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
                                     ea commodo consequat.</p>
-                                <div class="facility-card-meta">
+                                <div class="catalog-card-meta">
                                     <div><i class="bi bi-tag"></i> Sports</div>
                                     <div><i class="bi bi-building"></i> Athletics</div>
                                 </div>
                             </div>
-                            <div class="facility-card-actions">
+                            <div class="catalog-card-actions">
                                 <div class="rental-fee">₱1500.00</div>
                                 <button class="btn btn-sm btn-primary">Add to Form</button>
                                 <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
                             </div>
                         </div>
 
-                        <div class="facility-card" data-category="Halls">
+                        <div class="catalog-card" data-category="Halls" data-catalog-type="facilities">
                             <img src="https://via.placeholder.com/180x120/FFC107/FFFFFF?text=Hall+2"
-                                class="facility-card-img" alt="Facility Image">
-                            <div class="facility-card-details">
+                                class="catalog-card-img" alt="Facility Image">
+                            <div class="catalog-card-details">
                                 <h5>Facility Name 4 (Halls)</h5>
                                 <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
                                     fugiat nulla pariatur.</p>
-                                <div class="facility-card-meta">
+                                <div class="catalog-card-meta">
                                     <div><i class="bi bi-tag"></i> CategoryType</div>
                                     <div><i class="bi bi-building"></i> Department</div>
                                 </div>
                             </div>
-                            <div class="facility-card-actions">
+                            <div class="catalog-card-actions">
                                 <div class="rental-fee">₱900.00</div>
                                 <button class="btn btn-sm btn-primary">Add to Form</button>
                                 <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
                             </div>
                         </div>
 
-                        <div class="facility-card" data-category="Laboratories">
+                        <div class="catalog-card" data-category="Laboratories" data-catalog-type="facilities">
                             <img src="https://via.placeholder.com/180x120/6f42c1/FFFFFF?text=Lab"
-                                class="facility-card-img" alt="Facility Image">
-                            <div class="facility-card-details">
+                                class="catalog-card-img" alt="Facility Image">
+                            <div class="catalog-card-details">
                                 <h5>Facility Name 5 (Laboratory)</h5>
                                 <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
                                     mollit anim id est laborum.</p>
-                                <div class="facility-card-meta">
+                                <div class="catalog-card-meta">
                                     <div><i class="bi bi-tag"></i> Science</div>
                                     <div><i class="bi bi-building"></i> Research</div>
                                 </div>
                             </div>
-                            <div class="facility-card-actions">
+                            <div class="catalog-card-actions">
                                 <div class="rental-fee">₱800.00</div>
                                 <button class="btn btn-sm btn-primary">Add to Form</button>
                                 <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
                             </div>
                         </div>
 
-                        <div class="facility-card" data-category="Buildings">
+                        <div class="catalog-card" data-category="Buildings" data-catalog-type="facilities">
                             <img src="https://via.placeholder.com/180x120/fd7e14/FFFFFF?text=Building"
-                                class="facility-card-img" alt="Facility Image">
-                            <div class="facility-card-details">
+                                class="catalog-card-img" alt="Facility Image">
+                            <div class="catalog-card-details">
                                 <h5>Facility Name 6 (Building)</h5>
                                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
                                     incididunt ut labore.</p>
-                                <div class="facility-card-meta">
+                                <div class="catalog-card-meta">
                                     <div><i class="bi bi-tag"></i> General</div>
                                     <div><i class="bi bi-building"></i> Campus Admin</div>
                                 </div>
                             </div>
-                            <div class="facility-card-actions">
+                            <div class="catalog-card-actions">
                                 <div class="rental-fee">₱1000.00</div>
                                 <button class="btn btn-sm btn-primary">Add to Form</button>
                                 <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
                             </div>
                         </div>
+
+                        <div class="catalog-card" data-category="Electronics" data-catalog-type="equipment" style="display: none;">
+                            <img src="https://via.placeholder.com/180x120/6c757d/FFFFFF?text=Projector"
+                                class="catalog-card-img" alt="Equipment Image">
+                            <div class="catalog-card-details">
+                                <h5>Projector (Electronics)</h5>
+                                <p>High-resolution projector suitable for presentations and movie screenings.</p>
+                                <div class="catalog-card-meta">
+                                    <div><i class="bi bi-cpu"></i> Audiovisual</div>
+                                    <div><i class="bi bi-house"></i> IT Department</div>
+                                </div>
+                            </div>
+                            <div class="catalog-card-actions">
+                                <div class="rental-fee">₱500.00</div>
+                                <button class="btn btn-sm btn-primary">Add to Form</button>
+                                <button class="btn btn-sm btn-outline-secondary">View Availability</button>
+                            </div>
+                        </div>
+
+                        <div class="catalog-card" data-category="Sports Gear" data-catalog-type="equipment" style="display: none;">
+                            <img src="https://via.placeholder.com/180x120/dc3545/FFFFFF?text=Basketball"
+                                class="catalog-card-img" alt="Equipment Image">
+                            <div class="catalog-card-details">
+                                <h5>Basketball Set (Sports Gear)</h5>
+                                <p>Complete set of basketballs and nets for court usage.</p>
+                                <div class="catalog-card-meta">
+                                    <div><i class="bi bi-controller"></i> Sports</div>
+                                    <div><i class="bi bi-trophy"></i> Athletics Department</div>
+                                </div>
+                            </div>
+                            <div class="catalog-card-actions">
+                                <div class="rental-fee">₱150.00</div>
+                                <button class="btn btn-sm btn-primary">Add to Form</button>
+                                <button class="btn btn-sm btn-outline-secondary">View Availability</button>
+                            </div>
+                        </div>
+
+                         <div class="catalog-card" data-category="Event Support" data-catalog-type="services" style="display: none;">
+                            <img src="https://via.placeholder.com/180x120/17a2b8/FFFFFF?text=Catering"
+                                class="catalog-card-img" alt="Service Image">
+                            <div class="catalog-card-details">
+                                <h5>Catering Services (Event Support)</h5>
+                                <p>Full-service catering for events, customizable menus available.</p>
+                                <div class="catalog-card-meta">
+                                    <div><i class="bi bi-briefcase"></i> Events</div>
+                                    <div><i class="bi bi-person-fill"></i> Food Services</div>
+                                </div>
+                            </div>
+                            <div class="catalog-card-actions">
+                                <div class="rental-fee">Price Varies</div>
+                                <button class="btn btn-sm btn-primary">Add to Form</button>
+                                <button class="btn btn-sm btn-outline-secondary">Request Quote</button>
+                            </div>
+                        </div>
+
+                        <div class="catalog-card" data-category="Technical Support" data-catalog-type="services" style="display: none;">
+                            <img src="https://via.placeholder.com/180x120/ffc107/FFFFFF?text=Tech+Support"
+                                class="catalog-card-img" alt="Service Image">
+                            <div class="catalog-card-details">
+                                <h5>Audiovisual Setup (Technical Support)</h5>
+                                <p>Assistance with setting up projectors, sound systems, and microphones.</p>
+                                <div class="catalog-card-meta">
+                                    <div><i class="bi bi-gear-fill"></i> IT Services</div>
+                                    <div><i class="bi bi-headset"></i> Help Desk</div>
+                                </div>
+                            </div>
+                            <div class="catalog-card-actions">
+                                <div class="rental-fee">₱250.00/hr</div>
+                                <button class="btn btn-sm btn-primary">Add to Form</button>
+                                <button class="btn btn-sm btn-outline-secondary">Schedule Support</button>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="text-center mt-4">
@@ -659,62 +708,164 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const filterItems = document.querySelectorAll('.filter-item');
-            const facilitiesContainer = document.getElementById('facilitiesContainer');
+            const chooseCatalogDropdownItems = document.querySelectorAll('#chooseCatalogDropdown + .dropdown-menu .dropdown-item');
+            const categoryFilterList = document.getElementById('categoryFilterList');
+            const catalogItemsContainer = document.getElementById('catalogItemsContainer');
             const currentCategoryTitle = document.getElementById('currentCategoryTitle');
-            const facilityCards = facilitiesContainer.querySelectorAll('.facility-card');
-            const categoryCounts = {
-                "All": 0,
-                "Buildings": 0,
-                "Complex": 0,
-                "Halls": 0,
-                "Residencies": 0,
-                "Classrooms": 0,
-                "Laboratories": 0,
-                "Gymnasiums": 0,
-                "Outdoor Courts": 0,
-                "Swimming Pools": 0
+            const catalogHeroTitle = document.getElementById('catalogHeroTitle');
+            const filterByCatalogDropdownButton = document.getElementById('filterByCatalogDropdown');
+
+            // --- Data Structures for Categories and Items ---
+            // You can fetch this from an API or database in a real application
+            const allCatalogItems = [
+                { type: "facilities", category: "Halls", name: "Facility Name 1 (Halls)", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.", tags: "CategoryType", department: "Department", fee: "₱750.00", imgSrc: "https://via.placeholder.com/180x120/FFC107/FFFFFF?text=Hall" },
+                { type: "facilities", category: "Classrooms", name: "Facility Name 2 (Classroom)", description: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.", tags: "Education", department: "Academic Affairs", fee: "₱300.00", imgSrc: "https://via.placeholder.com/180x120/007bff/FFFFFF?text=Classroom" },
+                { type: "facilities", category: "Gymnasiums", name: "Facility Name 3 (Gymnasium)", description: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.", tags: "Sports", department: "Athletics", fee: "₱1500.00", imgSrc: "https://via.placeholder.com/180x120/28a745/FFFFFF?text=Gymnasium" },
+                { type: "facilities", category: "Halls", name: "Facility Name 4 (Halls)", description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.", tags: "CategoryType", department: "Department", fee: "₱900.00", imgSrc: "https://via.placeholder.com/180x120/FFC107/FFFFFF?text=Hall+2" },
+                { type: "facilities", category: "Laboratories", name: "Facility Name 5 (Laboratory)", description: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", tags: "Science", department: "Research", fee: "₱800.00", imgSrc: "https://via.placeholder.com/180x120/6f42c1/FFFFFF?text=Lab" },
+                { type: "facilities", category: "Buildings", name: "Facility Name 6 (Building)", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.", tags: "General", department: "Campus Admin", fee: "₱1000.00", imgSrc: "https://via.placeholder.com/180x120/fd7e14/FFFFFF?text=Building" },
+                { type: "facilities", category: "Complex", name: "Facility Name 7 (Complex)", description: "Complex description here.", tags: "Complex", department: "Campus Admin", fee: "₱1200.00", imgSrc: "https://via.placeholder.com/180x120/808080/FFFFFF?text=Complex" },
+                { type: "facilities", category: "Residencies", name: "Facility Name 8 (Residency)", description: "Residency description here.", tags: "Housing", department: "Student Affairs", fee: "₱2000.00", imgSrc: "https://via.placeholder.com/180x120/0000FF/FFFFFF?text=Residency" },
+                { type: "facilities", category: "Outdoor Courts", name: "Facility Name 9 (Outdoor Court)", description: "Outdoor court description here.", tags: "Sports", department: "Athletics", fee: "₱600.00", imgSrc: "https://via.placeholder.com/180x120/A020F0/FFFFFF?text=Court" },
+                { type: "facilities", category: "Swimming Pools", name: "Facility Name 10 (Pool)", description: "Swimming pool description here.", tags: "Recreation", department: "Athletics", fee: "₱1000.00", imgSrc: "https://via.placeholder.com/180x120/00CED1/FFFFFF?text=Pool" },
+
+                { type: "equipment", category: "Electronics", name: "Projector (Electronics)", description: "High-resolution projector suitable for presentations and movie screenings.", tags: "Audiovisual", department: "IT Department", fee: "₱500.00", imgSrc: "https://via.placeholder.com/180x120/6c757d/FFFFFF?text=Projector" },
+                { type: "equipment", category: "Electronics", name: "Sound System (Electronics)", description: "Professional sound system with microphones and speakers.", tags: "Audiovisual", department: "IT Department", fee: "₱700.00", imgSrc: "https://via.placeholder.com/180x120/6c757d/FFFFFF?text=SoundSys" },
+                { type: "equipment", category: "Sports Gear", name: "Basketball Set (Sports Gear)", description: "Complete set of basketballs and nets for court usage.", tags: "Sports", department: "Athletics Department", fee: "₱150.00", imgSrc: "https://via.placeholder.com/180x120/dc3545/FFFFFF?text=Basketball" },
+                { type: "equipment", category: "Sports Gear", name: "Volleyball Set (Sports Gear)", description: "Includes net, ball, and stands for volleyball.", tags: "Sports", department: "Athletics Department", fee: "₱120.00", imgSrc: "https://via.placeholder.com/180x120/dc3545/FFFFFF?text=Volleyball" },
+                { type: "equipment", category: "Furniture", name: "Folding Chairs (Furniture)", description: "Comfortable and portable folding chairs for events.", tags: "Seating", department: "Logistics", fee: "₱20.00/pc", imgSrc: "https://via.placeholder.com/180x120/adb5bd/FFFFFF?text=Chairs" },
+                { type: "equipment", category: "Lab Equipment", name: "Microscope (Lab Equipment)", description: "High-magnification microscope for scientific research.", tags: "Science", department: "Biology Dept", fee: "₱300.00", imgSrc: "https://via.placeholder.com/180x120/6f42c1/FFFFFF?text=Microscope" },
+
+                { type: "services", category: "Event Support", name: "Catering Services (Event Support)", description: "Full-service catering for events, customizable menus available.", tags: "Events", department: "Food Services", fee: "Price Varies", imgSrc: "https://via.placeholder.com/180x120/17a2b8/FFFFFF?text=Catering" },
+                { type: "services", category: "Event Support", name: "Photography Services (Event Support)", description: "Professional photographers for capturing event moments.", tags: "Events", department: "Media Dept", fee: "₱2000.00", imgSrc: "https://via.placeholder.com/180x120/17a2b8/FFFFFF?text=Photo" },
+                { type: "services", category: "Technical Support", name: "Audiovisual Setup (Technical Support)", description: "Assistance with setting up projectors, sound systems, and microphones.", tags: "IT Services", department: "Help Desk", fee: "₱250.00/hr", imgSrc: "https://via.placeholder.com/180x120/ffc107/FFFFFF?text=Tech+Support" },
+                { type: "services", category: "Maintenance", name: "Janitorial Services (Maintenance)", description: "Cleaning and maintenance for facilities before and after events.", tags: "Cleaning", department: "Facilities Mgt", fee: "₱500.00", imgSrc: "https://via.placeholder.com/180x120/20c997/FFFFFF?text=Janitorial" },
+            ];
+
+           
+            const catalogCategories = {
+                "facilities": ["All", "Buildings", "Complex", "Halls", "Residencies", "Classrooms", "Laboratories", "Gymnasiums", "Outdoor Courts", "Swimming Pools"],
+                "equipment": ["All", "Electronics", "Sports Gear", "Furniture", "Lab Equipment"], 
+                "services": ["All", "Event Support", "Technical Support", "Maintenance", "Consulting", "Transportation"] 
             };
 
+            let currentCatalogType = "facilities"; 
 
-            facilityCards.forEach(card => {
-                const category = card.dataset.category;
-                if (categoryCounts.hasOwnProperty(category)) {
-                    categoryCounts[category]++;
-                }
-                categoryCounts["All"]++;
-            });
+            // Function to render category filter list
+            function renderCategoryFilterList(catalogType) {
+                categoryFilterList.innerHTML = ''; // Clear existing filters
+                const categories = catalogCategories[catalogType];
+                const counts = {};
 
-            for (const category in categoryCounts) {
-                const badgeElement = document.getElementById(`count-${category.replace(/\s/g, '')}`);
-                if (badgeElement) {
-                    badgeElement.textContent = categoryCounts[category];
-                }
+                // Count items for the current catalog type
+                allCatalogItems.filter(item => item.type === catalogType).forEach(item => {
+                    counts[item.category] = (counts[item.category] || 0) + 1;
+                });
+                counts["All"] = allCatalogItems.filter(item => item.type === catalogType).length;
+
+
+                categories.forEach(category => {
+                    const listItem = document.createElement('a');
+                    listItem.href = "#";
+                    listItem.classList.add('filter-item');
+                    listItem.dataset.category = category;
+                    listItem.innerHTML = `${category} <span class="count-badge" id="count-${category.replace(/\s/g, '')}">${counts[category] || 0}</span>`;
+                    categoryFilterList.appendChild(listItem);
+                });
+
+                // Attach click listeners to the new filter items
+                attachCategoryFilterListeners();
             }
 
+            // Function to render catalog items based on type and sub-category
+            function renderCatalogItems(catalogType, selectedCategory = "All") {
+                catalogItemsContainer.innerHTML = ''; 
 
-            filterItems.forEach(item => {
-                item.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    filterItems.forEach(li => li.classList.remove('active'));
+                const filteredItems = allCatalogItems.filter(item => {
+                    return item.type === catalogType && (selectedCategory === "All" || item.category === selectedCategory);
+                });
+
+                filteredItems.forEach(item => {
+                    const card = document.createElement('div');
+                    card.classList.add('catalog-card');
+                    card.dataset.category = item.category;
+                    card.dataset.catalogType = item.type; 
+
+                    let buttonText = "Add to Form";
+                    let secondaryButtonText = "View Calendar";
+                    if (item.type === "equipment") {
+                        secondaryButtonText = "View Availability";
+                    } else if (item.type === "services") {
+                        secondaryButtonText = item.fee === "Price Varies" ? "Request Quote" : "Schedule Support";
+                    }
 
 
-                    this.classList.add('active');
+                    card.innerHTML = `
+                        <img src="${item.imgSrc}" class="catalog-card-img" alt="${item.name} Image">
+                        <div class="catalog-card-details">
+                            <h5>${item.name}</h5>
+                            <p>${item.description}</p>
+                            <div class="catalog-card-meta">
+                                <div><i class="bi bi-tag"></i> ${item.tags}</div>
+                                <div><i class="bi bi-building"></i> ${item.department}</div>
+                            </div>
+                        </div>
+                        <div class="catalog-card-actions">
+                            <div class="rental-fee">${item.fee}</div>
+                            <button class="btn btn-sm btn-primary">${buttonText}</button>
+                            <button class="btn btn-sm btn-outline-secondary">${secondaryButtonText}</button>
+                        </div>
+                    `;
+                    catalogItemsContainer.appendChild(card);
+                });
+            }
 
-                    const selectedCategory = this.dataset.category;
-                    currentCategoryTitle.textContent = selectedCategory + ' Facilities';
+            // Function to handle category filter clicks within the sidebar
+            function attachCategoryFilterListeners() {
+                const filterItems = document.querySelectorAll('#categoryFilterList .filter-item');
+                filterItems.forEach(item => {
+                    item.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        filterItems.forEach(li => li.classList.remove('active'));
+                        this.classList.add('active');
 
-                    facilityCards.forEach(card => {
-                        const cardCategory = card.dataset.category;
-                        if (selectedCategory === 'All' || cardCategory === selectedCategory) {
-                            card.style.display = 'flex';
-                        } else {
-                            card.style.display = 'none';
-                        }
+                        const selectedCategory = this.dataset.category;
+                        currentCategoryTitle.textContent = `${selectedCategory} ${currentCatalogType.charAt(0).toUpperCase() + currentCatalogType.slice(1)}`;
+                        filterByCatalogDropdownButton.textContent = `${selectedCategory} ${currentCatalogType.charAt(0).toUpperCase() + currentCatalogType.slice(1)}`;
+
+                        renderCatalogItems(currentCatalogType, selectedCategory);
                     });
                 });
+            }
+
+            // Handle "Choose Catalog" dropdown clicks
+            chooseCatalogDropdownItems.forEach(item => {
+                item.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const newCatalogType = this.dataset.catalogType;
+                    currentCatalogType = newCatalogType;
+
+                    const displayTitle = newCatalogType.charAt(0).toUpperCase() + newCatalogType.slice(1);
+                    catalogHeroTitle.textContent = `${displayTitle} Catalog`; 
+                    currentCategoryTitle.textContent = `All ${displayTitle}`; 
+                    filterByCatalogDropdownButton.textContent = `All ${displayTitle}`; // Update filter dropdown button
+
+                    renderCategoryFilterList(currentCatalogType);
+                    renderCatalogItems(currentCatalogType); // Show all items for the new catalog type
+                    
+                   
+                    const allCategoryLink = document.querySelector(`#categoryFilterList .filter-item[data-category="All"]`);
+                    if (allCategoryLink) {
+                        allCategoryLink.classList.add('active');
+                    }
+                });
             });
-            document.querySelector('.filter-item.active').click();
+
+            // Initial load: Render facilities
+            renderCategoryFilterList(currentCatalogType);
+            renderCatalogItems(currentCatalogType);
+            // Manually set "All Facilities" as active on initial load
+            document.querySelector('#categoryFilterList .filter-item[data-category="All"]').classList.add('active');
         });
     </script>
 </body>
