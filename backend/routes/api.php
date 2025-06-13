@@ -16,16 +16,14 @@ use App\Http\Controllers\AdminAuthController;
 */
 
 // Public login route
-Route::post('/admin/login', [AdminAuthController::class, 'login']);
+Route::post('/admin/login', [AdminAuthController::class, 'login'])
+    ->middleware('throttle:5,1'); // 5 attempts per minute
 
 //Route::post('/admin/login', function () {
     //return response()->json(['message' => 'It works!']);
 //});
 
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
-
-Route::post('/admin/login', [AdminAuthController::class, 'login'])
-    ->middleware('throttle:login'); // Uses the named limiter
 
 // Protected admin routes
 Route::middleware('auth:sanctum')->group(function () {

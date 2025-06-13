@@ -41,7 +41,7 @@ class Kernel extends HttpKernel
                 // Sanctum middleware for token auth:
                 \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
 
-                \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+                \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
                 \Illuminate\Routing\Middleware\SubstituteBindings::class,
             ],
         ];
@@ -68,4 +68,3 @@ class Kernel extends HttpKernel
         ];
     }
 }
-
