@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    
+    console.log('Checking token...');
     const token = localStorage.getItem('adminToken');
+    console.log('Token exists:', !!token);
     
     if (!token) {
         window.location.href = 'adminlogin.html';
@@ -9,40 +12,49 @@ document.addEventListener('DOMContentLoaded', () => {
     // Verify token with backend
     fetch('http://127.0.0.1:8000/api/admin/profile', {
         headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
         }
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Invalid token');
+            throw new Error('Session expired or invalid');
         }
         return response.json();
     })
     .then(data => {
-        // Update UI with admin data if needed
-        console.log('Welcome', data.admin);
+        // You can use the admin data here if needed
+        console.log('Authenticated as', data.admin.email);
     })
     .catch(error => {
+        console.error('Authentication error:', error);
         localStorage.removeItem('adminToken');
         window.location.href = 'adminlogin.html';
     });
 });
 
-// Only keep logout functionality
-document.getElementById('logoutLink')?.addEventListener('click', (e) => {
+// Logout functionality
+document.getElementById('logoutLink')?.addEventListener('click', async (e) => {
     e.preventDefault();
     
     const token = localStorage.getItem('adminToken');
-    if (!token) return;
+    if (!token) {
+        window.location.href = 'adminlogin.html';
+        return;
+    }
 
-    fetch('http://127.0.0.1:8000/api/admin/logout', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    .finally(() => {
+    try {
+        await fetch('http://127.0.0.1:8000/api/admin/logout', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+    } finally {
         localStorage.removeItem('adminToken');
         window.location.href = 'adminlogin.html';
-    });
+    }
 });

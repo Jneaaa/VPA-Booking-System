@@ -19,6 +19,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
             \Illuminate\Http\Middleware\TrimStrings::class,
             \Illuminate\Http\Middleware\ConvertEmptyStringsToNull::class,
+            \App\Http\Middleware\CorsMiddleware::class,
         ];
     }
 

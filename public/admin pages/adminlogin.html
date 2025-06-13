@@ -238,7 +238,7 @@
 
       <div id="errorBox" class="error-box"></div>
 
-      <form id="loginForm">
+      <form id="loginForm" onsubmit="return false;">
         <div class="form-group">
           <label for="email">Email</label>
           <input
@@ -263,46 +263,59 @@
 
         <a href="#" class="forgot-password">Forgot your password?</a>
 
-        <button type="button" id="loginBtn" class="login-button">Login</button>
+        <button type="submit" id="loginBtn" class="login-button">Login</button>
         <a href="../index.html" class="home-button">Return to Homepage</a>
       </form>
     </div>
     <script>
-      document.getElementById('loginBtn').addEventListener('click', async function() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const errorBox = document.getElementById('errorBox');
-    
-    // Clear previous errors
-    errorBox.style.display = 'none';
-    
-    try {
-        const response = await fetch('http://127.0.0.1:8000/api/admin/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
+        document.getElementById('loginBtn').addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorBox = document.getElementById('errorBox');
+            const loginBtn = this;
+        
+            // Disable button and show loading state
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Logging in...';
+        
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password }),
+                    redirect: 'manual' // Important to prevent automatic redirects
+                });
+        
+                // Handle response
+                if (response.status === 0) {
+                    throw new Error('Network error or CORS blocked the request');
+                }
+        
+                const data = await response.json();
+        
+                if (!response.ok) {
+                    throw new Error(data.message || 'Login failed');
+                }
+        
+                // Successful login
+                localStorage.setItem('adminToken', data.token);
+                window.location.href = 'dashboard.html';
+        
+            } catch (error) {
+                errorBox.textContent = error.message;
+                errorBox.style.display = 'block';
+                console.error('Login error:', error);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
         });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            localStorage.setItem('adminToken', data.token);
-            window.location.href = 'dashboard.html';
-        } else {
-            errorBox.textContent = data.message || 'Invalid email or password';
-            errorBox.style.display = 'block';
-            document.getElementById('loginForm').classList.add('shake');
-        }
-    } catch (error) {
-        errorBox.textContent = 'Connection error. Please try again.';
-        errorBox.style.display = 'block';
-    }
-});
-    </script>
+        </script>
   </body>
 </html>

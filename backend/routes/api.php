@@ -9,9 +9,9 @@ use App\Http\Controllers\AdminAuthController;
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application.
+| Here is where you can register API routes for our application.
 | These routes are loaded by the RouteServiceProvider and all of them
-| will be assigned to the "api" middleware group. Make something great!
+| will be assigned to the "api" middleware group. 
 |
 */
 
@@ -19,9 +19,6 @@ use App\Http\Controllers\AdminAuthController;
 Route::post('/admin/login', [AdminAuthController::class, 'login'])
     ->middleware('throttle:5,1'); // 5 attempts per minute
 
-//Route::post('/admin/login', function () {
-    //return response()->json(['message' => 'It works!']);
-//});
 
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
 
