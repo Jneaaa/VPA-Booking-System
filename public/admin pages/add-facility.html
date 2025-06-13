@@ -10,6 +10,12 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/admin-styles.css">
+  <style>
+    /* Add sharp edges to all elements */
+    * {
+      border-radius: 0 !important;
+    }
+  </style>
 </head>
 <body>
   <!-- Top Bar -->
@@ -64,7 +70,7 @@
     <nav id="sidebar">
       <div class="text-center mb-4">
         <div class="position-relative d-inline-block">
-          <img src="assets/admin-pic.jpg" alt="Admin Profile" class="profile-img rounded-circle">
+          <img src="assets/admin-pic.jpg" alt="Admin Profile" class="profile-img">
           <span class="status-indicator"></span>
         </div>
         <h5 class="mt-3 mb-1">John Doe</h5>
@@ -128,7 +134,7 @@
                 <!-- Facility Photos Section -->
                 <div class="mb-4">
                     <label class="form-label fw-bold">Facility Photos</label>
-                    <div class="dropzone border rounded p-4 text-center" id="facilityPhotosDropzone" style="cursor: pointer;">
+                    <div class="dropzone border p-4 text-center" id="facilityPhotosDropzone" style="cursor: pointer;">
                         <i class="bi bi-images fs-1 text-muted"></i>
                         <p class="mt-2">Drag & drop facility photos here or click to browse</p>
                         <input type="file" id="facilityPhotos" class="d-none" multiple accept="image/*">

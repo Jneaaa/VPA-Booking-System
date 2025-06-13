@@ -9,18 +9,29 @@
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/admin-styles.css">
   <style>
+    /* Add sharp edges to all elements */
+    * {
+      border-radius: 0 !important;
+    }
+
+    /* Exclude admin photo container and status circle */
+    .profile-img {
+      border-radius: 50% !important;
+    }
+    .status-indicator {
+      border-radius: 50% !important;
+    }
+
     /* Custom styles for the Admin Roles page */
     .form-section {
       background-color: #fff;
       padding: 30px;
-      border-radius: 8px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
       margin-bottom: 30px;
     }
     .table-section {
       background-color: #fff;
       padding: 30px;
-      border-radius: 8px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     }
     .table-section table th, .table-section table td {

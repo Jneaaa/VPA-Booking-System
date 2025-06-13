@@ -23,6 +23,15 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+        border-radius: 0 !important;
+      }
+
+      /* Exclude admin photo container and status circle */
+      .profile-img {
+        border-radius: 50% !important;
+      }
+      .status-indicator {
+        border-radius: 50% !important;
       }
 
       body {
@@ -45,7 +54,6 @@
         max-width: 500px;
         background-color: rgba(255, 255, 255, 0.95);
         padding: 30px;
-        border-radius: var(--border-radius);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         text-align: center;
       }
@@ -95,7 +103,6 @@
         width: 100%;
         padding: 12px 15px;
         border: 1px solid #ddd;
-        border-radius: var(--border-radius);
         font-size: 1rem;
         transition: border-color 0.3s;
       }
@@ -126,7 +133,6 @@
         background-color: var(--primary-color);
         color: white;
         border: none;
-        border-radius: var(--border-radius);
         font-size: 1rem;
         font-weight: 500;
         cursor: pointer;
@@ -145,7 +151,6 @@
         background-color: var(--yellow-color);
         color: var(--text-color);
         border: none;
-        border-radius: var(--border-radius);
         font-size: 1rem;
         font-weight: 500;
         cursor: pointer;
@@ -219,7 +224,6 @@
         background-color: #f8d7da;
         border-color: #f5c6cb;
         padding: 10px;
-        border-radius: 4px;
         margin-bottom: 15px;
         display: none;
       }
