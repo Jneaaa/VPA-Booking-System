@@ -131,188 +131,148 @@
     <div class="card shadow mb-4">
         <div class="card-body">
             <form id="addFacilityForm">
-                <!-- Facility Photos Section -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Facility Photos</label>
-                    <div class="dropzone border p-4 text-center" id="facilityPhotosDropzone" style="cursor: pointer;">
-                        <i class="bi bi-images fs-1 text-muted"></i>
-                        <p class="mt-2">Drag & drop facility photos here or click to browse</p>
-                        <input type="file" id="facilityPhotos" class="d-none" multiple accept="image/*">
-                    </div>
-                    <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
-                    <small class="text-muted">Upload at least one photo of the facility (max 5 photos)</small>
-                </div>
-
-                <!-- Basic Information Section -->
+                <!-- Facility Photos and Details Section -->
                 <div class="row mb-4">
-                    <div class="col-md-6 mb-3">
-                        <label for="facilityName" class="form-label">Facility Name *</label>
-                        <input type="text" class="form-control" id="facilityName" placeholder="Enter facility name" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="buildingCode" class="form-label">Building Code</label>
-                        <select class="form-select" id="buildingCode">
-                            <option value="">Select Building Code</option>
-                            <option value="MT">MT</option>
-                            <option value="LEB">LEB</option>
-                            <option value="LHB">LHB</option>
-                        </select>
-                    </div>
-                    <div class="col-12 mb-3 position-relative">
-                        <label for="description" class="form-label">Description *</label>
-                        <textarea class="form-control" id="description" rows="3" placeholder="Provide a detailed description of the facility" required></textarea>
-                        <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1" id="descriptionWordCount">0/255 words</small>
-                    </div>
-                </div>
-
-                <!-- Category & Subcategory Section -->
-                <div class="row mb-4">
-                    <div class="col-md-6 mb-3">
-                        <label for="category" class="form-label">Category *</label>
-                        <select class="form-select" id="category" required>
-                            <option value="">Select Category</option>
-                            <option value="Campus Buildings">Campus Buildings</option>
-                            <option value="Residential Buildings">Residential Buildings</option>
-                            <option value="Outside Spaces">Outside Spaces</option>
-                            <option value="Rooms">Rooms</option>
-                            <option value="Sports Venue">Sports Venue</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3" id="subcategoryContainer" style="display: none;">
-                        <label for="subcategory" class="form-label">Subcategory *</label>
-                        <select class="form-select" id="subcategory">
-                            <option value="">Select Subcategory</option>
-                            <!-- Subcategories will be populated dynamically -->
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Room Details Section (Dynamic) -->
-                <div class="row mb-4" id="roomDetailsContainer" style="display: none;">
-                    <div class="col-md-4 mb-3">
-                        <label for="roomName" class="form-label">Room Name *</label>
-                        <input type="text" class="form-control" id="roomName">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="roomNumber" class="form-label">Room Number *</label>
-                        <input type="text" class="form-control" id="roomNumber">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="floorLevel" class="form-label">Floor Level *</label>
-                        <input type="number" class="form-control" id="floorLevel" min="1">
-                    </div>
-                </div>
-
-                <!-- Location & Capacity Section -->
-                <div class="row mb-4">
-                    <div class="col-md-8 mb-3 position-relative">
-                        <label for="locationNote" class="form-label">Location Note</label>
-                        <textarea class="form-control" id="locationNote" rows="2" maxlength="80" placeholder="Brief description of where the facility is located."></textarea>
-                        <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1" id="locationNoteWordCount">0/80 words</small>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="capacity" class="form-label">Capacity (max people)</label>
-                        <input type="number" class="form-control" id="capacity" min="1" placeholder="Maximum capacity">
-                    </div>
-                </div>
-
-                <!-- Department & Flags Section -->
-                <div class="row mb-4">
-                    <div class="col-md-4 mb-3">
-                        <label for="owningDepartment" class="form-label">Owning Department *</label>
-                        <select class="form-select" id="owningDepartment" required>
-                            <option value="">Select Department</option>
-                            <option value="CS">CS</option>
-                            <option value="CBA">CBA</option>
-                            <option value="CAS">CAS</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="availabilityStatus" class="form-label">Availability Status *</label>
-                        <select class="form-select" id="availabilityStatus" required>
-                            <option value="Available" selected>Available</option>
-                            <option value="Unavailable">Unavailable</option>
-                            <option value="Hidden">Hidden</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="is_indoors" class="form-label">Indoors/Outdoors *</label>
-                        <select class="form-select" id="is_indoors" required>
-                            <option value="Indoors">Indoors</option>
-                            <option value="Outdoors">Outdoors</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Pricing Section -->
-                <div class="row mb-4">
-                    <div class="col-md-4 mb-3">
-                        <label for="rentalFee" class="form-label">Rental Fee (₱) *</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="number" class="form-control" id="rentalFee" min="0" step="0.01" required placeholder="Rental fee">
+                    <div class="col-md-6">
+                        <div class="mb-4 h-100">
+                            <label class="form-label fw-bold">Facility Photos</label>
+                            <div class="dropzone border p-4 text-center h-100" id="facilityPhotosDropzone" style="cursor: pointer;">
+                                <i class="bi bi-images fs-1 text-muted"></i>
+                                <p class="mt-2">Drag & drop facility photos here or click to browse</p>
+                                <input type="file" id="facilityPhotos" class="d-none" multiple accept="image/*">
+                            </div>
+                            <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+                            <small class="text-muted">Upload at least one photo of the facility (max 5 photos)</small>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="companyFee" class="form-label">Company Fee (₱)</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="number" class="form-control" id="companyFee" min="0" step="0.01" placeholder="Company fee">
+                    <div class="col-md-6">
+                        <div class="mb-4 h-100">
+                            <!-- Basic Information Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label for="facilityName" class="form-label">Facility Name *</label>
+                                    <input type="text" class="form-control" id="facilityName" placeholder="Enter facility name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="buildingCode" class="form-label">Building Code</label>
+                                    <select class="form-select" id="buildingCode">
+                                        <option value="">Select Building Code</option>
+                                        <option value="MT">MT</option>
+                                        <option value="LEB">LEB</option>
+                                        <option value="LHB">LHB</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 mb-3 position-relative">
+                                    <label for="description" class="form-label">Description *</label>
+                                    <textarea class="form-control" id="description" rows="3" placeholder="Provide a detailed description of the facility" required></textarea>
+                                    <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1" id="descriptionWordCount">0/255 characters</small>
+                                </div>
+                            </div>
+                            <!-- Category & Subcategory Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label for="category" class="form-label">Category *</label>
+                                    <select class="form-select" id="category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Campus Buildings">Campus Buildings</option>
+                                        <option value="Residential Buildings">Residential Buildings</option>
+                                        <option value="Outside Spaces">Outside Spaces</option>
+                                        <option value="Rooms">Rooms</option>
+                                        <option value="Sports Venue">Sports Venue</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3" id="subcategoryContainer" style="display: none;">
+                                    <label for="subcategory" class="form-label">Subcategory *</label>
+                                    <select class="form-select" id="subcategory">
+                                        <option value="">Select Subcategory</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Room Details Section -->
+                            <div class="row mb-4" id="roomDetailsContainer" style="display: none;">
+                                <div class="col-md-4 mb-3">
+                                    <label for="roomName" class="form-label">Room Name *</label>
+                                    <input type="text" class="form-control" id="roomName">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="roomNumber" class="form-label">Room Number *</label>
+                                    <input type="text" class="form-control" id="roomNumber">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="floorLevel" class="form-label">Floor Level *</label>
+                                    <input type="number" class="form-control" id="floorLevel" min="1">
+                                </div>
+                            </div>
+                            <!-- Location & Capacity Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-8 mb-3 position-relative">
+                                    <label for="locationNote" class="form-label">Location Note</label>
+                                    <textarea class="form-control" id="locationNote" rows="2" maxlength="80" placeholder="Brief description of where the facility is located."></textarea>
+                                    <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1" id="locationNoteWordCount">0/80 characters</small>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="capacity" class="form-label">Capacity (max people)</label>
+                                    <input type="number" class="form-control" id="capacity" min="1" placeholder="Maximum capacity">
+                                </div>
+                            </div>
+                            <!-- Department & Flags Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-4 mb-3">
+                                    <label for="owningDepartment" class="form-label">Owning Department *</label>
+                                    <select class="form-select" id="owningDepartment" required>
+                                        <option value="">Select Department</option>
+                                        <option value="CS">CS</option>
+                                        <option value="CBA">CBA</option>
+                                        <option value="CAS">CAS</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="availabilityStatus" class="form-label">Availability Status *</label>
+                                    <select class="form-select" id="availabilityStatus" required>
+                                        <option value="Available" selected>Available</option>
+                                        <option value="Unavailable">Unavailable</option>
+                                        <option value="Hidden">Hidden</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="is_indoors" class="form-label">Indoors/Outdoors *</label>
+                                    <select class="form-select" id="is_indoors" required>
+                                        <option value="Indoors">Indoors</option>
+                                        <option value="Outdoors">Outdoors</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="rateType" class="form-label">Rate Type *</label>
-                        <select class="form-select" id="rateType" required>
-                            <option value="Hour">Per Hour</option>
-                            <option value="Show">Per Show</option>
-                            <option value="Event">Per Event</option>
-                        </select>
                     </div>
                 </div>
 
                 <!-- Amenities Section -->
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <label class="form-label fw-bold">Amenities</label>
-                        <button type="button" class="btn btn-sm btn-secondary" id="addAmenityBtn">
-                            <i class="bi bi-plus me-1"></i>Add Amenity
-                        </button>
-                    </div>
-                    <div id="amenitiesContainer">
-                        <!-- Amenity items will be added here -->
-                        <div class="amenity-item row g-2 mb-2">
-                            <div class="col-md-4">
-                                <input type="text" class="form-control" placeholder="Label (e.g., Wi-Fi, Projector)" required>
-                            </div>
-                            <div class="col-md-2">
-                                <input type="number" class="form-control" placeholder="Qty" min="1" value="1">
-                            </div>
-                            <div class="col-md-4">
-                                <div class="input-group">
-                                    <span class="input-group-text">₱</span>
-                                    <input type="number" class="form-control" placeholder="Price" min="0" step="0.01">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-outline-danger w-100 remove-amenity">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="form-label fw-bold">Amenities</label>
+                            <button type="button" class="btn btn-sm btn-secondary" id="addAmenityBtn">
+                                <i class="bi bi-plus me-1"></i>Add Amenity
+                            </button>
+                        </div>
+                        <div id="amenitiesContainer">
+                            <p class="text-muted">No amenities added yet.</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Equipment Section -->
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <label class="form-label fw-bold">Equipment</label>
-                        <button type="button" class="btn btn-sm btn-primary" id="addEquipmentBtn" data-bs-toggle="modal" data-bs-target="#equipmentModal">
-                            <i class="bi bi-plus me-1"></i>Add Equipment
-                        </button>
-                    </div>
-                    <div id="equipmentContainer">
-                        <!-- Equipment items will be added here -->
-                        <p class="text-muted">No equipment added yet.</p>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="form-label fw-bold">Equipment</label>
+                            <button type="button" class="btn btn-sm btn-primary" id="addEquipmentBtn" data-bs-toggle="modal" data-bs-target="#equipmentModal">
+                                <i class="bi bi-plus me-1"></i>Add Equipment
+                            </button>
+                        </div>
+                        <div id="equipmentContainer">
+                            <p class="text-muted">No equipment added yet.</p>
+                        </div>
                     </div>
                 </div>
 
