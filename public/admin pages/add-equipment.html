@@ -107,6 +107,11 @@
     .equipment-item .flex-grow-1 {
       flex: 1; /* Allow details section to take remaining space */
     }
+
+    .form-label.required::after {
+      content: " *";
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -274,7 +279,7 @@
                           <!-- Basic Information Section -->
                           <div class="row mb-4">
                             <div class="col-md-6">
-                              <label for="equipmentName" class="form-label">Equipment Name *</label>
+                              <label for="equipmentName" class="form-label">Equipment Name</label>
                               <input type="text" class="form-control" id="equipmentName" placeholder="(e.g., HD Projector, Wireless Microphone)" required>
                             </div>
                             <div class="col-md-6">
@@ -284,19 +289,19 @@
                           </div>
                           <div class="row mb-4">
                             <div class="col-12 position-relative">
-                              <label for="description" class="form-label">Description *</label>
-                              <textarea class="form-control" id="description" rows="3" placeholder="Provide a detailed description of the equipment including specifications and features" required></textarea>
+                              <label for="description" class="form-label">Description</label>
+                              <textarea class="form-control" id="description" rows="3" placeholder="Provide a detailed description of the equipment including specifications and features"></textarea>
                               <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1" id="descriptionWordCount">0/255 characters</small>
                             </div>
                           </div>
                           <!-- Location & Category Section -->
                           <div class="row mb-4">
                             <div class="col-md-6">
-                              <label for="storageLocation" class="form-label">Storage Location *</label>
+                              <label for="storageLocation" class="form-label">Storage Location</label>
                               <input type="text" class="form-control" id="storageLocation" placeholder="(e.g., MT Building Room 201)" required>
                             </div>
                             <div class="col-md-6">
-                              <label for="category" class="form-label">Category *</label>
+                              <label for="category" class="form-label">Category</label>
                               <select class="form-select" id="category" required>
                                 <option value="">Select Category</option>
                                 <option value="Audio Equipment">Audio Equipment</option>
@@ -309,11 +314,11 @@
                           <!-- Quantity & Pricing Section -->
                           <div class="row mb-4">
                             <div class="col-md-3">
-                              <label for="totalQuantity" class="form-label">Total Quantity *</label>
+                              <label for="totalQuantity" class="form-label">Total Quantity</label>
                               <input type="number" class="form-control" id="totalQuantity" min="1" value="1" required>
                             </div>
                             <div class="col-md-3">
-                              <label for="rentalFee" class="form-label">Rental Fee (₱) *</label>
+                              <label for="rentalFee" class="form-label">Rental Fee (₱)</label>
                               <div class="input-group">
                                 <span class="input-group-text">₱</span>
                                 <input type="number" class="form-control" id="rentalFee" min="0" step="0.01" required placeholder="0.00">
@@ -327,7 +332,7 @@
                               </div>
                             </div>
                             <div class="col-md-3">
-                              <label for="rateType" class="form-label">Rate Type *</label>
+                              <label for="rateType" class="form-label">Rate Type</label>
                               <select class="form-select" id="rateType" required>
                                 <option value="Hour">Per Hour</option>
                                 <option value="Show">Per Show</option>
@@ -338,7 +343,7 @@
                           <!-- Department & Availability Section -->
                           <div class="row mb-4">
                             <div class="col-md-4">
-                              <label for="department" class="form-label">Owning Department *</label>
+                              <label for="department" class="form-label">Owning Department</label>
                               <select class="form-select" id="department" required>
                                 <option value="">Select Department</option>
                                 <option value="CBA">CBA</option>
@@ -347,11 +352,11 @@
                               </select>
                             </div>
                             <div class="col-md-4">
-                              <label for="minRentalHours" class="form-label">Minimum Rental Duration (hours) *</label>
+                              <label for="minRentalHours" class="form-label">Minimum Rental Duration (hours)</label>
                               <input type="number" class="form-control" id="minRentalHours" min="1" value="1" required>
                             </div>
                             <div class="col-md-4">
-                              <label for="availabilityStatus" class="form-label">Availability Status *</label>
+                              <label for="availabilityStatus" class="form-label">Availability Status</label>
                               <select class="form-select" id="availabilityStatus" required>
                                 <option value="Available" selected>Available</option>
                                 <option value="Unavailable">Unavailable</option>
@@ -621,7 +626,7 @@ itemNotes.addEventListener('keydown', function(e) {
           
           <!-- Condition -->
           <div class="mb-3">
-            <label for="itemCondition" class="form-label">Condition *</label>
+            <label for="itemCondition" class="form-label">Condition</label>
             <select class="form-select" id="itemCondition" required>
               <option value="">Select Condition</option>
               <option value="New">New</option>
@@ -928,6 +933,14 @@ saveItemBtn.addEventListener('click', function() {
     // Initialize all functionality
     initDropzone();
     initInventoryModal();
+    
+    // Add 'required' class to labels with required fields
+    document.querySelectorAll('label[for]').forEach(label => {
+      const input = document.getElementById(label.getAttribute('for'));
+      if (input && input.hasAttribute('required')) {
+        label.classList.add('required');
+      }
+    });
   });
 </script>
 </html>

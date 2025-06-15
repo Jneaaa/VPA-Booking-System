@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('equipment_items', function (Blueprint $table) {
             $table->id('equipment_id');
-            $table->string('asset_name')->nullable();
-            $table->unsignedTinyInteger('condition')->notNullable();
+            $table->string('item_name')->nullable();
+            $table->unsignedTinyInteger('condition_id');
             $table->string('barcode_number')->nullable();
             $table->text('item_notes')->nullable();
             $table->timestamps();
-        
-            $table->foreign('condition')->references('id')->on('conditions')->onDelete('restrict');
+            $table->foreign('condition_id')->references('condition_id')->on('conditions')->onDelete('restrict');
+
         });
     }
 

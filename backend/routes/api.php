@@ -22,6 +22,9 @@ Route::post('/admin/login', [AdminAuthController::class, 'login'])
 
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
 
+Route::post('/equipment/{id}/upload-image', [EquipmentController::class, 'uploadImage']);
+Route::post('/equipment/{id}/upload-images', [EquipmentController::class, 'uploadMultipleImages']);
+
 // Protected admin routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/profile', [AdminAuthController::class, 'profile']);

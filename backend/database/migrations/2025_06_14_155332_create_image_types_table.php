@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('equipment_categories', function (Blueprint $table) {
-            $table->tinyIncrements('category_id');
-            $table->string('category_name', 50)->notNullable();
+        Schema::create('image_types', function (Blueprint $table) {
+            $table->tinyIncrements('type_id');
+            $table->string('type_name', 50)->unique();
             $table->string('description', 255)->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('equipment_categories');
+        Schema::dropIfExists('image_types');
     }
 };

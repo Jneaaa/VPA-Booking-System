@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rate_types', function (Blueprint $table) {
-            $table->id('type_id');
-            $table->string('type_name', 50)->notNullable();
+        Schema::create('action_types', function (Blueprint $table) {
+            $table->tinyIncrements('action_id'); // PK, auto increment
+            $table->string('action_name', 50);   // Not null by default
+            $table->string('description', 80)->nullable();
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rate_types');
+        Schema::dropIfExists('action_types');
     }
 };

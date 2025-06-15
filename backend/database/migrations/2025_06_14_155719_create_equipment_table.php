@@ -1,0 +1,66 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('equipment', function (Blueprint $table) {
+            $table->id('equipment_id');
+            $table->string('equipment_name', 50);
+            $table->string('description', 255)->nullable();
+            $table->string('brand', 80)->nullable();
+            $table->string('storage_location', 50);
+            $table->unsignedTinyInteger('category_id');
+            $table->integer('total_quantity');
+            $table->decimal('rental_fee', 10, 2);
+            $table->decimal('company_fee', 10, 2);
+            $table->unsignedTinyInteger('type_id');
+            $table->unsignedTinyInteger('status_id');
+            $table->unsignedTinyInteger('department_id');
+            $table->integer('minimum_hour');
+            $table->timestamps();
+        
+            // Foreign key constraints
+            $table->foreign('category_id')->references('category_id')->on('equipment_categories')->onDelete('restrict');
+            $table->foreign('type_id')->references('type_id')->on('rate_types')->onDelete('restrict');
+            $table->foreign('status_id')->references('status_id')->on('availability_statuses')->onDelete('restrict');
+            $table->foreign('department_id')->references('department_id')->on('departments')->onDelete('restrict');
+        
+            // Indexes for query optimization
+            $table->index('equipment_name', 'idx_equipment_name');
+            $table->index('brand', 'idx_equipment_brand');
+            $table->index('storage_location', 'idx_equipment_storage_location');
+            $table->index('category_id', 'idx_equipment_category');
+            $table->index('status_id', 'idx_equipment_status');
+            $table->index('department_id', 'idx_equipment_department');
+            $table->index('type_id', 'idx_equipment_type');
+            
+            // Composite indexes for common query patterns
+            $table->index(['category_id', 'status_id'], 'idx_equipment_category_status');
+            $table->index(['department_id', 'status_id'], 'idx_equipment_dept_status');
+            $table->index(['status_id', 'category_id'], 'idx_equipment_status_category');
+            $table->index(['rental_fee', 'status_id'], 'idx_equipment_fee_status');
+            
+            // Index for availability and quantity queries
+            $table->index(['status_id', 'total_quantity'], 'idx_equipment_availability');
+            
+            // Text search optimization (if using MySQL/PostgreSQL full-text search)
+            // $table->fullText(['equipment_name', 'description'], 'idx_equipment_fulltext');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('equipment');
+    }
+};

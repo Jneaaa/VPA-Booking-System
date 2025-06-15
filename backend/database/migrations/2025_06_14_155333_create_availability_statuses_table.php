@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('conditions', function (Blueprint $table) {
-            $table->tinyIncrements('condition_id');
-            $table->string('condition_name', 50)->notNullable();
-            $table->string('color_code', 20)->notNullable();
+        Schema::create('availability_statuses', function (Blueprint $table) {
+            $table->tinyIncrements('status_id');
+            $table->string('status_name', 50);
+            $table->string('color_code', 20);
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('conditions');
+        Schema::dropIfExists('availability_statuses');
     }
 };

@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('departments', function (Blueprint $table) {
-            $table->tinyIncrements('department_id');
-            $table->string('department_name', 80)->notNullable();
-            $table->string('department_code', 10)->nullable();
+        Schema::create('equipment_categories', function (Blueprint $table) {
+            $table->tinyIncrements('category_id');
+            $table->string('category_name', 50);
+            $table->string('description', 255)->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('departments');
+        Schema::dropIfExists('equipment_categories');
     }
 };
