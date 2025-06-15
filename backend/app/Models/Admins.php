@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Sanctum\HasApiTokens;
 
-class Admin extends Model
+class Admins extends Model
 {
     use HasApiTokens;
     
@@ -22,5 +21,4 @@ class Admin extends Model
     ];
 
     protected $primaryKey = 'admin_id';
-
 }

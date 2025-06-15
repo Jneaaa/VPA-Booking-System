@@ -13,23 +13,24 @@ return new class extends Migration
     {
         Schema::create('admins', function (Blueprint $table) {
             $table->id('admin_id')->autoIncrement();
-            $table->string('username')->unique();
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->string('middle_name')->nullable();
+            $table->string('photo_url', 500)->nullable();
+            $table->string('username', 50)->unique();
+            $table->string('first_name', 50);
+            $table->string('last_name', 50);
+            $table->string('middle_name', 50)->nullable();
             $table->unsignedTinyInteger('role_id');
-            $table->string('school_id')->nullable();
-            $table->string('email')->unique();
-            $table->string('contact_number')->nullable();
-            $table->string('hashed_password');
+            $table->string('school_id', 20)->nullable();
+            $table->string('email', 150)->unique();
+            $table->string('contact_number', 20)->nullable();
+            $table->string('hashed_password', 100);
             $table->timestamps();
-
+         
             // Foreign key constraint
             $table->foreign('role_id')
-            ->references('role_id')
-            ->on('admin_roles')
-            ->onDelete('cascade');
-        });
+                ->references('role_id')
+                ->on('admin_roles')
+                ->onDelete('cascade');
+         });
     }
 
     /**
