@@ -23,7 +23,7 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
         
-            $table->foreign('item_id')->references('equipment_id')->on('equipment_items')->onDelete('cascade');
+            $table->foreign('item_id')->references('item_id')->on('equipment_items')->onDelete('cascade');
             $table->foreign('action_id')->references('action_id')->on('action_types')->onDelete('set null');
             $table->foreign('condition_before')->references('condition_id')->on('conditions')->onDelete('set null');
             $table->foreign('condition_after')->references('condition_id')->on('conditions')->onDelete('set null');

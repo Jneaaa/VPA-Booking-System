@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AdminsSeeder extends Seeder
 {
@@ -20,7 +22,7 @@ class AdminsSeeder extends Seeder
                 'middle_name' => 'Smith',
                 'role_id' => 1,
                 'school_id' => '20-9483-38',
-                'email' => 'admin@school.edu',
+                'email' => 'admin@example.com',
                 'contact_number' => '+63 912 345 6789',
                 'hashed_password' => Hash::make('password123'),
                 'created_at' => now(),

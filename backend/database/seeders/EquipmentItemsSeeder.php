@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class EquipmentItemsSeeder extends Seeder
 {
@@ -12,6 +13,7 @@ class EquipmentItemsSeeder extends Seeder
      */
     public function run(): void
     {
+        
         DB::table('equipment_items')->insert([
             // Wireless Microphone System items
             [
