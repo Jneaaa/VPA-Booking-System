@@ -3,10 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 class Admins extends Model
 {
-    use HasApiTokens;
+    use HasApiTokens, HasFactory;
+
+    protected $table = 'admins';
+
+    protected $primaryKey = 'admin_id';
+    public $timestamps = true;
     
     protected $fillable = [
         'username',
@@ -20,5 +28,9 @@ class Admins extends Model
         'contact_number',
     ];
 
-    protected $primaryKey = 'admin_id';
+    protected $hidden = [
+        'hashed_password',
+    ];
+
+    
 }
