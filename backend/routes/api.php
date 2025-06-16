@@ -16,18 +16,18 @@ use App\Http\Controllers\AdminAuthController;
 */
 
 // Public login route
-Route::post('/admin/login', [AdminAuthController::class, 'login'])
+Route::post('/admins/login', [AdminAuthController::class, 'login'])
     ->middleware('throttle:5,1'); // 5 attempts per minute
 
 
-Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::post('/admins/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::post('/equipment/{id}/upload-image', [EquipmentController::class, 'uploadImage']);
 Route::post('/equipment/{id}/upload-images', [EquipmentController::class, 'uploadMultipleImages']);
 
 // Protected admin routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/admin/profile', [AdminAuthController::class, 'profile']);
+    Route::get('/admins/profile', [AdminAuthController::class, 'profile']);
     // Add other protected routes here
 });
 
