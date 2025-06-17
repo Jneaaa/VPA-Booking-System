@@ -66,6 +66,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
+    border-bottom: 4px solid var(--cpu-secondary); /* Add bottom border */
   }
 
   /* Sidebar styles */
@@ -163,6 +164,51 @@ body {
 
     .fc-day-today {
       background-color: #e8eaeb !important; /* Light blue for today's date */
+    }
+
+    /* Calendar button styles */
+    .fc-button {
+        background-color: var(--cpu-primary) !important;
+        border-color: var(--cpu-primary) !important;
+        color: white !important;
+        transition: background-color 0.2s ease !important;
+    }
+
+    .fc-button:hover {
+        background-color: var(--cpu-primary-hover) !important;
+        border-color: var(--cpu-primary-hover) !important;
+        color: white !important;
+    }
+
+    .fc-button:active {
+        background-color: var(--cpu-primary-hover) !important;
+        border-color: var(--cpu-primary-hover) !important;
+        color: white !important;
+    }
+
+    .fc-button.fc-button-primary {
+        background-color: var(--cpu-primary) !important;
+        border-color: var(--cpu-primary) !important;
+        color: white !important;
+    }
+
+    .fc-header-toolbar .fc-button {
+        background-color: var(--cpu-primary) !important;
+        border-color: var(--cpu-primary) !important;
+        color: white !important;
+        transition: background-color 0.2s ease !important;
+    }
+
+    .fc-header-toolbar .fc-button:hover {
+        background-color: var(--cpu-primary-light) !important;
+        border-color: var(--cpu-primary-light) !important;
+        color: white !important;
+    }
+
+    .fc-header-toolbar .fc-button:active {
+        background-color: var(--cpu-primary-light) !important;
+        border-color: var(--cpu-primary-light) !important;
+        color: white !important;
     }
 
     /* Profile image styles */

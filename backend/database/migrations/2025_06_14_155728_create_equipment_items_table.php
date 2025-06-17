@@ -21,7 +21,13 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign('condition_id')->references('condition_id')->on('conditions')->onDelete('restrict');
             $table->foreign('equipment_id')->references('equipment_id')->on('equipment')->onDelete('cascade');
+            $table->unsignedBigInteger('created_by');
+            $table->unsignedBigInteger('updated_by')->nullable();
 
+            // Foreign Key Constraints
+            $table->foreign('created_by')->references('admin_id')->on('admins')->onDelete('restrict');
+            $table->foreign('updated_by')->references('admin_id')->on('admins')->onDelete('set null');
+            
         });
     }
 

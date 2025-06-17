@@ -26,8 +26,12 @@ return new class extends Migration
             $table->unsignedTinyInteger('department_id');
             $table->integer('minimum_hour');
             $table->timestamps();
+            $table->unsignedBigInteger('created_by');
+            $table->unsignedBigInteger('updated_by')->nullable();
         
             // Foreign key constraints
+            $table->foreign('created_by')->references('admin_id')->on('admins')->onDelete('restrict');
+            $table->foreign('updated_by')->references('admin_id')->on('admins')->onDelete('set null');
             $table->foreign('category_id')->references('category_id')->on('equipment_categories')->onDelete('restrict');
             $table->foreign('type_id')->references('type_id')->on('rate_types')->onDelete('restrict');
             $table->foreign('status_id')->references('status_id')->on('availability_statuses')->onDelete('restrict');
