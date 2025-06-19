@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
             }
         },
-        height: '100%', // Ensure it fills the container height
+        height: '600px', // Explicitly set height to ensure visibility
         slotMinTime: '07:00:00', // Start calendar at 7am
         slotMaxTime: '20:00:00', // End calendar at 8pm
         nowIndicator: true, // Show current time indicator
@@ -82,27 +82,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     calendar.render();
 
-    // Initialize Mini Calendar with Bootstrap Datepicker
+    // Sync mini calendar date selection with big calendar
     const miniCalendarElement = $('#miniCalendar');
-    const savedDate = localStorage.getItem('miniCalendarDate'); // Retrieve saved date from localStorage
-
     miniCalendarElement.datepicker({
         format: "mm/dd/yyyy",
         todayHighlight: true,
         weekStart: 0, // Sunday
         autoclose: true
     }).on('changeDate', function(e) {
-        // Sync selected date to the big calendar
-        calendar.changeView('timeGridDay', e.date);
-
-        // Save the selected date to localStorage
-        localStorage.setItem('miniCalendarDate', e.date.toISOString());
+        calendar.changeView('timeGridDay', e.date); // Switch big calendar to day view
+        calendar.gotoDate(e.date); // Navigate to the selected date
     });
-
-    // Set the mini calendar to the saved date if available
-    if (savedDate) {
-        miniCalendarElement.datepicker('setDate', new Date(savedDate));
-    }
 
     // Event Filtering with Checkboxes
     document.querySelectorAll('.filter-checkbox').forEach(checkbox => {

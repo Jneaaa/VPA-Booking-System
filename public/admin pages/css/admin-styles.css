@@ -235,7 +235,7 @@ body {
       background-color: var(--light-gray);
       color: black;
       border-radius: 0 !important; /* Remove rounded corners */
-      height: calc(100% + 30px) !important; /* Increase height to prevent bleeding */
+      height: 100%; /* Ensure it fills the parent container */
       display: flex; /* Use flexbox for alignment */
       flex-direction: column; /* Ensure proper layout */
     }
@@ -245,7 +245,6 @@ body {
       width: 100%; /* Ensure it spans the full width */
       height: 100%; /* Ensure it spans the full height */
       box-sizing: border-box; /* Include padding and border in dimensions */
-      padding-bottom: 20px; /* Add padding to the bottom */
     }
 
     #miniCalendar {
