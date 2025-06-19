@@ -1,4 +1,3 @@
-
 // Notification functionality
 document.addEventListener('DOMContentLoaded', function() {
     const notificationItems = document.querySelectorAll('#notificationDropdown .notification-item');

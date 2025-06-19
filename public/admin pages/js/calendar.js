@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const calendarElement = document.getElementById('calendar');
     const calendar = new FullCalendar.Calendar(calendarElement, {
-        initialView: 'timeGridWeek', // Default to week view
+        initialView: 'dayGridMonth', // Default to month view
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',

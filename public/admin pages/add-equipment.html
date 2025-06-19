@@ -167,8 +167,7 @@
     <nav id="sidebar">
       <div class="text-center mb-4">
         <div class="position-relative d-inline-block">
-          <img src="assets/admin-pic.jpg" alt="Admin Profile" class="profile-img">
-          <span class="status-indicator"></span>
+          <img src="assets/admin-pic.jpg" alt="Admin Profile" class="profile-img rounded-circle">
         </div>
         <h5 class="mt-3 mb-1">John Doe</h5>
         <p class="text-muted mb-0">Head Admin</p>
@@ -219,8 +218,8 @@
         
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="h3 mb-0 text-gray-800">Add New Equipment</h1>
-            <a href="dashboard.html" class="btn btn-primary">
-              <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+            <a href="equipment.html" class="btn btn-primary">
+              <i class="bi bi-arrow-left me-2"></i>Back to Equipment
             </a>
           </div>
   
@@ -411,6 +410,91 @@
       </div>
     </div>
   </div>
+  <!-- Reset Confirmation Modal -->
+  <div class="modal fade" id="resetConfirmationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Reset</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to reset the form? This will clear all uploaded photos and inventory items.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmResetBtn">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Inventory Item Modal -->
+  <div class="modal fade" id="inventoryItemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Inventory Item</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="itemForm">
+            <!-- Item Photo -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <label class="form-label">Item Photo</label>
+                <button class="btn btn-sm btn-danger d-none" id="removePhotoBtn">
+                  <i class="bi bi-trash"></i> Remove
+                </button>
+              </div>
+              <div class="dropzone border p-4 text-center" id="itemPhotoDropzone" style="cursor: pointer;">
+                <i class="bi bi-image fs-1 text-muted"></i>
+                <p class="mt-2">Click to upload item photo</p>
+                <input type="file" id="itemPhoto" class="d-none" accept="image/*">
+              </div>
+              <div id="itemPhotoPreview" class="mt-3 text-center"></div>
+            </div>
+            
+            <!-- Item Name -->
+            <div class="mb-3">
+              <label for="itemName" class="form-label">Item Name</label>
+              <input type="text" class="form-control" id="itemName" placeholder="Enter item name">
+            </div>
+            
+            <!-- Condition -->
+            <div class="mb-3">
+              <label for="itemCondition" class="form-label">Condition</label>
+              <select class="form-select" id="itemCondition" required>
+                <option value="">Select Condition</option>
+                <option value="New">New</option>
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Needs Maintenance">Needs Maintenance</option>
+                <option value="Damaged">Damaged</option>
+              </select>
+            </div>
+            
+            <!-- Barcode -->
+            <div class="mb-3">
+              <label for="barcode" class="form-label">Barcode Number</label>
+              <input type="text" class="form-control" id="barcode" placeholder="Scan or enter barcode">
+            </div>
+            
+            <!-- Notes -->
+            <div class="mb-3 position-relative">
+              <label for="itemNotes" class="form-label">Item Notes</label>
+              <textarea class="form-control" id="itemNotes" rows="3" placeholder="Additional notes about this item"></textarea>
+              <small class="text-muted position-absolute bottom-0 end-0 me-2 mb-1" id="notesWordCount">0/80 words</small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="saveItemBtn">Save Item</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <!-- Combined JS resources -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
@@ -418,37 +502,73 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the reset confirmation modal
+      const resetConfirmationModal = new bootstrap.Modal('#resetConfirmationModal', {
+        backdrop: 'static',
+        keyboard: false
+      });
+
+      // Handle reset button click
+      document.querySelector('button[type="reset"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        resetConfirmationModal.show();
+      });
+
+      // Handle confirm reset button click
+      document.getElementById('confirmResetBtn').addEventListener('click', function() {
+        // Clear uploaded photos
+        const photosPreview = document.getElementById('photosPreview');
+        if (photosPreview) photosPreview.innerHTML = '';
+        
+        // Reset inventory items
+        const itemsContainer = document.getElementById('itemsContainer');
+        if (itemsContainer) itemsContainer.innerHTML = '<p class="text-muted">No items added yet. Click "Add Item" to track individual equipment pieces.</p>';
+        
+        // Reset the form
+        const form = document.getElementById('addEquipmentForm');
+        if (form) form.reset();
+        
+        // Scroll to the top smoothly
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Hide the modal
+        resetConfirmationModal.hide();
+      });
+
+      // Equipment Photos Section
       const equipmentDropzone = document.getElementById('equipmentPhotosDropzone');
       const equipmentFileInput = document.getElementById('equipmentPhotos');
       const photosPreview = document.getElementById('photosPreview');
-      let uploadedPhotos = []; // Array to track uploaded photos
-  
-      equipmentDropzone.addEventListener('click', function() {
-        equipmentFileInput.click();
-      });
-  
-      equipmentFileInput.addEventListener('change', function() {
-        handleEquipmentFiles(this.files);
-        this.value = ''; // Reset input to allow selecting same files again
-      });
-  
-      equipmentDropzone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        this.classList.add('border-primary');
-      });
-  
-      equipmentDropzone.addEventListener('dragleave', function() {
-        this.classList.remove('border-primary');
-      });
-  
-      equipmentDropzone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        this.classList.remove('border-primary');
-        if (e.dataTransfer.files.length) {
-          handleEquipmentFiles(e.dataTransfer.files);
-        }
-      });
-  
+      let uploadedPhotos = [];
+
+      if (equipmentDropzone && equipmentFileInput) {
+        equipmentDropzone.addEventListener('click', function() {
+          equipmentFileInput.click();
+        });
+      
+        equipmentFileInput.addEventListener('change', function() {
+          handleEquipmentFiles(this.files);
+          this.value = '';
+        });
+      
+        equipmentDropzone.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          this.classList.add('border-primary');
+        });
+      
+        equipmentDropzone.addEventListener('dragleave', function() {
+          this.classList.remove('border-primary');
+        });
+      
+        equipmentDropzone.addEventListener('drop', function(e) {
+          e.preventDefault();
+          this.classList.remove('border-primary');
+          if (e.dataTransfer.files.length) {
+            handleEquipmentFiles(e.dataTransfer.files);
+          }
+        });
+      }
+
       function handleEquipmentFiles(files) {
         // Filter out non-image files
         const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
@@ -466,31 +586,28 @@
         filesToUpload.forEach(file => {
           const reader = new FileReader();
           reader.onload = function(e) {
-            const photoId = Date.now(); // Unique ID for each photo
+            const photoId = Date.now();
             
             const preview = document.createElement('div');
             preview.className = 'photo-preview';
             preview.dataset.id = photoId;
-  
+
             const img = document.createElement('img');
             img.src = e.target.result;
             img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
-  
+
             const removeBtn = document.createElement('button');
             removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
             removeBtn.innerHTML = '<i class="bi bi-x"></i>';
             removeBtn.onclick = function() {
-              // Remove from DOM
               preview.remove();
-              // Remove from our tracking array
               uploadedPhotos = uploadedPhotos.filter(photo => photo.id !== photoId);
             };
-  
+
             preview.appendChild(img);
             preview.appendChild(removeBtn);
-            photosPreview.appendChild(preview);
+            if (photosPreview) photosPreview.appendChild(preview);
             
-            // Add to our tracking array
             uploadedPhotos.push({
               id: photoId,
               file: file,
@@ -501,446 +618,216 @@
         });
       }
 
-// Word count limiter for Description textbox (character limit)
-const description = document.getElementById('description');
-const descriptionWordCount = document.getElementById('descriptionWordCount');
-const descriptionMaxChars = 255;
+      // Word count limiter for Description textbox
+      const description = document.getElementById('description');
+      const descriptionWordCount = document.getElementById('descriptionWordCount');
+      const descriptionMaxChars = 255;
 
-description.addEventListener('input', function() {
-    // Always trim to max length first
-    if (this.value.length > descriptionMaxChars) {
-        this.value = this.value.substring(0, descriptionMaxChars);
-    }
-    
-    const charCount = this.value.length;
-    descriptionWordCount.textContent = `${charCount}/${descriptionMaxChars} characters`;
-    descriptionWordCount.classList.toggle('text-danger', charCount >= descriptionMaxChars);
-});
+      if (description && descriptionWordCount) {
+        description.addEventListener('input', function() {
+          if (this.value.length > descriptionMaxChars) {
+            this.value = this.value.substring(0, descriptionMaxChars);
+          }
+          
+          const charCount = this.value.length;
+          descriptionWordCount.textContent = `${charCount}/${descriptionMaxChars} characters`;
+          descriptionWordCount.classList.toggle('text-danger', charCount >= descriptionMaxChars);
+        });
 
-// Add paste handler to properly handle pasted text
-description.addEventListener('paste', function(e) {
-    e.preventDefault();
-    const pasteText = (e.clipboardData || window.clipboardData).getData('text');
-    const newText = this.value.substring(0, this.selectionStart) + 
-                   pasteText + 
-                   this.value.substring(this.selectionEnd);
-    
-    // Only insert up to the character limit
-    const remainingChars = descriptionMaxChars - this.value.length + (this.selectionEnd - this.selectionStart);
-    if (remainingChars > 0) {
-        const pasteToInsert = pasteText.substring(0, remainingChars);
-        document.execCommand('insertText', false, pasteToInsert);
-    }
-});
+        description.addEventListener('paste', function(e) {
+          e.preventDefault();
+          const pasteText = (e.clipboardData || window.clipboardData).getData('text');
+          const newText = this.value.substring(0, this.selectionStart) + 
+                         pasteText + 
+                         this.value.substring(this.selectionEnd);
+          
+          const remainingChars = descriptionMaxChars - this.value.length + (this.selectionEnd - this.selectionStart);
+          if (remainingChars > 0) {
+            const pasteToInsert = pasteText.substring(0, remainingChars);
+            document.execCommand('insertText', false, pasteToInsert);
+          }
+        });
+      }
 
-// Handle paste events to maintain word limit
-itemNotes.addEventListener('paste', function(e) {
-    e.preventDefault();
-    const paste = (e.clipboardData || window.clipboardData).getData('text');
-    const currentText = this.value;
-    const selectionStart = this.selectionStart;
-    const selectionEnd = this.selectionEnd;
-    
-    // Calculate the new text that would result from the paste
-    const newText = currentText.substring(0, selectionStart) + 
-                   paste + 
-                   currentText.substring(selectionEnd);
-    
-    const newWordCount = countWords(newText);
-    
-    // If within limit, allow the full paste
-    if (newWordCount <= notesMaxWords) {
-        document.execCommand('insertText', false, paste);
-        return;
-    }
-    
-    // If over limit, calculate how much we can paste
-    const currentWordCount = countWords(currentText);
-    const selectedWordCount = countWords(currentText.substring(selectionStart, selectionEnd));
-    const remainingWords = notesMaxWords - (currentWordCount - selectedWordCount);
-    
-    if (remainingWords > 0) {
-        // Get only the allowed number of words from the paste
-        const wordsToPaste = paste.trim().split(/\s+/).slice(0, remainingWords).join(' ');
-        document.execCommand('insertText', false, wordsToPaste);
-    }
-});
+      // Initialize Inventory Item Modal
+      const addItemBtn = document.getElementById('addItemBtn');
+      if (addItemBtn) {
+        const inventoryItemModal = new bootstrap.Modal('#inventoryItemModal');
+        const itemPhotoInput = document.getElementById('itemPhoto');
+        const itemPhotoPreview = document.getElementById('itemPhotoPreview');
+        const itemNotes = document.getElementById('itemNotes');
+        const notesWordCount = document.getElementById('notesWordCount');
+        const saveItemBtn = document.getElementById('saveItemBtn');
+        const itemsContainer = document.getElementById('itemsContainer');
 
-// Prevent typing when at word limit
-itemNotes.addEventListener('keydown', function(e) {
-    // Allow these keys even when at limit:
-    const allowedKeys = [
-        8,   // Backspace
-        46,  // Delete
-        37,  // Left arrow
-        38,  // Up arrow
-        39,  // Right arrow
-        40,  // Down arrow
-        16,  // Shift
-        17,  // Ctrl
-        91,  // Cmd (Mac)
-        9    // Tab
-    ];
-    
-    // If at word limit and not an allowed key, prevent default
-    if (countWords(this.value) >= notesMaxWords && !allowedKeys.includes(e.keyCode)) {
-        // Only prevent if adding text (not deleting or navigating)
-        if (e.key.length === 1 || e.keyCode === 32) { // 32 = space
-            e.preventDefault();
+        addItemBtn.addEventListener('click', () => {
+          document.getElementById('itemForm').reset();
+          if (itemPhotoPreview) itemPhotoPreview.innerHTML = '';
+          inventoryItemModal.show();
+        });
+
+        if (itemPhotoInput) {
+          itemPhotoInput.addEventListener('change', function() {
+            if (this.files?.[0]) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
+                if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'none';
+                const removePhotoBtn = document.getElementById('removePhotoBtn');
+                if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
+                if (itemPhotoPreview) {
+                  itemPhotoPreview.innerHTML = `
+                    <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
+                  `;
+                }
+              };
+              reader.readAsDataURL(this.files[0]);
+            }
+          });
         }
-    }
-});
+
+        const removePhotoBtn = document.getElementById('removePhotoBtn');
+        if (removePhotoBtn) {
+          removePhotoBtn.addEventListener('click', function() {
+            if (itemPhotoPreview) itemPhotoPreview.innerHTML = '';
+            const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
+            if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'block';
+            const itemPhotoInput = document.getElementById('itemPhoto');
+            if (itemPhotoInput) itemPhotoInput.value = '';
+            this.classList.add('d-none');
+          });
+        }
+
+        const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
+        if (itemPhotoDropzone) {
+          itemPhotoDropzone.addEventListener('click', function() {
+            const itemPhotoInput = document.getElementById('itemPhoto');
+            if (itemPhotoInput) itemPhotoInput.click();
+          });
+        }
+
+        if (itemNotes && notesWordCount) {
+          itemNotes.addEventListener('input', function() {
+            const words = this.value.trim() ? this.value.trim().split(/\s+/) : [];
+            const wordCount = words.length;
+            
+            notesWordCount.textContent = `${wordCount}/80 words`;
+            notesWordCount.classList.toggle('text-danger', wordCount >= 80);
+            
+            if (wordCount > 80) {
+              const allowedWords = words.slice(0, 80).join(' ');
+              const cursorPos = this.selectionStart;
+              this.value = allowedWords;
+              
+              if (cursorPos <= allowedWords.length) {
+                this.setSelectionRange(cursorPos, cursorPos);
+              }
+            }
+          });
+
+          itemNotes.addEventListener('keydown', function(e) {
+            const words = this.value.trim() ? this.value.trim().split(/\s+/) : [];
+            const allowedKeys = [8, 46, 37, 38, 39, 40, 16, 17, 91, 9];
+            
+            if (words.length >= 80 && !allowedKeys.includes(e.keyCode)) {
+              if (e.key.length === 1 || e.keyCode === 32) {
+                e.preventDefault();
+              }
+            }
+          });
+
+          itemNotes.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pasteText = (e.clipboardData || window.clipboardData).getData('text');
+            const currentText = this.value;
+            const selectionStart = this.selectionStart;
+            const selectionEnd = this.selectionEnd;
+            
+            const newText = currentText.substring(0, selectionStart) + 
+                           pasteText + 
+                           currentText.substring(selectionEnd);
+            
+            const currentWords = currentText.trim() ? currentText.trim().split(/\s+/) : [];
+            const pasteWords = pasteText.trim() ? pasteText.trim().split(/\s+/) : [];
+            const selectedWords = currentText.substring(selectionStart, selectionEnd).trim() ? 
+                                 currentText.substring(selectionStart, selectionEnd).trim().split(/\s+/) : [];
+            
+            const newWordCount = currentWords.length - selectedWords.length + pasteWords.length;
+            
+            if (newWordCount <= 80) {
+              document.execCommand('insertText', false, pasteText);
+            } else {
+              const remainingWords = 80 - (currentWords.length - selectedWords.length);
+              if (remainingWords > 0) {
+                const wordsToPaste = pasteWords.slice(0, remainingWords).join(' ');
+                document.execCommand('insertText', false, wordsToPaste);
+              }
+            }
+          });
+        }
+
+        if (saveItemBtn) {
+          saveItemBtn.addEventListener('click', function() {
+            const condition = document.getElementById('itemCondition')?.value;
+            if (!condition) {
+              alert('Please select the item condition');
+              return;
+            }
+            
+            const itemId = Date.now();
+            const barcode = document.getElementById('barcode')?.value || '';
+            const notes = document.getElementById('itemNotes')?.value || '';
+            const itemPhoto = itemPhotoPreview?.querySelector('img')?.src || '';
+            
+            const conditionColors = {
+              "New": "bg-success text-white",
+              "Good": "bg-primary text-white",
+              "Fair": "bg-warning text-dark",
+              "Needs Maintenance": "bg-danger text-white",
+              "Damaged": "bg-dark text-white"
+            };
+
+            const itemCard = document.createElement('div');
+            itemCard.className = 'card equipment-item';
+            itemCard.innerHTML = `
+              <div class="card-body">
+                <div class="photo-container">
+                  ${itemPhoto ? `<img src="${itemPhoto}" class="img-thumbnail">` : ''}
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="card-title">Item #${itemId}</h6>
+                  <div class="d-flex flex-wrap gap-3">
+                    <span class="badge ${conditionColors[condition]}">${condition}</span>
+                  </div>
+                  ${barcode ? `<div class="mt-2"><strong>Barcode:</strong> ${barcode}</div>` : ''}
+                  ${notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${notes.substring(0, 50)}${notes.length > 50 ? '...' : ''}</p>` : ''}
+                </div>
+                <button class="btn btn-sm btn-danger align-self-start" onclick="this.closest('.equipment-item').remove()">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            `;
+            
+            if (itemsContainer) {
+              if (itemsContainer.querySelector('p.text-muted')) {
+                itemsContainer.innerHTML = '';
+              }
+              itemsContainer.appendChild(itemCard);
+            }
+
+            inventoryItemModal.hide();
+          });
+        }
+      }
+
+      // Add 'required' class to labels with required fields
+      document.querySelectorAll('label[for]').forEach(label => {
+        const input = document.getElementById(label.getAttribute('for'));
+        if (input && input.hasAttribute('required')) {
+          label.classList.add('required');
+        }
+      });
     });
   </script>
-  <!-- Inventory Item Modal -->
-<div class="modal fade" id="inventoryItemModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add Inventory Item</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="itemForm">
-          <!-- Item Photo -->
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center">
-              <label class="form-label">Item Photo</label>
-              <button class="btn btn-sm btn-danger d-none" id="removePhotoBtn">
-                <i class="bi bi-trash"></i> Remove
-              </button>
-            </div>
-            <div class="dropzone border p-4 text-center" id="itemPhotoDropzone" style="cursor: pointer;">
-              <i class="bi bi-image fs-1 text-muted"></i>
-              <p class="mt-2">Click to upload item photo</p>
-              <input type="file" id="itemPhoto" class="d-none" accept="image/*">
-            </div>
-            <div id="itemPhotoPreview" class="mt-3 text-center"></div>
-          </div>
-          
-          <!-- Item Name -->
-          <div class="mb-3">
-            <label for="itemName" class="form-label">Item Name</label>
-            <input type="text" class="form-control" id="itemName" placeholder="Enter item name">
-          </div>
-          
-          <!-- Condition -->
-          <div class="mb-3">
-            <label for="itemCondition" class="form-label">Condition</label>
-            <select class="form-select" id="itemCondition" required>
-              <option value="">Select Condition</option>
-              <option value="New">New</option>
-              <option value="Good">Good</option>
-              <option value="Fair">Fair</option>
-              <option value="Needs Maintenance">Needs Maintenance</option>
-              <option value="Damaged">Damaged</option>
-            </select>
-          </div>
-          
-          <!-- Barcode -->
-          <div class="mb-3">
-            <label for="barcode" class="form-label">Barcode Number</label>
-            <input type="text" class="form-control" id="barcode" placeholder="Scan or enter barcode">
-          </div>
-          
-          <!-- Notes -->
-          <div class="mb-3 position-relative">
-            <label for="itemNotes" class="form-label">Item Notes</label>
-            <textarea class="form-control" id="itemNotes" rows="3" placeholder="Additional notes about this item"></textarea>
-            <small class="text-muted position-absolute bottom-0 end-0 me-2 mb-1" id="notesWordCount">0/80 words</small>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="saveItemBtn">Save Item</button>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Equipment Photos Section
-    const equipmentDropzone = document.getElementById('equipmentPhotosDropzone');
-    const equipmentFileInput = document.getElementById('equipmentPhotos');
-    const photosPreview = document.getElementById('photosPreview');
-    let uploadedPhotos = [];
-
-    // Initialize dropzone events
-    function initDropzone() {
-      equipmentDropzone.addEventListener('click', () => equipmentFileInput.click());
-      
-      equipmentFileInput.addEventListener('change', (e) => {
-        handleEquipmentFiles(e.target.files);
-        e.target.value = ''; // Reset input
-      });
-
-      equipmentDropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        equipmentDropzone.classList.add('border-primary');
-      });
-
-      equipmentDropzone.addEventListener('dragleave', () => {
-        equipmentDropzone.classList.remove('border-primary');
-      });
-
-      equipmentDropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        equipmentDropzone.classList.remove('border-primary');
-        if (e.dataTransfer.files.length) {
-          handleEquipmentFiles(e.dataTransfer.files);
-        }
-      });
-    }
-
-    // Handle uploaded files
-    function handleEquipmentFiles(files) {
-      const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
-      const remainingSlots = Math.max(0, 5 - uploadedPhotos.length);
-      
-      if (remainingSlots <= 0) {
-        alert('Maximum of 5 photos allowed');
-        return;
-      }
-
-      const filesToUpload = imageFiles.slice(0, remainingSlots);
-      filesToUpload.forEach(file => processPhotoFile(file));
-    }
-
-    // Process individual photo file
-    function processPhotoFile(file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const photoId = Date.now();
-        
-        const preview = document.createElement('div');
-        preview.className = 'photo-preview';
-        preview.dataset.id = photoId;
-
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
-
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
-        removeBtn.innerHTML = '<i class="bi bi-x"></i>';
-        removeBtn.addEventListener('click', () => removePhoto(photoId));
-
-        preview.appendChild(img);
-        preview.appendChild(removeBtn);
-        photosPreview.appendChild(preview);
-        
-        uploadedPhotos.push({
-          id: photoId,
-          file: file,
-          element: preview
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // Remove photo from preview and array
-    function removePhoto(photoId) {
-      const photoIndex = uploadedPhotos.findIndex(photo => photo.id === photoId);
-      if (photoIndex !== -1) {
-        uploadedPhotos[photoIndex].element.remove();
-        uploadedPhotos.splice(photoIndex, 1);
-      }
-    }
-
-    // Initialize Inventory Item Modal
-    function initInventoryModal() {
-      const addItemBtn = document.getElementById('addItemBtn');
-      const inventoryItemModal = new bootstrap.Modal('#inventoryItemModal');
-      const itemPhotoInput = document.getElementById('itemPhoto');
-      const itemPhotoPreview = document.getElementById('itemPhotoPreview');
-      const itemNotes = document.getElementById('itemNotes');
-      const notesWordCount = document.getElementById('notesWordCount');
-      const saveItemBtn = document.getElementById('saveItemBtn');
-      const itemsContainer = document.getElementById('itemsContainer');
-
-      addItemBtn.addEventListener('click', () => {
-        document.getElementById('itemForm').reset();
-        itemPhotoPreview.innerHTML = '';
-        inventoryItemModal.show();
-      });
-
-      itemPhotoInput.addEventListener('change', function() {
-        if (this.files?.[0]) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            itemPhotoDropzone.style.display = 'none'; // Hide dropzone
-            document.getElementById('removePhotoBtn').classList.remove('d-none'); // Show remove button
-            itemPhotoPreview.innerHTML = `
-              <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
-            `;
-          };
-          reader.readAsDataURL(this.files[0]);
-        }
-      });
-
-      const removePhotoBtn = document.getElementById('removePhotoBtn');
-      removePhotoBtn.addEventListener('click', function() {
-        itemPhotoPreview.innerHTML = ''; // Clear photo preview
-        itemPhotoDropzone.style.display = 'block'; // Show dropzone
-        itemPhotoInput.value = ''; // Reset file input
-        this.classList.add('d-none'); // Hide remove button
-      });
-
-      const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
-      itemPhotoDropzone.addEventListener('click', function() {
-        itemPhotoInput.click(); // Trigger file input when dropzone is clicked
-      });
-
-      itemNotes.addEventListener('input', function() {
-    // Get the text and split into words (filtering out empty strings)
-    const words = this.value.trim() ? this.value.trim().split(/\s+/) : [];
-    const wordCount = words.length;
-    
-    // Update counter display
-    notesWordCount.textContent = `${wordCount}/80 words`;
-    notesWordCount.classList.toggle('text-danger', wordCount >= 80);
-    
-    // Prevent going over word limit
-    if (wordCount > 80) {
-        // Take first 80 words and join them back
-        const allowedWords = words.slice(0, 80).join(' ');
-        
-        // Calculate cursor position to maintain it if possible
-        const cursorPos = this.selectionStart;
-        this.value = allowedWords;
-        
-        // Restore cursor position if it was within the allowed text
-        if (cursorPos <= allowedWords.length) {
-            this.setSelectionRange(cursorPos, cursorPos);
-        }
-    }
-});
-
-// Add keydown handler to prevent typing when at limit
-itemNotes.addEventListener('keydown', function(e) {
-    const words = this.value.trim() ? this.value.trim().split(/\s+/) : [];
-    
-    // Allow these keys even when at limit
-    const allowedKeys = [
-        8,   // Backspace
-        46,  // Delete
-        37,  // Left arrow
-        38,  // Up arrow
-        39,  // Right arrow
-        40,  // Down arrow
-        16,  // Shift
-        17,  // Ctrl
-        91,  // Cmd (Mac)
-        9    // Tab
-    ];
-    
-    // If at word limit and not pressing an allowed key
-    if (words.length >= 80 && !allowedKeys.includes(e.keyCode)) {
-        // Only prevent if adding text (not deleting or navigating)
-        if (e.key.length === 1 || e.keyCode === 32) { // 32 = space
-            e.preventDefault();
-        }
-    }
-});
-
-// Handle paste events
-itemNotes.addEventListener('paste', function(e) {
-    e.preventDefault();
-    const pasteText = (e.clipboardData || window.clipboardData).getData('text');
-    const currentText = this.value;
-    const selectionStart = this.selectionStart;
-    const selectionEnd = this.selectionEnd;
-    
-    // Calculate new text that would result from paste
-    const newText = currentText.substring(0, selectionStart) + 
-                   pasteText + 
-                   currentText.substring(selectionEnd);
-    
-    // Count words in current text and paste text
-    const currentWords = currentText.trim() ? currentText.trim().split(/\s+/) : [];
-    const pasteWords = pasteText.trim() ? pasteText.trim().split(/\s+/) : [];
-    const selectedWords = currentText.substring(selectionStart, selectionEnd).trim() ? 
-                         currentText.substring(selectionStart, selectionEnd).trim().split(/\s+/) : [];
-    
-    const newWordCount = currentWords.length - selectedWords.length + pasteWords.length;
-    
-    if (newWordCount <= 80) {
-        // If within limit, allow full paste
-        document.execCommand('insertText', false, pasteText);
-    } else {
-        // Calculate how many words we can paste
-        const remainingWords = 80 - (currentWords.length - selectedWords.length);
-        if (remainingWords > 0) {
-            const wordsToPaste = pasteWords.slice(0, remainingWords).join(' ');
-            document.execCommand('insertText', false, wordsToPaste);
-        }
-    }
-});
-
-saveItemBtn.addEventListener('click', function() {
-        const condition = document.getElementById('itemCondition').value;
-        if (!condition) {
-          alert('Please select the item condition');
-          return;
-        }
-        
-        const itemId = Date.now();
-        const barcode = document.getElementById('barcode').value;
-        const notes = document.getElementById('itemNotes').value;
-        const itemPhoto = itemPhotoPreview.querySelector('img')?.src || '';
-        
-        const conditionColors = {
-          "New": "bg-success text-white",
-          "Good": "bg-primary text-white",
-          "Fair": "bg-warning text-dark",
-          "Needs Maintenance": "bg-danger text-white",
-          "Damaged": "bg-dark text-white"
-        };
-
-        const itemCard = document.createElement('div');
-        itemCard.className = 'card equipment-item';
-        itemCard.innerHTML = `
-          <div class="card-body">
-            <div class="photo-container">
-              ${itemPhoto ? `<img src="${itemPhoto}" class="img-thumbnail">` : ''}
-            </div>
-            <div class="flex-grow-1">
-              <h6 class="card-title">Item #${itemId}</h6>
-              <div class="d-flex flex-wrap gap-3">
-                <span class="badge ${conditionColors[condition]}">${condition}</span>
-              </div>
-              ${barcode ? `<div class="mt-2"><strong>Barcode:</strong> ${barcode}</div>` : ''}
-              ${notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${notes.substring(0, 50)}${notes.length > 50 ? '...' : ''}</p>` : ''}
-            </div>
-            <button class="btn btn-sm btn-danger align-self-start" onclick="this.closest('.equipment-item').remove()">
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
-        `;
-        
-        if (itemsContainer.querySelector('p.text-muted')) {
-          itemsContainer.innerHTML = '';
-        }
-        itemsContainer.appendChild(itemCard);
-
-        // Close the modal using Bootstrap's modal method
-        inventoryItemModal.hide();
-      });
-    }
-
-    // Initialize all functionality
-    initDropzone();
-    initInventoryModal();
-    
-    // Add 'required' class to labels with required fields
-    document.querySelectorAll('label[for]').forEach(label => {
-      const input = document.getElementById(label.getAttribute('for'));
-      if (input && input.hasAttribute('required')) {
-        label.classList.add('required');
-      }
-    });
-  });
-</script>
 </html>

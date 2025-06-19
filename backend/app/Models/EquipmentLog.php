@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class EquipmentCategories extends Model
+class EquipmentLog extends Model
 {
     //
 }

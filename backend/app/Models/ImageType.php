@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ImageTypes extends Model
+class ImageType extends Model
 {
     use HasFactory;
 

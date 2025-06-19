@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Admins;
+use App\Models\Admin;
 
 class AdminAuthController extends Controller
 {
@@ -17,7 +17,7 @@ class AdminAuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $admin = Admins::where('email', $request->email)->first();
+        $admin = Admin::where('email', $request->email)->first();
 
         if (!$admin) {
             return response()->json(['message' => 'Invalid credentials'], 401);

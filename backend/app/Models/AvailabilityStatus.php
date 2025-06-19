@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class RateTypes extends Model
+class AvailabilityStatus extends Model
 {
     //
 }
