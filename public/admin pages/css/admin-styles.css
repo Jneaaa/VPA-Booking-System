@@ -39,6 +39,7 @@ body {
     margin: 0;
     font-family: Arial, sans-serif;
     color: var(--cpu-text-dark);
+    overflow-x: hidden; /* Prevent horizontal scrolling but allow vertical scrolling */
 }
 
 #layout {
@@ -127,7 +128,9 @@ body {
   }
   
   .fc-col-header-cell {
-    background-color: #dad8e0;
+    background-color: white !important;
+    border-color: #dadada !important;
+    color: #333333 !important;
     border-radius: 0; /* Remove rounded corners */
     padding: 5px;
   }
@@ -158,8 +161,9 @@ body {
     }
 
     .fc-daygrid-day {
-      background-color: #f9f9f9;
-      border: 1px solid #e0e0e0;
+      background-color: white !important;
+      border-color: #dadada !important;
+      color: #333333 !important;
     }
 
     .fc-day-today {
@@ -167,48 +171,36 @@ body {
     }
 
     /* Calendar button styles */
-    .fc-button {
-        background-color: var(--cpu-primary) !important;
-        border-color: var(--cpu-primary) !important;
-        color: white !important;
-        transition: background-color 0.2s ease !important;
-    }
 
-    .fc-button:hover {
-        background-color: var(--cpu-primary-hover) !important;
-        border-color: var(--cpu-primary-hover) !important;
-        color: white !important;
-    }
-
-    .fc-button:active {
-        background-color: var(--cpu-primary-hover) !important;
-        border-color: var(--cpu-primary-hover) !important;
-        color: white !important;
-    }
-
-    .fc-button.fc-button-primary {
-        background-color: var(--cpu-primary) !important;
-        border-color: var(--cpu-primary) !important;
-        color: white !important;
-    }
 
     .fc-header-toolbar .fc-button {
-        background-color: var(--cpu-primary) !important;
-        border-color: var(--cpu-primary) !important;
-        color: white !important;
+        background-color: white !important;
+        border-color: #dadada !important;
+        color: #333333 !important;
         transition: background-color 0.2s ease !important;
     }
 
     .fc-header-toolbar .fc-button:hover {
-        background-color: var(--cpu-primary-light) !important;
-        border-color: var(--cpu-primary-light) !important;
+        background-color: var(--btn-primary-hover) !important;
+        border-color: var(--btn-primary-hover) !important;
         color: white !important;
     }
 
-    .fc-header-toolbar .fc-button:active {
-        background-color: var(--cpu-primary-light) !important;
-        border-color: var(--cpu-primary-light) !important;
+    .fc-header-toolbar .fc-button:active,
+    .fc-header-toolbar .fc-button.active {
+        background-color: var(--btn-primary-hover) !important;
+        border-color: var(--btn-primary-hover) !important;
         color: white !important;
+    }
+
+    .fc-header-toolbar .fc-button.fc-button-active {
+        background-color: var(--btn-primary-hover) !important;
+        border-color: var(--btn-primary-hover) !important;
+        color: white !important;
+    }
+
+    .fc-header-toolbar .fc-button:focus {
+        box-shadow: none !important;
     }
 
     /* Profile image styles */
@@ -242,6 +234,32 @@ body {
     .calendar-container {
       background-color: var(--light-gray);
       color: black;
+      border-radius: 0 !important; /* Remove rounded corners */
+      height: calc(100% + 30px) !important; /* Increase height to prevent bleeding */
+      display: flex; /* Use flexbox for alignment */
+      flex-direction: column; /* Ensure proper layout */
+    }
+
+    #calendar {
+      flex-grow: 1; /* Allow the calendar to expand and fill the container */
+      width: 100%; /* Ensure it spans the full width */
+      height: 100%; /* Ensure it spans the full height */
+      box-sizing: border-box; /* Include padding and border in dimensions */
+      padding-bottom: 20px; /* Add padding to the bottom */
+    }
+
+    #miniCalendar {
+      height: auto; /* Adjust height dynamically */
+      min-height: 350px; /* Increase minimum height to prevent bleeding */
+      max-height: 400px; /* Prevent excessive height */
+      background-color: var(--light-gray);
+      border: 1px solid #e0e0e0;
+      overflow: hidden; /* Prevent content from bleeding out */
+      display: flex; /* Use flexbox for centering */
+      align-items: center; /* Vertically center content */
+      justify-content: center; /* Horizontally center content */
+      padding: 20px 10px; /* Add top and bottom padding */
+      box-sizing: border-box; /* Include padding in height calculation */
     }
 
     .nav-link {
@@ -521,3 +539,59 @@ body {
 .list-group-item em {
   color: var(--cpu-secondary-hover);
 }
+
+/* Bootstrap Datepicker styles */
+.datepicker {
+  width: 100%;
+  padding: 10px;
+}
+
+.datepicker table {
+  width: 100%;
+}
+
+.datepicker table tr td, 
+.datepicker table tr th {
+  text-align: center;
+  padding: 8px;
+  border-radius: 0 !important;
+}
+
+.datepicker table tr td.day:hover,
+.datepicker table tr td.day.focused {
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.datepicker table tr td.active,
+.datepicker table tr td.active:hover {
+  background-color: var(--cpu-primary) !important;
+  background-image: none;
+  color: white;
+}
+
+.datepicker table tr td.today {
+  background-color: var(--cpu-secondary) !important;
+  background-image: none;
+  color: white;
+}
+
+.datepicker table tr td.today:hover {
+  background-color: var(--cpu-secondary-hover) !important;
+}
+
+.datepicker .datepicker-switch {
+  font-weight: bold;
+}
+
+.datepicker .prev, 
+.datepicker .next {
+  color: var(--cpu-primary);
+}
+
+.datepicker .prev:hover, 
+.datepicker .next:hover {
+  background: transparent;
+  color: var(--cpu-primary-hover);
+}
+
