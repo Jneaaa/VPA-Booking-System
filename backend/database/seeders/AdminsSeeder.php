@@ -27,7 +27,21 @@ class AdminsSeeder extends Seeder
                 'hashed_password' => Hash::make('password123'),
                 'created_at' => now(),
                 'updated_at' => now()
+            ],
+            [
+                'username' => 'HanEscob',
+                'first_name' => 'Hannah',
+                'last_name' => 'Escobar',
+                'middle_name' => 'Oniot',
+                'role_id' => 3,
+                'school_id' => '18-9483-38',
+                'email' => 'ccsdepartment@example.com',
+                'contact_number' => '+63991234567891',
+                'hashed_password' => Hash::make('hannahgwynethhehe'),
+                'created_at' => now(),
+                'updated_at' => now()
             ]
+            
          ]);
     }
 }

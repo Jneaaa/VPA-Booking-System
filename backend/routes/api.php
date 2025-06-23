@@ -25,9 +25,16 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware
 Route::post('/equipment/{id}/upload-image', [EquipmentController::class, 'uploadImage']);
 Route::post('/equipment/{id}/upload-images', [EquipmentController::class, 'uploadMultipleImages']);
 
+
+
 // Protected admin routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/profile', [AdminAuthController::class, 'profile']);
+
+     Route::put('/requisitions/{id}', [RequisitionController::class, 'update']);
+    Route::patch('/requisitions/{id}', [RequisitionController::class, 'update']); 
+    Route::delete('/requisitions/{id}', [RequisitionController::class, 'destroy']);
+
     // Add other protected routes here
 });
 

@@ -26,7 +26,7 @@ class AdminRolesSeeder extends Seeder
             ],
             [
                 'role_id' => 3,
-                'role_title' => 'Reservation Officer',
+                'role_title' => 'Signatories',
                 'description' => 'Review, approve forms and manage fees'
             ],
             [
