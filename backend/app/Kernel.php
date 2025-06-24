@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http;
+namespace App;
 
-use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -19,7 +18,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
             \Illuminate\Http\Middleware\TrimStrings::class,
             \Illuminate\Http\Middleware\ConvertEmptyStringsToNull::class,
-            \App\Http\Middleware\CorsMiddleware::class,
+            \App\Http\Middleware\Cors::class, // Register CORS middleware globally
         ];
     }
 
@@ -42,7 +41,7 @@ class Kernel extends HttpKernel
                 // Sanctum middleware for token auth:
                 \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
 
-                \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
+                'throttle:api',
                 \Illuminate\Routing\Middleware\SubstituteBindings::class,
             ],
         ];
@@ -66,6 +65,7 @@ class Kernel extends HttpKernel
             'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
             'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
             'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+            'check.admin.role' => \App\Http\Middleware\CheckAdminRole::class,
         ];
     }
 }

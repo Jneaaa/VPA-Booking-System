@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\LookupTables\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,7 +10,6 @@ class ImageType extends Model
 
     protected $fillable = [
         'name',
-        'description',
         'is_active',
     ];
 
@@ -20,7 +19,7 @@ class ImageType extends Model
 
     public function equipmentImages(): HasMany
     {
-        return $this->hasMany(EquipmentImage::class, 'image_type_id');
+        return $this->hasMany(EquipmentImage::class, 'type_id', 'type_id');
     }
 
     public function scopeActive($query)

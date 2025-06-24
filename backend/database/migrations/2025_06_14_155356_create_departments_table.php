@@ -15,7 +15,6 @@ return new class extends Migration
             $table->tinyIncrements('department_id');
             $table->string('department_name', 80);
             $table->string('department_code', 10)->nullable();
-            $table->timestamps();
         });
     }
 

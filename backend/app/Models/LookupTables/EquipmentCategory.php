@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\LookupTables\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +13,8 @@ class EquipmentCategory extends Model
     protected $primaryKey = 'category_id';
 
     protected $fillable = [
-        'category_name'
+        'category_name',
+        'description'
     ];
 
     public function equipment()

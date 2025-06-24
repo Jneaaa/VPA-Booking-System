@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('rate_types', function (Blueprint $table) {
             $table->tinyIncrements('type_id');
             $table->string('type_name', 50);
-            $table->timestamps();
         });
     }
 
