@@ -22,6 +22,6 @@ class EquipmentImage extends Model
 
     public function equipment()
     {
-        return $this->belongsTo(Equipment::class, 'equipment_id', 'resource_id');
+        return $this->belongsTo(Equipment::class, 'equipment_id', 'equipment_id');
     }
 }

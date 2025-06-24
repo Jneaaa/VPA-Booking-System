@@ -11,7 +11,7 @@ class Equipment extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'equipment';
-    protected $primaryKey = 'resource_id';
+    protected $primaryKey = 'equipment_id';
 
     protected $fillable = [
         'equipment_name',
@@ -53,17 +53,17 @@ class Equipment extends Model
 
     public function rateType()
     {
-        return $this->belongsTo(RateTypes::class, 'rate_type', 'rate_type_id');
+        return $this->belongsTo(RateTypes::class, 'rate_type', 'type_id');
     }
 
     public function equipmentItems()
     {
-        return $this->hasMany(EquipmentItems::class, 'resource_id', 'resource_id');
+        return $this->hasMany(EquipmentItems::class, 'item_id', 'item_id');
     }
 
     public function equipmentImages()
     {
-        return $this->hasMany(EquipmentImages::class, 'equipment_id', 'resource_id');
+        return $this->hasMany(EquipmentImages::class, 'image_id', 'image_id');
     }
 
     public function createdByAdmin()
