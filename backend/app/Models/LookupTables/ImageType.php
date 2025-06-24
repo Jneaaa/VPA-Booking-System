@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ImageType extends Model
 {
-    use HasFactory;
+
 
     protected $fillable = [
         'name',

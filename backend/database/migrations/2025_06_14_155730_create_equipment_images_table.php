@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('image_id');
             $table->foreignId('equipment_id');
             $table->string('image_url', 500);
+            $table->string('cloudinary_public_id')->nullable();
             $table->string('description')->nullable();
             $table->integer('sort_order')->default(0);
             $table->unsignedtinyInteger('type_id')->default(1); // Assuming 1 is the default type_id for 'primary' images

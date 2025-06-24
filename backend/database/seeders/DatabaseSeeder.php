@@ -12,17 +12,18 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            ActionTypesSeeder::class,
-            AdminRolesSeeder::class,
-            AvailabilityStatusesSeeder::class,
-            ConditionsSeeder::class,
-            DepartmentsSeeder::class,
-            EquipmentCategoriesSeeder::class,
-            ImageTypesSeeder::class,
-            RateTypesSeeder::class,
-            AdminsSeeder::class,
+            ActionTypeSeeder::class,
+            AdminRoleSeeder::class,
+            AvailabilityStatusSeeder::class,
+            ConditionSeeder::class,
+            DepartmentSeeder::class,
+            EquipmentCategorySeeder::class,
+            ImageTypeSeeder::class,
+            RateTypeSeeder::class,
+            AdminSeeder::class,
             EquipmentSeeder::class,
-            EquipmentItemsSeeder::class,
+            EquipmentItemSeeder::class,
+            EquipmentImageSeeder::class,
             // Add other seeders here if needed
         ]);
     }

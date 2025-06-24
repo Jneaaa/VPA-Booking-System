@@ -17,7 +17,26 @@ use Illuminate\Support\Facades\Auth;
 */
 
 // Public login route
-Route::post('/admin/login', [AdminAuthController::class, 'login'])->middleware('throttle:5,1'); // 5 attempts per minute
+Route::post('/admin/login', [AdminAuthController::class, 'login'])
+    ->middleware('throttle:5,1'); // 5 attempts per minute
+Route::post('/login', function (Request $request) {
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    if (!Auth::attempt($credentials)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
+    $user = Auth::user();
+    $token = $user->createToken('api-token')->plainTextToken;
+
+    return response()->json([
+        'token' => $token,
+        'user' => $user,
+    ]);
+});
 
 Route::post('/login', function (Request $request) {
     $credentials = $request->validate([
@@ -48,9 +67,7 @@ Route::post('/equipment/{id}/upload-images', [\App\Http\Controllers\EquipmentCon
 // Protected admin routes
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('/admin/profile', [AdminAuthController::class, 'profile']);
-
-    Route::get('/admin/me', function (Request $request) {
+    Route::get('/admin/profile', function (Request $request) {
         $user = $request->user();
         $user->load('departments'); // Ensure departments are included
         return response()->json($user);

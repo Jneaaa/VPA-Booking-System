@@ -23,15 +23,15 @@ class EquipmentSeeder extends Seeder
                 'status_id' => 1,
                 'department_id' => 3,
                 'minimum_hour' => 2,
-                'created_by' => 1,
+                'created_by' => 1, // Assuming admin ID 1 is the creator
                 'created_at' => now(),
             ],
             [
                 'equipment_name' => 'LCD Projector',
-                'description' => 'High-definition LCD projector with 3000 lumens brightness, perfect for presentations and seminars.',
+                'description' => 'High-definition LCD projector with 3000 lumens brightness, perfect for presentations and seminars',
+                'storage_location' => 'Equipment Room B',
                 'brand' => 'Epson',
-                'storage_location' => 'Visual Equipment Room B2',
-                'category_id' => 2,
+                'category_id' => 2, // Visual Equipment
                 'total_quantity' => 8,
                 'rental_fee' => 100.00,
                 'company_fee' => 450.00,

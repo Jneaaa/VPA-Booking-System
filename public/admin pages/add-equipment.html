@@ -829,5 +829,221 @@
       });
     });
   </script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Authentication check
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            window.location.href = 'adminlogin.html';
+            return;
+        }
+
+        const form = document.getElementById('addEquipmentForm');
+        if (!form) return;
+
+        // Fetch necessary dropdown data
+        fetchDropdownData();
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const formData = {
+                equipment_name: document.getElementById('equipmentName').value,
+                description: document.getElementById('description').value,
+                brand: document.getElementById('brand').value,
+                storage_location: document.getElementById('storageLocation').value,
+                category_id: document.getElementById('category').value,
+                total_quantity: document.getElementById('totalQuantity').value,
+                rental_fee: document.getElementById('rentalFee').value,
+                company_fee: document.getElementById('companyFee').value,
+                type_id: document.getElementById('rateType').value,
+                status_id: document.getElementById('availabilityStatus').value,
+                department_id: document.getElementById('department').value,
+                minimum_hour: document.getElementById('minRentalHours').value,
+                images: [], // Will be populated with uploaded images
+                items: []  // Will be populated with inventory items
+            };
+
+            // Add inventory items if any
+            const itemCards = document.querySelectorAll('.equipment-item');
+            itemCards.forEach(card => {
+                formData.items.push({
+                    item_name: card.querySelector('.card-title').textContent.replace('Item #', ''),
+                    condition_id: card.querySelector('.badge').textContent,
+                    barcode_number: card.querySelector('div:nth-child(3)')?.textContent.replace('Barcode:', '').trim() || '',
+                    item_notes: card.querySelector('p')?.textContent.replace('Notes:', '').trim() || ''
+                });
+            });
+
+            try {
+                // First create the equipment
+                const response = await fetch('http://127.0.0.1:8000/api/admin/equipment', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create equipment');
+                }
+
+                const data = await response.json();
+                const equipmentId = data.data.equipment_id;
+
+                // Then upload images if any
+                await uploadImages(equipmentId);
+
+                alert('Equipment created successfully!');
+                window.location.href = 'equipment.html';
+            } catch (error) {
+                console.error('Error creating equipment:', error);
+                alert('Failed to create equipment: ' + error.message);
+            }
+        });
+
+        async function fetchDropdownData() {
+            try {
+                // Fetch user role
+                const userResponse = await fetch('http://127.0.0.1:8000/api/admin/user-role', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!userResponse.ok) {
+                    throw new Error('Failed to fetch user role');
+                }
+
+                const userData = await userResponse.json();
+                const userRole = userData.role;
+
+                // Fetch departments
+                const departmentsResponse = await fetch('http://127.0.0.1:8000/api/admin/departments', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (departmentsResponse.ok) {
+                    const departmentsData = await departmentsResponse.json();
+
+                    // Filter departments based on role
+                    let filteredDepartments = [];
+                    if (userRole === 'head admin') {
+                        filteredDepartments = departmentsData.data; // Head admins see all departments
+                    } else if (userRole === 'inventory manager') {
+                        filteredDepartments = departmentsData.data.filter(department =>
+                            department.assigned_to.includes(userData.id)
+                        ); // Inventory managers see only their assigned departments
+                    }
+
+                    populateDropdown('department', filteredDepartments);
+                }
+
+                // Fetch categories
+                const categoriesResponse = await fetch('http://127.0.0.1:8000/api/admin/equipment-categories', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (categoriesResponse.ok) {
+                    const categoriesData = await categoriesResponse.json();
+                    populateDropdown('category', categoriesData.data);
+                }
+
+                // Fetch statuses
+                const statusesResponse = await fetch('http://127.0.0.1:8000/api/admin/availability-statuses', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (statusesResponse.ok) {
+                    const statusesData = await statusesResponse.json();
+                    populateDropdown('availabilityStatus', statusesData.data);
+                }
+
+                // Fetch rate types
+                const rateTypesResponse = await fetch('http://127.0.0.1:8000/api/admin/rate-types', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (rateTypesResponse.ok) {
+                    const rateTypesData = await rateTypesResponse.json();
+                    populateDropdown('rateType', rateTypesData.data);
+                }
+
+            } catch (error) {
+                console.error('Error fetching dropdown data:', error);
+            }
+        }
+
+        function populateDropdown(elementId, data) {
+            const dropdown = document.getElementById(elementId);
+            if (!dropdown) return;
+
+            // Clear existing options except the first one
+            while (dropdown.options.length > 1) {
+                dropdown.remove(1);
+            }
+
+            // Add new options
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[Object.keys(item)[0]]; // Get the ID (first key)
+                option.textContent = item[Object.keys(item)[1]]; // Get the name (second key)
+                dropdown.appendChild(option);
+            });
+        }
+
+        async function uploadImages(equipmentId) {
+            const photos = Array.from(document.querySelectorAll('.photo-preview'));
+            if (photos.length === 0) return;
+
+            for (const photo of photos) {
+                const img = photo.querySelector('img');
+                if (!img) continue;
+
+                try {
+                    // Convert data URL to blob
+                    const blob = await fetch(img.src).then(r => r.blob());
+                    const formData = new FormData();
+                    formData.append('image', blob);
+                    formData.append('type_id', photo === photos[0] ? 1 : 2); // First image is primary
+
+                    const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/upload-image`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        console.error('Failed to upload image');
+                    }
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                }
+            }
+        }
+
+        // Existing form handling code remains the same...
+    });
+  </script>
 </body>
 </html>

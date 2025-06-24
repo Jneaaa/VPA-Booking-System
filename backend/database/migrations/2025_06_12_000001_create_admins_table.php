@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('admins', function (Blueprint $table) {
             $table->id('admin_id')->autoIncrement();
             $table->string('photo_url', 500)->nullable();
-            $table->string('username', 50)->unique();
             $table->string('first_name', 50);
             $table->string('last_name', 50);
             $table->string('middle_name', 50)->nullable();

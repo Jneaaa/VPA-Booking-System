@@ -2,35 +2,49 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 
 class Admin extends Authenticatable
 {
-    use HasApiTokens, HasFactory;
+    use HasApiTokens;
 
     protected $table = 'admins';
-
     protected $primaryKey = 'admin_id';
-    public $timestamps = true;
-    
+
     protected $fillable = [
-        'username',
-        'email',
-        'hashed_password',
+        'photo_url',
         'first_name',
         'last_name',
         'middle_name',
         'role_id',
         'school_id',
+        'email',
         'contact_number',
+        'hashed_password'
     ];
 
     protected $hidden = [
-        'hashed_password',
+        'hashed_password'
     ];
 
-    
+    public function role()
+    {
+        return $this->belongsTo(AdminRole::class, 'role_id', 'role_id');
+    }
+
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class, 'admin_departments', 'admin_id', 'department_id')
+                    ->withPivot('is_primary')
+                    ->withTimestamps();
+    }
+
+    public function primaryDepartment()
+    {
+        return $this->departments()->wherePivot('is_primary', true);
+    }
+
 }

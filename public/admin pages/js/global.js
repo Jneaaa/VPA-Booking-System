@@ -36,6 +36,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const roleDropdownItems = document.querySelectorAll('#adminRoleDropdown .dropdown-item');
   const dateFilterInput = document.getElementById('logDateFilter');
 
+  // Add null check for dateFilterInput
+  if (!dateFilterInput) {
+    console.warn('dateFilterInput element not found. Skipping log filtering functionality.');
+    return;
+  }
+
   roleDropdownItems.forEach(item => {
     item.addEventListener('click', function() {
       const filterRole = this.getAttribute('data-filter');

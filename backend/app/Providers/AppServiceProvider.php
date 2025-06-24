@@ -5,9 +5,15 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Models\Equipment;
+use App\Policies\EquipmentPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
+    protected $policies = [
+        Equipment::class => EquipmentPolicy::class,
+    ];
+
     /**
      * Register any application services.
      */
@@ -25,5 +31,7 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->ip()); // 5 attempts per minute per IP
         });
     }
+
+    
     
 }

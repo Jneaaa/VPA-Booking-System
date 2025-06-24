@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class AdminsSeeder extends Seeder
+class AdminSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,7 +16,6 @@ class AdminsSeeder extends Seeder
     {
         DB::table('admins')->insert([
             [
-                'username' => 'John Doe',
                 'first_name' => 'John',
                 'last_name' => 'Doe',
                 'middle_name' => 'Smith',

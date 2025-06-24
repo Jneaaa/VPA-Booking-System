@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class RateTypesSeeder extends Seeder
+class RateTypeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -20,15 +20,10 @@ class RateTypesSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
-                'type_name' => 'Per Show',
+                'type_name' => 'Per Show/Event',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
-            [
-                'type_name' => 'Per Event',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]
          ]);
     }
 }

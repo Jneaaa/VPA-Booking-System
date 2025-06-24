@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 use Illuminate\Database\Eloquent\Model;
 
 class EquipmentItem extends Model
 {
 
-    use HasFactory;
 
     protected $table = 'equipment_items';
     protected $primaryKey = 'item_id';

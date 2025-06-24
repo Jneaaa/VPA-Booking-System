@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 use Illuminate\Database\Eloquent\Model;
 
 class EquipmentImage extends Model
 {
-    use HasFactory;
+
 
     protected $table = 'equipment_images';
     protected $primaryKey = 'equipment_photo_id';

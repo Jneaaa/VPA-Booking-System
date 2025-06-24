@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class EquipmentItemsSeeder extends Seeder
+class EquipmentItemSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -88,6 +88,7 @@ class EquipmentItemsSeeder extends Seeder
                 'item_notes' => 'Complete set with DMX controller and mounting brackets',
                 'created_by' => 1,
                 'created_at' => now(),
+                'created_by' => 1,
                 'updated_at' => now()
             ],
             [
@@ -98,6 +99,7 @@ class EquipmentItemsSeeder extends Seeder
                 'item_notes' => 'One unit has slight color inconsistency but functional',
                 'created_by' => 1,
                 'created_at' => now(),
+                'created_by' => 1,
                 'updated_at' => now()
             ],
             [
