@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dropdowns;
 
 use App\Http\Controllers\Controller;
-use App\Models\EquipmentCategory;
+use App\Models\LookupTables\EquipmentCategory;
 
 class EquipmentCategoryController extends Controller
 {

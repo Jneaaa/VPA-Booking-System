@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dropdowns;
 
 use App\Http\Controllers\Controller;
-use App\Models\RateType;
+use App\Models\LookupTables\RateType;
 
 class RateTypeController extends Controller
 {

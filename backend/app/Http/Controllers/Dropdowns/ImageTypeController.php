@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dropdowns;
 
 use App\Http\Controllers\Controller;
-use App\Models\ImageType;
+use App\Models\LookupTables\ImageType;
 
 class ImageTypeController extends Controller
 {

@@ -1,14 +1,23 @@
 <?php
 
-namespace App\Http\Controllers\Dropdowns;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Department;
+use App\Models\LookupTables\Department;
+use Illuminate\Http\JsonResponse;
 
 class DepartmentController extends Controller
 {
-    public function index()
+
+    public function index(): JsonResponse
     {
-        return response()->json(Department::where('is_active', true)->get());
+        
+        try {
+            $departments = Department::all(['department_id', 'department_name']);
+            return response()->json($departments);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching departments', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to fetch departments'], 500);
+        }
+
     }
 }

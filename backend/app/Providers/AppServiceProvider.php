@@ -10,9 +10,6 @@ use App\Policies\EquipmentPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
-    protected $policies = [
-        Equipment::class => EquipmentPolicy::class,
-    ];
 
     /**
      * Register any application services.

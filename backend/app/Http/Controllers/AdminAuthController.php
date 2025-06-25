@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Admin;
+use App\Models\LookupTables\Department;
 
 class AdminAuthController extends Controller
 {

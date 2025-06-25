@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dropdowns;
 
 use App\Http\Controllers\Controller;
-use App\Models\AvailabilityStatus;
+use App\Models\LookupTables\AvailabilityStatus;
 
 class AvailabilityStatusController extends Controller
 {

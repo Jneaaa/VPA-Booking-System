@@ -38,25 +38,6 @@ Route::post('/login', function (Request $request) {
     ]);
 });
 
-Route::post('/login', function (Request $request) {
-    $credentials = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-
-    if (!Auth::attempt($credentials)) {
-        return response()->json(['message' => 'Invalid credentials'], 401);
-    }
-
-    $user = Auth::user();
-    $token = $user->createToken('api-token')->plainTextToken;
-
-    return response()->json([
-        'token' => $token,
-        'user' => $user,
-    ]);
-});
-
 // Logout route
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
 

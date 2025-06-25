@@ -2,7 +2,7 @@
 
 // app/Models/AdminRole.php
 
-namespace App\LookupTables\Models;
+namespace App\Models\LookupTables;
 
 use Illuminate\Database\Eloquent\Model;
 

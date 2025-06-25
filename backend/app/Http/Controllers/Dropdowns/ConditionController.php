@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dropdowns;
 
 use App\Http\Controllers\Controller;
-use App\Models\Condition;
+use App\Models\LookupTables\Condition;
 
 class ConditionController extends Controller
 {
