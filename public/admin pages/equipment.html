@@ -323,12 +323,16 @@
         // Fetch user data including departments
         async function fetchUserData() {
           try {
-            const response = await fetch("http://127.0.0.1:8000/api/admin/me", {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: "application/json",
-              },
-            });
+            const response = await fetch(
+              "http://127.0.0.1:8000/api/admin/profile",
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: "application/json",
+                },
+                credentials: "include",
+              }
+            );
 
             if (response.status === 401) {
               console.error("Unauthorized: Invalid or expired token.");
@@ -339,17 +343,38 @@
             }
 
             if (!response.ok) {
-              throw new Error(`Error ${response.status}: ${response.statusText}`);
+              throw new Error(
+                `Error ${response.status}: ${response.statusText}`
+              );
             }
 
             const userData = await response.json();
-            userDepartments = userData.departments || [];
+            userDepartments = userData.departments || []; // Changed from userData.admin.departments to userData.departments
 
             // Populate department filter
             populateDepartmentFilter();
+
+            // Update admin info in sidebar
+            updateAdminInfo(userData);
           } catch (error) {
             console.error("Error fetching user data:", error);
-            alert("Failed to fetch user data. Please check your network connection.");
+            alert(
+              "Failed to fetch user data. Please check your network connection."
+            );
+          }
+        }
+
+        // Add this new helper function
+        function updateAdminInfo(userData) {
+          const adminName = document.querySelector("#sidebar h5");
+          const adminRole = document.querySelector("#sidebar p.text-muted");
+
+          if (userData.first_name && userData.last_name) {
+            adminName.textContent = `${userData.first_name} ${userData.last_name}`;
+          }
+
+          if (userData.role) {
+            adminRole.textContent = userData.role.role_name || "Admin";
           }
         }
 
@@ -404,12 +429,15 @@
         // Fetch and populate departments
         async function fetchDepartments() {
           try {
-            const response = await fetch("http://127.0.0.1:8000/api/admin/departments", {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: "application/json",
-              },
-            });
+            const response = await fetch(
+              "http://127.0.0.1:8000/api/admin/departments",
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: "application/json",
+                },
+              }
+            );
 
             if (response.status === 401) {
               console.error("Unauthorized: Invalid or expired token.");
@@ -420,7 +448,9 @@
             }
 
             if (!response.ok) {
-              throw new Error(`Error ${response.status}: ${response.statusText}`);
+              throw new Error(
+                `Error ${response.status}: ${response.statusText}`
+              );
             }
 
             const data = await response.json();
@@ -433,12 +463,15 @@
         // Fetch and populate categories
         async function fetchCategories() {
           try {
-            const response = await fetch("http://127.0.0.1:8000/api/admin/equipment-categories", {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: "application/json",
-              },
-            });
+            const response = await fetch(
+              "http://127.0.0.1:8000/api/admin/equipment-categories",
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: "application/json",
+                },
+              }
+            );
 
             if (response.status === 401) {
               console.error("Unauthorized: Invalid or expired token.");
@@ -449,7 +482,9 @@
             }
 
             if (!response.ok) {
-              throw new Error(`Error ${response.status}: ${response.statusText}`);
+              throw new Error(
+                `Error ${response.status}: ${response.statusText}`
+              );
             }
 
             const data = await response.json();

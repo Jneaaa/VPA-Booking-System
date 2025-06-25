@@ -10,6 +10,7 @@ class EquipmentCategory extends Model
 
     protected $table = 'equipment_categories';
     protected $primaryKey = 'category_id';
+    public $timestamps = false;
 
     protected $fillable = [
         'category_name',

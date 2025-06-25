@@ -55,6 +55,12 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('admin')->middleware(['auth:sanctum', 'check.admin.role'])->group(function () {
+
+        Route::get('/admin/me', function (Request $request) {
+            $user = $request->user();
+            $user->load('departments');
+            return response()->json($user);
+        });
         
         // Equipment Routes
         Route::apiResource('equipment', \App\Http\Controllers\EquipmentController::class);

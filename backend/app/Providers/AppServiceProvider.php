@@ -6,7 +6,6 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use App\Models\Equipment;
-use App\Policies\EquipmentPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {

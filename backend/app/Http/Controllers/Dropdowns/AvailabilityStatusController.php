@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Dropdowns;
 
 use App\Http\Controllers\Controller;
 use App\Models\LookupTables\AvailabilityStatus;
+use Illuminate\Http\JsonResponse;
 
 class AvailabilityStatusController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
-        return response()->json(AvailabilityStatus::where('is_active', true)->get());
+        $statuses = AvailabilityStatus::active()->get(['status_id', 'status_name', 'color_code']);
+        return response()->json($statuses);
     }
 }

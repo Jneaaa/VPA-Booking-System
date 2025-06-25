@@ -37,7 +37,7 @@ class Admin extends Authenticatable
 
     public function departments(): BelongsToMany
     {
-        return $this->belongsToMany(Department::class, 'admin_departments', 'admin_id', 'department_id')
+        return $this->belongsToMany(LookupTables\Department::class, 'admin_departments', 'admin_id', 'department_id')
                     ->withPivot('is_primary')
                     ->withTimestamps();
     }

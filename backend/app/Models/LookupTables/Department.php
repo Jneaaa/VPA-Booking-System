@@ -5,7 +5,7 @@ namespace App\Models\LookupTables;
 use Illuminate\Database\Eloquent\Model;
 
 
-class Departments extends Model
+class Department extends Model
 {
     protected $table = 'departments';
     protected $primaryKey = 'department_id';

@@ -42,22 +42,22 @@ class Equipment extends Model
     // Relationships
     public function category()
     {
-        return $this->belongsTo(EquipmentCategory::class, 'category_id', 'category_id');
+        return $this->belongsTo(LookupTables\EquipmentCategory::class, 'category_id', 'category_id');
     }
 
     public function department()
     {
-        return $this->belongsTo(Department::class, 'department_id', 'department_id');
+        return $this->belongsTo(LookupTables\Department::class, 'department_id', 'department_id');
     }
 
     public function type()
     {
-        return $this->belongsTo(RateTypes::class, 'rate_type', 'type_id');
+        return $this->belongsTo(LookupTables\RateType::class, 'rate_type', 'type_id');
     }
 
     public function items()
     {
-        return $this->hasMany(EquipmentItems::class, 'item_id', 'item_id');
+        return $this->hasMany(EquipmentItem::class, 'item_id', 'item_id');
     }
 
     public function images()
@@ -68,7 +68,7 @@ class Equipment extends Model
 
     public function status()
     {
-        return $this->belongsTo(AvailabilityStatus::class, 'status_id', 'status_id');
+        return $this->belongsTo(LookupTables\AvailabilityStatus::class, 'status_id', 'status_id');
     }
 
     public function createdByAdmin()
