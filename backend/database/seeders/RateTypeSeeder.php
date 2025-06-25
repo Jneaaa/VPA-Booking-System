@@ -16,13 +16,9 @@ class RateTypeSeeder extends Seeder
         DB::table('rate_types')->insert([
             [
                 'type_name' => 'Per Hour',
-                'created_at' => now(),
-                'updated_at' => now()
             ],
             [
                 'type_name' => 'Per Show/Event',
-                'created_at' => now(),
-                'updated_at' => now()
             ],
          ]);
     }

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('amenity_name', 50);
             $table->decimal('amenity_fee', 10, 2)->nullable();
             $table->integer('quantity')->default(1);
+            $table->timestamps();
 
             // Foreign Key
             $table->foreign('facility_id')->references('facility_id')->on('facilities')->onDelete('cascade');

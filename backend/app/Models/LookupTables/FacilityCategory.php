@@ -1,8 +1,9 @@
 <?php
 
-namespace App\LookupTables\Models;
+namespace App\Models\LookupTables;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FacilityCategory extends Model
 {

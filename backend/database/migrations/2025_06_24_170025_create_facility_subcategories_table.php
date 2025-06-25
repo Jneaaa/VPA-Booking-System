@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('facility_subcategories', function (Blueprint $table) {
             $table->tinyIncrements('subcategory_id');
             $table->unsignedTinyInteger('category_id');
-            $table->string('subcategoryName', 50);
+            $table->string('subcategory_name', 50);
 
             $table->foreign('category_id')->references('category_id')->on('facility_categories')->onDelete('cascade');
         });

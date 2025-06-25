@@ -24,6 +24,9 @@ class DatabaseSeeder extends Seeder
             EquipmentSeeder::class,
             EquipmentItemSeeder::class,
             EquipmentImageSeeder::class,
+            FacilityCategorySeeder::class,
+            FacilitySubcategorySeeder::class,
+            FacilitySeeder::class,
             // Add other seeders here if needed
         ]);
     }
