@@ -9,6 +9,7 @@ class ConditionController extends Controller
 {
     public function index()
     {
-        return response()->json(Condition::where('is_active', true)->get());
+        $conditions = Condition::orderBy('condition_id')->get(['condition_name', 'condition_name']);
+        return response()->json($conditions);
     }
 }

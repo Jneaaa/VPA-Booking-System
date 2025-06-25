@@ -9,6 +9,6 @@ class RateTypeController extends Controller
 {
     public function index()
     {
-        return response()->json(RateType::where('is_active', true)->get());
+        return response()->json(RateType::all());
     }
 }

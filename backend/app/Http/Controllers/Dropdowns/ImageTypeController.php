@@ -9,6 +9,6 @@ class ImageTypeController extends Controller
 {
     public function index()
     {
-        return response()->json(ImageType::where('is_active', true)->get());
+        return response()->json(ImageType::all());
     }
 }

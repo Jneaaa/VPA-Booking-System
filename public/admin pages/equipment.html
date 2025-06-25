@@ -459,8 +459,7 @@
             console.error("Error fetching departments:", error);
           }
         }
-
-        // Fetch and populate categories
+        // Fetch and populate equipment categories
         async function fetchCategories() {
           try {
             const response = await fetch(
@@ -488,6 +487,10 @@
             }
 
             const data = await response.json();
+
+            // Log to inspect
+            console.log("Equipment categories:", data);
+
             populateDropdown(categoryFilter, data, "category_name");
           } catch (error) {
             console.error("Error fetching categories:", error);
@@ -496,14 +499,29 @@
 
         // Populate dropdown helper function
         function populateDropdown(dropdown, data, key) {
-          dropdown.innerHTML = '<option value="all">All</option>';
+          dropdown.innerHTML = "";
+
+          const defaultOption = document.createElement("option");
+          defaultOption.value = "all";  
+
+          // Adjust label based on dropdown ID
+          if (dropdown.id === "departmentFilter") {
+            defaultOption.textContent = "All Departments";
+          } else if (dropdown.id === "categoryFilter") {
+            defaultOption.textContent = "All Categories";
+          } else {
+            defaultOption.textContent = "All";
+          }
+
+          dropdown.appendChild(defaultOption);
+
           data.forEach((item) => {
-            const option = document.createElement("option");
-            option.value = item[key];
-            option.textContent = item[key];
-            dropdown.appendChild(option);
-          });
-        }
+          const option = document.createElement("option");
+          option.value = item[key];
+          option.textContent = item[key];
+          dropdown.appendChild(option);
+        });
+      }
 
         // Extract unique categories from equipment
         function extractCategories() {

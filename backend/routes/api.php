@@ -55,12 +55,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('admin')->middleware(['auth:sanctum', 'check.admin.role'])->group(function () {
-
-        Route::get('/admin/me', function (Request $request) {
-            $user = $request->user();
-            $user->load('departments');
-            return response()->json($user);
-        });
         
         // Equipment Routes
         Route::apiResource('equipment', \App\Http\Controllers\EquipmentController::class);
@@ -77,7 +71,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('availability-statuses', [\App\Http\Controllers\Dropdowns\AvailabilityStatusController::class, 'index']);
         Route::get('conditions', [\App\Http\Controllers\Dropdowns\ConditionController::class, 'index']);
         Route::get('image-types', [\App\Http\Controllers\Dropdowns\ImageTypeController::class, 'index']);
-        Route::get('amenities', [\App\Http\Controllers\Dropdowns\AmenityController::class, 'index']);
     });
 });
 

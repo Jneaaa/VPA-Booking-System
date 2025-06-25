@@ -9,6 +9,6 @@ class FacilitySubcategoryController extends Controller
 {
     public function index($category)
     {
-        return response()->json(FacilitySubcategory::where('category_id', $category)->where('is_active', true)->get());
+        return response()->json(FacilitySubcategory::all());
     }
 }

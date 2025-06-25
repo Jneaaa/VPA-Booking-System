@@ -10,7 +10,7 @@ class AvailabilityStatusController extends Controller
 {
     public function index(): JsonResponse
     {
-        $statuses = AvailabilityStatus::active()->get(['status_id', 'status_name', 'color_code']);
-        return response()->json($statuses);
+        $status = AvailabilityStatus::orderBy('status_id')->get(['status_name', 'status_name']);
+        return response()->json($status);
     }
 }
