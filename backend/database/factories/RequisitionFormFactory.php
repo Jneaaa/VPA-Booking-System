@@ -17,11 +17,10 @@ class RequisitionFormFactory extends Factory
             'access_code' => strtoupper(Str::random(10)),
             'num_participants' => $this->faker->numberBetween(5, 100),
 
-            'purpose_id' => \App\Models\RequisitionPurpose::factory(),
-            'other_purpose' => $this->faker->optional()->sentence(),
+            'purpose_id' => \App\Models\RequisitionPurpose::inRandomOrder()->value('purpose_id') ?? 1,
             'additional_requests' => $this->faker->optional()->sentence(),
 
-            'status_id' => \App\Models\FormStatusCode::factory(),
+            'status_id' => \App\Models\FormStatusCode::inRandomOrder()->value('status_id') ?? 1,
 
             'start_date' => $this->faker->dateTimeBetween('now', '+1 week')->format('Y-m-d'),
             'end_date' => $this->faker->dateTimeBetween('+1 week', '+2 weeks')->format('Y-m-d'),

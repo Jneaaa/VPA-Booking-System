@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('requisition_purposes', function (Blueprint $table) {
             $table->tinyIncrements('purpose_id');
-            $table->string('purpose_name', 50);
+            $table->string('purpose_name', 50)->index();
             $table->timestamps();
         });
     }

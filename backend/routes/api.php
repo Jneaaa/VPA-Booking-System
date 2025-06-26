@@ -22,6 +22,28 @@ Route::get('/users', [UserController::class, 'index']); // list all users
 Route::get('/users/{user_id}/with-requisitions', [UserController::class, 'showWithRequisitions']);
 Route::get('/users/search', [UserController::class, 'search']);
 
+// Requisition Form Routes
+Route::prefix('requisition')->group(function () {
+    // Form progress management
+    Route::post('/save-progress', [RequisitionFormController::class, 'saveProgress']);
+    Route::get('/load-progress', [RequisitionFormController::class, 'loadProgress']);
+    Route::post('/clear-progress', [RequisitionFormController::class, 'clearProgress']);
+    
+    // File uploads
+    Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);
+    
+    // Form submission
+    Route::post('/submit', [RequisitionFormController::class, 'submitRequisition']);
+    
+    // View requisition
+    Route::get('/{id}', [RequisitionFormController::class, 'show']);
+});
+
+// Public routes needed for the form
+Route::get('/requisition-purposes', [DropdownController::class, 'getRequisitionPurposes']);
+Route::get('/facilities', [FacilityController::class, 'publicIndex']);
+Route::get('/equipment', [EquipmentController::class, 'publicIndex']);
+
 
 
 // Requisitions 

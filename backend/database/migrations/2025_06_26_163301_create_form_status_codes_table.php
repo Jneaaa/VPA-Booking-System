@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('form_status_codes', function (Blueprint $table) {
             $table->tinyIncrements('status_id');
-            $table->string('status_name', 50);
+            $table->string('status_name', 50)->index();
             $table->timestamps();
         });
     }

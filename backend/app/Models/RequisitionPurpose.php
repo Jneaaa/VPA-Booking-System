@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+
 class RequisitionPurpose extends Model
 {
+
     protected $fillable = [
         'purpose_name',
     ];

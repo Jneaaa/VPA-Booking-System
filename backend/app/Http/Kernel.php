@@ -61,4 +61,11 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'check.admin.role' => \App\Http\Middleware\CheckAdminRole::class,
     ];
+
+    protected function schedule(Schedule $schedule)
+    {
+        $schedule->command('queue:work --stop-when-empty')
+                ->everyMinute()
+                ->withoutOverlapping();
+    }
 }

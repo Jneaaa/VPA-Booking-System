@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id('upload_id');
             $table->string('file_url');
             $table->string('cloudinary_public_id');
-            $table->enum('upload_type', ['Letter', 'Room Setup'])->nullable();
+            $table->enum('upload_type', ['Letter', 'Room Setup'])->nullable()->index();
             $table->string('upload_token', 50)->nullable(); // used before form finalization
-            $table->unsignedBigInteger('requisition_id')->nullable(); // linked after final submit
+            $table->unsignedBigInteger('requisition_id')->nullable()->index(); // linked after final submit
             $table->timestamps();
         });
     }

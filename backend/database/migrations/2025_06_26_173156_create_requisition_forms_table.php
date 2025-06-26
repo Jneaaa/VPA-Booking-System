@@ -27,6 +27,13 @@ return new class extends Migration
 
             $table->decimal('late_penalty_fee', 10, 2)->nullable();
 
+            // new fields
+            $table->boolean('is_late')->default(false);
+            $table->timestamp('returned_at')->nullable();
+            $table->boolean('is_closed')->default(false);
+            $table->timestamp('closed_at')->nullable();
+            $table->unsignedBigInteger('closed_by')->nullable();
+
             // finalization
             $table->boolean('is_finalized')->default(false);
             $table->timestamp('finalized_at')->nullable();
@@ -38,18 +45,12 @@ return new class extends Migration
             $table->timestamps();
 
             // Foreign Keys
-            $table->foreign('finalized_by')->references('admin_id')->on('admins')->onDelete('set null');
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
             $table->foreign('purpose_id')->references('purpose_id')->on('requisition_purposes')->onDelete('restrict');
             $table->foreign('status_id')->references('status_id')->on('form_status_codes')->onDelete('restrict');
+            $table->foreign('finalized_by')->references('admin_id')->on('admins')->onDelete('set null');
+            $table->foreign('closed_by')->references('admin_id')->on('admins')->onDelete('set null');
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('requisition_forms');
-    }
 };
+

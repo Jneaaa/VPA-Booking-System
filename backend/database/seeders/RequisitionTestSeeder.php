@@ -9,7 +9,6 @@ use App\Models\Facility;
 use App\Models\Equipment;
 use App\Models\RequestedFacility;
 use App\Models\RequestedEquipment;
-use App\Models\RequisitionPurpose;
 use App\Models\FormStatusCode;
 use App\Models\CalendarEvent;
 use App\Models\Admin;
@@ -20,10 +19,6 @@ class RequisitionTestSeeder extends Seeder
    // RequisitionTestSeeder.php
 public function run(): void
 {
-    // Seed lookup tables first
-    if (RequisitionPurpose::count() == 0) {
-        $this->call(RequisitionPurposesSeeder::class);
-    }
 
     // Create users, facilities, and equipment first
     $users = User::factory()->count(10)->create();
