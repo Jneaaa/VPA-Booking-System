@@ -16,6 +16,19 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
+// users 
+Route::post('/users/store-or-fetch', [UserController::class, 'storeOrFetch']);
+Route::get('/users', [UserController::class, 'index']); // list all users
+Route::get('/users/{user_id}/with-requisitions', [UserController::class, 'showWithRequisitions']);
+Route::get('/users/search', [UserController::class, 'search']);
+
+
+
+// Requisitions 
+Route::post('/requisitions/temp-upload', [RequisitionController::class, 'tempUpload']);
+Route::post('/requisitions/finalize', [RequisitionController::class, 'finalizeRequisition']);
+
+
 // Public login route
 Route::post('/admin/login', [AdminAuthController::class, 'login'])
     ->middleware('throttle:5,1'); // 5 attempts per minute
