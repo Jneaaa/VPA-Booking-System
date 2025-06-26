@@ -119,47 +119,27 @@
                 Not sure when to book?<br />View available timeslots here.
               </p>
               <a
+                id="requisitionFormButton"
+                href="bookingpage.html"
+                class="btn btn-primary d-flex justify-content-center align-items-center position-relative mb-2"
+                style="border-radius: 0; font-size: 0.9rem; padding: 0.4rem 0.7rem; text-align: center;"
+              >
+                <i class="bi bi-receipt me-2"></i> Your Requisition Form
+                <span
+                  id="requisitionBadge"
+                  class="badge bg-danger rounded-pill position-absolute d-none"
+                  style="top: 0; right: 0; transform: translate(50%, -50%); font-size: 0.8rem;"
+                >
+                  0
+                </span>
+              </a>
+              <a
                 href="#"
-                class="btn btn-outline-primary d-flex align-items-center mb-3"
+                class="btn btn-outline-primary d-flex align-items-center"
+                style="border-radius: 0; font-size: 0.9rem; padding: 0.4rem 0.7rem;"
               >
                 <i class="bi bi-calendar-event"></i> Events Calendar
               </a>
-              <a
-                href="bookingpage.html"
-                class="btn btn-outline-primary d-flex align-items-center"
-              >
-                <i class="bi bi-receipt"></i> Your Requisition Form
-                <span class="badge rounded-pill bg-danger ms-auto">4</span>
-              </a>
-            </div>
-            <div class="dropdown mb-3">
-              <button
-                class="btn dropdown-toggle"
-                type="button"
-                id="chooseCatalogDropdown"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Choose Catalog
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="chooseCatalogDropdown">
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="bookingcatalog.html"
-                    data-catalog-type="facilities"
-                    >Facilities</a
-                  >
-                </li>
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="catalog-equipment.html"
-                    data-catalog-type="equipment"
-                    >Equipment</a
-                  >
-                </li>
-              </ul>
             </div>
 
             <div class="sidebar-card">
@@ -170,7 +150,40 @@
 
           <div class="col-lg-9 col-md-8">
             <div class="right-content-header">
-              <h4 id="currentCategoryTitle">All Facilities</h4>
+              <h4 id="currentCategoryTitle" class="d-flex align-items-center">
+                <div class="dropdown">
+                  <button
+                    class="btn btn-link dropdown-toggle text-decoration-none"
+                    type="button"
+                    id="chooseCatalogDropdown"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    style="font-size: 1.2rem; color: inherit;"
+                  >
+                    All Facilities
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="chooseCatalogDropdown">
+                    <li>
+                      <a
+                        class="dropdown-item"
+                        href="bookingcatalog.html"
+                        data-catalog-type="facilities"
+                      >
+                        Facilities
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        class="dropdown-item"
+                        href="catalog-equipment.html"
+                        data-catalog-type="equipment"
+                      >
+                        Equipment
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </h4>
               <div class="d-flex gap-2 filter-sort-dropdowns">
                 <div class="dropdown">
                   <button
@@ -237,7 +250,9 @@
             <div id="catalogItemsContainer" class="list-layout d-none"></div>
 
             <div class="text-center mt-4">
-              <button class="btn load-more-btn">Load More</button>
+              <nav>
+                <ul id="pagination" class="pagination justify-content-center"></ul>
+              </nav>
             </div>
           </div>
         </div>
@@ -264,10 +279,14 @@
         );
         const catalogHeroTitle = document.getElementById("catalogHeroTitle");
         const loadingIndicator = document.getElementById("loadingIndicator");
+        const requisitionFormButton = document.getElementById("requisitionFormButton");
+        const requisitionBadge = document.getElementById("requisitionBadge");
 
         let facilities = []; // Store fetched facilities
         let currentCategory = "All";
         let currentLayout = "list"; // Default layout
+        let currentPage = 1;
+        const itemsPerPage = 4; // Adjust as needed
 
         // Fetch facilities from the API
         async function fetchFacilities() {
@@ -297,7 +316,10 @@
               throw new Error("Invalid data structure from API");
             }
 
-            facilities = data.data;
+            facilities = data.data.map((facility) => ({
+              ...facility,
+              rental_fee: parseFloat(facility.rental_fee) || 0, // Ensure rental_fee is a valid number
+            }));
 
             renderCategoryFilterList();
             renderCatalogItems();
@@ -320,7 +342,7 @@
           const categories = [
             "All",
             ...new Set(
-              facilities.map((facility) => facility.category.category_name)
+              facilities.map((facility) => facility.category?.category_name || "Uncategorized")
             ),
           ];
           categoryFilterList.innerHTML = "";
@@ -338,21 +360,6 @@
 
         function renderCatalogItems() {
           catalogItemsContainer.innerHTML = "";
-          catalogItemsContainer.className = currentLayout + "-layout";
-
-          if (!facilities || facilities.length === 0) {
-            catalogItemsContainer.innerHTML = `
-      <div class="alert alert-info w-100">
-        No facilities found for this category.
-      </div>
-    `;
-            return;
-          }
-        }
-
-        // Render catalog items
-        function renderCatalogItems() {
-          catalogItemsContainer.innerHTML = "";
           catalogItemsContainer.className = currentLayout + "-layout"; // Apply current layout class
 
           const filteredFacilities =
@@ -360,18 +367,21 @@
               ? facilities
               : facilities.filter(
                   (facility) =>
-                    facility.category.category_name === currentCategory
+                    facility.category?.category_name === currentCategory
                 );
+
+          const startIndex = (currentPage - 1) * itemsPerPage;
+          const paginatedFacilities = filteredFacilities.slice(
+            startIndex,
+            startIndex + itemsPerPage
+          );
 
           const itemsWrapper = document.createElement("div");
           itemsWrapper.className = "catalog-items-wrapper";
           catalogItemsContainer.appendChild(itemsWrapper);
 
-          filteredFacilities.forEach((facility) => {
-            const rentalFee =
-              typeof facility.rental_fee === "number"
-                ? facility.rental_fee.toFixed(2)
-                : "0.00";
+          paginatedFacilities.forEach((facility) => {
+            const rentalFee = facility.rental_fee.toFixed(2); // Ensure rental_fee is formatted as a decimal
             const card = document.createElement("div");
             card.classList.add("catalog-card");
 
@@ -384,15 +394,13 @@
                 }" class="catalog-card-img" alt="${facility.facility_name}">
                 <div class="catalog-card-details">
                     <h5>${facility.facility_name}</h5>
-                    <p>${
-                      facility.description || "No description available."
-                    }</p>
+                    <p>${facility.description || "No description available."}</p>
                     <div class="catalog-card-meta">
                         <div><i class="bi bi-tag"></i> ${
-                          facility.category.category_name
+                          facility.category?.category_name || "Uncategorized"
                         }</div>
                         <div><i class="bi bi-building"></i> ${
-                          facility.department.department_name
+                          facility.department?.department_name || "Unknown Department"
                         }</div>
                         <div><i class="bi bi-people"></i> Capacity: ${
                           facility.capacity
@@ -416,7 +424,7 @@
                     <h5>${facility.facility_name}</h5>
                     <div class="catalog-card-meta">
                         <div><i class="bi bi-tag"></i> ${
-                          facility.category.category_name
+                          facility.category?.category_name || "Uncategorized"
                         }</div>
                         <div><i class="bi bi-cash"></i> ₱${rentalFee}</div>
                     </div>
@@ -427,6 +435,27 @@
 
             itemsWrapper.appendChild(card);
           });
+
+          renderPagination(filteredFacilities.length);
+        }
+
+        function renderPagination(totalItems) {
+          const pagination = document.getElementById("pagination");
+          pagination.innerHTML = "";
+
+          const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+          for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item" + (i === currentPage ? " active" : "");
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener("click", function (e) {
+              e.preventDefault();
+              currentPage = i;
+              renderCatalogItems();
+            });
+            pagination.appendChild(li);
+          }
         }
 
         // Attach category filter listeners
@@ -461,10 +490,44 @@
           });
         }
 
+        function updateRequisitionButton() {
+          const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities") || "[]");
+          const selectedEquipment = JSON.parse(localStorage.getItem("selectedEquipment") || "[]");
+          const totalCount = selectedFacilities.length + selectedEquipment.length;
+
+          if (totalCount > 0) {
+            requisitionBadge.textContent = totalCount;
+            requisitionBadge.classList.remove("d-none");
+            requisitionFormButton.classList.remove("btn-outline-primary");
+            requisitionFormButton.classList.add("btn-primary");
+          } else {
+            requisitionBadge.classList.add("d-none");
+            requisitionFormButton.classList.remove("btn-primary");
+            requisitionFormButton.classList.add("btn-outline-primary");
+          }
+        }
+
+        updateRequisitionButton();
+        window.addEventListener("storage", updateRequisitionButton);
+
         // Initial fetch and render
         fetchFacilities();
         setupLayoutToggle();
       });
     </script>
+
+    <style>
+      /* Add sharp edges and light grey borders to specific containers */
+      .quick-links-card, .sidebar-card, .catalog-card, .dropdown-menu {
+        border-radius: 0 !important;
+        border: 1px solid #d3d3d3 !important;
+      }
+
+      /* Remove border and shadows from the main container */
+      .container {
+        border: none !important;
+        box-shadow: none !important;
+      }
+    </style>
   </body>
 </html>

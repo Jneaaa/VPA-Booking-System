@@ -31,8 +31,8 @@
       .form-section-card {
         background: white;
         padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #ddd; /* Replace shadow with solid stroke */
+        border-radius: 0; /* Remove rounded corners */
         margin-bottom: 20px;
       }
 
@@ -233,6 +233,41 @@
 
       #toggleReservationBtn.rotate {
         transform: rotate(180deg);
+      }
+
+      .facility-card,
+      .equipment-card {
+        position: relative; /* Enable positioning for the trash bin */
+        border: none; /* Remove grey border */
+        border-radius: 0; /* Remove rounded corners */
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .facility-card .btn-outline-danger,
+      .equipment-card .btn-outline-danger {
+        position: absolute;
+        top: 10px;
+        right: 10px; /* Move trash bin to top-right */
+        z-index: 1; /* Ensure it stays above other elements */
+        border: none; /* Remove red border */
+      }
+
+      .facility-card img,
+      .equipment-card img {
+        width: 120px; /* Ensure consistent image size */
+        height: 120px;
+        object-fit: cover;
+        border-radius: 0; /* Remove rounded corners from images */
+        margin-right: 15px;
+      }
+
+      .facility-card .facility-details,
+      .equipment-card .equipment-details {
+        flex-grow: 1;
+        margin-right: 30px; /* Further reduce right margin */
       }
     </style>
   </head>
@@ -656,14 +691,16 @@
           <div class="form-section-card">
             <h5>Requested Facilities</h5>
             <div id="facilityList">
-              <div class="facility-card d-flex align-items-center mb-3">
+              <div class="facility-card">
+                <button class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-trash"></i>
+                </button>
                 <img
                   src="facility-image.jpg"
                   alt="Facility Image"
-                  class="img-thumbnail me-3"
-                  style="width: 100px; height: 100px; object-fit: cover;"
+                  class="img-thumbnail"
                 />
-                <div class="facility-details flex-grow-1 me-3">
+                <div class="facility-details">
                   <h6 class="mb-1">Conference Room A</h6>
                   <p class="text-muted mb-1">
                     A spacious room equipped with modern amenities for meetings
@@ -671,9 +708,6 @@
                   </p>
                   <div class="text-primary fw-bold">₱1,500.00</div>
                 </div>
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="bi bi-trash"></i>
-                </button>
               </div>
               <div class="attach-room-setup mt-2">
                 <label class="form-label">Attach your preferred room setup (if any)</label>
@@ -693,23 +727,22 @@
           <div class="form-section-card">
             <h5>Requested Equipment</h5>
             <div id="equipmentList">
-              <div class="equipment-card d-flex align-items-center mb-3">
+              <div class="equipment-card">
+                <button class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-trash"></i>
+                </button>
                 <img
                   src="equipment-image.jpg"
                   alt="Equipment Image"
-                  class="img-thumbnail me-3"
-                  style="width: 100px; height: 100px; object-fit: cover"
+                  class="img-thumbnail"
                 />
-                <div class="equipment-details flex-grow-1 me-3">
+                <div class="equipment-details">
                   <h6 class="mb-1">Projector</h6>
                   <p class="text-muted mb-1">
                     High-quality projector for presentations and events.
                   </p>
                   <div class="text-primary fw-bold">₱500.00</div>
                 </div>
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="bi bi-trash"></i>
-                </button>
               </div>
             </div>
           </div>
@@ -863,6 +896,22 @@
         const equipmentList = document.getElementById("equipmentList");
         const submitButton = document.querySelector("button[type='submit']");
 
+        function saveSelectionsToLocalStorage() {
+          const selectedFacilities = Array.from(facilityList.querySelectorAll(".facility-card")).map(
+            (card) => card.querySelector("h6").textContent
+          );
+          const selectedEquipment = Array.from(equipmentList.querySelectorAll(".equipment-card")).map(
+            (card) => card.querySelector("h6").textContent
+          );
+
+          localStorage.setItem("selectedFacilities", JSON.stringify(selectedFacilities));
+          localStorage.setItem("selectedEquipment", JSON.stringify(selectedEquipment));
+
+          // Trigger storage event for other pages
+          const event = new Event("storage");
+          window.dispatchEvent(event);
+        }
+
         function updateEmptyMessage(list, message) {
           if (list.children.length === 0) {
             const emptyMessage = document.createElement("p");
@@ -889,6 +938,7 @@
             updateRoomSetupVisibility();
             updateEmptyMessage(facilityList, "No facility added yet.");
             toggleSubmitButton();
+            saveSelectionsToLocalStorage();
           }
         });
 
@@ -898,6 +948,7 @@
             card.remove();
             updateEmptyMessage(equipmentList, "No equipment added yet.");
             toggleSubmitButton();
+            saveSelectionsToLocalStorage();
           }
         });
 
@@ -923,6 +974,7 @@
         updateEmptyMessage(equipmentList, "No equipment added yet.");
         toggleSubmitButton();
         updateRoomSetupVisibility();
+        saveSelectionsToLocalStorage();
       });
 
       function removeFile(inputId, buttonId) {

@@ -9,10 +9,13 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   const catalogHeroTitle = document.getElementById("catalogHeroTitle");
   const loadingIndicator = document.getElementById("loadingIndicator");
+  const pagination = document.getElementById("pagination");
 
   let equipment = []; // Store fetched equipment
   let currentCategory = "All";
   let currentLayout = "list"; // Default layout
+  let currentPage = 1;
+  const itemsPerPage = 4; // Adjust as needed
 
   // Fetch equipment from the API
   async function fetchEquipment() {
@@ -94,11 +97,17 @@ document.addEventListener("DOMContentLoaded", function () {
               item.category.category_name === currentCategory
           );
 
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedItems = filteredEquipment.slice(
+      startIndex,
+      startIndex + itemsPerPage
+    );
+
     const itemsWrapper = document.createElement("div");
     itemsWrapper.className = "catalog-items-wrapper";
     catalogItemsContainer.appendChild(itemsWrapper);
 
-    filteredEquipment.forEach((item) => {
+    paginatedItems.forEach((item) => {
       const rentalFee =
         typeof item.rental_fee === "number"
           ? item.rental_fee.toFixed(2)
@@ -156,6 +165,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
       itemsWrapper.appendChild(card);
     });
+
+    renderPagination(filteredEquipment.length);
+  }
+
+  // Render pagination
+  function renderPagination(totalItems) {
+    pagination.innerHTML = "";
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    for (let i = 1; i <= totalPages; i++) {
+      const li = document.createElement("li");
+      li.className = "page-item" + (i === currentPage ? " active" : "");
+      li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+      li.addEventListener("click", function (e) {
+        e.preventDefault();
+        currentPage = i;
+        renderCatalogItems();
+      });
+      pagination.appendChild(li);
+    }
   }
 
   // Attach category filter listeners
@@ -170,6 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
         this.classList.add("active");
         currentCategory = this.dataset.category;
         currentCategoryTitle.textContent = `${currentCategory} Equipment`;
+        currentPage = 1; // Reset to first page
         renderCatalogItems();
       });
     });
