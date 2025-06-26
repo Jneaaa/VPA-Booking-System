@@ -332,15 +332,16 @@
         <div class="col-12">
           <div class="form-section-card">
             <div class="d-flex justify-content-between align-items-center">
-              <h5>Complete Your Reservation</h5>
+              <h5 class="mb-0">Complete Your Reservation</h5>
               <button
                 id="toggleReservationBtn"
                 class="btn btn-sm btn-outline-secondary"
+                style="height: 100%; align-self: center"
               >
                 <i class="bi bi-chevron-up"></i>
               </button>
             </div>
-            <div id="reservationContent">
+            <div id="reservationContent" style="padding-top: 10px">
               <p class="text-muted">
                 To confirm your request, please fill out the necessary details
                 below. We need this information to process your booking
@@ -349,9 +350,9 @@
                 once your submission is reviewed and approved.
               </p>
               <div class="d-flex justify-content-start gap-2 mb-4">
-                <button class="btn btn-primary">
+                <a href="policies.html" class="btn btn-primary">
                   Watch Cocomelon
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -365,18 +366,22 @@
             <h5>Your Contact Information</h5>
             <div class="row">
               <div class="col-md-12">
+                <select
+                  id="applicantType"
+                  class="form-select mb-2"
+                  aria-label="Type of Applicant"
+                >
+                  <option selected>Type of Applicant</option>
+                  <option value="Internal">Internal</option>
+                  <option value="External">External</option>
+                </select>
+              </div>
+              <div class="col-md-12">
                 <input
                   type="text"
                   class="form-control mb-2"
                   placeholder="Organization Name (optional)"
                 />
-              </div>
-              <div class="col-md-12">
-                <select id="applicantType" class="form-select mb-2" aria-label="Type of Applicant">
-                  <option selected>Type of Applicant</option>
-                  <option value="Internal">Internal</option>
-                  <option value="External">External</option>
-                </select>
               </div>
               <div class="col-md-12">
                 <input
@@ -406,14 +411,14 @@
                 <input
                   type="text"
                   class="form-control"
-                  placeholder="CPU Student ID (if applicable)"
+                  placeholder="CPU Student ID"
                 />
               </div>
               <div class="col-md-6">
                 <input
                   type="text"
                   class="form-control"
-                  placeholder="Contact Number (optional)"
+                  placeholder="Contact Number"
                 />
               </div>
             </div>
@@ -430,12 +435,24 @@
             </p>
             <div class="row">
               <div class="col-md-6">
-                <label for="startDateField" class="form-label">Start Date</label>
-                <input type="date" id="startDateField" class="form-control mb-2" />
+                <label for="startDateField" class="form-label"
+                  >Start Date</label
+                >
+                <input
+                  type="date"
+                  id="startDateField"
+                  class="form-control mb-2"
+                />
               </div>
               <div class="col-md-6">
-                <label for="startTimeField" class="form-label">Start Time</label>
-                <select id="startTimeField" class="form-select mb-2" onchange="adjustEndTime()">
+                <label for="startTimeField" class="form-label"
+                  >Start Time</label
+                >
+                <select
+                  id="startTimeField"
+                  class="form-select mb-2"
+                  onchange="adjustEndTime()"
+                >
                   <!-- Predefined 12-hour intervals -->
                   <option value="12:00 AM">12:00 AM</option>
                   <option value="12:30 AM">12:30 AM</option>
@@ -491,7 +508,11 @@
             <div class="row">
               <div class="col-md-6">
                 <label for="endDateField" class="form-label">End Date</label>
-                <input type="date" id="endDateField" class="form-control mb-2" />
+                <input
+                  type="date"
+                  id="endDateField"
+                  class="form-control mb-2"
+                />
               </div>
               <div class="col-md-6">
                 <label for="endTimeField" class="form-label">End Time</label>
@@ -596,14 +617,21 @@
                 ></textarea>
               </div>
               <div class="col-md-6">
-                <label class="form-label mt-3">Please attach formal letter.</label>
+                <label class="form-label mt-3"
+                  >Please attach formal letter.</label
+                >
                 <div class="position-relative">
-                  <input type="file" class="form-control mb-3" id="attachLetter" onchange="toggleRemoveButton('attachLetter', 'removeAttachLetterBtn')" />
+                  <input
+                    type="file"
+                    class="form-control mb-3"
+                    id="attachLetter"
+                    onchange="toggleRemoveButton('attachLetter', 'removeAttachLetterBtn')"
+                  />
                   <button
                     type="butt.on"
                     id="removeAttachLetterBtn"
                     class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 d-none"
-                    style="color: black; background: none; border: none;"
+                    style="color: black; background: none; border: none"
                     onclick="removeFile('attachLetter', 'removeAttachLetterBtn')"
                   >
                     x
@@ -647,27 +675,15 @@
                   <i class="bi bi-trash"></i>
                 </button>
               </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label"
-                >Attach your preferred room setup (if any)</label
-              >
-              <div class="position-relative">
-                <input
-                  type="file"
-                  class="form-control me-2"
-                  id="roomSetupFile"
-                  onchange="toggleRemoveButton('roomSetupFile', 'removeRoomSetupBtn')"
-                />
-                <button
-                  type="button"
-                  id="removeRoomSetupBtn"
-                  class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 d-none"
-                  style="color: black; background: none; border: none;"
-                  onclick="removeFile('roomSetupFile', 'removeRoomSetupBtn')"
-                >
-                  x
-                </button>
+              <div class="attach-room-setup mt-2">
+                <label class="form-label">Attach your preferred room setup (if any)</label>
+                <div class="position-relative">
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="roomSetupFile1"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -682,7 +698,7 @@
                   src="equipment-image.jpg"
                   alt="Equipment Image"
                   class="img-thumbnail me-3"
-                  style="width: 100px; height: 100px; object-fit: cover;"
+                  style="width: 100px; height: 100px; object-fit: cover"
                 />
                 <div class="equipment-details flex-grow-1 me-3">
                   <h6 class="mb-1">Projector</h6>
@@ -808,19 +824,25 @@
           document.getElementById("reservationContent");
 
         toggleReservationBtn.addEventListener("click", function () {
-          if (reservationContent.style.maxHeight === "0px" || !reservationContent.style.maxHeight) {
-            reservationContent.style.maxHeight = reservationContent.scrollHeight + "px";
+          if (
+            reservationContent.style.maxHeight === "0px" ||
+            !reservationContent.style.maxHeight
+          ) {
+            reservationContent.style.maxHeight =
+              reservationContent.scrollHeight + "px";
             reservationContent.style.opacity = "1";
             toggleReservationBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
           } else {
             reservationContent.style.maxHeight = "0px";
             reservationContent.style.opacity = "0";
-            toggleReservationBtn.innerHTML = '<i class="bi bi-chevron-down"></i>';
+            toggleReservationBtn.innerHTML =
+              '<i class="bi bi-chevron-down"></i>';
           }
         });
 
         // Initialize max-height for smooth animation
-        reservationContent.style.maxHeight = reservationContent.scrollHeight + "px";
+        reservationContent.style.maxHeight =
+          reservationContent.scrollHeight + "px";
       });
 
       document.addEventListener("DOMContentLoaded", function () {
@@ -839,6 +861,7 @@
       document.addEventListener("DOMContentLoaded", function () {
         const facilityList = document.getElementById("facilityList");
         const equipmentList = document.getElementById("equipmentList");
+        const submitButton = document.querySelector("button[type='submit']");
 
         function updateEmptyMessage(list, message) {
           if (list.children.length === 0) {
@@ -849,25 +872,57 @@
           }
         }
 
+        function toggleSubmitButton() {
+          const hasFacilities = facilityList.querySelector(".facility-card");
+          const hasEquipment = equipmentList.querySelector(".equipment-card");
+          submitButton.disabled = !(hasFacilities || hasEquipment);
+        }
+
         facilityList.addEventListener("click", function (event) {
-          if (event.target.classList.contains("remove-facility-btn")) {
+          if (event.target.closest(".btn-outline-danger")) {
             const card = event.target.closest(".facility-card");
+            const roomSetupField = card.nextElementSibling; // Assume room setup field is directly after the card
+            if (roomSetupField && roomSetupField.classList.contains("attach-room-setup")) {
+              roomSetupField.remove();
+            }
             card.remove();
+            updateRoomSetupVisibility();
             updateEmptyMessage(facilityList, "No facility added yet.");
+            toggleSubmitButton();
           }
         });
 
         equipmentList.addEventListener("click", function (event) {
-          if (event.target.classList.contains("remove-equipment-btn")) {
+          if (event.target.closest(".btn-outline-danger")) {
             const card = event.target.closest(".equipment-card");
             card.remove();
             updateEmptyMessage(equipmentList, "No equipment added yet.");
+            toggleSubmitButton();
           }
         });
 
-        // Initialize empty messages if no items exist
+        function updateRoomSetupVisibility() {
+          const facilityCards = facilityList.querySelectorAll(".facility-card");
+          const attachRoomSetupFields = facilityList.querySelectorAll(".attach-room-setup");
+
+          // Ensure each facility card has a corresponding room setup field
+          facilityCards.forEach((card, index) => {
+            if (attachRoomSetupFields[index]) {
+              attachRoomSetupFields[index].style.display = "block";
+            }
+          });
+
+          // Hide extra room setup fields if no corresponding facility card exists
+          for (let i = facilityCards.length; i < attachRoomSetupFields.length; i++) {
+            attachRoomSetupFields[i].style.display = "none";
+          }
+        }
+
+        // Initialize empty messages and submit button state
         updateEmptyMessage(facilityList, "No facility added yet.");
         updateEmptyMessage(equipmentList, "No equipment added yet.");
+        toggleSubmitButton();
+        updateRoomSetupVisibility();
       });
 
       function removeFile(inputId, buttonId) {
@@ -900,7 +955,10 @@
         if (startTimeField && endTimeField) {
           const startTimeIndex = startTimeField.selectedIndex;
           if (startTimeIndex !== -1) {
-            endTimeField.selectedIndex = Math.min(startTimeIndex + 2, endTimeField.options.length - 1); // Ensure at least 1 hour gap
+            endTimeField.selectedIndex = Math.min(
+              startTimeIndex + 2,
+              endTimeField.options.length - 1
+            ); // Ensure at least 1 hour gap
           }
         }
       }

@@ -201,32 +201,6 @@
           </div>
 
         </div>
-
-        <!-- New Section: Date and Time Selection -->
-        <div class="me-4" style="width: 300px; flex-shrink: 0;">
-          <h5 class="fw-bold mb-3">Date and Time Selection</h5>
-          <div class="mb-3">
-            <label for="selectedDateTime" class="form-label">Selected Date and Time:</label>
-            <p id="selectedDateTime" class="form-control bg-light">None</p>
-          </div>
-          <div class="mb-3">
-            <label for="dateField" class="form-label">Select Date:</label>
-            <input type="date" id="dateField" class="form-control">
-          </div>
-          <div class="mb-3">
-            <label for="startTimeField" class="form-label">Start Time:</label>
-            <input type="time" id="startTimeField" class="form-control">
-          </div>
-          <div class="mb-3">
-            <label for="endTimeField" class="form-label">End Time:</label>
-            <input type="time" id="endTimeField" class="form-control">
-          </div>
-          <div class="d-flex justify-content-between">
-            <button id="checkAvailabilityButton" class="btn btn-primary">Check Availability</button>
-            <button id="clearSelectionButton" class="btn btn-secondary">Clear Selection</button>
-          </div>
-        </div>
-
         <!-- Right Section: Events Calendar -->
         <div style="flex-grow: 1; height: 100%;"> <!-- Reduced flex-grow -->
           <div id="calendar" class="border p-2 calendar-container" style="height: 100%;"></div>
@@ -289,32 +263,6 @@
 
       // Show the calendar immediately
       $('#miniCalendar').datepicker('show');
-
-      // Update selected date and time dynamically
-      const selectedDateTime = document.getElementById('selectedDateTime');
-      const dateField = document.getElementById('dateField');
-      const startTimeField = document.getElementById('startTimeField');
-      const endTimeField = document.getElementById('endTimeField');
-      const clearSelectionButton = document.getElementById('clearSelectionButton');
-
-      function updateSelectedDateTime() {
-        const date = dateField.value || 'None';
-        const startTime = startTimeField.value || 'None';
-        const endTime = endTimeField.value || 'None';
-        selectedDateTime.textContent = `Date: ${date}, Start: ${startTime}, End: ${endTime}`;
-      }
-
-      dateField.addEventListener('change', updateSelectedDateTime);
-      startTimeField.addEventListener('change', updateSelectedDateTime);
-      endTimeField.addEventListener('change', updateSelectedDateTime);
-
-      // Clear selection
-      clearSelectionButton.addEventListener('click', function () {
-        dateField.value = '';
-        startTimeField.value = '';
-        endTimeField.value = '';
-        updateSelectedDateTime();
-      });
     });
   </script>
 </body>
