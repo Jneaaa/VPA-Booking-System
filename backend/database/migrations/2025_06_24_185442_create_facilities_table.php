@@ -46,6 +46,13 @@ return new class extends Migration
             $table->foreign('created_by')->references('admin_id')->on('admins');
             $table->foreign('updated_by')->references('admin_id')->on('admins');
             $table->foreign('deleted_by')->references('admin_id')->on('admins');
+
+            // Indexes for optimization
+            $table->index('category_id');
+            $table->index('subcategory_id');
+            $table->index('room_id');
+            $table->index('department_id');
+            $table->index('status_id');
         });
     }
 

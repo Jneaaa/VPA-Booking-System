@@ -23,6 +23,9 @@ return new class extends Migration
 // Foreign Key
 $table->foreign('subcategory_id')->references('subcategory_id')->on('facility_subcategories')->onDelete('cascade');
 
+// Index
+$table->index('subcategory_id');
+
         });
     }
 

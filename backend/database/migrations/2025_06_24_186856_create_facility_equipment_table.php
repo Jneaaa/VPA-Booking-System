@@ -20,6 +20,9 @@ return new class extends Migration
             $table->foreign('facility_id')->references('facility_id')->on('facilities')->onDelete('cascade');
             $table->foreign('equipment_id')->references('equipment_id')->on('equipment')->onDelete('cascade'); // adjust 'equipment' table name if different
             
+            // Indexes
+            $table->index('facility_id');
+            $table->index('equipment_id');
         });
     }
 
