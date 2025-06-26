@@ -3,32 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Department extends Model
+class FacilityImage extends Model
 {
-    protected $table = 'departments';
-    protected $primaryKey = 'department_id';
+    use HasFactory;
+
+    protected $table = 'facility_images';
+    protected $primaryKey = 'image_id';
 
     protected $fillable = [
-        'department_name',
-        'department_description'
+        'facility_id',
+        'image_url',
+        'type_id',
+        'cloudinary_public_id',
+        'description',
+        'sort_order',
     ];
 
-    public function equipment()
+    public function facility()
     {
-        return $this->hasMany(Equipment::class, 'department_id', 'department_id');
-    }
-
-    public function departmentAdmins()
-    {
-        return $this->hasMany(DepartmentAdmin::class, 'department_id', 'department_id');
-    }
-
-    public function managers(): BelongsToMany
-    {
-        return $this->belongsToMany(Admin::class, 'admin_department')
-                    ->withPivot('is_primary')
-                    ->withTimestamps();
+        return $this->belongsTo(Facility::class, 'facility_id', 'facility_id');
     }
 }
 

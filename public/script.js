@@ -1,3 +1,0 @@
-<script>
-    document.addEventListener()
-</script>

@@ -41,6 +41,23 @@ class EquipmentController extends Controller
         }
     }
 
+    public function publicIndex(): JsonResponse
+{
+    try {
+        $equipment = Equipment::with(['category', 'rateType', 'status', 'items.condition'])
+            ->orderBy('equipment_name')
+            ->get();
+
+        $formatted = $equipment->map(fn ($item) => $this->formatEquipment($item));
+
+        return response()->json(['data' => $formatted]);
+    } catch (\Exception $e) {
+        \Log::error('Error fetching public equipment', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'Failed to fetch equipment data', 'error' => $e->getMessage()], 500);
+    }
+}
+
+
     /**
      * Store newly created equipment in storage.
      */

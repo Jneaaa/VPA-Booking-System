@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('sort_order')->nullable();
             $table->string('cloudinary_public_id')->nullable();
             $table->string('image_url')->nullable();
+            $table->timestamps();
 
             // Foreign Keys
             $table->foreign('facility_id')->references('facility_id')->on('facilities')->onDelete('cascade');

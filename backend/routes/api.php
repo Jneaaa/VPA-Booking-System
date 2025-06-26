@@ -45,6 +45,14 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware
 Route::post('/equipment/{id}/upload-image', [\App\Http\Controllers\EquipmentController::class, 'uploadImage']);
 Route::post('/equipment/{id}/upload-images', [\App\Http\Controllers\EquipmentController::class, 'uploadMultipleImages']);
 
+// Public routes for facilities and categories
+Route::get('/facility-categories', [\App\Http\Controllers\Dropdowns\FacilityCategoryController::class, 'index']);
+Route::get('/facility-subcategories/{category}', [\App\Http\Controllers\Dropdowns\FacilitySubcategoryController::class, 'index']);
+Route::get('/facilities', [\App\Http\Controllers\FacilityController::class, 'publicIndex']);
+Route::get('/equipment', [\App\Http\Controllers\EquipmentController::class, 'publicIndex']);
+
+
+
 // Protected admin routes
 Route::middleware('auth:sanctum')->group(function () {
 

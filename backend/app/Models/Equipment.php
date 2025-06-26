@@ -80,6 +80,10 @@ class Equipment extends Model
     {
         return $this->belongsTo(Admin::class, 'updated_by', 'admin_id');
     }
+    public function rateType()
+    {
+        return $this->belongsTo(\App\Models\LookupTables\RateType::class, 'type_id', 'type_id');
+    }
 
     // Scopes
     public function scopeByDepartment($query, $departmentId)

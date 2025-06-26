@@ -14,8 +14,8 @@ class EquipmentItem extends Model
 
     protected $fillable = [
         'image_url',
-        'resource_id',
-        'condition',
+        'equipment_id',
+        'condition_id',
         'barcode_num',
         'item_notes'
     ];
@@ -23,7 +23,7 @@ class EquipmentItem extends Model
     // Relationships
     public function equipment()
     {
-        return $this->belongsTo(Equipment::class, 'resource_id', 'resource_id');
+        return $this->belongsTo(Equipment::class, 'equipment_id', 'equipment_id');
     }
 }
 
