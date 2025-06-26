@@ -30,9 +30,6 @@ return new class extends Migration
             $table->foreign('created_by')->references('admin_id')->on('admins')->onDelete('restrict');
             $table->foreign('updated_by')->references('admin_id')->on('admins')->onDelete('set null');
             $table->foreign('deleted_by')->references('admin_id')->on('admins')->onDelete('set null');
-
-            $table->index('item_id');
-            $table->index('action_id');
         });
     }
 

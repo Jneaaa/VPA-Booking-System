@@ -24,9 +24,6 @@ return new class extends Migration
             $table->foreign('facility_id')->references('facility_id')->on('facilities')->onDelete('cascade');
             $table->foreign('type_id')->references('type_id')->on('image_types'); // adjust if different
 
-            // Indexes
-            $table->index('facility_id');
-            $table->index('type_id');
         });
     }
 

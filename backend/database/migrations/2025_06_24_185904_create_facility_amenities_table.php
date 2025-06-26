@@ -22,8 +22,6 @@ return new class extends Migration
             // Foreign Key
             $table->foreign('facility_id')->references('facility_id')->on('facilities')->onDelete('cascade');
 
-            // Index
-            $table->index('facility_id');
         });
     }
 

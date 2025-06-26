@@ -29,8 +29,6 @@ return new class extends Migration
                 ->references('role_id')
                 ->on('admin_roles')
                 ->onDelete('cascade');
-
-            $table->index('role_id');
          });
     }
 
