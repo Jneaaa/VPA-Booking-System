@@ -27,7 +27,10 @@ return new class extends Migration
             // Foreign Key Constraints
             $table->foreign('created_by')->references('admin_id')->on('admins')->onDelete('restrict');
             $table->foreign('updated_by')->references('admin_id')->on('admins')->onDelete('set null');
-            
+
+            // Indexes
+            $table->index('equipment_id');
+            $table->index('condition_id');
         });
     }
 

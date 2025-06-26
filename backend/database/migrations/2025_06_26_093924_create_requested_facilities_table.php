@@ -11,19 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('facility_amenities', function (Blueprint $table) {
-            $table->id('facility_amenity_id');
-            $table->unsignedBigInteger('facility_id');
-            $table->string('amenity_name', 50);
-            $table->decimal('amenity_fee', 10, 2)->nullable();
-            $table->integer('quantity')->default(1);
+        Schema::create('requested_facilities', function (Blueprint $table) {
+            $table->id('requested_facility_id');
+            $table->unsignedBigInteger('request_id')->index();
+            $table->unsignedBigInteger('facility_id')->index();
+            $table->boolean('is_waived')->default(0);
             $table->timestamps();
 
-            // Foreign Key
+            $table->foreign('request_id')->references('request_id')->on('requisition_forms')->onDelete('cascade');
             $table->foreign('facility_id')->references('facility_id')->on('facilities')->onDelete('cascade');
 
-            // Index
-            $table->index('facility_id');
         });
     }
 
@@ -32,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('facility_amenities');
+        Schema::dropIfExists('requested_facilities');
     }
 };

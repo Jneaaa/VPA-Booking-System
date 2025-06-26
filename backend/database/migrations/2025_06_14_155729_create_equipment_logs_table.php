@@ -32,6 +32,10 @@ return new class extends Migration
         
             $table->timestamps(); // created_at, updated_at
             $table->softDeletes(); // includes deleted_at
+
+            // Indexes
+            $table->index('equipment_id');
+            $table->index('action_id');
         
             // Foreign Key Constraints
             $table->foreign('equipment_id')->references('equipment_id')->on('equipment')->onDelete('cascade');
