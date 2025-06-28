@@ -11,11 +11,21 @@ class UserUpload extends Model
         'cloudinary_public_id',
         'upload_type',
         'upload_token',
-        'requisition_id',
+        'request_id',
     ];
 
     public function requisitionForm()
     {
-        return $this->belongsTo(RequisitionForm::class, 'requisition_id', 'request_id');
+        return $this->belongsTo(RequisitionForm::class, 'request_id', 'request_id');
     }
+    public function scopeLetters($query)
+    {
+        return $query->where('upload_type', 'Letter');
+    }
+
+    public function scopeRoomSetups($query)
+    {
+        return $query->where('upload_type', 'Room Setup');
+    }
+
 }

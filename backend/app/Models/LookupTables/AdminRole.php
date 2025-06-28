@@ -5,6 +5,7 @@
 namespace App\Models\LookupTables;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Admin;
 
 class AdminRole extends Model
 {

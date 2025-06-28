@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\LookupTables\FacilitySubcategory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -18,8 +19,12 @@ class RoomDetail extends Model
         'floor_level',
     ];
 
-    public function facilities()
+    public function subcategory()
     {
-        return $this->hasMany(Facility::class, 'room_id', 'room_id');
+        return $this->hasMany(FacilitySubcategory::class, 'room_id', 'room_id');
+    }
+    public function requisitions()
+    {
+        return $this->hasMany(RequisitionForm::class, 'room_id', 'room_id');
     }
 }

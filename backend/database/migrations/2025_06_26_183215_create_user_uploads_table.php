@@ -17,8 +17,12 @@ return new class extends Migration
             $table->string('cloudinary_public_id');
             $table->enum('upload_type', ['Letter', 'Room Setup'])->nullable()->index();
             $table->string('upload_token', 50)->nullable(); // used before form finalization
-            $table->unsignedBigInteger('requisition_id')->nullable()->index(); // linked after final submit
+            $table->unsignedBigInteger('request_id')->nullable()->index(); // linked after final submit
             $table->timestamps();
+
+            // Foreign Keys
+            $table->foreign('request_id')->references('request_id')->on('requisition_forms')->onDelete('set null');
+
         });
     }
 
@@ -29,4 +33,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('user_uploads');
     }
+
 };

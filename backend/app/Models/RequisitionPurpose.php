@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class RequisitionPurpose extends Model
 {
+    protected $table = "requisition_purposes";
+    protected $primaryKey = "purpose_id";
+    public $timestamps = false;
 
-    protected $fillable = [
-        'purpose_name',
-    ];
 
     public function requisitionForms()
     {

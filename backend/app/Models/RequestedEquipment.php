@@ -11,8 +11,14 @@ class RequestedEquipment extends Model
     protected $fillable = [
         'request_id',
         'equipment_id',
+        'quantity',
         'is_waived',
     ];
+
+    protected $casts = [
+        'is_waived' => 'boolean'
+    ];
+
     public function requisitionForm()
     {
         return $this->belongsTo(RequisitionForm::class, 'request_id', 'request_id');

@@ -12,25 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('facilities', function (Blueprint $table) {
+
             $table->id('facility_id');
+
             $table->string('facility_name', 50);
             $table->string('description', 250)->nullable();
-            
+            $table->unsignedInteger('maximum_rental_hour')->default(1);
             $table->unsignedTinyInteger('category_id');
             $table->unsignedTinyInteger('subcategory_id')->nullable();
             $table->unsignedBigInteger('room_id')->nullable();
-            
             $table->string('location_note', 200);
             $table->unsignedInteger('capacity');
-            
             $table->unsignedTinyInteger('department_id');
             $table->enum('is_indoors', ['Indoors', 'Outdoors']);
-            
             $table->decimal('rental_fee', 10, 2);
             $table->decimal('company_fee', 10, 2);
-            
+            $table->enum('rate_type', ['Per Hour', 'Per Show/Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');
-
             $table->timestamps();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();

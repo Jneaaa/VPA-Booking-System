@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class FormStatusCode extends Model
 {
-    protected $fillable = [
-        'status_name',
-    ];
+    protected $table = "form_status_codes";
+    protected $primaryKey = "status_id";
+    public $timestamps = false;
 
     public function requisitionForms()
     {
         return $this->hasMany(RequisitionForm::class, 'status_id', 'status_id');
     }
+
 }

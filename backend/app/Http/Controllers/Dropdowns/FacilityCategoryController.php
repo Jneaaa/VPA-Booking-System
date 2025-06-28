@@ -11,4 +11,11 @@ class FacilityCategoryController extends Controller
     {
         return response()->json(FacilityCategory::all());
     }
+
+    public function indexWithSubcategories()
+    {
+        $categories = FacilityCategory::with('subcategories')->get();
+
+        return response()->json($categories);
+    }
 }

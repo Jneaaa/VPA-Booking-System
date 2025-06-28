@@ -20,17 +20,23 @@ class RequisitionForm extends Model
         'end_date',
         'start_time',
         'end_time',
+        'is_late',
         'late_penalty_fee',
+        'returned_at',
         'is_finalized',
         'finalized_at',
         'finalized_by',
+        'is_closed',
+        'closed_at',
+        'closed_by',
         'endorser',
         'date_endorsed',
     ];
-    
+
+    // Relationships
+
     public function user()
     {
-        
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
@@ -42,6 +48,16 @@ class RequisitionForm extends Model
     public function status()
     {
         return $this->belongsTo(FormStatusCode::class, 'status_id', 'status_id');
+    }
+
+    public function finalizedBy()
+    {
+        return $this->belongsTo(Admin::class, 'finalized_by', 'admin_id');
+    }
+
+    public function closedBy()
+    {
+        return $this->belongsTo(Admin::class, 'closed_by', 'admin_id');
     }
 
     public function requestedFacilities()
@@ -57,16 +73,6 @@ class RequisitionForm extends Model
     public function calendarEvents()
     {
         return $this->hasMany(CalendarEvent::class, 'request_id', 'request_id');
-    }
-
-    public function finalizedBy()
-    {
-        return $this->belongsTo(Admin::class, 'finalized_by', 'admin_id');
-    }
-
-    public function closedBy()
-    {
-        return $this->belongsTo(Admin::class, 'closed_by', 'admin_id');
     }
 
 }

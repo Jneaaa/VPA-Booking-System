@@ -14,21 +14,18 @@ return new class extends Migration
         Schema::create('equipment_images', function (Blueprint $table) {
             $table->id('image_id');
             $table->foreignId('equipment_id');
-            $table->string('image_url', 500);
-            $table->string('cloudinary_public_id')->nullable();
-            $table->string('description')->nullable();
+            $table->string('image_url')->default('https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp')->nullable;
+            $table->string('cloudinary_public_id')->default('oxvsxogzu9koqhctnf7s')->nullable();
+            $table->string('description', 80)->nullable();
             $table->integer('sort_order')->default(0);
-            $table->unsignedtinyInteger('type_id')->default(1); // Assuming 1 is the default type_id for 'primary' images
+            $table->enum('image_type', ['Primary','Secondary']);
             $table->timestamps();
             
             // Foreign key constraints
-            $table->foreign('type_id')->references('type_id')->on('image_types')->onDelete('restrict');
             $table->foreign('equipment_id')->references('equipment_id')->on('equipment')->onDelete('cascade');
-
-            
+   
             // Indexes for performance
             $table->index(['equipment_id', 'sort_order']);
-            $table->index(['equipment_id', 'type_id']);
 
         });
     }

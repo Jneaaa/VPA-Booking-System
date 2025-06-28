@@ -3,6 +3,7 @@
 namespace App\Models\LookupTables;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Equipment;
 
 class EquipmentCategory extends Model
 {

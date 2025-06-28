@@ -4,6 +4,7 @@ namespace App\Models\LookupTables;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\RoomDetail;
 
 class FacilitySubcategory extends Model
 {
@@ -16,4 +17,10 @@ class FacilitySubcategory extends Model
     protected $fillable = [
         'subcategory_name',
     ];
+
+    public function roomDetail()
+    {
+        return $this->belongsTo(RoomDetail::class, 'room_detail_id', 'room_detail_id');
+    }
+
 }

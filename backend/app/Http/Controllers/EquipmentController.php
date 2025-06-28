@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Equipment;
-use App\Models\EquipmentImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,22 +11,22 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class EquipmentController extends Controller
 {
-    /**
-     * Display a listing of equipment.
-     */
+
+    // ----- Indexes ----- //
+
     public function index(): JsonResponse
     {
         try {
             $user = auth()->user();
 
-            // Allow head admins to see all equipment
-            if ($user->role_id === \App\AdminRoles::HEAD_ADMIN) {
-                $equipment = Equipment::with(['category', 'status', 'department', 'type', 'items', 'images'])
+            // Head admins can view all equipment
+            if ($user->role?->role_name === 'Head Admin') {
+                $equipment = Equipment::with(['category', 'status', 'department', 'items', 'images'])
                     ->orderBy('equipment_name')
                     ->get();
             } else {
-                $equipment = Equipment::whereIn('department_id', $user->departments->pluck('id'))
-                    ->with(['category', 'status', 'department', 'type', 'items', 'images'])
+                $equipment = Equipment::whereIn('department_id', $user->departments->pluck('department_id'))
+                    ->with(['category', 'status', 'department', 'items', 'images'])
                     ->orderBy('equipment_name')
                     ->get();
             }
@@ -35,35 +34,39 @@ class EquipmentController extends Controller
             $formatted = $equipment->map(fn ($item) => $this->formatEquipment($item));
 
             return response()->json(['data' => $formatted]);
-        } catch (\Exception $e) {
-            \Log::error('Error fetching equipment data', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Failed to fetch equipment data', 'error' => $e->getMessage()], 500);
-        }
+            } catch (\Exception $e) {
+                \Log::error('Error fetching equipment data', ['error' => $e->getMessage()]);
+                return response()->json([
+                    'message' => 'Failed to fetch equipment data',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
     }
+    
 
     public function publicIndex(): JsonResponse
-{
-    try {
-        $equipment = Equipment::with(['category', 'rateType', 'status', 'items.condition'])
-            ->orderBy('equipment_name')
-            ->get();
-
-        $formatted = $equipment->map(fn ($item) => $this->formatEquipment($item));
-
-        return response()->json(['data' => $formatted]);
-    } catch (\Exception $e) {
-        \Log::error('Error fetching public equipment', ['error' => $e->getMessage()]);
-        return response()->json(['message' => 'Failed to fetch equipment data', 'error' => $e->getMessage()], 500);
+    {
+        try {
+            $equipment = Equipment::with(['category', 'status', 'department', 'items.condition', 'images'])
+                ->orderBy('equipment_name')
+                ->get();
+    
+            $formatted = $equipment->map(fn ($item) => $this->formatPublicEquipment($item));
+    
+            return response()->json(['data' => $formatted]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching public equipment', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Failed to fetch equipment data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
+    
+    // ----- Store Equipment ----- //
 
-
-    /**
-     * Store newly created equipment in storage.
-     */
     public function store(Request $request): JsonResponse
     {
-
         $data = $request->validate([
             'equipment_name' => 'required|string|max:50',
             'description' => 'nullable|string|max:255',
@@ -73,27 +76,27 @@ class EquipmentController extends Controller
             'total_quantity' => 'required|integer|min:1',
             'rental_fee' => 'required|numeric|min:0',
             'company_fee' => 'required|numeric|min:0',
-            'type_id' => 'required|exists:rate_types,type_id',
+            'rate_type' => 'required|in:Per Hour,Per Show/Event',
             'status_id' => 'required|exists:availability_statuses,status_id',
             'department_id' => 'required|exists:departments,department_id',
-            'minimum_hour' => 'required|integer|min:1',
-        
+            'maximum_rental_hour' => 'required|integer|min:1',
+
             'items' => 'sometimes|array',
             'items.*.item_name' => 'sometimes|string|max:100',
             'items.*.condition_id' => 'required|exists:conditions,condition_id',
             'items.*.barcode_number' => 'nullable|string|max:100',
             'items.*.item_notes' => 'nullable|string',
-        
+
             'images' => 'sometimes|array',
             'images.*.image_url' => 'required|url|max:500',
             'images.*.description' => 'nullable|string',
             'images.*.sort_order' => 'sometimes|integer',
             'images.*.type_id' => 'required|exists:image_types,type_id',
         ]);
-        
+
         $user = auth()->user();
 
-        if (!$user->departments->pluck('id')->contains($data['department_id'])) {
+        if (!$user->departments->pluck('department_id')->contains($data['department_id'])) {
             return response()->json(['message' => 'You do not manage this department.'], 403);
         }
 
@@ -106,33 +109,47 @@ class EquipmentController extends Controller
             'total_quantity' => $data['total_quantity'],
             'rental_fee' => $data['rental_fee'],
             'company_fee' => $data['company_fee'],
-            'type_id' => $data['type_id'],
+            'rate_type' => $data['rate_type'],
             'status_id' => $data['status_id'],
             'department_id' => $data['department_id'],
-            'minimum_hour' => $data['minimum_hour'],
-            'created_by' => $user->id,
+            'maximum_rental_hour' => $data['maximum_rental_hour'],
+            'created_by' => $user->admin_id
         ]);
+
+        // Optional: Handle items and images if provided
+        if (!empty($data['items'])) {
+            foreach ($data['items'] as $item) {
+                $equipment->items()->create($item);
+            }
+        }
+
+        if (!empty($data['images'])) {
+            foreach ($data['images'] as $image) {
+                $equipment->images()->create($image);
+            }
+        }
 
         return response()->json([
             'message' => 'Equipment created successfully',
-            'data' => $this->formatEquipment($equipment),
+            'data' => $this->formatEquipment($equipment->fresh()) // refresh with relations
         ], 201);
-
     }
 
-    /**
-     * Display the specified equipment.
-     */
+   
+    // ----- Display Equipment ----- //
+
     public function show(Equipment $equipment): JsonResponse
     {
+        $equipment->load(['category', 'status', 'department', 'items.condition', 'images']);
+
         return response()->json([
             'data' => $this->formatEquipment($equipment),
         ]);
     }
 
-    /**
-     * Update the specified equipment in storage.
-     */
+
+    // ----- Update Equipment ----- //
+
     public function update(Request $request, Equipment $equipment): JsonResponse
     {
         $data = $request->validate([
@@ -144,15 +161,15 @@ class EquipmentController extends Controller
             'total_quantity' => 'sometimes|integer|min:1',
             'rental_fee' => 'sometimes|numeric|min:0',
             'company_fee' => 'sometimes|numeric|min:0',
-            'type_id' => 'sometimes|exists:rate_types,type_id',
+            'rate_type' => 'sometimes|in:Per Hour,Per Show/Event',
             'status_id' => 'sometimes|exists:availability_statuses,status_id',
             'department_id' => 'sometimes|exists:departments,department_id',
-            'minimum_hour' => 'sometimes|integer|min:1',
+            'maximum_rental_hour' => 'sometimes|integer|min:1',
         ]);
 
         $user = auth()->user();
 
-        if (!$user->departments->pluck('id')->contains($equipment->department_id)) {
+        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
             return response()->json(['message' => 'You do not manage this equipment.'], 403);
         }
 
@@ -165,49 +182,50 @@ class EquipmentController extends Controller
             'total_quantity' => $data['total_quantity'] ?? $equipment->total_quantity,
             'rental_fee' => $data['rental_fee'] ?? $equipment->rental_fee,
             'company_fee' => $data['company_fee'] ?? $equipment->company_fee,
-            'type_id' => $data['type_id'] ?? $equipment->type_id,
+            'rate_type' => $data['rate_type'] ?? $equipment->rate_type,
             'status_id' => $data['status_id'] ?? $equipment->status_id,
             'department_id' => $data['department_id'] ?? $equipment->department_id,
-            'minimum_hour' => $data['minimum_hour'] ?? $equipment->minimum_hour,
-            'updated_by' => $user->id,
+            'maximum_rental_hour' => $data['maximum_rental_hour'] ?? $equipment->maximum_rental_hour,
+            'updated_by' => $user->admin_id,
         ]);
 
         return response()->json([
             'message' => 'Equipment updated successfully',
-            'data' => $this->formatEquipment($equipment),
+            'data' => $this->formatEquipment($equipment->fresh()),
         ]);
     }
 
-    /**
-     * Remove the specified equipment from storage.
-     */
+
+    // ----- Remove Equipment ----- //
     public function destroy(Equipment $equipment): JsonResponse
     {
         $user = auth()->user();
 
-        if (!$user->departments->pluck('id')->contains($equipment->department_id)) {
+        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
             return response()->json(['message' => 'You do not manage this equipment.'], 403);
         }
 
+        // Soft delete tracking
+        $equipment->update([
+            'deleted_by' => $user->id,
+        ]);
+
+        // Remove related records
         $equipment->items()->delete();
         $equipment->images()->delete();
+
+        // Delete equipment record
         $equipment->delete();
 
         return response()->json(['message' => 'Equipment deleted successfully']);
-
     }
 
-    /**
-     * Upload an image for the equipment
-     */
+    // ----- Upload Equipment Images ----- //
+
     public function uploadImage(Request $request, $equipmentId): JsonResponse
     {
-        $uploadResponse = Cloudinary::upload($image->getRealPath(), [
-            'upload_preset' => 'equipment-photos'
-        ]);
-        
-        // Validate the uploaded image
-        $request->validate([
+        // Validate the uploaded image and data
+        $validated = $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'description' => 'nullable|string|max:255',
             'type_id' => 'sometimes|exists:image_types,type_id'
@@ -216,21 +234,31 @@ class EquipmentController extends Controller
         // Find the equipment
         $equipment = Equipment::findOrFail($equipmentId);
 
-        // Handle file upload (store in storage/app/public/equipment-images)
-        // Upload to Cloudinary and get secure URL
-        $uploadedFileUrl = Cloudinary::upload($request->file('image')->getRealPath())->getSecurePath();
-        $imageUrl = $uploadedFileUrl;
+        // Check if the user is authorized to upload for this equipment
+        $user = auth()->user();
+        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
+            return response()->json(['message' => 'You do not manage this equipment.'], 403);
+        }
+
+        // Upload to Cloudinary
+        $uploaded = Cloudinary::upload(
+            $request->file('image')->getRealPath(),
+            ['upload_preset' => 'equipment-photos']
+        );
+
+        $imageUrl = $uploaded->getSecurePath();
+        $publicId = $uploaded->getPublicId();
 
         // Determine image type if not provided
-        $imageType = $request->input('type_id') ??
-            ($equipment->images()->count() == 0 ? 1 : 2); // First = primary, rest = additional
+        $imageType = $validated['type_id'] ??
+            ($equipment->images()->count() == 0 ? 1 : 2); // First image = primary
 
-        // Create the equipment image record
+        // Create the image record
         $equipment->images()->create([
             'image_url' => $imageUrl,
             'type_id' => $imageType,
             'cloudinary_public_id' => $publicId,
-            'description' => $request->input('description'),
+            'description' => $validated['description'] ?? null,
             'sort_order' => $equipment->images()->count() + 1
         ]);
 
@@ -240,73 +268,91 @@ class EquipmentController extends Controller
         ]);
     }
 
-    /**
-     * Bulk upload images for the equipment
-     */
+
+   // ----- Upload Images In Bulk ----- //
     public function uploadMultipleImages(Request $request, $equipmentId): JsonResponse
     {
-        $request->validate([
+        // Validate the images and optional type_id
+        $validated = $request->validate([
+            'images' => 'required|array',
             'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'type_id' => 'sometimes|exists:image_types,type_id'
+            'description' => 'nullable|string|max:255',
+            'type_id' => 'sometimes|exists:image_types,type_id',
         ]);
 
+        // Find the equipment
         $equipment = Equipment::findOrFail($equipmentId);
+
+        // Authorization: ensure the admin manages this equipment's department
+        $user = auth()->user();
+        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
+            return response()->json(['message' => 'You do not manage this equipment.'], 403);
+        }
+
         $currentImageCount = $equipment->images()->count();
-        $typeId = $request->input('type_id');
+        $typeId = $validated['type_id'] ?? null;
 
-        foreach ($request->file('images') as $index => $image) {
-            $uploadedFileUrl = Cloudinary::upload($image->getRealPath())->getSecurePath();
-            $imageUrl = $uploadedFileUrl;
+        foreach ($validated['images'] as $index => $image) {
+            // Upload to Cloudinary
+            $upload = Cloudinary::upload(
+                $image->getRealPath(),
+                ['upload_preset' => 'equipment-photos']
+            );
 
-            // Use provided type_id if available, otherwise determine automatically
-            $imageType = $typeId ?? (($currentImageCount + $index) == 0 ? 1 : 2);
+            $imageUrl = $upload->getSecurePath();
+            $publicId = $upload->getPublicId();
 
+            // Decide image type (first image = primary if none specified)
+            $imageType = $typeId ?? (($currentImageCount + $index) === 0 ? 1 : 2);
+
+            // Create image record
             $equipment->images()->create([
                 'image_url' => $imageUrl,
                 'type_id' => $imageType,
                 'cloudinary_public_id' => $publicId,
-                'description' => $request->input('description'),
-                'sort_order' => $currentImageCount + $index + 1
+                'description' => $validated['description'] ?? null,
+                'sort_order' => $currentImageCount + $index + 1,
             ]);
         }
 
         return response()->json(['message' => 'Images uploaded successfully']);
     }
 
-    /**
-     * Delete an equipment image
-     */
+
+    // ----- Delete Equipment Images ----- //
+
     public function deleteImage($equipmentId, $imageId): JsonResponse
     {
         $equipment = Equipment::findOrFail($equipmentId);
+        $user = auth()->user();
+
+        // Authorization check
+        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
+            return response()->json(['message' => 'You do not manage this equipment.'], 403);
+        }
+
         $image = $equipment->images()->findOrFail($imageId);
 
-        // Delete all images from cloudinary if equipment is deleted
-        foreach ($equipment->images as $image) {
-            if ($image->cloudinary_public_id) {
-                Cloudinary::destroy($image->cloudinary_public_id);
-            }
-        }
-        $equipment->images()->delete();
-        $equipment->items()->delete();
-        $equipment->delete();
-
-        // Delete the file from storage
-        $path = str_replace('/storage', 'public', parse_url($image->image_url, PHP_URL_PATH));
-        Storage::delete($path);
-
-        // Delete the record
-        $image->delete();
-
+        // Delete the image from Cloudinary if it exists
         if ($image->cloudinary_public_id) {
             Cloudinary::destroy($image->cloudinary_public_id);
-        }  
+        }
+
+        // Delete local copy from storage if applicable
+        $path = str_replace('/storage', 'public', parse_url($image->image_url, PHP_URL_PATH));
+        if (Storage::exists($path)) {
+            Storage::delete($path);
+        }
+
+        // Delete DB record
+        $image->delete();
 
         // Reorder remaining images
         $this->reorderImageRecords($equipment);
 
         return response()->json(['message' => 'Image deleted successfully']);
     }
+
 
     private function reorderImageRecords(Equipment $equipment): void
     {
@@ -316,9 +362,8 @@ class EquipmentController extends Controller
         }
     }
 
-    /**
-     * Reorder equipment images
-     */
+    // ----- Reorder Images ----- //
+
     public function reorderImages(Request $request, $equipmentId): JsonResponse
     {
         $request->validate([
@@ -327,18 +372,63 @@ class EquipmentController extends Controller
         ]);
 
         $equipment = Equipment::findOrFail($equipmentId);
+        $user = auth()->user();
+
+        // Authorization check
+        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
+            return response()->json(['message' => 'You do not manage this equipment.'], 403);
+        }
 
         foreach ($request->input('order') as $position => $imageId) {
-            EquipmentImage::where('image_id', $imageId)
+            $equipment->images()->where('image_id', $imageId)
                 ->update(['sort_order' => $position + 1]);
         }
 
         return response()->json(['message' => 'Images reordered successfully']);
     }
 
+
+    // ----- Formatting ----- //
+
     private function formatEquipment($equipment): array
     {
-        $equipment->load(['category', 'status', 'department', 'type', 'items', 'images']);
+        $equipment->load(['category', 'status', 'department', 'items', 'images']);
+    
+        return [
+            'equipment_id' => $equipment->equipment_id,
+            'equipment_name' => $equipment->equipment_name,
+            'description' => $equipment->description,
+            'brand' => $equipment->brand,
+            'storage_location' => $equipment->storage_location,
+            'category' => [
+                'category_id' => $equipment->category_id,
+                'category_name' => $equipment->category->category_name,
+            ],
+            'total_quantity' => $equipment->total_quantity,
+            'available_quantity' => $equipment->available_quantity,
+            'rental_fee' => $equipment->rental_fee,
+            'company_fee' => $equipment->company_fee,
+            'rate_type' => $equipment->rate_type,
+            'status' => [
+                'status_id' => $equipment->status_id,
+                'status_name' => $equipment->status->status_name,
+                'color_code' => $equipment->status->color_code,
+            ],
+            'department' => [
+                'department_id' => $equipment->department_id,
+                'department_name' => $equipment->department->department_name,
+            ],
+            'maximum_rental_hour' => $equipment->maximum_rental_hour,
+            'items' => $equipment->items,
+            'images' => $equipment->images,
+            'created_at' => $equipment->created_at,
+            'updated_at' => $equipment->updated_at,
+        ];
+    }
+
+    private function formatPublicEquipment($equipment): array
+    {
+        $equipment->load(['category', 'status', 'department', 'items.condition', 'images']);
 
         return [
             'equipment_id' => $equipment->equipment_id,
@@ -354,10 +444,7 @@ class EquipmentController extends Controller
             'available_quantity' => $equipment->available_quantity,
             'rental_fee' => $equipment->rental_fee,
             'company_fee' => $equipment->company_fee,
-            'rate_type' => [
-                'type_id' => $equipment->type_id,
-                'type_name' => optional($equipment->type)->type_name,
-            ],
+            'rate_type' => $equipment->rate_type,
             'status' => [
                 'status_id' => $equipment->status_id,
                 'status_name' => $equipment->status->status_name,
@@ -367,11 +454,10 @@ class EquipmentController extends Controller
                 'department_id' => $equipment->department_id,
                 'department_name' => $equipment->department->department_name,
             ],
-            'minimum_hour' => $equipment->minimum_hour,
             'items' => $equipment->items,
             'images' => $equipment->images,
-            'created_at' => $equipment->created_at,
-            'updated_at' => $equipment->updated_at,
         ];
     }
+
+
 }

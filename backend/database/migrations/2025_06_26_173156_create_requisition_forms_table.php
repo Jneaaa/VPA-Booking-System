@@ -19,29 +19,32 @@ return new class extends Migration
             $table->unsignedTinyInteger('purpose_id')->index();
             $table->string('other_purpose', 250)->nullable();
             $table->string('additional_requests', 250)->nullable();
+            $table->unsignedTinyInteger('status_id')->index();
+
+            // booking schedule 
             $table->date('start_date')->index();
             $table->date('end_date')->index();
             $table->time('start_time');
             $table->time('end_time');
-            $table->unsignedTinyInteger('status_id')->index();
 
+            // late returns 
             $table->decimal('late_penalty_fee', 10, 2)->nullable();
-
-            // new fields
             $table->boolean('is_late')->default(false);
-            $table->timestamp('returned_at')->nullable();
+            $table->dateTime('returned_at')->nullable();
+
+            // close form
             $table->boolean('is_closed')->default(false);
-            $table->timestamp('closed_at')->nullable();
+            $table->dateTime('closed_at')->nullable();
             $table->unsignedBigInteger('closed_by')->nullable();
 
             // finalization
             $table->boolean('is_finalized')->default(false);
-            $table->timestamp('finalized_at')->nullable();
+            $table->dateTime('finalized_at')->nullable();
             $table->unsignedBigInteger('finalized_by')->nullable();
 
             // endorsement
             $table->string('endorser', 50)->nullable();
-            $table->date('date_endorsed')->nullable();
+            $table->dateTime('date_endorsed')->nullable();
             $table->timestamps();
 
             // Foreign Keys

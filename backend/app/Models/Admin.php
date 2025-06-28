@@ -16,6 +16,9 @@ class Admin extends Authenticatable
 
     protected $fillable = [
         'photo_url',
+        'photo_public_id',
+        'wallpaper_url',
+        'wallpaper_public_id',
         'first_name',
         'last_name',
         'middle_name',
@@ -30,21 +33,88 @@ class Admin extends Authenticatable
         'hashed_password'
     ];
 
+    // ----- Role Assignment ----- //
     public function role()
     {
-        return $this->belongsTo(AdminRole::class, 'role_id', 'role_id');
+        return $this->belongsTo(LookupTables\AdminRole::class, 'role_id', 'role_id');
     }
 
+
+    // ----- Department Assignments ----- //
     public function departments(): BelongsToMany
     {
-        return $this->belongsToMany(LookupTables\Department::class, 'admin_departments', 'admin_id', 'department_id')
+        return $this->belongsToMany(Department::class, 'admin_departments', 'admin_id', 'department_id')
                     ->withPivot('is_primary')
                     ->withTimestamps();
     }
-
     public function primaryDepartment()
     {
         return $this->departments()->wherePivot('is_primary', true);
     }
+
+    // ----- Requisition Management ----- //
+
+    public function approvals()
+    {
+        return $this->hasMany(RequisitionApproval::class, 'admin_id', 'admin_id');
+    } 
+    public function finalizedByAdmin()
+    {
+        return $this->hasMany(RequisitionForm::class, 'finalized_by', 'admin_id');
+    }
+    public function addEvent()
+    {
+        return $this->hasMany(CalendarEvent::class,'admin_id', 'admin_id');
+    }
+    public function closedByAdmin()
+    {
+        return $this->hasMany(RequisitionForm::class, 'closed_by', 'admin_id');
+    }
+
+    // ----- Equipment Management ----- //
+    public function createEquipment()
+    {
+        return $this->hasMany(Equipment::class, 'created_by', 'admin_id');
+    }
+    public function updateEquipment()
+    {
+        return $this->hasMany(Equipment::class, 'updated_by', 'admin_id');
+    }
+    public function deleteEquipment()
+    {
+        return $this->hasMany(Equipment::class, 'deleted_by', 'admin_id');
+    }
+
+    // ----- Equipment Items Management ----- //
+    public function createEquipmentItems()
+    {
+        return $this->hasMany(EquipmentItem::class, 'created_by', 'admin_id');
+    }
+    public function updateEquipmentItems()
+    {
+        return $this->hasMany(Equipment::class, 'updated_by', 'admin_id');
+    }
+    public function deleteEquipmentItems()
+    {
+        return $this->hasMany(Equipment::class, 'deleted_by', 'admin_id');
+    }
+
+    // ----- Facility Management ----- //
+    public function createFacility()
+    {
+        return $this->hasMany(Facility::class, 'created_by', 'admin_id');
+    }
+    public function updateFacility()
+    {
+        return $this->hasMany(Facility::class, 'updated_by', 'admin_id');
+    }
+    public function deleteFacility()
+    {
+        return $this->hasMany(Facility::class, 'deleted_by', 'admin_id');
+    }
+
+
+
+
 
 }

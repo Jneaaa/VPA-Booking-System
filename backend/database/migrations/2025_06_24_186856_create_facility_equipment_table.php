@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id('facility_equipment_id');
             $table->unsignedBigInteger('facility_id');
             $table->unsignedBigInteger('equipment_id');
+            $table->unsignedBigInteger('quantity')->default(1);
             
             // Foreign Keys
             $table->foreign('facility_id')->references('facility_id')->on('facilities')->onDelete('cascade');
             $table->foreign('equipment_id')->references('equipment_id')->on('equipment')->onDelete('cascade'); // adjust 'equipment' table name if different
+            
             
         });
     }

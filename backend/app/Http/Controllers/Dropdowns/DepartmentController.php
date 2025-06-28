@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Dropdowns;
 
 
 use App\Http\Controllers\Controller;
-use App\Models\LookupTables\Department;
+use App\Models\Department;
 use Illuminate\Http\JsonResponse;
 
 class DepartmentController extends Controller

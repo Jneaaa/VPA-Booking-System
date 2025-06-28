@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('room_details', function (Blueprint $table) {
         $table->id('room_id');
         $table->unsignedTinyInteger('subcategory_id');
-        $table->string('room_name', 50);
+        $table->string('room_name', 50)->nullable();
         $table->string('building_name', 50)->nullable();
         $table->string('building_code', 10)->nullable();
         $table->string('room_number', 10)->nullable();

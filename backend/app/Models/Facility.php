@@ -15,6 +15,7 @@ class Facility extends Model
     protected $fillable = [
         'facility_name',
         'description',
+        'maximum_rental_hour',
         'category_id',
         'subcategory_id',
         'room_id',
@@ -24,21 +25,31 @@ class Facility extends Model
         'is_indoors',
         'rental_fee',
         'company_fee',
+        'rate_type',
         'status_id',
+        'last_booked_at',
         'created_by',
         'updated_by',
         'deleted_by',
-        'last_booked_at'
     ];
 
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'deleted_at',
-        'last_booked_at'
+    protected $casts = [
+        'last_booked_at' => 'datetime',
+        'is_indoors' => 'boolean',
     ];
 
     // Relationships
+
+    public function amenities()
+    {
+        return $this->hasMany(FacilityAmenity::class, 'facility_id', 'facility_id');
+    }
+
+    public function equipment()
+    {
+        return $this->hasMany(FacilityEquipment::class, 'facility_id', 'facility_id');
+    }
+
     public function category()
     {
         return $this->belongsTo(LookupTables\FacilityCategory::class, 'category_id', 'category_id');
@@ -49,24 +60,19 @@ class Facility extends Model
         return $this->belongsTo(LookupTables\FacilitySubcategory::class, 'subcategory_id', 'subcategory_id');
     }
 
-    public function room()
-    {
-        return $this->belongsTo(RoomDetail::class, 'room_id', 'room_id');
-    }
-
     public function roomDetail()
     {
         return $this->belongsTo(RoomDetail::class, 'room_id', 'room_id');
     }
 
-    public function department()
-    {
-        return $this->belongsTo(LookupTables\Department::class, 'department_id', 'department_id');
-    }
-
     public function status()
     {
         return $this->belongsTo(LookupTables\AvailabilityStatus::class, 'status_id', 'status_id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'department_id');
     }
 
     public function images()
@@ -95,8 +101,9 @@ class Facility extends Model
         return $query->where('department_id', $departmentId);
     }
 
-    public function scopeActive($query)
+    public function scopeBySubcategory($query, $subcategoryId)
     {
-        return $query->whereNull('deleted_at');
+        return $query->where('subcategory_id', $subcategoryId);
     }
+
 }

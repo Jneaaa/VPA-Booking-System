@@ -4,56 +4,136 @@ namespace App\Http\Controllers;
 
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Str;
-use App\Models\UserFile;
+use App\Models\UserUpload;
 use Illuminate\Http\Request;
 use App\Models\RequisitionForm;
 use App\Models\RequestedEquipment;
 use App\Models\RequestedFacility;
+use App\Models\Facility;
+use App\Models\Equipment;
 use App\Models\User;
-use App\Models\UserUpload;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 
 class RequisitionFormController extends Controller
 {
+    public function addToForm(Request $request)
+    {
+        $request->validate([
+            'facility_id' => 'sometimes|exists:facilities,facility_id',
+            'equipment_id' => 'sometimes|exists:equipment,equipment_id',
+            'type' => 'required|in:facility,equipment'
+        ]);
+
+        $selectedItems = session()->get('selected_items', []);
+        $id = $request->input($request->type . '_id');
+        
+        // Check if already added
+        if (!collect($selectedItems)->contains('id', $id)) {
+            $selectedItems[] = [
+                'id' => $id,
+                'type' => $request->type
+            ];
+            session()->put('selected_items', $selectedItems);
+        }
+
+        return response()->json([
+            'success' => true,
+            'selectedItems' => $selectedItems
+        ]);
+    }
+
+    public function removeFromForm(Request $request)
+    {
+        $request->validate([
+            'facility_id' => 'sometimes|exists:facilities,facility_id',
+            'equipment_id' => 'sometimes|exists:equipment,equipment_id',
+            'type' => 'required|in:facility,equipment'
+        ]);
+
+        $selectedItems = session()->get('selected_items', []);
+        $id = $request->input($request->type . '_id');
+        
+        $selectedItems = array_filter($selectedItems, function($item) use ($id, $request) {
+            return !($item['id'] == $id && $item['type'] == $request->type);
+        });
+
+        session()->put('selected_items', array_values($selectedItems));
+
+        return response()->json([
+            'success' => true,
+            'selectedItems' => $selectedItems
+        ]);
+    }
+
+    public function checkAvailability(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'start_time' => 'required',
+            'end_time' => 'required'
+        ]);
+
+        // Convert to proper datetime format
+        $startDateTime = Carbon::parse($request->start_date . ' ' . $request->start_time);
+        $endDateTime = Carbon::parse($request->end_date . ' ' . $request->end_time);
+
+        // Check for conflicts
+        $conflicts = RequisitionForm::where(function($query) use ($startDateTime, $endDateTime) {
+            $query->where(function($q) use ($startDateTime, $endDateTime) {
+                $q->where('start_date', '<=', $endDateTime->format('Y-m-d'))
+                  ->where('end_date', '>=', $startDateTime->format('Y-m-d'))
+                  ->where('start_time', '<=', $endDateTime->format('H:i:s'))
+                  ->where('end_time', '>=', $startDateTime->format('H:i:s'));
+            });
+        })->whereIn('status_id', [2, 3]); // Approved or in-process statuses
+
+        return response()->json([
+            'available' => $conflicts->count() === 0,
+            'conflicts' => $conflicts->count()
+        ]);
+    }
+
     // Save form progress
-public function saveProgress(Request $request)
-{
-    $sessionKey = 'requisition_form_' . ($request->user() ? $request->user()->id : session()->getId());
-    
-    $data = $request->validate([
-        'step' => 'required|integer',
-        'formData' => 'required|array'
-    ]);
-    
-    $currentData = session()->get($sessionKey, []);
-    $currentData[$data['step']] = $data['formData'];
-    
-    session()->put($sessionKey, $currentData);
-    session()->save();
-    
-    return response()->json(['message' => 'Progress saved']);
-}
+    public function saveProgress(Request $request)
+    {
+        $sessionKey = 'requisition_form_' . ($request->user() ? $request->user()->id : session()->getId());
+        
+        $data = $request->validate([
+            'step' => 'required|integer',
+            'formData' => 'required|array'
+        ]);
+        
+        $currentData = session()->get($sessionKey, []);
+        $currentData[$data['step']] = $data['formData'];
+        
+        session()->put($sessionKey, $currentData);
+        session()->save();
+        
+        return response()->json(['message' => 'Progress saved']);
+    }
 
-// Load saved progress
-public function loadProgress(Request $request)
-{
-    $sessionKey = 'requisition_form_' . ($request->user() ? $request->user()->id : session()->getId());
-    
-    return response()->json([
-        'savedData' => session()->get($sessionKey, [])
-    ]);
-}
+    // Load saved progress
+    public function loadProgress(Request $request)
+    {
+        $sessionKey = 'requisition_form_' . ($request->user() ? $request->user()->id : session()->getId());
+        
+        return response()->json([
+            'savedData' => session()->get($sessionKey, [])
+        ]);
+    }
 
-// Clear saved progress
-public function clearProgress(Request $request)
-{
-    $sessionKey = 'requisition_form_' . ($request->user() ? $request->user()->id : session()->getId());
-    
-    session()->forget($sessionKey);
-    
-    return response()->json(['message' => 'Progress cleared']);
-}
+    // Clear saved progress
+    public function clearProgress(Request $request)
+    {
+        $sessionKey = 'requisition_form_' . ($request->user() ? $request->user()->id : session()->getId());
+        
+        session()->forget($sessionKey);
+        
+        return response()->json(['message' => 'Progress cleared']);
+    }
+
     // Temporary file upload handler
     public function tempUpload(Request $request)
     {
@@ -251,31 +331,31 @@ public function clearProgress(Request $request)
     }
 
     private function scheduleReminderEmails(RequisitionForm $requisition): void
-{
-    $startDate = Carbon::parse($requisition->start_date);
-    $endDate = Carbon::parse($requisition->end_date);
-    
-    // Pre-event reminder (3 days before)
-    $reminderDate = $startDate->copy()->subDays(3);
-    if ($reminderDate->isFuture()) {
-        SendRequisitionReminder::dispatch($requisition, 'pre_event')
-            ->delay($reminderDate);
-    }
-
-    // Equipment reminders only if equipment is requested
-    if ($requisition->requestedEquipment()->exists()) {
-        // Pre-return reminder (3 days before due date)
-        $preReturnDate = $endDate->copy()->subDays(3);
-        if ($preReturnDate->isFuture()) {
-            SendRequisitionReminder::dispatch($requisition, 'pre_return')
-                ->delay($preReturnDate);
+    {
+        $startDate = Carbon::parse($requisition->start_date);
+        $endDate = Carbon::parse($requisition->end_date);
+        
+        // Pre-event reminder (3 days before)
+        $reminderDate = $startDate->copy()->subDays(3);
+        if ($reminderDate->isFuture()) {
+            SendRequisitionReminder::dispatch($requisition, 'pre_event')
+                ->delay($reminderDate);
         }
 
-        // Due date reminder
-        SendRequisitionReminder::dispatch($requisition, 'return_due')
-            ->delay($endDate->startOfDay());
+        // Equipment reminders only if equipment is requested
+        if ($requisition->requestedEquipment()->exists()) {
+            // Pre-return reminder (3 days before due date)
+            $preReturnDate = $endDate->copy()->subDays(3);
+            if ($preReturnDate->isFuture()) {
+                SendRequisitionReminder::dispatch($requisition, 'pre_return')
+                    ->delay($preReturnDate);
+            }
+
+            // Due date reminder
+            SendRequisitionReminder::dispatch($requisition, 'return_due')
+                ->delay($endDate->startOfDay());
+        }
     }
-}
 
     // Get requisition details (for viewing)
     public function show($id, Request $request)

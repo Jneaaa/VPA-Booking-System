@@ -16,31 +16,35 @@ class EquipmentSeeder extends Seeder
                 'brand' => 'Shure',
                 'storage_location' => 'Equipment Room A',
                 'category_id' => 1, // Audio Equipment
+                'department_id' => 3,
                 'total_quantity' => 5,
                 'rental_fee' => 150.00,
                 'company_fee' => 450.00,
-                'type_id' => 1, // e.g., Per Hour
+                'rate_type' => 'Per Hour',
                 'status_id' => 1,
-                'department_id' => 3,
-                'minimum_hour' => 2,
-                'created_by' => 1, // Assuming admin ID 1 is the creator
+                'maximum_rental_hour' => 8,
+                'last_booked_at' => null,
+                'created_by' => 1,
                 'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'equipment_name' => 'LCD Projector',
-                'description' => 'High-definition LCD projector with 3000 lumens brightness, perfect for presentations and seminars',
-                'storage_location' => 'Equipment Room B',
+                'description' => 'High-definition LCD projector with 3000 lumens brightness, perfect for presentations and seminars.',
                 'brand' => 'Epson',
+                'storage_location' => 'Equipment Room B',
                 'category_id' => 2, // Visual Equipment
+                'department_id' => 1,
                 'total_quantity' => 8,
                 'rental_fee' => 100.00,
                 'company_fee' => 450.00,
-                'type_id' => 1, // e.g., Per Hour
+                'rate_type' => 'Per Hour',
                 'status_id' => 1,
-                'department_id' => 1,
-                'minimum_hour' => 1,
-                'created_by' => 1,
+                'maximum_rental_hour' => 6,
+                'last_booked_at' => null,
+                'created_by' => 2,
                 'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'equipment_name' => 'LED Stage Lights',
@@ -48,16 +52,18 @@ class EquipmentSeeder extends Seeder
                 'brand' => 'Chauvet',
                 'storage_location' => 'Lighting Storage Room C1',
                 'category_id' => 3,
+                'department_id' => 6,
                 'total_quantity' => 12,
                 'rental_fee' => 300.00,
                 'company_fee' => 450.00,
-                'type_id' => 2, // Per Event
+                'rate_type' => 'Per Show/Event',
                 'status_id' => 1,
-                'department_id' => 6,
-                'minimum_hour' => 4,
-                'created_by' => 1,
+                'maximum_rental_hour' => 10,
+                'last_booked_at' => null,
+                'created_by' => 3,
                 'created_at' => now(),
-            ]
+                'updated_at' => now(),
+            ],
         ]);
     }
 }

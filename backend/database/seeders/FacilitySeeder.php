@@ -6,10 +6,6 @@ use Illuminate\Database\Seeder;
 use App\Models\Facility;
 use App\Models\FacilityAmenity;
 use App\Models\RoomDetail;
-use App\Models\FacilityCategory;
-use App\Models\FacilitySubcategory;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 
 class FacilitySeeder extends Seeder
 {
@@ -19,7 +15,7 @@ class FacilitySeeder extends Seeder
     public function run(): void
 {
     // Step 1: Create facilities and store them
-    $facilities = \App\Models\Facility::factory()->count(10)->create();
+    $facilities = Facility::factory()->count(10)->create();
 
     // Step 2: Loop over each saved facility
     foreach ($facilities as $facility) {
@@ -45,7 +41,7 @@ class FacilitySeeder extends Seeder
 
         // Create 1–3 amenities
         for ($i = 0; $i < rand(1, 3); $i++) {
-            \App\Models\FacilityAmenity::factory()->create([
+            FacilityAmenity::factory()->create([
                 'facility_id' => $facility->facility_id,
             ]);
         }

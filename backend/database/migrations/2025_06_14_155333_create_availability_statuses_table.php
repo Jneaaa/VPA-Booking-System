@@ -15,7 +15,7 @@ return new class extends Migration
             $table->tinyIncrements('status_id');
             $table->string('status_name', 50);
             $table->string('color_code', 20);
-            $table->timestamps();
+            $table->boolean('is_active')->default(true);
         });
     }
 

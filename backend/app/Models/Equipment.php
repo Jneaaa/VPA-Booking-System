@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\AvailabilityStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
@@ -18,30 +17,32 @@ class Equipment extends Model
         'equipment_name',
         'description',
         'brand',
-        'location_note',
+        'storage_location',
         'category_id',
-        'subcategory_id',
         'department_id',
         'total_quantity',
         'rental_fee',
         'company_fee',
-        'status_id',
         'rate_type',
-        'minimum_hour',
+        'status_id',
+        'maximum_rental_hour',
+        'last_booked_at',
         'created_by',
         'updated_by',
-        'deleted_by',
-        'last_booked_at'
+        'deleted_by'
     ];
 
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'deleted_at',
+    protected $casts = [
         'last_booked_at'
     ];
 
     // Relationships
+
+    public function facilities()
+    {
+        return $this->belongsToMany(Facility::class, 'facility_equipment', 'equipment_id', 'facility_id');
+    }
+
     public function category()
     {
         return $this->belongsTo(LookupTables\EquipmentCategory::class, 'category_id', 'category_id');
@@ -49,23 +50,17 @@ class Equipment extends Model
 
     public function department()
     {
-        return $this->belongsTo(LookupTables\Department::class, 'department_id', 'department_id');
-    }
-
-    public function type()
-    {
-        return $this->belongsTo(LookupTables\RateType::class, 'rate_type', 'type_id');
+        return $this->belongsTo(Department::class, 'department_id', 'department_id');
     }
 
     public function items()
     {
-        return $this->hasMany(EquipmentItem::class, 'item_id', 'item_id');
+        return $this->hasMany(EquipmentItem::class, 'equipment_id', 'equipment_id');
     }
 
     public function images()
     {
-        return $this->hasMany(EquipmentImage::class, 'equipment_id', 'equipment_id')
-            ->select(['image_id', 'equipment_id', 'image_url', 'type_id', 'description', 'sort_order']);
+        return $this->hasMany(EquipmentImage::class, 'equipment_id', 'equipment_id');
     }
 
     public function status()
@@ -82,9 +77,10 @@ class Equipment extends Model
     {
         return $this->belongsTo(Admin::class, 'updated_by', 'admin_id');
     }
-    public function rateType()
+
+    public function deletedByAdmin()
     {
-        return $this->belongsTo(\App\Models\LookupTables\RateType::class, 'type_id', 'type_id');
+        return $this->belongsTo(Admin::class, 'deleted_by', 'admin_id');
     }
 
     // Scopes
@@ -93,8 +89,4 @@ class Equipment extends Model
         return $query->where('department_id', $departmentId);
     }
 
-    public function scopeActive($query)
-    {
-        return $query->where('is_deleted', false);
-    }
 }

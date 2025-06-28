@@ -11,23 +11,23 @@ class FacilityCategorySeeder extends Seeder
     {
         DB::table('facility_categories')->insert([
             [
-                'category_name' => 'Building',
+                'category_name' => 'Buildings',
                 'description' => 'Standalone structures such as halls and churches.',
             ],
             [
-                'category_name' => 'Residential Building',
-                'description' => 'Buildings intended for housing, including dormitories.',
-            ],
-            [
-                'category_name' => 'Outside Space',
-                'description' => 'Open areas outside of buildings, like gardens and Halfmoon Drive.',
-            ],
-            [
-                'category_name' => 'Room',
+                'category_name' => 'Indoor Facilities',
                 'description' => 'Enclosed indoor spaces such as classrooms and laboratories.',
             ],
             [
-                'category_name' => 'Sports Venue',
+                'category_name' => 'Residencies',
+                'description' => 'Buildings intended for housing, including dormitories.',
+            ],
+            [
+                'category_name' => 'Outside Spaces',
+                'description' => 'Open areas outside of buildings, like gardens and Halfmoon Drive.',
+            ],
+            [
+                'category_name' => 'Sports Venues',
                 'description' => 'Facilities designated for physical activities and sports events.',
             ],
         ]);

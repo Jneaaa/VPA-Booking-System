@@ -14,6 +14,10 @@ class RequestedFacility extends Model
         'is_waived',
     ];
 
+    protected $casts = [
+        'is_waived' => 'boolean'
+    ];
+
     public function requisitionForm()
     {
         return $this->belongsTo(RequisitionForm::class, 'request_id', 'request_id');

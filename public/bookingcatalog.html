@@ -238,6 +238,12 @@
               </div>
             </div>
 
+            <div class="text-center mt-4">
+              <nav>
+                <ul id="pagination-top" class="pagination justify-content-center"></ul>
+              </nav>
+            </div>
+
             <!-- Loading Indicator -->
             <div id="loadingIndicator" class="text-center py-5">
               <div class="spinner-border text-primary" role="status">
@@ -321,7 +327,6 @@
               rental_fee: parseFloat(facility.rental_fee) || 0, // Ensure rental_fee is a valid number
             }));
 
-            renderCategoryFilterList();
             renderCatalogItems();
 
             loadingIndicator.classList.add("d-none");
@@ -337,25 +342,97 @@
           }
         }
 
-        // Render category filter list
-        function renderCategoryFilterList() {
-          const categories = [
-            "All",
-            ...new Set(
-              facilities.map((facility) => facility.category?.category_name || "Uncategorized")
-            ),
-          ];
+        // Fetch categories and subcategories from the API
+        async function fetchCategories() {
+          try {
+            const response = await fetch("http://127.0.0.1:8000/api/facility-categories", {
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            renderCategoryFilterList(data);
+          } catch (error) {
+            console.error("Error fetching categories:", error);
+          }
+        }
+
+        // Render category filter list with collapsible subcategories
+        function renderCategoryFilterList(categories) {
           categoryFilterList.innerHTML = "";
+
           categories.forEach((category) => {
-            const listItem = document.createElement("a");
-            listItem.href = "#";
-            listItem.classList.add("filter-item");
-            listItem.dataset.category = category;
-            listItem.textContent = category;
-            if (category === "All") listItem.classList.add("active");
-            categoryFilterList.appendChild(listItem);
+            const categoryItem = document.createElement("div");
+            categoryItem.classList.add("category-item");
+
+            const categoryHeader = document.createElement("span");
+            categoryHeader.classList.add("filter-item", "d-flex", "align-items-center", "justify-content-between");
+            categoryHeader.textContent = category.category_name;
+
+            if (category.subcategories && category.subcategories.length > 0) {
+              const toggleButton = document.createElement("i");
+              toggleButton.classList.add("bi", "bi-chevron-down", "ms-2", "toggle-icon");
+              toggleButton.dataset.bsToggle = "collapse";
+              toggleButton.dataset.bsTarget = `#subcategory-${category.category_id}`;
+              categoryHeader.appendChild(toggleButton);
+
+              const subcategoryList = document.createElement("div");
+              subcategoryList.classList.add("subcategory-list", "collapse");
+              subcategoryList.id = `subcategory-${category.category_id}`;
+
+              category.subcategories.forEach((subcategory) => {
+                const subcategoryItem = document.createElement("a");
+                subcategoryItem.href = "#";
+                subcategoryItem.classList.add("filter-item", "ms-3");
+                subcategoryItem.dataset.category = subcategory.subcategory_name;
+                subcategoryItem.textContent = subcategory.subcategory_name;
+                subcategoryList.appendChild(subcategoryItem);
+              });
+
+              categoryItem.appendChild(categoryHeader); // Ensure header is added first
+              categoryItem.appendChild(subcategoryList); // Subcategories appear below the header
+            } else {
+              categoryHeader.dataset.category = category.category_name;
+              categoryHeader.classList.add("clickable");
+              categoryHeader.addEventListener("click", function (e) {
+                e.preventDefault();
+                currentCategory = this.dataset.category;
+                currentCategoryTitle.textContent = `${currentCategory} Facilities`;
+                renderCatalogItems();
+              });
+              categoryItem.appendChild(categoryHeader);
+            }
+
+            categoryFilterList.appendChild(categoryItem);
           });
+
           attachCategoryFilterListeners();
+          setupCollapseAnimations();
+        }
+
+        // Add animations for the collapse arrow
+        function setupCollapseAnimations() {
+          const toggleIcons = document.querySelectorAll(".toggle-icon");
+          toggleIcons.forEach((icon) => {
+            const targetId = icon.dataset.bsTarget;
+            const targetElement = document.querySelector(targetId);
+
+            targetElement.addEventListener("show.bs.collapse", () => {
+              icon.classList.remove("bi-chevron-down");
+              icon.classList.add("bi-chevron-up");
+            });
+
+            targetElement.addEventListener("hide.bs.collapse", () => {
+              icon.classList.remove("bi-chevron-up");
+              icon.classList.add("bi-chevron-down");
+            });
+          });
         }
 
         function renderCatalogItems() {
@@ -367,7 +444,8 @@
               ? facilities
               : facilities.filter(
                   (facility) =>
-                    facility.category?.category_name === currentCategory
+                    facility.category?.category_name === currentCategory ||
+                    facility.subcategory?.subcategory_name === currentCategory
                 );
 
           const startIndex = (currentPage - 1) * itemsPerPage;
@@ -399,6 +477,9 @@
                         <div><i class="bi bi-tag"></i> ${
                           facility.category?.category_name || "Uncategorized"
                         }</div>
+                        <div><i class="bi bi-tags"></i> ${
+                          facility.subcategory?.subcategory_name || "No Subcategory"
+                        }</div>
                         <div><i class="bi bi-building"></i> ${
                           facility.department?.department_name || "Unknown Department"
                         }</div>
@@ -426,6 +507,9 @@
                         <div><i class="bi bi-tag"></i> ${
                           facility.category?.category_name || "Uncategorized"
                         }</div>
+                        <div><i class="bi bi-tags"></i> ${
+                          facility.subcategory?.subcategory_name || "No Subcategory"
+                        }</div>
                         <div><i class="bi bi-cash"></i> ₱${rentalFee}</div>
                     </div>
                     <button class="btn btn-sm btn-primary mt-2">Add to Form</button>
@@ -440,22 +524,40 @@
         }
 
         function renderPagination(totalItems) {
-          const pagination = document.getElementById("pagination");
-          pagination.innerHTML = "";
+          const paginationTop = document.getElementById("pagination-top");
+          const paginationBottom = document.getElementById("pagination");
+          paginationTop.innerHTML = "";
+          paginationBottom.innerHTML = "";
 
           const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-          for (let i = 1; i <= totalPages; i++) {
+          function createPaginationElement(page, label = null, isDisabled = false) {
             const li = document.createElement("li");
-            li.className = "page-item" + (i === currentPage ? " active" : "");
-            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-            li.addEventListener("click", function (e) {
-              e.preventDefault();
-              currentPage = i;
-              renderCatalogItems();
-            });
-            pagination.appendChild(li);
+            li.className = `page-item${isDisabled ? " disabled" : ""}${page === currentPage ? " active" : ""}`;
+            li.innerHTML = `<a class="page-link" href="#">${label || page}</a>`;
+            if (!isDisabled) {
+              li.addEventListener("click", function (e) {
+                e.preventDefault();
+                currentPage = page;
+                renderCatalogItems();
+              });
+            }
+            return li;
           }
+
+          // Add "Back" button
+          paginationTop.appendChild(createPaginationElement(currentPage - 1, "Back", currentPage === 1));
+          paginationBottom.appendChild(createPaginationElement(currentPage - 1, "Back", currentPage === 1));
+
+          // Add numbered pages
+          for (let i = 1; i <= totalPages; i++) {
+            paginationTop.appendChild(createPaginationElement(i));
+            paginationBottom.appendChild(createPaginationElement(i));
+          }
+
+          // Add "Next" button
+          paginationTop.appendChild(createPaginationElement(currentPage + 1, "Next", currentPage === totalPages));
+          paginationBottom.appendChild(createPaginationElement(currentPage + 1, "Next", currentPage === totalPages));
         }
 
         // Attach category filter listeners
@@ -512,6 +614,7 @@
 
         // Initial fetch and render
         fetchFacilities();
+        fetchCategories();
         setupLayoutToggle();
       });
     </script>
@@ -528,6 +631,24 @@
         border: none !important;
         box-shadow: none !important;
       }
+
+      /* Style pagination to use CPU primary colors */
+      .pagination .page-item.active .page-link {
+        background-color: var(--cpu-primary) !important;
+        border-color: var(--cpu-primary) !important;
+        color: #fff !important;
+      }
+
+      .pagination .page-link {
+        color: var(--cpu-primary) !important;
+        border-color: lightgrey !important;
+      }
+
+      .pagination .page-item.disabled .page-link {
+        color: #6c757d !important;
+        border-color: #d3d3d3 !important;
+      }
+      
     </style>
   </body>
 </html>

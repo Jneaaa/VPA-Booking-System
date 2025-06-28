@@ -15,7 +15,6 @@ return new class extends Migration
             $table->tinyIncrements('category_id');
             $table->string('category_name', 50);
             $table->string('description', 255)->nullable();
-            $table->timestamps();
         });
     }
 

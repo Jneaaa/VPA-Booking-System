@@ -8,16 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class EquipmentImage extends Model
 {
 
-
     protected $table = 'equipment_images';
-    protected $primaryKey = 'equipment_photo_id';
+    protected $primaryKey = 'image_id';
 
     protected $fillable = [
         'equipment_id',
         'description',
-        'image_type',
+        'is_primary',
         'sort_order',
-        'image_url'
+        'image_url',
+        'cloudinary_public_id'
+    ];
+
+    protected $casts = [
+        'is_primary'
     ];
 
     public function equipment()

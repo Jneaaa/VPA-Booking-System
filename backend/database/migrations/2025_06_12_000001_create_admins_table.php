@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('admins', function (Blueprint $table) {
             $table->id('admin_id')->autoIncrement();
-            $table->string('photo_url', 500)->nullable();
+            $table->string('photo_url')->nullable()->default('https://res.cloudinary.com/dn98ntlkd/image/upload/v1751033911/ksdmh4mmpxdtjogdgjmm.png')->nullable();
+            $table->string('photo_public_id')->nullable()->default('ksdmh4mmpxdtjogdgjmm')->nullable();
+            $table->string('wallpaper_url')->nullable()->default('https://res.cloudinary.com/dn98ntlkd/image/upload/v1751033948/verzp7lqedwsfn3hz8xf.jpg')->nullable();
+            $table->string('wallpaper_public_id')->nullable()->default('verzp7lqedwsfn3hz8xf')->nullable();
             $table->string('first_name', 50);
             $table->string('last_name', 50);
             $table->string('middle_name', 50)->nullable();

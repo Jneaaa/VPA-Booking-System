@@ -15,7 +15,6 @@ return new class extends Migration
             $table->tinyIncrements('subcategory_id');
             $table->unsignedTinyInteger('category_id');
             $table->string('subcategory_name', 50);
-
             $table->foreign('category_id')->references('category_id')->on('facility_categories')->onDelete('cascade');
         });
     }

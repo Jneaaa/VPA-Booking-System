@@ -17,32 +17,22 @@ class AvailabilityStatusSeeder extends Seeder
             [
                 'status_name' => 'Available',
                 'color_code' => '#28a745',
-                'created_at' => now(),
-                'updated_at' => now()
             ],
             [
                 'status_name' => 'Unavailable',
                 'color_code' => '#dc3545',
-                'created_at' => now(),
-                'updated_at' => now()
             ],
             [
                 'status_name' => 'Under Maintenance',
                 'color_code' => '#ffc107',
-                'created_at' => now(),
-                'updated_at' => now()
             ],
             [
                 'status_name' => 'Closed',
                 'color_code' => '#6c757d',
-                'created_at' => now(),
-                'updated_at' => now()
             ],
             [
                 'status_name' => 'Hidden',
                 'color_code' => '#343a40',
-                'created_at' => now(),
-                'updated_at' => now()
             ]
          ]);
     }

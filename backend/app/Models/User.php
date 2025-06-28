@@ -13,7 +13,8 @@ class User extends Model
         'first_name',
         'last_name',
         'email',
-        'organization',
+        'contact_number',
+        'organization_name',
         'school_id',
     ];
     

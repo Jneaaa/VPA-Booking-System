@@ -15,7 +15,6 @@ return new class extends Migration
             $table->tinyIncrements('condition_id');
             $table->string('condition_name', 50);
             $table->string('color_code', 20);
-            $table->timestamps();
 
         });
     }

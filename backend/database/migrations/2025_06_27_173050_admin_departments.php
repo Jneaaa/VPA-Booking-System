@@ -17,22 +17,12 @@ return new class extends Migration
             $table->boolean('is_primary')->default(false);
             $table->timestamps();
 
-            // Composite primary key
+            // Composite Primary Key
             $table->primary(['admin_id', 'department_id']);
 
-            // Foreign keys
-            $table->foreign('admin_id')
-                  ->references('admin_id')
-                  ->on('admins')
-                  ->onDelete('cascade');
-
-            $table->foreign('department_id')
-                  ->references('department_id')
-                  ->on('departments')
-                  ->onDelete('cascade');
-            
-            // Index for performance
-            $table->index(['admin_id', 'is_primary']);
+            // Foreign Keys
+            $table->foreign('admin_id')->references('admin_id')->on('admins')->onDelete('cascade');
+            $table->foreign('department_id')->references('department_id')->on('departments')->onDelete('cascade');
         });
     }
 
@@ -41,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('admin_departments');
     }
 };

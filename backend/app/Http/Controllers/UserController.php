@@ -8,13 +8,11 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    // Search users by full name or email
+    // Search users by email
     public function search(Request $request)
     {
         $search = $request->input('q');
-
-        $users = User::where('full_name', 'like', "%$search%")
-                    ->orWhere('email', 'like', "%$search%")
+        $users = User::where('email', 'like', "%$search%")
                     ->get();
 
         return response()->json($users);
@@ -33,7 +31,7 @@ class UserController extends Controller
     // List users 
     public function index()
     {
-        $users = User::orderBy('full_name')->get();
+        $users = User::orderBy('email')->get();
 
         return response()->json($users);
     }
@@ -42,7 +40,7 @@ class UserController extends Controller
     public function storeOrFetch(Request $request)
     {
         $request->validate([
-            'full_name' => 'required|string|max:100',
+            'first_name' => 'required|string|max:100',
             'email' => 'required|email|max:100',
             'department' => 'required|string|max:100',
             // Add other user fields here if needed
@@ -52,7 +50,7 @@ class UserController extends Controller
         $user = User::firstOrCreate(
             ['email' => $request->email],
             [
-                'full_name' => $request->full_name,
+                'first_name' => $request->full_name,
                 'department' => $request->department,
                 // Add other fields if necessary
             ]

@@ -15,11 +15,16 @@ class FacilityImage extends Model
     protected $fillable = [
         'facility_id',
         'image_url',
-        'type_id',
         'cloudinary_public_id',
+        'is_primary',
         'description',
         'sort_order',
     ];
+    
+    protected $casts = [
+        'is_primary'
+    ];
+
 
     public function facility()
     {

@@ -18,12 +18,8 @@ class FacilityAmenity extends Model
         'quantity',
     ];
 
-    public function equipment()
-    {
-        return $this->hasMany(Equipment::class, 'amenity_id', 'amenity_id');
-    }
     public function facility()
     {
-        return $this->belongsTo(Facility::class, 'facility_id');
+        return $this->belongsTo(Facility::class, 'facility_id', 'facility_id');
     }
 }

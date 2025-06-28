@@ -18,20 +18,17 @@ class DatabaseSeeder extends Seeder
             ConditionSeeder::class,
             DepartmentSeeder::class,
             EquipmentCategorySeeder::class,
-            ImageTypeSeeder::class,
-            RateTypeSeeder::class,
             AdminSeeder::class,
+            AdminDepartmentSeeder::class,
             EquipmentSeeder::class,
             EquipmentItemSeeder::class,
-            EquipmentImageSeeder::class,
             FacilityCategorySeeder::class,
             FacilitySubcategorySeeder::class,
-            FacilityImageSeeder::class,
-            RateTypeSeeder::class,
+            FacilitySeeder::class,
             RequisitionPurposeSeeder::class,
             FormStatusCodeSeeder::class,
             RequisitionTestSeeder::class,
-            FacilitySeeder::class,
+            
             // Add other seeders here if needed
         ]);
     }

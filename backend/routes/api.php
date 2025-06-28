@@ -3,57 +3,107 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RequisitionFormController;
+use App\Http\Controllers\FacilityController;
+use App\Http\Controllers\EquipmentController;
+use App\Http\Controllers\Dropdowns\FacilityCategoryController;
+use App\Http\Controllers\Dropdowns\FacilitySubcategoryController;
+use App\Http\Controllers\Dropdowns\EquipmentCategoryController;
+use App\Http\Controllers\Dropdowns\DepartmentController;
+use App\Http\Controllers\Dropdowns\AvailabilityStatusController;
+use App\Http\Controllers\Dropdowns\ConditionController;
+use App\Http\Controllers\Dropdowns\RequisitionPurposeController;
+
 use Illuminate\Support\Facades\Auth;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for our application.
-| These routes are loaded by the RouteServiceProvider and all of them
-| will be assigned to the "api" middleware group. 
-|
-*/
 
-// users 
-Route::post('/users/store-or-fetch', [UserController::class, 'storeOrFetch']);
-Route::get('/users', [UserController::class, 'index']); // list all users
-Route::get('/users/{user_id}/with-requisitions', [UserController::class, 'showWithRequisitions']);
-Route::get('/users/search', [UserController::class, 'search']);
+// ----- User Routes ----- //
 
-// Requisition Form Routes
+Route::get('/users', [UserController::class, 'index']);
+
+
+// ----- Requisition Form Routes ----- //
+
 Route::prefix('requisition')->group(function () {
-    // Form progress management
-    Route::post('/save-progress', [RequisitionFormController::class, 'saveProgress']);
-    Route::get('/load-progress', [RequisitionFormController::class, 'loadProgress']);
-    Route::post('/clear-progress', [RequisitionFormController::class, 'clearProgress']);
+
+// File uploads
+Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);
+
+// Form submission
+Route::post('/submit', [RequisitionFormController::class, 'submitRequisition']);
+
+// View requisition
+Route::get('/{request_id}', [RequisitionFormController::class, 'show']);
     
-    // File uploads
-    Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);
-    
-    // Form submission
-    Route::post('/submit', [RequisitionFormController::class, 'submitRequisition']);
-    
-    // View requisition
-    Route::get('/{id}', [RequisitionFormController::class, 'show']);
 });
 
-// Public routes needed for the form
-Route::get('/requisition-purposes', [DropdownController::class, 'getRequisitionPurposes']);
-Route::get('/facilities', [FacilityController::class, 'publicIndex']);
+// ------ Dropdowns and Categories ------ //
+
+
+Route::get('/departments', [DepartmentController::class, 'index']);
+Route::get('/availability-statuses', [AvailabilityStatusController::class, 'index']);
+Route::get('/conditions', [ConditionController::class, 'index']);
+Route::get('/equipment-categories', [EquipmentCategoryController::class, 'index']);
+Route::get('/facility-categories', [FacilityCategoryController::class, 'index']);
+Route::get('/facility-categories/index', [FacilityCategoryController::class, 'indexWithSubcategories']);
+Route::get('/facility-subcategories/{category}', [FacilitySubcategoryController::class, 'index']);
+Route::get('/requisition-purposes', [RequisitionPurposeController::class, 'index']);
+
+// ---- Public Catalog Routes ---- //
+
 Route::get('/equipment', [EquipmentController::class, 'publicIndex']);
+Route::get('/facilities', [FacilityController::class, 'publicIndex']);
+Route::get('/facilities/{facility}', [FacilityController::class, 'show']);
+
+// ---- Protected Catalog Routes ---- //
+
+// Equipment
+    Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::get('/equipment', [EquipmentController::class, 'index']);
+    Route::post('/equipment', [EquipmentController::class, 'store']);
+    Route::get('/equipment/{equipment}', [EquipmentController::class, 'show']);
+    Route::put('/equipment/{equipment}', [EquipmentController::class, 'update']);
+    Route::delete('/equipment/{equipment}', [EquipmentController::class, 'destroy']);
+
+// Facilities
+
+    Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/admin/facilities', [FacilityController::class, 'index']);
+    Route::post('/admin/facilities', [FacilityController::class, 'store']);
+    Route::put('/admin/facilities/{facility}', [FacilityController::class, 'update']);
+    Route::delete('/admin/facilities/{facility}', [FacilityController::class, 'destroy']);
+    
+// ----- Image management ----- //
+
+    // Equipment
+    Route::post('/equipment/{equipmentId}/images/upload', [EquipmentController::class, 'uploadImage']);
+    Route::post('/equipment/{equipmentId}/images/bulk-upload', [EquipmentController::class, 'uploadMultipleImages']);
+    Route::delete('/equipment/{equipmentId}/images/{imageId}', [EquipmentController::class, 'deleteImage']);
+    Route::post('/equipment/{equipmentId}/images/reorder', [EquipmentController::class, 'reorderImages']);
+    });
+
+    // Facility
+    Route::post('/admin/facilities/{facilityId}/images', [FacilityController::class, 'uploadImage']);
+    Route::post('/admin/facilities/{facilityId}/images/bulk', [FacilityController::class, 'uploadMultipleImages']);
+    Route::delete('/admin/facilities/{facilityId}/images/{imageId}', [FacilityController::class, 'deleteImage']);
+    Route::post('/admin/facilities/{facilityId}/images/reorder', [FacilityController::class, 'reorderImages']);
+    });
 
 
+// --------- Admin Image Uploads --------- //
 
-// Requisitions 
-Route::post('/requisitions/temp-upload', [RequisitionController::class, 'tempUpload']);
-Route::post('/requisitions/finalize', [RequisitionController::class, 'finalizeRequisition']);
+// equipment image uploads
+Route::post('/equipment/{id}/upload-image', [EquipmentController::class, 'uploadImage']);
 
+Route::post('/equipment/{id}/upload-images', [EquipmentController::class, 'uploadMultipleImages']);
+
+// ----- Admin Authentication ----- //
 
 // Public login route
 Route::post('/admin/login', [AdminAuthController::class, 'login'])
     ->middleware('throttle:5,1'); // 5 attempts per minute
+
 Route::post('/login', function (Request $request) {
     $credentials = $request->validate([
         'email' => 'required|email',
@@ -76,19 +126,9 @@ Route::post('/login', function (Request $request) {
 // Logout route
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
 
-// Public routes for equipment
-Route::post('/equipment/{id}/upload-image', [\App\Http\Controllers\EquipmentController::class, 'uploadImage']);
-Route::post('/equipment/{id}/upload-images', [\App\Http\Controllers\EquipmentController::class, 'uploadMultipleImages']);
 
-// Public routes for facilities and categories
-Route::get('/facility-categories', [\App\Http\Controllers\Dropdowns\FacilityCategoryController::class, 'index']);
-Route::get('/facility-subcategories/{category}', [\App\Http\Controllers\Dropdowns\FacilitySubcategoryController::class, 'index']);
-Route::get('/facilities', [\App\Http\Controllers\FacilityController::class, 'publicIndex']);
-Route::get('/equipment', [\App\Http\Controllers\EquipmentController::class, 'publicIndex']);
+// ----- Protected admin routes ----- //
 
-
-
-// Protected admin routes
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/admin/profile', function (Request $request) {
@@ -100,20 +140,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin')->middleware(['auth:sanctum', 'check.admin.role'])->group(function () {
         
         // Equipment Routes
-        Route::apiResource('equipment', \App\Http\Controllers\EquipmentController::class);
+        Route::apiResource('equipment', EquipmentController::class);
 
         // Facility Routes
-        Route::apiResource('facilities', \App\Http\Controllers\FacilityController::class);
+        Route::apiResource('facilities', FacilityController::class);
 
-        // Additional routes for dropdowns and selections
-        Route::get('equipment-categories', [\App\Http\Controllers\Dropdowns\EquipmentCategoryController::class, 'index']);
-        Route::get('facility-categories', [\App\Http\Controllers\Dropdowns\FacilityCategoryController::class, 'index']);
-        Route::get('facility-subcategories/{category}', [\App\Http\Controllers\Dropdowns\FacilitySubcategoryController::class, 'index']);
-        Route::get('departments', [\App\Http\Controllers\Dropdowns\DepartmentController::class, 'index']);
-        Route::get('rate-types', [\App\Http\Controllers\Dropdowns\RateTypeController::class, 'index']);
-        Route::get('availability-statuses', [\App\Http\Controllers\Dropdowns\AvailabilityStatusController::class, 'index']);
-        Route::get('conditions', [\App\Http\Controllers\Dropdowns\ConditionController::class, 'index']);
-        Route::get('image-types', [\App\Http\Controllers\Dropdowns\ImageTypeController::class, 'index']);
     });
 });
 

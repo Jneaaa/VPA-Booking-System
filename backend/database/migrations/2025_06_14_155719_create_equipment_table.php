@@ -18,22 +18,25 @@ return new class extends Migration
             $table->string('brand', 80)->nullable();
             $table->string('storage_location', 50);
             $table->unsignedTinyInteger('category_id');
-            $table->integer('total_quantity');
+            $table->unsignedInteger('total_quantity')->default(1);
             $table->decimal('rental_fee', 10, 2);
             $table->decimal('company_fee', 10, 2);
-            $table->unsignedTinyInteger('type_id');
+            $table->enum('rate_type', ['Per Hour', 'Per Show/Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');
             $table->unsignedTinyInteger('department_id');
-            $table->integer('minimum_hour');
+            $table->unsignedInteger('maximum_rental_hour')->default(1);
             $table->timestamps();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->dateTime('last_booked_at')->nullable();
         
             // Foreign key constraints
             $table->foreign('created_by')->references('admin_id')->on('admins')->onDelete('restrict');
             $table->foreign('updated_by')->references('admin_id')->on('admins')->onDelete('set null');
+            $table->foreign('deleted_by')->references('admin_id')->on('admins')->onDelete('set null');
+
             $table->foreign('category_id')->references('category_id')->on('equipment_categories')->onDelete('restrict');
-            $table->foreign('type_id')->references('type_id')->on('rate_types')->onDelete('restrict');
             $table->foreign('status_id')->references('status_id')->on('availability_statuses')->onDelete('restrict');
             $table->foreign('department_id')->references('department_id')->on('departments')->onDelete('restrict');
         
@@ -44,7 +47,6 @@ return new class extends Migration
             $table->index('category_id', 'idx_equipment_category');
             $table->index('status_id', 'idx_equipment_status');
             $table->index('department_id', 'idx_equipment_department');
-            $table->index('type_id', 'idx_equipment_type');
             
             // Composite indexes for common query patterns
             $table->index(['category_id', 'status_id'], 'idx_equipment_category_status');

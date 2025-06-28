@@ -430,10 +430,9 @@
         async function fetchDepartments() {
           try {
             const response = await fetch(
-              "http://127.0.0.1:8000/api/admin/departments",
+              "http://127.0.0.1:8000/api/departments",
               {
                 headers: {
-                  Authorization: `Bearer ${token}`,
                   Accept: "application/json",
                 },
               }
@@ -463,7 +462,7 @@
         async function fetchCategories() {
           try {
             const response = await fetch(
-              "http://127.0.0.1:8000/api/admin/equipment-categories",
+              "http://127.0.0.1:8000/api/equipment-categories",
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
