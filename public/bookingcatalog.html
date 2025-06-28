@@ -265,7 +265,7 @@
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <div id="userFullCalendar"></div> <!-- This is where FullCalendar will render -->
+                  <div id="userFullCalendar"></div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -273,6 +273,7 @@
               </div>
             </div>
           </div>
+          
           <!-- Loading Indicator -->
           <div id="loadingIndicator" class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
@@ -306,371 +307,481 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
-  <script src="http://127.0.0.1:5500/public/js/user-catalog-calendar.js" type="application/javascript"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      let userCalendar; // Declare globally to access from modal toggle
-      const userCalendarEl = document.getElementById("userFullCalendar");
-
-      function initializeCalendar() {
-        userCalendar = new FullCalendar.Calendar(userCalendarEl, {
-          initialView: 'dayGridMonth',
-          height: 'auto',
-          headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,listWeek'
-          },
-          nowIndicator: true,
-          events: [
-            {
-              title: 'Booked: AVR Room',
-              start: '2025-07-02T10:00:00',
-              end: '2025-07-02T12:00:00',
-              backgroundColor: '#198754'
+      // Initialize FullCalendar when the modal is shown
+      const calendarModal = document.getElementById('userCalendarModal');
+      let calendar;
+      
+      calendarModal.addEventListener('shown.bs.modal', function () {
+        const calendarEl = document.getElementById('userFullCalendar');
+        
+        if (!calendar) {
+          calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,listWeek'
             },
-            {
-              title: 'PE Gym Reservation',
-              start: '2025-07-05',
-              backgroundColor: '#0d6efd'
-            },
-            {
-              title: 'Library Conference',
-              start: '2025-07-10T14:00:00',
-              end: '2025-07-10T16:00:00',
-              backgroundColor: '#dc3545'
+            height: 'auto',
+            nowIndicator: true,
+            events: [
+              {
+                title: 'Booked: AVR Room',
+                start: '2025-06-02T10:00:00',
+                end: '2025-06-02T12:00:00',
+                backgroundColor: '#198754'
+              },
+              {
+                title: 'PE Gym Reservation',
+                start: '2025-06-05',
+                backgroundColor: '#0d6efd'
+              },
+              {
+                title: 'Library Conference',
+                start: '2025-06-10T14:00:00',
+                end: '2025-06-10T16:00:00',
+                backgroundColor: '#dc3545'
+              }
+            ],
+            eventClick: function(info) {
+              alert('Event: ' + info.event.title);
             }
-          ]
-        });
-
-        userCalendar.render();
-      }
-
-      // Delay render until modal is shown
-      const modal = document.getElementById('userCalendarModal');
-      modal.addEventListener('shown.bs.modal', function () {
-        if (!userCalendar) {
-          initializeCalendar();
-        } else {
-          userCalendar.changeView('dayGridMonth');
-          userCalendar.today();
+          });
+          calendar.render();
         }
       });
-
-      const categoryFilterList =
-        document.getElementById("categoryFilterList");
-      const catalogItemsContainer = document.getElementById(
-        "catalogItemsContainer"
-      );
-      const currentCategoryTitle = document.getElementById(
-        "currentCategoryTitle"
-      );
-      const catalogHeroTitle = document.getElementById("catalogHeroTitle");
+      
+      // The rest of your existing JavaScript code...
+      const categoryFilterList = document.getElementById("categoryFilterList");
+      const catalogItemsContainer = document.getElementById("catalogItemsContainer");
+      const currentCategoryTitle = document.getElementById("currentCategoryTitle");
       const loadingIndicator = document.getElementById("loadingIndicator");
       const requisitionFormButton = document.getElementById("requisitionFormButton");
       const requisitionBadge = document.getElementById("requisitionBadge");
 
       let facilities = []; // Store fetched facilities
-      let currentCategory = "All";
-      let currentLayout = "list"; // Default layout
+      let categories = []; // Store fetched categories
+      let currentCategory = "All"; // Tracks the currently active category filter
+      let currentLayout = "list"; // 'list' or 'grid'
       let currentPage = 1;
-      const itemsPerPage = 4; // Adjust as needed
+      const itemsPerPage = 4; // Number of items per page
+
+      // Define your Laravel API base URL for catalog data
+      const API_BASE_URL = 'http://127.0.0.1:8000/api'; // <<< IMPORTANT: Update this if different
 
       // Fetch facilities from the API
       async function fetchFacilities() {
         try {
-          loadingIndicator.classList.remove("d-none");
-          catalogItemsContainer.classList.add("d-none");
+          loadingIndicator.classList.remove("d-none"); // Show loading spinner
+          catalogItemsContainer.classList.add("d-none"); // Hide catalog items
 
-          const response = await fetch(
-            "http://127.0.0.1:8000/api/facilities",
-            {
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              credentials: "same-origin", // or "include" if you need to send cookies
-            }
-          );
+          const response = await fetch(`${API_BASE_URL}/facilities`, {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            credentials: "same-origin", // or "include" if you need to send cookies
+          });
 
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorData.message || 'Failed to fetch facilities'}`);
           }
 
           const data = await response.json();
 
-          // Check if data structure is as expected
-          if (!data.data) {
-            throw new Error("Invalid data structure from API");
+          // Check if data structure is as expected and contains a 'data' array
+          if (!data.data || !Array.isArray(data.data)) {
+            throw new Error("Invalid data structure from facilities API: 'data' array missing.");
           }
 
+          // Map and parse facility data, ensuring rental_fee is a number
           facilities = data.data.map((facility) => ({
             ...facility,
-            rental_fee: parseFloat(facility.rental_fee) || 0, // Ensure rental_fee is a valid number
+            rental_fee: parseFloat(facility.rental_fee) || 0, // Default to 0 if invalid
           }));
 
-            renderCatalogItems();
-
-          loadingIndicator.classList.add("d-none");
-          catalogItemsContainer.classList.remove("d-none");
+          renderCatalogItems(); // Render after successful fetch
+          loadingIndicator.classList.add("d-none"); // Hide loading spinner
+          catalogItemsContainer.classList.remove("d-none"); // Show catalog items
         } catch (error) {
           console.error("Error fetching facilities:", error);
           loadingIndicator.innerHTML = `
-      <div class="alert alert-danger">
-        Failed to load facilities. Please try again later.
-      </div>
-    `;
-          // Don't automatically retry - let the user decide to retry
+                <div class="alert alert-danger">
+                    Failed to load facilities. Please try again later.
+                </div>
+            `;
+          loadingIndicator.classList.remove("d-none"); // Ensure error message is visible
+          catalogItemsContainer.classList.add("d-none"); // Keep items hidden
         }
       }
 
-        // Fetch categories and subcategories from the API
-        async function fetchCategories() {
-          try {
-            const response = await fetch("http://127.0.0.1:8000/api/facility-categories", {
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-            });
-
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            renderCategoryFilterList(data);
-          } catch (error) {
-            console.error("Error fetching categories:", error);
-          }
-        }
-
-        // Render category filter list with collapsible subcategories
-        function renderCategoryFilterList(categories) {
-          categoryFilterList.innerHTML = "";
-
-          categories.forEach((category) => {
-            const categoryItem = document.createElement("div");
-            categoryItem.classList.add("category-item");
-
-            const categoryHeader = document.createElement("span");
-            categoryHeader.classList.add("filter-item", "d-flex", "align-items-center", "justify-content-between");
-            categoryHeader.textContent = category.category_name;
-
-            if (category.subcategories && category.subcategories.length > 0) {
-              const toggleButton = document.createElement("i");
-              toggleButton.classList.add("bi", "bi-chevron-down", "ms-2", "toggle-icon");
-              toggleButton.dataset.bsToggle = "collapse";
-              toggleButton.dataset.bsTarget = `#subcategory-${category.category_id}`;
-              categoryHeader.appendChild(toggleButton);
-
-              const subcategoryList = document.createElement("div");
-              subcategoryList.classList.add("subcategory-list", "collapse");
-              subcategoryList.id = `subcategory-${category.category_id}`;
-
-              category.subcategories.forEach((subcategory) => {
-                const subcategoryItem = document.createElement("a");
-                subcategoryItem.href = "#";
-                subcategoryItem.classList.add("filter-item", "ms-3");
-                subcategoryItem.dataset.category = subcategory.subcategory_name;
-                subcategoryItem.textContent = subcategory.subcategory_name;
-                subcategoryList.appendChild(subcategoryItem);
-              });
-
-              categoryItem.appendChild(categoryHeader); // Ensure header is added first
-              categoryItem.appendChild(subcategoryList); // Subcategories appear below the header
-            } else {
-              categoryHeader.dataset.category = category.category_name;
-              categoryHeader.classList.add("clickable");
-              categoryHeader.addEventListener("click", function (e) {
-                e.preventDefault();
-                currentCategory = this.dataset.category;
-                currentCategoryTitle.textContent = `${currentCategory} Facilities`;
-                renderCatalogItems();
-              });
-              categoryItem.appendChild(categoryHeader);
-            }
-
-            categoryFilterList.appendChild(categoryItem);
+      // Fetch categories and subcategories from the API
+      async function fetchCategories() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/facility-categories/index`, { // Assuming this endpoint
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
           });
 
-          attachCategoryFilterListeners();
-          setupCollapseAnimations();
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorData.message || 'Failed to fetch categories'}`);
+          }
+
+          categories = await response.json(); // Store fetched categories
+          renderCategoryFilterList(categories); // Render the filter list
+        } catch (error) {
+          console.error("Error fetching categories:", error);
+          // Optionally, display an error message for categories as well
+          categoryFilterList.innerHTML = '<p class="text-danger">Failed to load categories.</p>';
         }
+      }
 
-        // Add animations for the collapse arrow
-        function setupCollapseAnimations() {
-          const toggleIcons = document.querySelectorAll(".toggle-icon");
-          toggleIcons.forEach((icon) => {
-            const targetId = icon.dataset.bsTarget;
-            const targetElement = document.querySelector(targetId);
+      // Render category filter list with collapsible subcategories
+      function renderCategoryFilterList(categoriesData) {
+        categoryFilterList.innerHTML = `
+            <a href="#" class="filter-item active" data-category="All">All Categories</a>
+        `;
 
-            targetElement.addEventListener("show.bs.collapse", () => {
+        categoriesData.forEach((category) => {
+          const categoryItem = document.createElement("div");
+          categoryItem.classList.add("category-item");
+
+          const categoryHeader = document.createElement("a");
+          categoryHeader.href = "#";
+          categoryHeader.classList.add("filter-item", "d-flex", "align-items-center", "justify-content-between");
+          categoryHeader.textContent = category.category_name;
+          categoryHeader.dataset.category = category.category_name;
+
+          if (category.subcategories && category.subcategories.length > 0) {
+            const toggleButton = document.createElement("i");
+            toggleButton.classList.add("bi", "bi-chevron-down", "ms-2", "toggle-icon");
+            toggleButton.dataset.bsToggle = "collapse";
+            toggleButton.dataset.bsTarget = `#subcategory-${category.id}`; // Use category.id for uniqueness
+            categoryHeader.appendChild(toggleButton);
+
+            // Add event listener to categoryHeader to handle category filtering OR subcategory collapse
+            categoryHeader.addEventListener("click", function (e) {
+              // Only filter if not clicking the toggle icon directly
+              if (e.target !== toggleButton) {
+                e.preventDefault();
+                updateCategoryFilter(this.dataset.category);
+              }
+            });
+
+            const subcategoryList = document.createElement("div");
+            subcategoryList.classList.add("subcategory-list", "collapse");
+            subcategoryList.id = `subcategory-${category.id}`; // Use category.id for uniqueness
+
+            category.subcategories.forEach((subcategory) => {
+              const subcategoryItem = document.createElement("a");
+              subcategoryItem.href = "#";
+              subcategoryItem.classList.add("filter-item", "ms-3");
+              subcategoryItem.dataset.category = subcategory.subcategory_name;
+              subcategoryItem.textContent = subcategory.subcategory_name;
+              subcategoryItem.addEventListener("click", function (e) {
+                e.preventDefault();
+                updateCategoryFilter(this.dataset.category);
+              });
+              subcategoryList.appendChild(subcategoryItem);
+            });
+
+            categoryItem.appendChild(categoryHeader);
+            categoryItem.appendChild(subcategoryList);
+          } else {
+            // If no subcategories, category header itself is directly clickable for filtering
+            categoryHeader.addEventListener("click", function (e) {
+              e.preventDefault();
+              updateCategoryFilter(this.dataset.category);
+            });
+            categoryItem.appendChild(categoryHeader);
+          }
+
+          categoryFilterList.appendChild(categoryItem);
+        });
+
+        // Add listener for the initial "All Categories" link
+        categoryFilterList.querySelector('[data-category="All"]').addEventListener("click", function (e) {
+          e.preventDefault();
+          updateCategoryFilter("All");
+        });
+
+        setupCollapseAnimations(); // Re-attach collapse animations
+        updateCategoryFilter(currentCategory); // Ensure active class is set correctly on initial load
+      }
+
+      // Function to update the active category filter and re-render catalog items
+      function updateCategoryFilter(categoryName) {
+        document.querySelectorAll("#categoryFilterList .filter-item").forEach(item => item.classList.remove("active"));
+        // Find the correct item to activate, including potential subcategories
+        document.querySelector(`#categoryFilterList .filter-item[data-category="${categoryName}"]`)?.classList.add("active");
+        currentCategory = categoryName;
+        currentPage = 1; // Reset to first page
+        currentCategoryTitle.querySelector(".dropdown-toggle").textContent =
+          `${currentCategory === "All" ? "All" : currentCategory} Facilities`;
+        renderCatalogItems();
+      }
+
+      // Add animations for the collapse arrow on subcategories
+      function setupCollapseAnimations() {
+        const toggleIcons = document.querySelectorAll(".toggle-icon");
+        toggleIcons.forEach((icon) => {
+          const targetId = icon.dataset.bsTarget;
+          const targetElement = document.querySelector(targetId);
+
+          // Ensure event listeners are added only once by using jQuery's .off()
+          // Or use an event delegation approach if not using jQuery
+          if (targetElement) { // Check if targetElement exists
+            $(targetElement).off('show.bs.collapse').on("show.bs.collapse", () => {
               icon.classList.remove("bi-chevron-down");
               icon.classList.add("bi-chevron-up");
             });
 
-            targetElement.addEventListener("hide.bs.collapse", () => {
+            $(targetElement).off('hide.bs.collapse').on("hide.bs.collapse", () => {
               icon.classList.remove("bi-chevron-up");
               icon.classList.add("bi-chevron-down");
             });
-          });
-        }
-
-      function renderCatalogItems() {
-        catalogItemsContainer.innerHTML = "";
-        catalogItemsContainer.className = currentLayout + "-layout";
-
-        const filteredFacilities =
-          currentCategory === "All"
-            ? facilities
-            : facilities.filter(
-              (facility) =>
-                facility.category?.category_name === currentCategory
-            );
-
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const paginatedFacilities = filteredFacilities.slice(
-          startIndex,
-          startIndex + itemsPerPage
-        );
-
-        const itemsWrapper = document.createElement("div");
-        itemsWrapper.className = "catalog-items-wrapper";
-        catalogItemsContainer.appendChild(itemsWrapper);
-
-        paginatedFacilities.forEach((facility) => {
-          const rentalFee = facility.rental_fee.toFixed(2);
-          const card = document.createElement("div");
-          card.classList.add("catalog-card");
-
-          if (currentLayout === "list") {
-            card.innerHTML = `
-                <img src="${facility.images.length > 0
-                ? facility.images[0].image_url
-                : "https://via.placeholder.com/180x120"
-              }" class="catalog-card-img" alt="${facility.facility_name}">
-                <div class="catalog-card-details">
-                    <h5>${facility.facility_name}</h5>
-                    <p>${facility.description || "No description available."}</p>
-                    <div class="catalog-card-meta">
-                        <div><i class="bi bi-tag"></i> ${
-                          facility.category?.category_name || "Uncategorized"
-                        }</div>
-                        <div><i class="bi bi-tags"></i> ${
-                          facility.subcategory?.subcategory_name || "No Subcategory"
-                        }</div>
-                        <div><i class="bi bi-building"></i> ${
-                          facility.department?.department_name || "Unknown Department"
-                        }</div>
-                        <div><i class="bi bi-people"></i> Capacity: ${
-                          facility.capacity
-                        }</div>
-                    </div>
-                </div>
-                <div class="catalog-card-actions">
-                    <div class="rental-fee">₱${rentalFee}</div>
-                    <button class="btn btn-sm btn-primary">Add to Form</button>
-                    <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
-                </div>
-              `;
-          } else {
-            card.innerHTML = `
-                <img src="${facility.images.length > 0
-                ? facility.images[0].image_url
-                : "https://via.placeholder.com/180x120"
-              }" class="catalog-card-img" alt="${facility.facility_name}">
-                <div class="catalog-card-details">
-                    <h5>${facility.facility_name}</h5>
-                    <div class="catalog-card-meta">
-                        <div><i class="bi bi-tag"></i> ${
-                          facility.category?.category_name || "Uncategorized"
-                        }</div>
-                        <div><i class="bi bi-tags"></i> ${
-                          facility.subcategory?.subcategory_name || "No Subcategory"
-                        }</div>
-                        <div><i class="bi bi-cash"></i> ₱${rentalFee}</div>
-                    </div>
-                    <button class="btn btn-sm btn-primary mt-2">Add to Form</button>
-                </div>
-              `;
           }
-
-          itemsWrapper.appendChild(card);
         });
-
-        renderPagination(filteredFacilities.length);
       }
 
-        function renderPagination(totalItems) {
-          const paginationTop = document.getElementById("pagination-top");
-          const paginationBottom = document.getElementById("pagination");
-          paginationTop.innerHTML = "";
-          paginationBottom.innerHTML = "";
+      function renderCatalogItems() {
+        catalogItemsContainer.innerHTML = ""; // Clear previous items
+        // Remove existing layout classes and apply the new one
+        catalogItemsContainer.classList.remove("list-layout", "grid-layout");
+        catalogItemsContainer.classList.add(currentLayout + "-layout");
+
+        // Filter facilities by current category (case-insensitive for robustness)
+        const filteredFacilities = facilities.filter(f => {
+          if (currentCategory === "All") {
+            return true;
+          }
+          // Check both category and subcategory names for a match
+          return (f.category?.category_name?.toLowerCase() === currentCategory.toLowerCase() ||
+            f.subcategory?.subcategory_name?.toLowerCase() === currentCategory.toLowerCase());
+        });
+
+        // Paginate results
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const paginatedFacilities = filteredFacilities.slice(startIndex, startIndex + itemsPerPage);
+
+        // Render each facility or show "No items found" message
+        if (paginatedFacilities.length === 0) {
+          catalogItemsContainer.innerHTML = '<p class="text-center text-muted mt-5">No facilities found for this category or filters.</p>';
+        } else {
+          const itemsWrapper = document.createElement("div");
+          itemsWrapper.className = currentLayout === "grid" ? "row g-3" : ""; // Use Bootstrap row for grid
+          catalogItemsContainer.appendChild(itemsWrapper);
+
+          paginatedFacilities.forEach((facility) => {
+            const rentalFee = facility.rental_fee.toFixed(2);
+            const card = document.createElement("div");
+            card.classList.add("catalog-card"); // Apply base card style
+
+            if (currentLayout === "list") {
+              card.innerHTML = `
+                        <div class="row g-0">
+                            <div class="col-md-3">
+                                <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
+                                    class="catalog-card-img" alt="${facility.facility_name}">
+                            </div>
+                            <div class="col-md-7">
+                                <div class="card-body">
+                                    <h5 class="card-title">${facility.facility_name}</h5>
+                                    <p class="card-text text-muted mb-1">${facility.description || "No description available."}</p>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <span class="text-muted"><i class="bi bi-tag"></i> ${facility.category?.category_name || "Uncategorized"}</span>
+                                        <span class="text-muted"><i class="bi bi-tags"></i> ${facility.subcategory?.subcategory_name || "No Subcategory"}</span>
+                                        <span class="text-muted"><i class="bi bi-building"></i> ${facility.department?.department_name || "Unknown Department"}</span>
+                                        <span class="text-muted"><i class="bi bi-people"></i> Capacity: ${facility.capacity || "N/A"}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 d-flex flex-column justify-content-between p-3 border-start">
+                                <div class="rental-fee fw-bold">₱${rentalFee}</div>
+                                <div class="d-grid gap-2 mt-auto">
+                                    <button class="btn btn-sm btn-primary add-to-form-btn" data-facility-id="${facility.id}">Add to Form</button>
+                                    <button class="btn btn-sm btn-outline-secondary view-calendar-btn" data-bs-toggle="modal" data-bs-target="#userCalendarModal" data-facility-id="${facility.id}">
+                                        View Calendar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+              itemsWrapper.appendChild(card);
+            } else { // Grid layout
+              const colDiv = document.createElement("div");
+              colDiv.className = "col-md-6 col-lg-4 col-xl-3"; // Adjust column size for grid
+              colDiv.innerHTML = `
+                        <div class="card h-100"> <!-- Added h-100 to ensure consistent height -->
+                            <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
+                                class="catalog-card-img" alt="${facility.facility_name}">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">${facility.facility_name}</h5>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-light text-dark"><i class="bi bi-tag"></i> ${facility.category?.category_name || "Uncategorized"}</span>
+                                    <span class="fw-bold rental-fee">₱${rentalFee}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-light text-dark"><i class="bi bi-people"></i> Capacity: ${facility.capacity || "N/A"}</span>
+                                </div>
+                                <div class="mt-auto d-grid gap-2"> <!-- Push buttons to bottom -->
+                                    <button class="btn btn-sm btn-primary add-to-form-btn" data-facility-id="${facility.id}">Add to Form</button>
+                                    <button class="btn btn-sm btn-outline-secondary view-calendar-btn" data-bs-toggle="modal" data-bs-target="#userCalendarModal" data-facility-id="${facility.id}">
+                                        View Calendar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+              itemsWrapper.appendChild(colDiv);
+            }
+          });
+        }
+        renderPagination(filteredFacilities.length);
+        attachCatalogItemListeners(); // Re-attach listeners to new elements
+      }
+
+      function renderPagination(totalItems) {
+        const paginationContainer = document.getElementById("pagination");
+        paginationContainer.innerHTML = ""; // Clear previous pagination
 
         const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-          function createPaginationElement(page, label = null, isDisabled = false) {
-            const li = document.createElement("li");
-            li.className = `page-item${isDisabled ? " disabled" : ""}${page === currentPage ? " active" : ""}`;
-            li.innerHTML = `<a class="page-link" href="#">${label || page}</a>`;
-            if (!isDisabled) {
-              li.addEventListener("click", function (e) {
-                e.preventDefault();
-                currentPage = page;
-                renderCatalogItems();
-              });
-            }
-            return li;
-          }
-
-          // Add "Back" button
-          paginationTop.appendChild(createPaginationElement(currentPage - 1, "Back", currentPage === 1));
-          paginationBottom.appendChild(createPaginationElement(currentPage - 1, "Back", currentPage === 1));
-
-          // Add numbered pages
-          for (let i = 1; i <= totalPages; i++) {
-            paginationTop.appendChild(createPaginationElement(i));
-            paginationBottom.appendChild(createPaginationElement(i));
-          }
-
-          // Add "Next" button
-          paginationTop.appendChild(createPaginationElement(currentPage + 1, "Next", currentPage === totalPages));
-          paginationBottom.appendChild(createPaginationElement(currentPage + 1, "Next", currentPage === totalPages));
+        if (totalPages <= 1) { // Hide pagination if only one page or no items
+          return;
         }
 
-      // Attach category filter listeners
-      function attachCategoryFilterListeners() {
-        const filterItems = document.querySelectorAll(
-          "#categoryFilterList .filter-item"
-        );
-        filterItems.forEach((item) => {
-          item.addEventListener("click", function (e) {
-            e.preventDefault();
-            filterItems.forEach((li) => li.classList.remove("active"));
-            this.classList.add("active");
-            currentCategory = this.dataset.category;
-            currentCategoryTitle.textContent = `${currentCategory} Facilities`;
+        // Previous button
+        const prevLi = document.createElement("li");
+        prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous">&laquo;</a>`;
+        prevLi.addEventListener("click", (e) => {
+          e.preventDefault();
+          if (currentPage > 1) {
+            currentPage--;
             renderCatalogItems();
+            window.scrollTo(0, 0); // Scroll to top
+          }
+        });
+        paginationContainer.appendChild(prevLi);
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+          const li = document.createElement("li");
+          li.className = `page-item ${i === currentPage ? "active" : ""}`;
+          li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+          li.addEventListener("click", (e) => {
+            e.preventDefault();
+            currentPage = i;
+            renderCatalogItems();
+            window.scrollTo(0, 0); // Scroll to top
+          });
+          paginationContainer.appendChild(li);
+        }
+
+        // Next button
+        const nextLi = document.createElement("li");
+        nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next">&raquo;</a>`;
+        nextLi.addEventListener("click", (e) => {
+          e.preventDefault();
+          if (currentPage < totalPages) {
+            currentPage++;
+            renderCatalogItems();
+            window.scrollTo(0, 0); // Scroll to top
+          }
+        });
+        paginationContainer.appendChild(nextLi);
+      }
+
+      // Attach listeners to dynamically created catalog items (View Calendar, Add to Form)
+      function attachCatalogItemListeners() {
+        document.querySelectorAll('.view-calendar-btn').forEach(button => {
+          // Remove previous listeners to prevent duplicates
+          $(button).off('click').on('click', function () {
+            const facilityId = this.dataset.facilityId;
+            console.log('View Calendar clicked for facility ID:', facilityId);
+            // The Bootstrap modal will be toggled by data-bs-toggle and data-bs-target attributes
+          });
+        });
+
+        document.querySelectorAll('.add-to-form-btn').forEach(button => {
+          // Remove previous listeners to prevent duplicates
+          $(button).off('click').on('click', function () {
+            const facilityId = this.dataset.facilityId;
+            let selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities") || "[]");
+
+            // Check if facility is already added (assuming unique facilities)
+            if (!selectedFacilities.some(item => item.id === parseInt(facilityId))) {
+              const facilityToAdd = facilities.find(f => f.id === parseInt(facilityId));
+              if (facilityToAdd) {
+                selectedFacilities.push({
+                  id: facilityToAdd.id,
+                  name: facilityToAdd.facility_name,
+                  type: 'facility' // Indicate item type
+                });
+                localStorage.setItem("selectedFacilities", JSON.stringify(selectedFacilities));
+                alert(`Facility '${facilityToAdd.facility_name}' added to your requisition form!`);
+                updateRequisitionButton();
+              } else {
+                console.error('Facility not found for ID:', facilityId);
+              }
+            } else {
+              alert(`Facility is already in your requisition form.`);
+            }
           });
         });
       }
 
-      // Setup layout toggle
+      // Setup layout toggle functionality
       function setupLayoutToggle() {
-        const layoutDropdown = document.getElementById("layoutDropdown");
         const layoutOptions = document.querySelectorAll(".layout-option");
-
-        layoutOptions.forEach((option) => {
-          option.addEventListener("click", function (e) {
+        layoutOptions.forEach(option => {
+          option.addEventListener("click", (e) => {
             e.preventDefault();
-            currentLayout = this.dataset.layout;
-            layoutDropdown.textContent = `${this.textContent} Layout`;
+            currentLayout = option.dataset.layout;
+            // Update the dropdown button text
+            layoutDropdownButton.textContent = `${option.textContent} Layout`;
+            currentPage = 1; // Reset to first page on layout change
             renderCatalogItems();
           });
         });
       }
 
+      // Setup sorting functionality
+      function setupSorting() {
+        const sortOptions = document.querySelectorAll(".sort-option");
+        sortOptions.forEach(option => {
+          option.addEventListener("click", (e) => {
+            e.preventDefault();
+            const sortType = option.dataset.sort;
+
+            switch (sortType) {
+              case 'price-asc':
+                facilities.sort((a, b) => (a.rental_fee || 0) - (b.rental_fee || 0));
+                break;
+              case 'price-desc':
+                facilities.sort((a, b) => (b.rental_fee || 0) - (a.rental_fee || 0));
+                break;
+              case 'name-asc':
+                facilities.sort((a, b) => (a.facility_name || '').localeCompare(b.facility_name || ''));
+                break;
+            }
+
+            currentPage = 1; // Reset to first page on sort
+            renderCatalogItems();
+            sortDropdownButton.textContent = option.textContent; // Update the sort dropdown text
+          });
+        });
+      }
+
+      // Update the requisition form button's badge
       function updateRequisitionButton() {
         const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities") || "[]");
         const selectedEquipment = JSON.parse(localStorage.getItem("selectedEquipment") || "[]");
@@ -688,15 +799,17 @@
         }
       }
 
-      updateRequisitionButton();
-      window.addEventListener("storage", updateRequisitionButton);
+      // --- Initializations on DOM Content Loaded ---
+      fetchCategories(); // Fetch categories for the filter list
+      fetchFacilities(); // Fetch facilities and render the catalog
 
-        // Initial fetch and render
-        fetchFacilities();
-        fetchCategories();
-        setupLayoutToggle();
-      });
-    </script>
+      setupLayoutToggle(); // Initialize layout toggle listeners
+      setupSorting(); // Initialize sorting listeners
+
+      updateRequisitionButton(); // Initial update of the badge
+      window.addEventListener("storage", updateRequisitionButton); // Listen for changes in local storage
+    });
+  </script>
 
   <style>
     /* Add sharp edges and light grey borders to specific containers */
@@ -708,29 +821,29 @@
       border: 1px solid #d3d3d3 !important;
     }
 
-      /* Remove border and shadows from the main container */
-      .container {
-        border: none !important;
-        box-shadow: none !important;
-      }
+    /* Remove border and shadows from the main container */
+    .container {
+      border: none !important;
+      box-shadow: none !important;
+    }
 
-      /* Style pagination to use CPU primary colors */
-      .pagination .page-item.active .page-link {
-        background-color: var(--cpu-primary) !important;
-        border-color: var(--cpu-primary) !important;
-        color: #fff !important;
-      }
+    /* Style pagination to use CPU primary colors */
+    .pagination .page-item.active .page-link {
+      background-color: var(--cpu-primary) !important;
+      border-color: var(--cpu-primary) !important;
+      color: #fff !important;
+    }
 
-      .pagination .page-link {
-        color: var(--cpu-primary) !important;
-        border-color: lightgrey !important;
-      }
+    .pagination .page-link {
+      color: var(--cpu-primary) !important;
+      border-color: lightgrey !important;
+    }
 
-      .pagination .page-item.disabled .page-link {
-        color: #6c757d !important;
-        border-color: #d3d3d3 !important;
-      }
-      
-    </style>
-  </body>
+    .pagination .page-item.disabled .page-link {
+      color: #6c757d !important;
+      border-color: #d3d3d3 !important;
+    }
+  </style>
+</body>
+
 </html>
