@@ -303,9 +303,11 @@
   <script src="js/user-catalog-calendar.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
+      let userCalendar; // Declare globally to access from modal toggle
       const userCalendarEl = document.getElementById("userFullCalendar");
-      if (userCalendarEl) {
-        const userCalendar = new FullCalendar.Calendar(userCalendarEl, {
+
+      function initializeCalendar() {
+        userCalendar = new FullCalendar.Calendar(userCalendarEl, {
           initialView: 'dayGridMonth',
           height: 'auto',
           headerToolbar: {
@@ -313,6 +315,7 @@
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,listWeek'
           },
+          nowIndicator: true,
           events: [
             {
               title: 'Booked: AVR Room',
@@ -333,8 +336,20 @@
             }
           ]
         });
+
         userCalendar.render();
       }
+
+      // Delay render until modal is shown
+      const modal = document.getElementById('userCalendarModal');
+      modal.addEventListener('shown.bs.modal', function () {
+        if (!userCalendar) {
+          initializeCalendar();
+        } else {
+          userCalendar.changeView('dayGridMonth');
+          userCalendar.today();
+        }
+      });
 
       const categoryFilterList =
         document.getElementById("categoryFilterList");
