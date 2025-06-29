@@ -14,7 +14,6 @@ use App\Http\Controllers\Dropdowns\DepartmentController;
 use App\Http\Controllers\Dropdowns\AvailabilityStatusController;
 use App\Http\Controllers\Dropdowns\ConditionController;
 use App\Http\Controllers\Dropdowns\RequisitionPurposeController;
-
 use Illuminate\Support\Facades\Auth;
 
 
@@ -29,7 +28,6 @@ Route::get('/users', [UserController::class, 'index']);
 Route::prefix('requisition')->group(function () {
 
 // add/remove selected equipment or facilities
-Route::post('/add-item', [RequisitionFormController::class, 'addToForm']);
 Route::post('/remove-item', [RequisitionFormController::class, 'removeFromForm']);
 // Display fees
 Route::get('/calculate-fees', [RequisitionFormController::class, 'calculateFees']);

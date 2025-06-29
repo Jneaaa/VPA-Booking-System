@@ -72,19 +72,28 @@ public function saveUserInfo(Request $request)
 
         // Prevent overload: limit to 10 items
         if (count($selectedItems) >= 10) {
-            return back()->withErrors(['message' => 'You have reached the maximum allowed items.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'You have reached the maximum allowed items.'
+            ], 422);
         }
 
         $id = $request->input($request->type . '_id');
 
         if (!$id) {
-            return back()->withErrors(['message' => 'Please select a valid item.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Please select a valid item.'
+            ], 422);
         }
 
         if (collect($selectedItems)->contains(fn($item) => 
             $item['id'] == $id && $item['type'] === $request->type
         )) {
-            return back()->withErrors(['message' => 'Item already in selection.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Item already in selection.'
+            ], 422);
         }
 
         $selectedItems[] = [
@@ -100,8 +109,9 @@ public function saveUserInfo(Request $request)
         $equipmentCount = collect($selectedItems)->where('type', 'equipment')->count();
         $totalItems = $facilityCount + $equipmentCount;
 
-        return back()->with([
-            'success' => Str::ucfirst($request->type) . ' added to selection.',
+        return response()->json([
+            'success' => true,
+            'message' => Str::ucfirst($request->type) . ' added to selection.',
             'selected_items' => session('selected_items'), // Return updated session data
             'total_items' => $totalItems // Return the sum of facilities and equipment
         ]);
