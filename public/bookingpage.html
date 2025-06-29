@@ -611,6 +611,31 @@
               <button id="checkAvailabilityBtn" class="btn btn-primary">
                 Check Availability
               </button>
+              <div id="availabilityStatus" class="ms-2" style="display: none;">
+                <div
+                  id="loadingCircle"
+                  class="spinner-border text-primary"
+                  role="status"
+                  style="width: 1.5rem; height: 1.5rem;"
+                >
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <div
+                  id="successCircle"
+                  style="
+                    display: none;
+                    width: 1.5rem;
+                    height: 1.5rem;
+                    border-radius: 50%;
+                    background-color: green;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <i class="bi bi-check text-white"></i>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -710,41 +735,79 @@
         <button id="submitFormBtn" class="btn btn-primary me-2">
           Submit Form
         </button>
-        <button type="reset" class="btn btn-secondary">Cancel</button>
-      </div>
-    </div>
-
-    <div id="facilityPopup" class="popup">
-      <h5>Select Available Facilities</h5>
-      <p>
-        This is a placeholder for facility selection content. Here you would
-        list available facilities, possibly with a date/time filter.
-      </p>
-      <div class="d-flex justify-content-end">
-        <button onclick="togglePopup('facilityPopup')" class="btn btn-danger">
-          Close
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#discardModal">
+          Discard
         </button>
       </div>
-    </div>
 
-    <div id="equipmentPopup" class="popup">
-      <h5>Select Equipment</h5>
-      <p>
-        This is a placeholder for equipment selection content. Here you would
-        list available equipment based on the selected date/time.
-      </p>
-      <div class="d-flex justify-content-end">
-        <button onclick="togglePopup('equipmentPopup')" class="btn btn-danger">
-          Close
-        </button>
+      <!-- Discard Confirmation Modal -->
+      <div class="modal fade" id="discardModal" tabindex="-1" aria-labelledby="discardModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="discardModalLabel">Discard Changes</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Are you sure you want to discard your progress? All changes will be lost.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-danger" onclick="discardChanges()">Discard</button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <footer class="bg-dark text-white text-center py-3 mt-5">
-      <div class="container">
-        <p class="mb-0">Copyright. All Rights Reserved.</p>
+      <!-- Success Modal -->
+      <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="successModalLabel">Success</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Form submitted successfully!
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" onclick="redirectToHome()">Go to Home</button>
+            </div>
+          </div>
+        </div>
       </div>
-    </footer>
+
+      <div id="facilityPopup" class="popup">
+        <h5>Select Available Facilities</h5>
+        <p>
+          This is a placeholder for facility selection content. Here you would
+          list available facilities, possibly with a date/time filter.
+        </p>
+        <div class="d-flex justify-content-end">
+          <button onclick="togglePopup('facilityPopup')" class="btn btn-danger">
+            Close
+          </button>
+        </div>
+      </div>
+
+      <div id="equipmentPopup" class="popup">
+        <h5>Select Equipment</h5>
+        <p>
+          This is a placeholder for equipment selection content. Here you would
+          list available equipment based on the selected date/time.
+        </p>
+        <div class="d-flex justify-content-end">
+          <button onclick="togglePopup('equipmentPopup')" class="btn btn-danger">
+            Close
+          </button>
+        </div>
+      </div>
+
+      <footer class="footer-container">
+        <div class="container text-center">
+          <p class="mb-0">&copy; 2025 Central Philippine University | All Rights Reserved</p>
+        </div>
+      </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -753,6 +816,14 @@
         const overlay = document.getElementById("overlay");
         popup.classList.toggle("show");
         overlay.classList.toggle("show");
+      }
+
+      function redirectToHome() {
+        window.location.href = "index.html";
+      }
+
+      function discardChanges() {
+        window.location.reload(); // Reload the page to reset the form
       }
 
       document.addEventListener("DOMContentLoaded", function () {
@@ -855,6 +926,20 @@
         const equipmentList = document.getElementById("equipmentList");
         const submitButton = document.querySelector("button[type='submit']");
 
+        async function removeItemFromAPI(facilityId, type) {
+          try {
+            await fetch("http://127.0.0.1:8000/requisition/remove-item", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ facility_id: facilityId, type }),
+            });
+          } catch (error) {
+            console.error("Error removing item:", error);
+          }
+        }
+
         function saveSelectionsToLocalStorage() {
           const selectedFacilities = Array.from(
             facilityList.querySelectorAll(".facility-card")
@@ -872,33 +957,24 @@
             JSON.stringify(selectedEquipment)
           );
 
-          // Trigger storage event for other pages
           const event = new Event("storage");
           window.dispatchEvent(event);
         }
 
         function updateEmptyMessage(list, message) {
-          // Check if there are any cards in the container
-          const hasCards = list.querySelector(
-            ".facility-card, .equipment-card"
-          );
-
-          // Find or create the empty message element
+          const hasCards = list.querySelector(".facility-card, .equipment-card");
           let emptyMessage = list.querySelector(".empty-message");
 
           if (!hasCards) {
-            // If no cards and no message exists, create one
             if (!emptyMessage) {
               emptyMessage = document.createElement("p");
               emptyMessage.className = "text-muted empty-message";
               emptyMessage.textContent = message;
               list.appendChild(emptyMessage);
             } else {
-              // If message exists, make sure it's visible
               emptyMessage.style.display = "block";
             }
           } else {
-            // If there are cards, hide the message if it exists
             if (emptyMessage) {
               emptyMessage.style.display = "none";
             }
@@ -911,10 +987,11 @@
           submitButton.disabled = !(hasFacilities || hasEquipment);
         }
 
-        facilityList.addEventListener("click", function (event) {
-          
+        facilityList.addEventListener("click", async function (event) {
           if (event.target.closest(".btn-outline-danger")) {
             const card = event.target.closest(".facility-card");
+            const facilityId = card.querySelector("h6").textContent;
+            await removeItemFromAPI(facilityId, "facility");
             const roomSetupField = card.nextElementSibling; // Assume room setup field is directly after the card
             if (
               roomSetupField &&
@@ -927,16 +1004,24 @@
             updateEmptyMessage(facilityList, "No facility added yet.");
             toggleSubmitButton();
             saveSelectionsToLocalStorage();
+            if (facilityList.querySelectorAll(".facility-card").length === 0) {
+              localStorage.removeItem("selectedFacilities");
+            }
           }
         });
 
-        equipmentList.addEventListener("click", function (event) {
+        equipmentList.addEventListener("click", async function (event) {
           if (event.target.closest(".btn-outline-danger")) {
             const card = event.target.closest(".equipment-card");
+            const equipmentId = card.querySelector("h6").textContent;
+            await removeItemFromAPI(equipmentId, "equipment");
             card.remove();
             updateEmptyMessage(equipmentList, "No equipment added yet.");
             toggleSubmitButton();
             saveSelectionsToLocalStorage();
+            if (equipmentList.querySelectorAll(".equipment-card").length === 0) {
+              localStorage.removeItem("selectedEquipment");
+            }
           }
         });
 
@@ -1035,7 +1120,8 @@
               },
               body: JSON.stringify(data),
             });
-            alert("Form submitted successfully!");
+            const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+            successModal.show();
           } catch (error) {
             console.error("Error:", error);
           }
@@ -1051,26 +1137,170 @@
         const facilityList = document.getElementById("facilityList");
         const equipmentList = document.getElementById("equipmentList");
 
-        // Clear existing items
         facilityList.innerHTML = "";
         equipmentList.innerHTML = "";
 
-        // Fetch all facilities and equipment data from the API
-        let facilitiesData = [];
-        try {
-          const response = await fetch("http://127.0.0.1:8000/api/facilities");
-          const data = await response.json();
-          facilitiesData = data.data || [];
-        } catch (error) {
-          console.error("Failed to fetch facilities:", error);
+        selectedFacilities.forEach((facilityId) => {
+          const facilityCard = document.createElement("div");
+          facilityCard.className = "facility-card";
+          facilityCard.innerHTML = `
+            <button class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-trash"></i>
+            </button>
+            <div class="facility-details">
+              <h6 class="mb-1">${facilityId}</h6>
+              <p class="text-muted mb-1">Facility description placeholder.</p>
+            </div>
+          `;
+          facilityList.appendChild(facilityCard);
+        });
+
+        selectedEquipment.forEach((equipmentId) => {
+          const equipmentCard = document.createElement("div");
+          equipmentCard.className = "equipment-card";
+          equipmentCard.innerHTML = `
+            <button class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-trash"></i>
+            </button>
+            <div class="equipment-details">
+              <h6 class="mb-1">${equipmentId}</h6>
+              <p class="text-muted mb-1">Equipment description placeholder.</p>
+            </div>
+          `;
+          equipmentList.appendChild(equipmentCard);
+        });
+      });
+
+      // Trigger storage event manually on page load to populate containers
+      window.dispatchEvent(new Event("storage"));
+
+      document.getElementById("checkAvailabilityBtn").addEventListener("click", function () {
+        const availabilityStatus = document.getElementById("availabilityStatus");
+        const loadingCircle = document.getElementById("loadingCircle");
+        const successCircle = document.getElementById("successCircle");
+
+        // Show loading circle
+        availabilityStatus.style.display = "flex";
+        loadingCircle.style.display = "block";
+        successCircle.style.display = "none";
+
+        // Simulate checking availability
+        setTimeout(() => {
+          // Hide loading circle and show success circle
+          loadingCircle.style.display = "none";
+          successCircle.style.display = "flex";
+        }, 2000); // Mock delay of 2 seconds
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const selectedDateTime = document.getElementById("selectedDateTime");
+        const startDateField = document.getElementById("startDateField");
+        const endDateField = document.getElementById("endDateField");
+        const startTimeField = document.getElementById("startTimeField");
+        const endTimeField = document.getElementById("endTimeField");
+
+        function formatDateToLong(dateString) {
+          const options = { year: "numeric", month: "long", day: "numeric" };
+          const date = new Date(dateString);
+          return date.toLocaleDateString("en-US", options);
         }
 
-        // Add facilities to the Requested Facilities container
-        selectedFacilities.forEach((facilityId) => {
-          const facility = facilitiesData.find(
-            (f) => f.facility_id === parseInt(facilityId)
+        function updateSelectedDateTime() {
+          const startDate = startDateField.value;
+          const endDate = endDateField.value;
+          const startTime = startTimeField.value;
+          const endTime = endTimeField.value;
+
+          if (startDate && endDate && startTime && endTime) {
+            const formattedStartDate = formatDateToLong(startDate);
+            const formattedEndDate = formatDateToLong(endDate);
+            selectedDateTime.textContent = `${formattedStartDate} ${startTime} to ${formattedEndDate} ${endTime}`;
+          } else {
+            selectedDateTime.textContent = "No date and time selected.";
+          }
+        }
+
+        startDateField.addEventListener("change", updateSelectedDateTime);
+        endDateField.addEventListener("change", updateSelectedDateTime);
+        startTimeField.addEventListener("change", updateSelectedDateTime);
+        endTimeField.addEventListener("change", updateSelectedDateTime);
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const facilityList = document.getElementById("facilityList");
+        const equipmentList = document.getElementById("equipmentList");
+
+        async function removeItemFromAPI(facilityId, type) {
+          try {
+            await fetch("http://127.0.0.1:8000/requisition/remove-item", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ facility_id: facilityId, type }),
+            });
+          } catch (error) {
+            console.error("Error removing item:", error);
+          }
+        }
+
+        function saveSelectionsToLocalStorage() {
+          const selectedFacilities = Array.from(
+            facilityList.querySelectorAll(".facility-card")
+          ).map((card) => card.querySelector("h6").textContent);
+          const selectedEquipment = Array.from(
+            equipmentList.querySelectorAll(".equipment-card")
+          ).map((card) => card.querySelector("h6").textContent);
+
+          localStorage.setItem(
+            "selectedFacilities",
+            JSON.stringify(selectedFacilities)
           );
-          if (facility) {
+          localStorage.setItem(
+            "selectedEquipment",
+            JSON.stringify(selectedEquipment)
+          );
+
+          const event = new Event("storage");
+          window.dispatchEvent(event);
+        }
+
+        facilityList.addEventListener("click", async function (event) {
+          if (event.target.closest(".btn-outline-danger")) {
+            const card = event.target.closest(".facility-card");
+            const facilityId = card.querySelector("h6").textContent;
+            await removeItemFromAPI(facilityId, "facility");
+            card.remove();
+            saveSelectionsToLocalStorage();
+            if (facilityList.querySelectorAll(".facility-card").length === 0) {
+              localStorage.removeItem("selectedFacilities");
+            }
+          }
+        });
+
+        equipmentList.addEventListener("click", async function (event) {
+          if (event.target.closest(".btn-outline-danger")) {
+            const card = event.target.closest(".equipment-card");
+            const equipmentId = card.querySelector("h6").textContent;
+            await removeItemFromAPI(equipmentId, "equipment");
+            card.remove();
+            saveSelectionsToLocalStorage();
+            if (equipmentList.querySelectorAll(".equipment-card").length === 0) {
+              localStorage.removeItem("selectedEquipment");
+            }
+          }
+        });
+
+        window.addEventListener("storage", async () => {
+          const selectedFacilities =
+            JSON.parse(localStorage.getItem("selectedFacilities")) || [];
+          const selectedEquipment =
+            JSON.parse(localStorage.getItem("selectedEquipment")) || [];
+
+          facilityList.innerHTML = "";
+          equipmentList.innerHTML = "";
+
+          selectedFacilities.forEach((facilityId) => {
             const facilityCard = document.createElement("div");
             facilityCard.className = "facility-card";
             facilityCard.innerHTML = `
@@ -1078,22 +1308,14 @@
                 <i class="bi bi-trash"></i>
               </button>
               <div class="facility-details">
-                <h6 class="mb-1">${facility.facility_name}</h6>
-                <p class="text-muted mb-1">${
-                  facility.description || "No description available."
-                }</p>
+                <h6 class="mb-1">${facilityId}</h6>
+                <p class="text-muted mb-1">Facility description placeholder.</p>
               </div>
             `;
             facilityList.appendChild(facilityCard);
-          }
-        });
+          });
 
-        // Add equipment to the Requested Equipment container
-        selectedEquipment.forEach((equipmentId) => {
-          const equipment = facilitiesData.find(
-            (e) => e.facility_id === parseInt(equipmentId)
-          ); // Replace with actual equipment API if available
-          if (equipment) {
+          selectedEquipment.forEach((equipmentId) => {
             const equipmentCard = document.createElement("div");
             equipmentCard.className = "equipment-card";
             equipmentCard.innerHTML = `
@@ -1101,19 +1323,16 @@
                 <i class="bi bi-trash"></i>
               </button>
               <div class="equipment-details">
-                <h6 class="mb-1">${equipment.facility_name}</h6>
-                <p class="text-muted mb-1">${
-                  equipment.description || "No description available."
-                }</p>
+                <h6 class="mb-1">${equipmentId}</h6>
+                <p class="text-muted mb-1">Equipment description placeholder.</p>
               </div>
             `;
             equipmentList.appendChild(equipmentCard);
-          }
+          });
         });
-      });
 
-      // Trigger storage event manually on page load to populate containers
-      window.dispatchEvent(new Event("storage"));
+        window.dispatchEvent(new Event("storage"));
+      });
     </script>
   </body>
 </html>

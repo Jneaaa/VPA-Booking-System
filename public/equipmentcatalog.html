@@ -1259,6 +1259,47 @@
         }
       });
     });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const selectedEquipment = JSON.parse(localStorage.getItem("selectedEquipment")) || [];
+      document.querySelectorAll(".add-to-form-btn").forEach((btn) => {
+        const equipmentId = btn.getAttribute("data-equipment-id");
+        if (selectedEquipment.includes(equipmentId)) {
+          btn.classList.replace("btn-primary", "btn-danger");
+          btn.textContent = "Remove from Form";
+        }
+      });
+
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".add-to-form-btn");
+        if (btn) {
+          e.preventDefault();
+          const equipmentId = btn.getAttribute("data-equipment-id");
+          const isAddAction = !btn.classList.contains("btn-danger");
+
+          try {
+            if (isAddAction) {
+              const selectedEquipment = JSON.parse(localStorage.getItem("selectedEquipment")) || [];
+              if (!selectedEquipment.includes(equipmentId)) {
+                selectedEquipment.push(equipmentId);
+                localStorage.setItem("selectedEquipment", JSON.stringify(selectedEquipment));
+              }
+              btn.classList.replace("btn-primary", "btn-danger");
+              btn.textContent = "Remove from Form";
+            } else {
+              const selectedEquipment = JSON.parse(localStorage.getItem("selectedEquipment")) || [];
+              const updatedEquipment = selectedEquipment.filter((id) => id !== equipmentId);
+              localStorage.setItem("selectedEquipment", JSON.stringify(updatedEquipment));
+              btn.classList.replace("btn-danger", "btn-primary");
+              btn.textContent = "Add to Form";
+            }
+            window.dispatchEvent(new Event("storage"));
+          } catch (error) {
+            console.error("Error handling equipment action:", error);
+          }
+        }
+      });
+    });
   </script>
 
   <style>

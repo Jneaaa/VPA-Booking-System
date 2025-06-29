@@ -14,12 +14,16 @@ use App\Http\Controllers\Dropdowns\DepartmentController;
 use App\Http\Controllers\Dropdowns\AvailabilityStatusController;
 use App\Http\Controllers\Dropdowns\ConditionController;
 use App\Http\Controllers\Dropdowns\RequisitionPurposeController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Auth;
 
 
 // ----- User Routes ----- //
 
 Route::get('/users', [UserController::class, 'index']);
+// Admin Routes
+Route::get('/admins', [AdminController::class, 'getAllAdmins']); // Get all admins
+Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']); // Get single admin info
 
 
 // ----- Requisition Form Routes ----- //
@@ -27,16 +31,22 @@ Route::get('/users', [UserController::class, 'index']);
 // Add requisition prefix for all requisition-related routes
 Route::prefix('requisition')->group(function () {
 
-// add/remove selected equipment or facilities
-Route::post('/remove-item', [RequisitionFormController::class, 'removeFromForm']);
-// Display fees
-Route::get('/calculate-fees', [RequisitionFormController::class, 'calculateFees']);
-// File uploads
-Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);
-// Form submission
-Route::post('/submit', [RequisitionFormController::class, 'submitRequisition']);
-// View requisition
-Route::get('/{request_id}', [RequisitionFormController::class, 'show']);
+    // Save user information
+    Route::post('/save-user-info', [RequisitionFormController::class, 'saveUserInfo']);
+    // Add items to form
+    Route::post('/add-item', [RequisitionFormController::class, 'addToForm']);
+    // Remove items from form
+    Route::post('/remove-item', [RequisitionFormController::class, 'removeFromForm']);
+    // Display fees
+    Route::get('/calculate-fees', [RequisitionFormController::class, 'calculateFees']);
+    // Check availability
+    Route::post('/check-availability', [RequisitionFormController::class, 'checkAvailability']);
+    // File uploads
+    Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);
+    // Form submission
+    Route::post('/submit', [RequisitionFormController::class, 'submitForm']);
+    // View requisition
+    Route::get('/{request_id}', [RequisitionFormController::class, 'show']);
     
 });
 
@@ -145,6 +155,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Facility Routes
         Route::apiResource('facilities', FacilityController::class);
+
 
     });
 });

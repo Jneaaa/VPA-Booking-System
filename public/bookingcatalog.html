@@ -248,6 +248,11 @@
       color: #666; /* Ensure consistent color */
       gap: 5px; /* Reduced gap between tags */
     }
+
+    .bg-light-green {
+      background-color: #d4edda !important;
+      border-color: #c3e6cb !important;
+    }
   </style>
 </head>
 
@@ -501,7 +506,7 @@
     };
 
 
-    // Toast notification system (unchanged)
+    // Toast notification system
     const Toast = {
       container: null,
       init() {
@@ -519,14 +524,15 @@
       },
       show(message, type = 'info') {
         const toast = document.createElement('div');
-        toast.className = `toast show align-items-center text-white bg-${type}`;
+        const bgColor = type === 'success' ? 'bg-light-green' : `bg-${type}`;
+        toast.className = `toast show align-items-center text-dark ${bgColor}`;
         toast.role = 'alert';
         toast.innerHTML = `
-      <div class="d-flex">
-        <div class="toast-body">${message}</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-      </div>
-    `;
+          <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        `;
         this.container.appendChild(toast);
         const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 5000 });
         bsToast.show();
@@ -1269,6 +1275,9 @@
             const selectedFacilities = JSON.parse(localStorage.getItem('selectedFacilities')) || [];
             const updatedFacilities = selectedFacilities.filter(id => id !== facilityId);
             localStorage.setItem('selectedFacilities', JSON.stringify(updatedFacilities));
+            if (updatedFacilities.length === 0) {
+              localStorage.removeItem("selectedFacilities");
+            }
 
             // Update button state
             btn.classList.replace('btn-danger', 'btn-primary');
@@ -1291,6 +1300,131 @@
         if (selectedFacilities.includes(facilityId)) {
           btn.classList.replace('btn-primary', 'btn-danger');
           btn.textContent = 'Remove from Form';
+        }
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities")) || [];
+      document.querySelectorAll(".add-to-form-btn").forEach((btn) => {
+        const facilityId = btn.getAttribute("data-facility-id");
+        if (selectedFacilities.includes(facilityId)) {
+          btn.classList.replace("btn-primary", "btn-danger");
+          btn.textContent = "Remove from Form";
+        }
+      });
+
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".add-to-form-btn");
+        if (btn) {
+          e.preventDefault();
+          const facilityId = btn.getAttribute("data-facility-id");
+          const isAddAction = !btn.classList.contains("btn-danger");
+
+          try {
+            if (isAddAction) {
+              const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities")) || [];
+              if (!selectedFacilities.includes(facilityId)) {
+                selectedFacilities.push(facilityId);
+                localStorage.setItem("selectedFacilities", JSON.stringify(selectedFacilities));
+              }
+              btn.classList.replace("btn-primary", "btn-danger");
+              btn.textContent = "Remove from Form";
+            } else {
+              const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities")) || [];
+              const updatedFacilities = selectedFacilities.filter((id) => id !== facilityId);
+              localStorage.setItem("selectedFacilities", JSON.stringify(updatedFacilities));
+              if (updatedFacilities.length === 0) {
+                localStorage.removeItem("selectedFacilities");
+              }
+              btn.classList.replace("btn-danger", "btn-primary");
+              btn.textContent = "Add to Form";
+            }
+            window.dispatchEvent(new Event("storage"));
+          } catch (error) {
+            console.error("Error handling facility action:", error);
+          }
+        }
+      });
+    });
+
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".add-to-form-btn");
+      if (btn) {
+        e.preventDefault();
+        const facilityId = btn.getAttribute("data-facility-id");
+        const isAddAction = !btn.classList.contains("btn-danger");
+
+        try {
+          if (!isAddAction) {
+            await fetch("http://127.0.0.1:8000/requisition/remove-item", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ facility_id: facilityId, type: "facility" }),
+            });
+
+            const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities")) || [];
+            const updatedFacilities = selectedFacilities.filter((id) => id !== facilityId);
+            localStorage.setItem("selectedFacilities", JSON.stringify(updatedFacilities));
+            if (updatedFacilities.length === 0) {
+              localStorage.removeItem("selectedFacilities");
+            }
+
+            btn.classList.replace("btn-danger", "btn-primary");
+            btn.textContent = "Add to Form";
+
+            window.dispatchEvent(new Event("storage"));
+          }
+        } catch (error) {
+          console.error("Error removing item:", error);
+        }
+      }
+    });
+
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".add-to-form-btn");
+      if (btn) {
+        e.preventDefault();
+        const facilityId = btn.getAttribute("data-facility-id");
+        const isAddAction = !btn.classList.contains("btn-danger");
+
+        try {
+          if (!isAddAction) {
+            await fetch("http://127.0.0.1:8000/requisition/remove-item", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ facility_id: facilityId, type: "facility" }),
+            });
+
+            const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities")) || [];
+            const updatedFacilities = selectedFacilities.filter((id) => id !== facilityId);
+            localStorage.setItem("selectedFacilities", JSON.stringify(updatedFacilities));
+            if (updatedFacilities.length === 0) {
+              localStorage.removeItem("selectedFacilities");
+            }
+
+            btn.classList.replace("btn-danger", "btn-primary");
+            btn.textContent = "Add to Form";
+
+            window.dispatchEvent(new Event("storage"));
+          }
+        } catch (error) {
+          console.error("Error removing item:", error);
+        }
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities")) || [];
+      document.querySelectorAll(".add-to-form-btn").forEach((btn) => {
+        const facilityId = btn.getAttribute("data-facility-id");
+        if (selectedFacilities.includes(facilityId)) {
+          btn.classList.replace("btn-primary", "btn-danger");
+          btn.textContent = "Remove from Form";
         }
       });
     });

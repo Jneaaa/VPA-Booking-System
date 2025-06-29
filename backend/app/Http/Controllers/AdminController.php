@@ -54,4 +54,18 @@ class AdminController extends Controller
 
         return response()->json($departments);
     }
+
+    // Get all admin information
+    public function getAllAdmins()
+    {
+        $admins = Admin::all();
+        return response()->json($admins);
+    }
+
+    // Get information of a single admin
+    public function getAdminInfo(Admin $admin)
+    {
+        $admin->load('departments'); // Ensure departments are included
+        return response()->json($admin);
+    }
 }

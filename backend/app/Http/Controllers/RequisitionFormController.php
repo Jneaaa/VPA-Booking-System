@@ -6,6 +6,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\RequisitionForm;
 use App\Models\RequestedEquipment;
 use App\Models\RequestedFacility;
@@ -15,13 +16,20 @@ use App\Models\User;
 use App\Models\UserUpload;
 use App\Models\FormStatusCode;
 
-
 class RequisitionFormController extends Controller
 {
+    // Common response structure
+    protected function jsonResponse($success, $message, $data = [], $status = 200)
+    {
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'data' => $data
+        ], $status);
+    }
 
-    // ----- Store user information in session ----- //
-    
-public function saveUserInfo(Request $request)
+    // ----- Save user information in session ----- //
+    public function saveUserInfo(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'user_type' => 'required|in:Internal,External',
@@ -34,169 +42,130 @@ public function saveUserInfo(Request $request)
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
         }
 
-        // Store in session
-        session()->put('user_info', [
-            'user_type' => $request->user_type,
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'contact_number' => $request->contact_number,
-            'organization_name' => $request->organization_name,
-            'school_id' => $request->school_id
+        $userInfo = $request->only([
+            'user_type', 'first_name', 'last_name', 'email', 
+            'contact_number', 'organization_name', 'school_id'
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User information saved successfully',
-            'user_info' => session()->get('user_info')
-        ]);
+        session(['user_info' => $userInfo]);
+
+        return $this->jsonResponse(true, 'User information saved successfully.', ['user_info' => $userInfo]);
     }
 
     // ----- Add items to session ----- //
-
     public function addToForm(Request $request)
     {
-        $request->validate([
-            'facility_id' => 'sometimes|exists:facilities,facility_id',
-            'equipment_id' => 'sometimes|exists:equipment,equipment_id',
-            'type' => 'required|in:facility,equipment'
+        $validator = Validator::make($request->all(), [
+            'facility_id' => 'required_without:equipment_id|exists:facilities,facility_id',
+            'equipment_id' => 'required_without:facility_id|exists:equipment,equipment_id',
+            'type' => 'required|in:facility,equipment',
+            'quantity' => 'sometimes|integer|min:1'
         ]);
 
+        if ($validator->fails()) {
+            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
+        }
+
         $selectedItems = session('selected_items', []);
-
-        // Prevent overload: limit to 10 items
-        if (count($selectedItems) >= 10) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You have reached the maximum allowed items.'
-            ], 422);
-        }
-
         $id = $request->input($request->type . '_id');
+        $type = $request->type;
 
-        if (!$id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please select a valid item.'
-            ], 422);
+        // Check for duplicate item
+        if (collect($selectedItems)->contains(fn($item) => $item['id'] == $id && $item['type'] === $type)) {
+            return $this->jsonResponse(false, 'This item is already in your requisition.', [], 422);
         }
 
-        if (collect($selectedItems)->contains(fn($item) => 
-            $item['id'] == $id && $item['type'] === $request->type
-        )) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Item already in selection.'
-            ], 422);
+        // Check maximum items limit
+        if (count($selectedItems) >= 10) {
+            return $this->jsonResponse(false, 'Maximum item limit (10) reached.', [], 422);
         }
 
-        $selectedItems[] = [
+        // Add new item
+        $newItem = [
             'id' => $id,
-            'type' => $request->type,
-            'added_at' => now()
+            'type' => $type,
+            'added_at' => now(),
+            'quantity' => $request->quantity ?? 1
         ];
 
-        session(['selected_items' => $selectedItems]); // Ensure session is updated
+        $selectedItems[] = $newItem;
+        session(['selected_items' => $selectedItems]);
 
-        // Calculate the sum of added facilities and equipment
-        $facilityCount = collect($selectedItems)->where('type', 'facility')->count();
-        $equipmentCount = collect($selectedItems)->where('type', 'equipment')->count();
-        $totalItems = $facilityCount + $equipmentCount;
-
-        return response()->json([
-            'success' => true,
-            'message' => Str::ucfirst($request->type) . ' added to selection.',
-            'selected_items' => session('selected_items'), // Return updated session data
-            'total_items' => $totalItems // Return the sum of facilities and equipment
+        return $this->jsonResponse(true, ucfirst($type) . ' added successfully.', [
+            'selected_items' => $selectedItems,
+            'total_items' => count($selectedItems)
         ]);
     }
 
     // ----- Calculate total fee of added items ----- //
-
     public function calculateFees()
     {
         $selectedItems = session('selected_items', []);
+        $userType = session('user_info.user_type', 'Internal');
 
-        $facilityTotalFee = collect($selectedItems)->reduce(function ($total, $item) {
-            if ($item['type'] === 'facility') {
+        $feeField = $userType === 'Internal' ? 'internal_fee' : 'external_fee';
+        
+        $facilityTotalFee = collect($selectedItems)
+            ->where('type', 'facility')
+            ->reduce(function ($total, $item) use ($feeField) {
                 $facility = Facility::find($item['id']);
-                return $total + ($facility ? $facility->internal_fee : 0);
-            }
-            return $total;
-        }, 0);
+                return $total + ($facility->$feeField ?? 0) * ($item['quantity'] ?? 1);
+            }, 0);
 
-        $equipmentTotalFee = collect($selectedItems)->reduce(function ($total, $item) {
-            if ($item['type'] === 'equipment') {
+        $equipmentTotalFee = collect($selectedItems)
+            ->where('type', 'equipment')
+            ->reduce(function ($total, $item) use ($feeField) {
                 $equipment = Equipment::find($item['id']);
-                return $total + ($equipment ? $equipment->internal_fee : 0);
-            }
-            return $total;
-        }, 0);
+                return $total + ($equipment->$feeField ?? 0) * ($item['quantity'] ?? 1);
+            }, 0);
 
         $totalFee = $facilityTotalFee + $equipmentTotalFee;
+        
+        $feeSummary = compact('facilityTotalFee', 'equipmentTotalFee', 'totalFee');
+        session(['fee_summary' => $feeSummary]);
 
-        // Save fees in session
-        session()->put('fee_summary', [
-            'facility_total_fee' => $facilityTotalFee,
-            'equipment_total_fee' => $equipmentTotalFee,
-            'total_fee' => $totalFee
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'fee_summary' => session('fee_summary') // Return fee summary from session
+        return $this->jsonResponse(true, 'Fees calculated successfully.', [
+            'fee_summary' => $feeSummary,
+            'user_type' => $userType
         ]);
     }
 
     // ----- Remove items from session ----- //
-
     public function removeFromForm(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'facility_id' => 'required_without:equipment_id|exists:facilities,facility_id',
             'equipment_id' => 'required_without:facility_id|exists:equipment,equipment_id',
             'type' => 'required|in:facility,equipment'
         ]);
 
-        $selectedItems = session()->get('selected_items', []);
-        $id = $request->input($request->type . '_id');
-
-        $itemExists = collect($selectedItems)->contains(fn($item) =>
-            $item['id'] == $id && $item['type'] === $request->type
-        );
-
-        if (!$itemExists) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Item not found in current selection.'
-            ], 404);
+        if ($validator->fails()) {
+            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
         }
 
-        $updatedItems = array_values(array_filter($selectedItems, function($item) use ($id, $request) {
-            return !($item['id'] == $id && $item['type'] === $request->type);
-        }));
+        $selectedItems = session('selected_items', []);
+        $id = $request->input($request->type . '_id');
+        $type = $request->type;
 
-        session()->put('selected_items', $updatedItems); // Ensure session is updated
+        $updatedItems = array_values(array_filter($selectedItems, 
+            fn($item) => !($item['id'] == $id && $item['type'] === $type)
+        ));
 
-        return response()->json([
-            'success' => true,
-            'message' => Str::ucfirst($request->type) . ' removed successfully.',
-            'count' => count(session('selected_items')), // Return updated session count
-            'selected_items' => session('selected_items') // Return updated session data
+        session(['selected_items' => $updatedItems]);
+
+        return $this->jsonResponse(true, ucfirst($type) . ' removed successfully.', [
+            'selected_items' => $updatedItems,
+            'total_items' => count($updatedItems)
         ]);
     }
 
     // ----- Check for booking schedule conflicts ----- //
-
     public function checkAvailability(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'start_time' => 'required|date_format:H:i:s',
@@ -205,67 +174,62 @@ public function saveUserInfo(Request $request)
             'equipment_id' => 'sometimes|required|exists:equipment,equipment_id'
         ]);
 
-        // Get active status IDs (Scheduled=4, Ongoing=5)
+        if ($validator->fails()) {
+            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
+        }
+
         $conflictStatusIds = FormStatusCode::whereIn('status_name', ['Scheduled', 'Ongoing'])
             ->pluck('status_id')
             ->toArray();
 
-        // Check for conflicting bookings
-        $conflicts = RequisitionForm::where(function($query) use ($request) {
+        $query = RequisitionForm::where(function($query) use ($request) {
                 $query->whereBetween('start_date', [$request->start_date, $request->end_date])
                     ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
-                    ->orWhere(function($q) use ($request) {
-                        $q->where('start_date', '<=', $request->start_date)
-                        ->where('end_date', '>=', $request->end_date);
-                    });
+                    ->orWhere(fn($q) => $q->where('start_date', '<=', $request->start_date)
+                        ->where('end_date', '>=', $request->end_date));
             })
             ->where(function($query) use ($request) {
-                $query->where(function($q) use ($request) {
-                        $q->where('start_time', '<', $request->end_time)
-                        ->where('end_time', '>', $request->start_time);
-                    });
+                $query->where('start_time', '<', $request->end_time)
+                    ->where('end_time', '>', $request->start_time);
             })
-            ->whereIn('status_id', $conflictStatusIds)
-            ->when($request->has('facility_id'), function($query) use ($request) {
-                $query->whereHas('requestedFacilities', function($q) use ($request) {
-                    $q->where('facility_id', $request->facility_id);
-                });
-            })
-            ->when($request->has('equipment_id'), function($query) use ($request) {
-                $query->whereHas('requestedEquipment', function($q) use ($request) {
-                    $q->where('equipment_id', $request->equipment_id);
-                });
-            })
-            ->exists();
+            ->whereIn('status_id', $conflictStatusIds);
 
-        return response()->json([
-            'success' => true,
-            'available' => !$conflicts,
-            'message' => $conflicts 
-                ? 'This time slot conflicts with an existing booking. Please choose different dates/times.'
-                : 'This time slot is available for booking.',
-            'conflicts' => $conflicts
-        ]);
+        if ($request->has('facility_id')) {
+            $query->whereHas('requestedFacilities', fn($q) => $q->where('facility_id', $request->facility_id));
+        }
+
+        if ($request->has('equipment_id')) {
+            $query->whereHas('requestedEquipment', fn($q) => $q->where('equipment_id', $request->equipment_id));
+        }
+
+        $conflicts = $query->exists();
+
+        return $this->jsonResponse(true, $conflicts ? 
+            'Time slot conflicts with an existing booking.' : 'Time slot is available.', 
+            ['available' => !$conflicts]
+        );
     }
 
     // ----- Temporary user uploads before submission ----- //
-
     public function tempUpload(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'upload_type' => 'required|in:Letter,Room Setup'
         ]);
 
-        try {
-            $folder = $request->upload_type === 'Letter' 
-                ? 'user-uploads/user-letters' 
-                : 'user-uploads/user-setups';
+        if ($validator->fails()) {
+            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
+        }
 
-            $upload = Cloudinary::upload($request->file('file')->getRealPath(), [
-                'folder' => $folder,
-                'resource_type' => 'auto'
-            ]);
+        try {
+            $folder = $request->upload_type === 'Letter' ? 
+                'user-uploads/user-letters' : 'user-uploads/user-setups';
+            
+            $upload = Cloudinary::upload(
+                $request->file('file')->getRealPath(), 
+                ['folder' => $folder, 'resource_type' => 'auto']
+            );
 
             $userUpload = UserUpload::create([
                 'file_url' => $upload->getSecurePath(),
@@ -275,31 +239,121 @@ public function saveUserInfo(Request $request)
                 'request_id' => null
             ]);
 
-            $uploadSession = session()->get('temp_uploads', []);
-            $uploadSession[] = [
+            $tempUploads = session('temp_uploads', []);
+            $tempUploads[] = [
                 'upload_id' => $userUpload->upload_id,
                 'token' => $userUpload->upload_token,
                 'type' => $userUpload->upload_type
             ];
-            session()->put('temp_uploads', $uploadSession); // Ensure session is updated
+            
+            session(['temp_uploads' => $tempUploads]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'File uploaded successfully',
+            return $this->jsonResponse(true, 'File uploaded successfully.', [
                 'upload' => [
                     'id' => $userUpload->upload_id,
                     'url' => $userUpload->file_url,
                     'type' => $userUpload->upload_type,
                     'token' => $userUpload->upload_token
                 ],
-                'temp_uploads' => session('temp_uploads') // Return updated session data
+                'temp_uploads' => $tempUploads
             ]);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Upload failed: ' . $e->getMessage()
-            ], 500);
+            return $this->jsonResponse(false, 'Upload failed: ' . $e->getMessage(), [], 500);
+        }
+    }
+
+    // ----- Submit requisition form ----- //
+    public function submitForm(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'start_time' => 'required|date_format:H:i:s',
+            'end_time' => 'required|date_format:H:i:s|after:start_time',
+            'purpose_id' => 'required|exists:requisition_purposes,purpose_id',
+            'num_participants' => 'required|integer|min:1',
+            'additional_requests' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Validate session data exists
+            $userInfo = session('user_info');
+            $selectedItems = session('selected_items', []);
+            $tempUploads = session('temp_uploads', []);
+
+            if (!$userInfo) {
+                throw new \Exception('User information not found in session. Please complete step 1.');
+            }
+
+            if (empty($selectedItems)) {
+                throw new \Exception('No items selected for requisition. Please add at least one facility or equipment.');
+            }
+
+            // Create or update user
+            $user = User::updateOrCreate(
+                ['email' => $userInfo['email']],
+                $userInfo
+            );
+
+            // Create requisition form
+            $requisitionForm = RequisitionForm::create([
+                'user_id' => $user->user_id,
+                'access_code' => Str::upper(Str::random(8)),
+                'purpose_id' => $request->purpose_id,
+                'num_participants' => $request->num_participants,
+                'additional_requests' => $request->additional_requests,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'status_id' => FormStatusCode::where('status_name', 'Pending Approval')->value('status_id'),
+                'tentative_fee' => session('fee_summary.total_fee', 0),
+            ]);
+
+            // Process selected items
+            foreach ($selectedItems as $item) {
+                if ($item['type'] === 'facility') {
+                    RequestedFacility::create([
+                        'request_id' => $requisitionForm->request_id,
+                        'facility_id' => $item['id'],
+                        'is_waived' => false,
+                    ]);
+                } elseif ($item['type'] === 'equipment') {
+                    RequestedEquipment::create([
+                        'request_id' => $requisitionForm->request_id,
+                        'equipment_id' => $item['id'],
+                        'quantity' => $item['quantity'] ?? 1,
+                        'is_waived' => false,
+                    ]);
+                }
+            }
+
+            // Process temporary uploads
+            foreach ($tempUploads as $upload) {
+                UserUpload::where('upload_token', $upload['token'])
+                    ->update(['request_id' => $requisitionForm->request_id]);
+            }
+
+            // Clear session data
+            session()->forget(['user_info', 'selected_items', 'fee_summary', 'temp_uploads']);
+            
+            DB::commit();
+
+            return $this->jsonResponse(true, 'Requisition submitted successfully!', [
+                'access_code' => $requisitionForm->access_code,
+                'request_id' => $requisitionForm->request_id,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->jsonResponse(false, 'Submission failed: ' . $e->getMessage(), [], 500);
         }
     }
 }
