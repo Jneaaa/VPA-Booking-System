@@ -97,6 +97,11 @@
     .spinner-border {
       border-radius: 50% !important;
     }
+
+    .toast {
+      border-radius: 0 !important;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 
@@ -273,7 +278,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Loading Indicator -->
           <div id="loadingIndicator" class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
@@ -281,6 +286,7 @@
             </div>
             <p class="mt-2">Loading facilities...</p>
           </div>
+
 
           <!-- Catalog Items Container -->
           <div id="catalogItemsContainer" class="list-layout d-none"></div>
@@ -308,511 +314,683 @@
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      // Initialize FullCalendar when the modal is shown
-      const calendarModal = document.getElementById('userCalendarModal');
-      let calendar;
-      
-      calendarModal.addEventListener('shown.bs.modal', function () {
-        const calendarEl = document.getElementById('userFullCalendar');
-        
-        if (!calendar) {
-          calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,listWeek'
-            },
-            height: 'auto',
-            nowIndicator: true,
-            events: [
-              {
-                title: 'Booked: AVR Room',
-                start: '2025-06-02T10:00:00',
-                end: '2025-06-02T12:00:00',
-                backgroundColor: '#198754'
-              },
-              {
-                title: 'PE Gym Reservation',
-                start: '2025-06-05',
-                backgroundColor: '#0d6efd'
-              },
-              {
-                title: 'Library Conference',
-                start: '2025-06-10T14:00:00',
-                end: '2025-06-10T16:00:00',
-                backgroundColor: '#dc3545'
-              }
-            ],
-            eventClick: function(info) {
-              alert('Event: ' + info.event.title);
-            }
-          });
-          calendar.render();
-        }
-      });
-      
-      // The rest of your existing JavaScript code...
-      const categoryFilterList = document.getElementById("categoryFilterList");
-      const catalogItemsContainer = document.getElementById("catalogItemsContainer");
-      const currentCategoryTitle = document.getElementById("currentCategoryTitle");
-      const loadingIndicator = document.getElementById("loadingIndicator");
-      const requisitionFormButton = document.getElementById("requisitionFormButton");
-      const requisitionBadge = document.getElementById("requisitionBadge");
+    // Global state management
 
-      let facilities = []; // Store fetched facilities
-      let categories = []; // Store fetched categories
-      let currentCategory = "All"; // Tracks the currently active category filter
-      let currentLayout = "list"; // 'list' or 'grid'
-      let currentPage = 1;
-      const itemsPerPage = 4; // Number of items per page
-
-      // Define your Laravel API base URL for catalog data
-      const API_BASE_URL = 'http://127.0.0.1:8000/api'; // <<< IMPORTANT: Update this if different
-
-      // Fetch facilities from the API
-      async function fetchFacilities() {
+    const AppState = {
+      initialized: false,
+      facilities: [],
+      calendar: null,
+      requisitionItems: (() => {
         try {
-          loadingIndicator.classList.remove("d-none"); // Show loading spinner
-          catalogItemsContainer.classList.add("d-none"); // Hide catalog items
-
-          const response = await fetch(`${API_BASE_URL}/facilities`, {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            credentials: "same-origin", // or "include" if you need to send cookies
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorData.message || 'Failed to fetch facilities'}`);
-          }
-
-          const data = await response.json();
-
-          // Check if data structure is as expected and contains a 'data' array
-          if (!data.data || !Array.isArray(data.data)) {
-            throw new Error("Invalid data structure from facilities API: 'data' array missing.");
-          }
-
-          // Map and parse facility data, ensuring rental_fee is a number
-          facilities = data.data.map((facility) => ({
-            ...facility,
-            rental_fee: parseFloat(facility.rental_fee) || 0, // Default to 0 if invalid
-          }));
-
-          renderCatalogItems(); // Render after successful fetch
-          loadingIndicator.classList.add("d-none"); // Hide loading spinner
-          catalogItemsContainer.classList.remove("d-none"); // Show catalog items
-        } catch (error) {
-          console.error("Error fetching facilities:", error);
-          loadingIndicator.innerHTML = `
-                <div class="alert alert-danger">
-                    Failed to load facilities. Please try again later.
-                </div>
-            `;
-          loadingIndicator.classList.remove("d-none"); // Ensure error message is visible
-          catalogItemsContainer.classList.add("d-none"); // Keep items hidden
+          const items = JSON.parse(localStorage.getItem("selectedItems"));
+          return Array.isArray(items) ? items : [];
+        } catch (e) {
+          return [];
         }
-      }
+      })(),
+      requisitionPurposes: [] // Added for storing purposes
+    };
 
-      // Fetch categories and subcategories from the API
-      async function fetchCategories() {
+
+    // Toast notification system (unchanged)
+    const Toast = {
+      container: null,
+      init() {
+        this.container = document.getElementById('toastContainer') || this.createContainer();
+      },
+      createContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.style.position = 'fixed';
+        container.style.bottom = '20px';
+        container.style.right = '20px';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
+      },
+      show(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast show align-items-center text-white bg-${type}`;
+        toast.role = 'alert';
+        toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">${message}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    `;
+        this.container.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 5000 });
+        bsToast.show();
+        toast.addEventListener('hidden.bs.toast', () => toast.remove());
+      }
+    };
+
+    // API Service (unchanged)
+    const ApiService = {
+      baseUrl: 'http://127.0.0.1:8000/api',
+      async request(url, method = 'GET', body = null) {
+        const headers = {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        };
+        const config = {
+          method,
+          headers,
+          credentials: 'same-origin'
+        };
+        if (body) {
+          config.body = JSON.stringify(body);
+        }
+        const response = await fetch(`${this.baseUrl}${url}`, config);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      },
+      get(url) {
+        return this.request(url);
+      },
+      post(url, data) {
+        return this.request(url, 'POST', data);
+      }
+    };
+
+    // Enhanced Requisition Module
+    const RequisitionModule = {
+      init() {
+        this.bindEvents();
+        this.updateRequisitionButton();
+        this.fetchPurposes().then(() => {
+          // Auto-load items if we're on the booking page
+          if (window.location.pathname.includes('bookingpage.html')) {
+            this.initializeBookingPage();
+          }
+        });
+      },
+
+      bindEvents() {
+        document.addEventListener('click', (e) => {
+          const btn = e.target.closest('.add-to-form-btn');
+          if (btn) {
+            e.preventDefault();
+            this.handleItemAction(btn);
+          }
+        });
+
+        window.addEventListener('storage', () => this.updateRequisitionButton());
+      },
+
+      async fetchPurposes() {
         try {
-          const response = await fetch(`${API_BASE_URL}/facility-categories/index`, { // Assuming this endpoint
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorData.message || 'Failed to fetch categories'}`);
-          }
-
-          categories = await response.json(); // Store fetched categories
-          renderCategoryFilterList(categories); // Render the filter list
+          AppState.requisitionPurposes = await ApiService.get('/requisition-purposes');
+          this.populatePurposeDropdown();
         } catch (error) {
-          console.error("Error fetching categories:", error);
-          // Optionally, display an error message for categories as well
-          categoryFilterList.innerHTML = '<p class="text-danger">Failed to load categories.</p>';
+          console.error('Failed to load requisition purposes:', error);
+          Toast.show('Failed to load requisition purposes', 'error');
         }
-      }
+      },
 
-      // Render category filter list with collapsible subcategories
-      function renderCategoryFilterList(categoriesData) {
-        categoryFilterList.innerHTML = `
-            <a href="#" class="filter-item active" data-category="All">All Categories</a>
-        `;
+      populatePurposeDropdown() {
+        const purposeSelect = document.getElementById('requisitionPurpose');
+        if (!purposeSelect) return; // Only on booking page
 
-        categoriesData.forEach((category) => {
-          const categoryItem = document.createElement("div");
-          categoryItem.classList.add("category-item");
+        // Clear existing options
+        purposeSelect.innerHTML = '<option value="" selected disabled>Select a purpose</option>';
 
-          const categoryHeader = document.createElement("a");
-          categoryHeader.href = "#";
-          categoryHeader.classList.add("filter-item", "d-flex", "align-items-center", "justify-content-between");
-          categoryHeader.textContent = category.category_name;
-          categoryHeader.dataset.category = category.category_name;
-
-          if (category.subcategories && category.subcategories.length > 0) {
-            const toggleButton = document.createElement("i");
-            toggleButton.classList.add("bi", "bi-chevron-down", "ms-2", "toggle-icon");
-            toggleButton.dataset.bsToggle = "collapse";
-            toggleButton.dataset.bsTarget = `#subcategory-${category.id}`; // Use category.id for uniqueness
-            categoryHeader.appendChild(toggleButton);
-
-            // Add event listener to categoryHeader to handle category filtering OR subcategory collapse
-            categoryHeader.addEventListener("click", function (e) {
-              // Only filter if not clicking the toggle icon directly
-              if (e.target !== toggleButton) {
-                e.preventDefault();
-                updateCategoryFilter(this.dataset.category);
-              }
-            });
-
-            const subcategoryList = document.createElement("div");
-            subcategoryList.classList.add("subcategory-list", "collapse");
-            subcategoryList.id = `subcategory-${category.id}`; // Use category.id for uniqueness
-
-            category.subcategories.forEach((subcategory) => {
-              const subcategoryItem = document.createElement("a");
-              subcategoryItem.href = "#";
-              subcategoryItem.classList.add("filter-item", "ms-3");
-              subcategoryItem.dataset.category = subcategory.subcategory_name;
-              subcategoryItem.textContent = subcategory.subcategory_name;
-              subcategoryItem.addEventListener("click", function (e) {
-                e.preventDefault();
-                updateCategoryFilter(this.dataset.category);
-              });
-              subcategoryList.appendChild(subcategoryItem);
-            });
-
-            categoryItem.appendChild(categoryHeader);
-            categoryItem.appendChild(subcategoryList);
-          } else {
-            // If no subcategories, category header itself is directly clickable for filtering
-            categoryHeader.addEventListener("click", function (e) {
-              e.preventDefault();
-              updateCategoryFilter(this.dataset.category);
-            });
-            categoryItem.appendChild(categoryHeader);
-          }
-
-          categoryFilterList.appendChild(categoryItem);
+        // Add new options
+        AppState.requisitionPurposes.forEach(purpose => {
+          const option = document.createElement('option');
+          option.value = purpose.id;
+          option.textContent = purpose.name;
+          purposeSelect.appendChild(option);
         });
+      },
 
-        // Add listener for the initial "All Categories" link
-        categoryFilterList.querySelector('[data-category="All"]').addEventListener("click", function (e) {
-          e.preventDefault();
-          updateCategoryFilter("All");
-        });
+      initializeBookingPage() {
+        this.populatePurposeDropdown();
+        this.displaySelectedItems();
 
-        setupCollapseAnimations(); // Re-attach collapse animations
-        updateCategoryFilter(currentCategory); // Ensure active class is set correctly on initial load
-      }
-
-      // Function to update the active category filter and re-render catalog items
-      function updateCategoryFilter(categoryName) {
-        document.querySelectorAll("#categoryFilterList .filter-item").forEach(item => item.classList.remove("active"));
-        // Find the correct item to activate, including potential subcategories
-        document.querySelector(`#categoryFilterList .filter-item[data-category="${categoryName}"]`)?.classList.add("active");
-        currentCategory = categoryName;
-        currentPage = 1; // Reset to first page
-        currentCategoryTitle.querySelector(".dropdown-toggle").textContent =
-          `${currentCategory === "All" ? "All" : currentCategory} Facilities`;
-        renderCatalogItems();
-      }
-
-      // Add animations for the collapse arrow on subcategories
-      function setupCollapseAnimations() {
-        const toggleIcons = document.querySelectorAll(".toggle-icon");
-        toggleIcons.forEach((icon) => {
-          const targetId = icon.dataset.bsTarget;
-          const targetElement = document.querySelector(targetId);
-
-          // Ensure event listeners are added only once by using jQuery's .off()
-          // Or use an event delegation approach if not using jQuery
-          if (targetElement) { // Check if targetElement exists
-            $(targetElement).off('show.bs.collapse').on("show.bs.collapse", () => {
-              icon.classList.remove("bi-chevron-down");
-              icon.classList.add("bi-chevron-up");
-            });
-
-            $(targetElement).off('hide.bs.collapse').on("hide.bs.collapse", () => {
-              icon.classList.remove("bi-chevron-up");
-              icon.classList.add("bi-chevron-down");
-            });
-          }
-        });
-      }
-
-      function renderCatalogItems() {
-        catalogItemsContainer.innerHTML = ""; // Clear previous items
-        // Remove existing layout classes and apply the new one
-        catalogItemsContainer.classList.remove("list-layout", "grid-layout");
-        catalogItemsContainer.classList.add(currentLayout + "-layout");
-
-        // Filter facilities by current category (case-insensitive for robustness)
-        const filteredFacilities = facilities.filter(f => {
-          if (currentCategory === "All") {
-            return true;
-          }
-          // Check both category and subcategory names for a match
-          return (f.category?.category_name?.toLowerCase() === currentCategory.toLowerCase() ||
-            f.subcategory?.subcategory_name?.toLowerCase() === currentCategory.toLowerCase());
-        });
-
-        // Paginate results
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const paginatedFacilities = filteredFacilities.slice(startIndex, startIndex + itemsPerPage);
-
-        // Render each facility or show "No items found" message
-        if (paginatedFacilities.length === 0) {
-          catalogItemsContainer.innerHTML = '<p class="text-center text-muted mt-5">No facilities found for this category or filters.</p>';
-        } else {
-          const itemsWrapper = document.createElement("div");
-          itemsWrapper.className = currentLayout === "grid" ? "row g-3" : ""; // Use Bootstrap row for grid
-          catalogItemsContainer.appendChild(itemsWrapper);
-
-          paginatedFacilities.forEach((facility) => {
-            const rentalFee = facility.rental_fee.toFixed(2);
-            const card = document.createElement("div");
-            card.classList.add("catalog-card"); // Apply base card style
-
-            if (currentLayout === "list") {
-              card.innerHTML = `
-                        <div class="row g-0">
-                            <div class="col-md-3">
-                                <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
-                                    class="catalog-card-img" alt="${facility.facility_name}">
-                            </div>
-                            <div class="col-md-7">
-                                <div class="card-body">
-                                    <h5 class="card-title">${facility.facility_name}</h5>
-                                    <p class="card-text text-muted mb-1">${facility.description || "No description available."}</p>
-                                    <div class="d-flex flex-wrap gap-3">
-                                        <span class="text-muted"><i class="bi bi-tag"></i> ${facility.category?.category_name || "Uncategorized"}</span>
-                                        <span class="text-muted"><i class="bi bi-tags"></i> ${facility.subcategory?.subcategory_name || "No Subcategory"}</span>
-                                        <span class="text-muted"><i class="bi bi-building"></i> ${facility.department?.department_name || "Unknown Department"}</span>
-                                        <span class="text-muted"><i class="bi bi-people"></i> Capacity: ${facility.capacity || "N/A"}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-2 d-flex flex-column justify-content-between p-3 border-start">
-                                <div class="rental-fee fw-bold">₱${rentalFee}</div>
-                                <div class="d-grid gap-2 mt-auto">
-                                    <button class="btn btn-sm btn-primary add-to-form-btn" data-facility-id="${facility.id}">Add to Form</button>
-                                    <button class="btn btn-sm btn-outline-secondary view-calendar-btn" data-bs-toggle="modal" data-bs-target="#userCalendarModal" data-facility-id="${facility.id}">
-                                        View Calendar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-              itemsWrapper.appendChild(card);
-            } else { // Grid layout
-              const colDiv = document.createElement("div");
-              colDiv.className = "col-md-6 col-lg-4 col-xl-3"; // Adjust column size for grid
-              colDiv.innerHTML = `
-                        <div class="card h-100"> <!-- Added h-100 to ensure consistent height -->
-                            <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
-                                class="catalog-card-img" alt="${facility.facility_name}">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">${facility.facility_name}</h5>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-light text-dark"><i class="bi bi-tag"></i> ${facility.category?.category_name || "Uncategorized"}</span>
-                                    <span class="fw-bold rental-fee">₱${rentalFee}</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-light text-dark"><i class="bi bi-people"></i> Capacity: ${facility.capacity || "N/A"}</span>
-                                </div>
-                                <div class="mt-auto d-grid gap-2"> <!-- Push buttons to bottom -->
-                                    <button class="btn btn-sm btn-primary add-to-form-btn" data-facility-id="${facility.id}">Add to Form</button>
-                                    <button class="btn btn-sm btn-outline-secondary view-calendar-btn" data-bs-toggle="modal" data-bs-target="#userCalendarModal" data-facility-id="${facility.id}">
-                                        View Calendar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-              itemsWrapper.appendChild(colDiv);
-            }
-          });
+        // Load any previously selected purpose
+        const savedPurpose = localStorage.getItem('selectedPurpose');
+        if (savedPurpose && document.getElementById('requisitionPurpose')) {
+          document.getElementById('requisitionPurpose').value = savedPurpose;
         }
-        renderPagination(filteredFacilities.length);
-        attachCatalogItemListeners(); // Re-attach listeners to new elements
-      }
+      },
 
-      function renderPagination(totalItems) {
-        const paginationContainer = document.getElementById("pagination");
-        paginationContainer.innerHTML = ""; // Clear previous pagination
+      displaySelectedItems() {
+        const itemsContainer = document.getElementById('selectedItemsContainer');
+        if (!itemsContainer) return;
 
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        itemsContainer.innerHTML = '';
 
-        if (totalPages <= 1) { // Hide pagination if only one page or no items
+        if (AppState.requisitionItems.length === 0) {
+          itemsContainer.innerHTML = '<p class="text-muted">No items selected</p>';
           return;
         }
 
-        // Previous button
-        const prevLi = document.createElement("li");
-        prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
-        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous">&laquo;</a>`;
-        prevLi.addEventListener("click", (e) => {
-          e.preventDefault();
-          if (currentPage > 1) {
-            currentPage--;
-            renderCatalogItems();
-            window.scrollTo(0, 0); // Scroll to top
-          }
-        });
-        paginationContainer.appendChild(prevLi);
+        const list = document.createElement('ul');
+        list.className = 'list-group';
 
-        // Page numbers
-        for (let i = 1; i <= totalPages; i++) {
-          const li = document.createElement("li");
-          li.className = `page-item ${i === currentPage ? "active" : ""}`;
-          li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-          li.addEventListener("click", (e) => {
-            e.preventDefault();
-            currentPage = i;
-            renderCatalogItems();
-            window.scrollTo(0, 0); // Scroll to top
+        AppState.requisitionItems.forEach(item => {
+          const listItem = document.createElement('li');
+          listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+          listItem.innerHTML = `
+        ${item.name}
+        <button class="btn btn-sm btn-danger remove-item-btn" data-item-id="${item.id}">
+          <i class="bi bi-trash"></i>
+        </button>
+      `;
+          list.appendChild(listItem);
+        });
+
+        itemsContainer.appendChild(list);
+
+        // Add event listeners for remove buttons
+        document.querySelectorAll('.remove-item-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const itemId = btn.dataset.itemId;
+            this.removeItem(itemId);
           });
-          paginationContainer.appendChild(li);
+        });
+      },
+
+      async handleItemAction(button) {
+        const facilityId = button.dataset.facilityId;
+        const facility = AppState.facilities.find(f => f.id === parseInt(facilityId));
+
+        if (!facility) {
+          Toast.show('Facility not found', 'error');
+          return;
         }
 
-        // Next button
-        const nextLi = document.createElement("li");
-        nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
-        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next">&raquo;</a>`;
-        nextLi.addEventListener("click", (e) => {
-          e.preventDefault();
-          if (currentPage < totalPages) {
-            currentPage++;
-            renderCatalogItems();
-            window.scrollTo(0, 0); // Scroll to top
+        const isAddAction = !button.classList.contains('btn-danger');
+        const originalText = button.innerHTML;
+
+        button.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${isAddAction ? 'Adding...' : 'Removing...'}`;
+        button.disabled = true;
+
+        try {
+          if (isAddAction) {
+            await this.addItem(facilityId, facility);
+          } else {
+            await this.removeItem(facilityId);
           }
-        });
-        paginationContainer.appendChild(nextLi);
-      }
+        } finally {
+          button.disabled = false;
+        }
+      },
 
-      // Attach listeners to dynamically created catalog items (View Calendar, Add to Form)
-      function attachCatalogItemListeners() {
-        document.querySelectorAll('.view-calendar-btn').forEach(button => {
-          // Remove previous listeners to prevent duplicates
-          $(button).off('click').on('click', function () {
-            const facilityId = this.dataset.facilityId;
-            console.log('View Calendar clicked for facility ID:', facilityId);
-            // The Bootstrap modal will be toggled by data-bs-toggle and data-bs-target attributes
+      async addItem(facilityId, facility) {
+        await ApiService.post('/requisition/add-item', { facility_id: facilityId });
+
+        if (!AppState.requisitionItems.some(item => item.id === parseInt(facilityId))) {
+          AppState.requisitionItems.push({
+            id: facility.id,
+            name: facility.facility_name,
+            type: 'facility'
           });
-        });
+          this.saveItems();
+        }
 
-        document.querySelectorAll('.add-to-form-btn').forEach(button => {
-          // Remove previous listeners to prevent duplicates
-          $(button).off('click').on('click', function () {
-            const facilityId = this.dataset.facilityId;
-            let selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities") || "[]");
+        Toast.show(`${facility.facility_name} added to form!`, 'success');
+        this.updateRequisitionButton();
+      },
 
-            // Check if facility is already added (assuming unique facilities)
-            if (!selectedFacilities.some(item => item.id === parseInt(facilityId))) {
-              const facilityToAdd = facilities.find(f => f.id === parseInt(facilityId));
-              if (facilityToAdd) {
-                selectedFacilities.push({
-                  id: facilityToAdd.id,
-                  name: facilityToAdd.facility_name,
-                  type: 'facility' // Indicate item type
-                });
-                localStorage.setItem("selectedFacilities", JSON.stringify(selectedFacilities));
-                alert(`Facility '${facilityToAdd.facility_name}' added to your requisition form!`);
-                updateRequisitionButton();
-              } else {
-                console.error('Facility not found for ID:', facilityId);
-              }
-            } else {
-              alert(`Facility is already in your requisition form.`);
-            }
-          });
-        });
-      }
+      async removeItem(facilityId) {
+        await ApiService.post('/requisition/remove-item', { facility_id: facilityId });
 
-      // Setup layout toggle functionality
-      function setupLayoutToggle() {
-        const layoutOptions = document.querySelectorAll(".layout-option");
-        layoutOptions.forEach(option => {
-          option.addEventListener("click", (e) => {
-            e.preventDefault();
-            currentLayout = option.dataset.layout;
-            // Update the dropdown button text
-            layoutDropdownButton.textContent = `${option.textContent} Layout`;
-            currentPage = 1; // Reset to first page on layout change
-            renderCatalogItems();
-          });
-        });
-      }
+        AppState.requisitionItems = AppState.requisitionItems.filter(item => item.id !== parseInt(facilityId));
+        this.saveItems();
 
-      // Setup sorting functionality
-      function setupSorting() {
-        const sortOptions = document.querySelectorAll(".sort-option");
-        sortOptions.forEach(option => {
-          option.addEventListener("click", (e) => {
-            e.preventDefault();
-            const sortType = option.dataset.sort;
+        
+        Toast.show('Item removed from form!', 'success');
+        this.updateRequisitionButton();
+      },
 
-            switch (sortType) {
-              case 'price-asc':
-                facilities.sort((a, b) => (a.rental_fee || 0) - (b.rental_fee || 0));
-                break;
-              case 'price-desc':
-                facilities.sort((a, b) => (b.rental_fee || 0) - (a.rental_fee || 0));
-                break;
-              case 'name-asc':
-                facilities.sort((a, b) => (a.facility_name || '').localeCompare(b.facility_name || ''));
-                break;
-            }
+      saveItems() {
+        localStorage.setItem("selectedItems", JSON.stringify(AppState.requisitionItems));
+      },
 
-            currentPage = 1; // Reset to first page on sort
-            renderCatalogItems();
-            sortDropdownButton.textContent = option.textContent; // Update the sort dropdown text
-          });
-        });
-      }
+      updateRequisitionButton() {
+        const requisitionFormButton = document.getElementById("requisitionFormButton");
+        if (!requisitionFormButton) return;
 
-      // Update the requisition form button's badge
-      function updateRequisitionButton() {
-        const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities") || "[]");
-        const selectedEquipment = JSON.parse(localStorage.getItem("selectedEquipment") || "[]");
-        const totalCount = selectedFacilities.length + selectedEquipment.length;
+        const requisitionBadge = document.getElementById("requisitionBadge");
+        const count = AppState.requisitionItems.length;
 
-        if (totalCount > 0) {
-          requisitionBadge.textContent = totalCount;
+        if (count > 0) {
+          requisitionBadge.textContent = count;
           requisitionBadge.classList.remove("d-none");
-          requisitionFormButton.classList.remove("btn-outline-primary");
-          requisitionFormButton.classList.add("btn-primary");
+          requisitionFormButton.classList.replace("btn-outline-primary", "btn-primary");
+
+          const tooltipContent = AppState.requisitionItems.map(item => `• ${item.name}`).join('<br>');
+          $(requisitionFormButton)
+            .attr('data-bs-toggle', 'tooltip')
+            .attr('data-bs-html', 'true')
+            .attr('title', `<strong>Selected Items (${count}):</strong><br>${tooltipContent}`);
+
+          new bootstrap.Tooltip(requisitionFormButton);
         } else {
           requisitionBadge.classList.add("d-none");
-          requisitionFormButton.classList.remove("btn-primary");
-          requisitionFormButton.classList.add("btn-outline-primary");
+          requisitionFormButton.classList.replace("btn-primary", "btn-outline-primary");
+          $(requisitionFormButton).tooltip('dispose');
         }
       }
+    };
 
-      // --- Initializations on DOM Content Loaded ---
-      fetchCategories(); // Fetch categories for the filter list
-      fetchFacilities(); // Fetch facilities and render the catalog
+    // Catalog Module
+    const CatalogModule = {
+      currentCategory: "All",
+      currentLayout: "list",
+      currentPage: 1,
+      itemsPerPage: 4,
 
-      setupLayoutToggle(); // Initialize layout toggle listeners
-      setupSorting(); // Initialize sorting listeners
+      init() {
+        this.loadCategories();
+        this.loadFacilities();
+        this.bindEvents();
+      },
 
-      updateRequisitionButton(); // Initial update of the badge
-      window.addEventListener("storage", updateRequisitionButton); // Listen for changes in local storage
+      async loadCategories() {
+        try {
+          const categories = await ApiService.get('/facility-categories');
+          this.renderCategoryFilter(categories);
+        } catch (error) {
+          document.getElementById("categoryFilterList").innerHTML = '<p class="text-danger">Failed to load categories.</p>';
+        }
+      },
+
+      async loadFacilities() {
+        const loadingIndicator = document.getElementById("loadingIndicator");
+        const catalogContainer = document.getElementById("catalogItemsContainer");
+
+        try {
+          loadingIndicator.classList.add("d-none");
+          catalogContainer.classList.remove("d-none");
+
+          const data = await ApiService.get('/facilities');
+          AppState.facilities = data.data.map(f => ({
+            ...f,
+            rental_fee: parseFloat(f.rental_fee) || 0
+          }));
+
+          this.renderCatalogItems();
+        } catch (error) {
+          loadingIndicator.innerHTML = '<div class="alert alert-danger">Failed to load facilities.</div>';
+        } finally {
+          loadingIndicator.classList.add("d-none");
+          catalogContainer.classList.remove("d-none");
+        }
+      },
+
+      bindEvents() {
+        // Layout toggle
+        document.querySelectorAll(".layout-option").forEach(option => {
+          option.addEventListener("click", (e) => {
+            e.preventDefault();
+            this.currentLayout = option.dataset.layout;
+            document.getElementById("layoutDropdown").textContent = `${option.textContent} Layout`;
+            this.currentPage = 1;
+            this.renderCatalogItems();
+          });
+        });
+
+        // Sorting
+        document.querySelectorAll(".sort-option").forEach(option => {
+          option.addEventListener("click", (e) => {
+            e.preventDefault();
+            this.sortFacilities(option.dataset.sort);
+            this.currentPage = 1;
+            this.renderCatalogItems();
+          });
+        });
+      },
+
+      sortFacilities(sortType) {
+        switch (sortType) {
+          case 'price-asc':
+            AppState.facilities.sort((a, b) => (a.rental_fee || 0) - (b.rental_fee || 0));
+            break;
+          case 'price-desc':
+            AppState.facilities.sort((a, b) => (b.rental_fee || 0) - (a.rental_fee || 0));
+            break;
+          case 'name-asc':
+            AppState.facilities.sort((a, b) => (a.facility_name || '').localeCompare(b.facility_name || ''));
+            break;
+        }
+      },
+
+      renderCategoryFilter(categories) {
+        const container = document.getElementById("categoryFilterList");
+        container.innerHTML = `<a href="#" class="filter-item active" data-category="All">All Categories</a>`;
+
+        categories.forEach(category => {
+          const item = document.createElement("div");
+          item.classList.add("category-item");
+
+          const header = document.createElement("a");
+          header.href = "#";
+          header.classList.add("filter-item", "d-flex", "align-items-center", "justify-content-between");
+          header.textContent = category.category_name;
+          header.dataset.category = category.category_name;
+
+          if (category.subcategories?.length > 0) {
+            const toggle = document.createElement("i");
+            toggle.classList.add("bi", "bi-chevron-down", "ms-2", "toggle-icon");
+            toggle.dataset.bsToggle = "collapse";
+            toggle.dataset.bsTarget = `#subcategory-${category.id}`;
+            header.appendChild(toggle);
+
+            const subList = document.createElement("div");
+            subList.classList.add("subcategory-list", "collapse");
+            subList.id = `subcategory-${category.id}`;
+
+            category.subcategories.forEach(sub => {
+              const subItem = document.createElement("a");
+              subItem.href = "#";
+              subItem.classList.add("filter-item", "ms-3");
+              subItem.dataset.category = sub.subcategory_name;
+              subItem.textContent = sub.subcategory_name;
+              subItem.addEventListener("click", (e) => {
+                e.preventDefault();
+                this.updateCategoryFilter(sub.subcategory_name);
+              });
+              subList.appendChild(subItem);
+            });
+
+            item.appendChild(header);
+            item.appendChild(subList);
+          } else {
+            header.addEventListener("click", (e) => {
+              e.preventDefault();
+              this.updateCategoryFilter(category.category_name);
+            });
+            item.appendChild(header);
+          }
+
+          container.appendChild(item);
+        });
+
+        container.querySelector('[data-category="All"]').addEventListener("click", (e) => {
+          e.preventDefault();
+          this.updateCategoryFilter("All");
+        });
+      },
+
+      updateCategoryFilter(category) {
+        document.querySelectorAll("#categoryFilterList .filter-item").forEach(item => {
+          item.classList.remove("active");
+        });
+
+        const activeItem = document.querySelector(`#categoryFilterList .filter-item[data-category="${category}"]`);
+        if (activeItem) {
+          activeItem.classList.add("active");
+        }
+
+        this.currentCategory = category;
+        this.currentPage = 1;
+        document.getElementById("currentCategoryTitle").querySelector(".dropdown-toggle").textContent =
+          `${this.currentCategory === "All" ? "All" : this.currentCategory} Facilities`;
+
+        this.renderCatalogItems();
+      },
+
+      renderCatalogItems() {
+        const container = document.getElementById("catalogItemsContainer");
+        container.innerHTML = "";
+        container.className = `${this.currentLayout}-layout`;
+
+        const filtered = this.getFilteredFacilities();
+        const paginated = this.paginateFacilities(filtered);
+
+        if (paginated.length === 0) {
+          container.innerHTML = '<p class="text-center text-muted mt-5">No facilities found.</p>';
+          return;
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = this.currentLayout === "grid" ? "row g-3" : "";
+
+        paginated.forEach(facility => {
+          const element = this.createFacilityElement(facility);
+          wrapper.appendChild(element);
+        });
+
+        container.appendChild(wrapper);
+        this.renderPagination(filtered.length);
+      },
+
+      getFilteredFacilities() {
+        if (this.currentCategory === "All") return AppState.facilities;
+
+        return AppState.facilities.filter(f =>
+          f.category?.category_name?.toLowerCase() === this.currentCategory.toLowerCase() ||
+          f.subcategory?.subcategory_name?.toLowerCase() === this.currentCategory.toLowerCase()
+        );
+      },
+
+      paginateFacilities(facilities) {
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        return facilities.slice(start, start + this.itemsPerPage);
+      },
+
+      createFacilityElement(facility) {
+        const isSelected = AppState.requisitionItems.some(item => item.id === facility.id);
+        const rentalFee = facility.rental_fee.toFixed(2);
+
+        if (this.currentLayout === "list") {
+          const card = document.createElement("div");
+          card.classList.add("catalog-card");
+          card.innerHTML = `
+        <div class="row g-0">
+          <div class="col-md-3">
+            <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
+              class="catalog-card-img" alt="${facility.facility_name}">
+          </div>
+          <div class="col-md-7">
+            <div class="card-body">
+              <h5 class="card-title">${facility.facility_name}</h5>
+              <p class="card-text text-muted mb-1">${facility.description || "No description available."}</p>
+              <div class="d-flex flex-wrap gap-3">
+                <span class="text-muted"><i class="bi bi-tag"></i> ${facility.category?.category_name || "Uncategorized"}</span>
+                <span class="text-muted"><i class="bi bi-tags"></i> ${facility.subcategory?.subcategory_name || "No Subcategory"}</span>
+                <span class="text-muted"><i class="bi bi-building"></i> ${facility.department?.department_name || "Unknown Department"}</span>
+                <span class="text-muted"><i class="bi bi-people"></i> Capacity: ${facility.capacity || "N/A"}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-2 d-flex flex-column justify-content-between p-3 border-start">
+            <div class="rental-fee fw-bold">₱${rentalFee}</div>
+            <div class="d-grid gap-2 mt-auto">
+              <button class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-primary'} add-to-form-btn" 
+                data-facility-id="${facility.id}">
+                ${isSelected ? 'Remove from Form' : 'Add to Form'}
+              </button>
+              <button class="btn btn-sm btn-outline-secondary view-calendar-btn" 
+                data-bs-toggle="modal" data-bs-target="#userCalendarModal" 
+                data-facility-id="${facility.id}">
+                View Calendar
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+          return card;
+        } else {
+          const col = document.createElement("div");
+          col.className = "col-md-6 col-lg-4 col-xl-3";
+          col.innerHTML = `
+        <div class="card h-100">
+          <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
+            class="catalog-card-img" alt="${facility.facility_name}">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">${facility.facility_name}</h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge bg-light text-dark"><i class="bi bi-tag"></i> ${facility.category?.category_name || "Uncategorized"}</span>
+              <span class="fw-bold rental-fee">₱${rentalFee}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge bg-light text-dark"><i class="bi bi-people"></i> Capacity: ${facility.capacity || "N/A"}</span>
+            </div>
+            <div class="mt-auto d-grid gap-2">
+              <button class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-primary'} add-to-form-btn" 
+                data-facility-id="${facility.id}">
+                ${isSelected ? 'Remove from Form' : 'Add to Form'}
+              </button>
+              <button class="btn btn-sm btn-outline-secondary view-calendar-btn" 
+                data-bs-toggle="modal" data-bs-target="#userCalendarModal" 
+                data-facility-id="${facility.id}">
+                View Calendar
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+          return col;
+        }
+      },
+
+      renderPagination(totalItems) {
+        const container = document.getElementById("pagination");
+        container.innerHTML = "";
+
+        const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+        if (totalPages <= 1) return;
+
+        const createPageItem = (content, disabled, onClick) => {
+          const li = document.createElement("li");
+          li.className = `page-item ${disabled ? "disabled" : ""}`;
+          li.innerHTML = `<a class="page-link" href="#">${content}</a>`;
+          li.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (!disabled) onClick();
+          });
+          return li;
+        };
+
+        // Previous
+        container.appendChild(createPageItem(
+          '&laquo;',
+          this.currentPage === 1,
+          () => {
+            this.currentPage--;
+            this.renderCatalogItems();
+            window.scrollTo(0, 0);
+          }
+        ));
+
+        // Pages
+        for (let i = 1; i <= totalPages; i++) {
+          container.appendChild(createPageItem(
+            i,
+            i === this.currentPage,
+            () => {
+              this.currentPage = i;
+              this.renderCatalogItems();
+              window.scrollTo(0, 0);
+            }
+          ));
+        }
+
+        // Next
+        container.appendChild(createPageItem(
+          '&raquo;',
+          this.currentPage === totalPages,
+          () => {
+            this.currentPage++;
+            this.renderCatalogItems();
+            window.scrollTo(0, 0);
+          }
+        ));
+      }
+    };
+
+    // Calendar Module
+    const CalendarModule = {
+      init() {
+        const modal = document.getElementById('userCalendarModal');
+        modal.addEventListener('shown.bs.modal', () => this.initializeCalendar());
+        modal.addEventListener('hidden.bs.modal', () => this.destroyCalendar());
+
+        document.addEventListener('click', (e) => {
+          if (e.target.closest('.view-calendar-btn')) {
+            // Could load facility-specific calendar data here
+          }
+        });
+      },
+
+      initializeCalendar() {
+        if (AppState.calendar) return;
+
+        const calendarEl = document.getElementById('userFullCalendar');
+        AppState.calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+          },
+          height: 'auto',
+          nowIndicator: true,
+          events: this.getCalendarEvents(),
+          eventClick: (info) => {
+            alert('Event: ' + info.event.title);
+          }
+        });
+
+        AppState.calendar.render();
+      },
+
+      destroyCalendar() {
+        if (AppState.calendar) {
+          AppState.calendar.destroy();
+          AppState.calendar = null;
+        }
+      },
+
+      getCalendarEvents() {
+        return [
+          {
+            title: 'Booked: AVR Room',
+            start: '2025-06-02T10:00:00',
+            end: '2025-06-02T12:00:00',
+            backgroundColor: '#198754'
+          },
+          {
+            title: 'PE Gym Reservation',
+            start: '2025-06-05',
+            backgroundColor: '#0d6efd'
+          },
+          {
+            title: 'Library Conference',
+            start: '2025-06-10T14:00:00',
+            end: '2025-06-10T16:00:00',
+            backgroundColor: '#dc3545'
+          }
+        ];
+      }
+    };
+
+    // Main Application Initialization
+    document.addEventListener("DOMContentLoaded", () => {
+      if (AppState.initialized) return;
+      AppState.initialized = true;
+
+      Toast.init();
+      RequisitionModule.init();
+
+      // Only initialize these if we're on the catalog page
+      if (window.location.pathname.includes('bookingcatalog.html') ||
+        window.location.pathname.includes('facilities.html')) {
+        CatalogModule.init();
+        CalendarModule.init();
+      }
     });
   </script>
 
   <style>
-    /* Add sharp edges and light grey borders to specific containers */
+    /* Your existing CSS remains the same */
     .quick-links-card,
     .sidebar-card,
     .catalog-card,
