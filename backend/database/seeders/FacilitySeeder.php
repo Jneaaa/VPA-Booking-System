@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Facility;
 use App\Models\FacilityAmenity;
-use App\Models\RoomDetail;
+use App\Models\FacilityDetail;
 
 class FacilitySeeder extends Seeder
 {
@@ -24,11 +24,10 @@ class FacilitySeeder extends Seeder
             $facility->save();
         }
 
-        // If "Room", assign room/subcategory
         if ($facility->category_id === 4) {
-            $room = RoomDetail::where('subcategory_id', $facility->subcategory_id)->inRandomOrder()->first();
-            if ($room) {
-                $facility->room_id = $room->room_id;
+            $detail = FacilityDetail::where('category_id', $facility->category_id)->inRandomOrder()->first();
+            if ($detail) {
+                $facility->detail_id = $detail->detail_id;
                 $facility->save();
             }
         }

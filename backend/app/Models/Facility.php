@@ -18,12 +18,13 @@ class Facility extends Model
         'maximum_rental_hour',
         'category_id',
         'subcategory_id',
-        'room_id',
+        'detail_id',
         'location_note',
         'capacity',
         'department_id',
         'is_indoors',
-        'rental_fee',
+        'internal_fee',
+        'external_fee',
         'company_fee',
         'rate_type',
         'status_id',
@@ -58,11 +59,6 @@ class Facility extends Model
     public function subcategory()
     {
         return $this->belongsTo(LookupTables\FacilitySubcategory::class, 'subcategory_id', 'subcategory_id');
-    }
-
-    public function roomDetail()
-    {
-        return $this->belongsTo(RoomDetail::class, 'room_id', 'room_id');
     }
 
     public function status()

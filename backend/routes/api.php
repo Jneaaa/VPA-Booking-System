@@ -27,6 +27,11 @@ Route::get('/users', [UserController::class, 'index']);
 
 Route::prefix('requisition')->group(function () {
 
+// Requisition form - add/remove selected equipment or facilities (no auth)
+Route::post('/add-item', [RequisitionFormController::class, 'addToForm']);
+Route::post('/remove-item', [RequisitionFormController::class, 'removeFromForm']);
+
+
 // File uploads
 Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);
 
@@ -39,7 +44,6 @@ Route::get('/{request_id}', [RequisitionFormController::class, 'show']);
 });
 
 // ------ Dropdowns and Categories ------ //
-
 
 Route::get('/departments', [DepartmentController::class, 'index']);
 Route::get('/availability-statuses', [AvailabilityStatusController::class, 'index']);

@@ -20,12 +20,12 @@ return new class extends Migration
             $table->unsignedInteger('maximum_rental_hour')->default(1);
             $table->unsignedTinyInteger('category_id');
             $table->unsignedTinyInteger('subcategory_id')->nullable();
-            $table->unsignedBigInteger('room_id')->nullable();
             $table->string('location_note', 200);
             $table->unsignedInteger('capacity');
             $table->unsignedTinyInteger('department_id');
             $table->enum('is_indoors', ['Indoors', 'Outdoors']);
-            $table->decimal('rental_fee', 10, 2);
+            $table->decimal('internal_fee', 10, 2);
+            $table->decimal('external_fee', 10, 2);
             $table->decimal('company_fee', 10, 2);
             $table->enum('rate_type', ['Per Hour', 'Per Show/Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');
@@ -38,7 +38,6 @@ return new class extends Migration
             // Foreign key constraints (optional, remove if you don’t want FK checks here)
             $table->foreign('category_id')->references('category_id')->on('facility_categories');
             $table->foreign('subcategory_id')->references('subcategory_id')->on('facility_subcategories');
-            $table->foreign('room_id')->references('room_id')->on('room_details');
             $table->foreign('department_id')->references('department_id')->on('departments');
             $table->foreign('status_id')->references('status_id')->on('availability_statuses');
             $table->foreign('created_by')->references('admin_id')->on('admins');

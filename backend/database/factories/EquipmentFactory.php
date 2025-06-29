@@ -7,18 +7,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class EquipmentFactory extends Factory
 {
+    protected static $counter = 1;
     protected $model = Equipment::class;
 
     public function definition(): array
     {
         return [
-            'equipment_name'       => $this->faker->unique()->words(2, true), // e.g., "Stage Lights"
-            'description'          => $this->faker->optional()->text(100),
-            'brand'                => $this->faker->optional()->company(),
+            'equipment_name'       => 'Equipment #' . self::$counter++,
+            'description'          => 'Insert a short description of the facility here.',
+            'brand'                => $this->faker->randomElement(['Brand name #1', 'Brand name #2', 'Brand name #3', 'Brand name #4']),
             'storage_location'     => $this->faker->randomElement(['Main Room', 'AV Room', 'Warehouse', 'Room 101']),
             'category_id'          => rand(1, 3), // Match seeded categories
             'total_quantity'       => $this->faker->numberBetween(1, 10),
-            'rental_fee'           => $this->faker->randomFloat(2, 100, 1000),
+            'internal_fee'         => $this->faker->randomFloat(2, 100, 1000),
+            'external_fee'         => $this->faker->randomFloat(2, 100, 1000),
             'company_fee'          => $this->faker->randomFloat(2, 50, 500),
             'rate_type'            => $this->faker->randomElement(['Per Hour', 'Per Show/Event']),
             'status_id'            => rand(1, 3),

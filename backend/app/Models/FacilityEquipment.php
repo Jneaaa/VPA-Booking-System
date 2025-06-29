@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FacilityEquipment extends Model
 {
+    use HasFactory;
     protected $table = "facility_equipment";
     protected $primaryKey = 'facility_equipment_id';
 

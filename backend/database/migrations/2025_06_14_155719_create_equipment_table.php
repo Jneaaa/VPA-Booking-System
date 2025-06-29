@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('storage_location', 50);
             $table->unsignedTinyInteger('category_id');
             $table->unsignedInteger('total_quantity')->default(1);
-            $table->decimal('rental_fee', 10, 2);
+            $table->decimal('internal_fee', 10, 2);
+            $table->decimal('external_fee', 10, 2);
             $table->decimal('company_fee', 10, 2);
             $table->enum('rate_type', ['Per Hour', 'Per Show/Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');
@@ -52,7 +53,7 @@ return new class extends Migration
             $table->index(['category_id', 'status_id'], 'idx_equipment_category_status');
             $table->index(['department_id', 'status_id'], 'idx_equipment_dept_status');
             $table->index(['status_id', 'category_id'], 'idx_equipment_status_category');
-            $table->index(['rental_fee', 'status_id'], 'idx_equipment_fee_status');
+            $table->index(['internal_fee', 'status_id'], 'idx_equipment_fee_status');
             
             // Index for availability and quantity queries
             $table->index(['status_id', 'total_quantity'], 'idx_equipment_availability');

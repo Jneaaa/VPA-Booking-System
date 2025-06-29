@@ -113,7 +113,7 @@ function renderCatalogItems() {
                 ` : ''}
             </div>
             <div class="catalog-card-actions">
-                <div class="${type}-price">₱${(isFacility ? item.rental_fee : item.company_fee).toFixed(2)}</div>
+                <div class="${type}-price">₱${(isFacility ? item.internal_fee : item.external_fee).toFixed(2)}</div>
                 <button class="btn ${isInForm ? 'btn-outline-danger' : 'btn-primary'} btn-sm toggle-form-btn" 
                         data-${type}-id="${item[`${type}_id`]}" data-type="${type}">
                     ${isInForm ? 'Remove' : 'Add to Form'}
@@ -278,8 +278,8 @@ document.head.appendChild(style);
 
     paginatedItems.forEach((item) => {
       const rentalFee =
-        typeof item.rental_fee === "number"
-          ? item.rental_fee.toFixed(2)
+        typeof item.internal_fee === "number"
+          ? item.internal_fee.toFixed(2)
           : "0.00";
       const card = document.createElement("div");
       card.classList.add("catalog-card");

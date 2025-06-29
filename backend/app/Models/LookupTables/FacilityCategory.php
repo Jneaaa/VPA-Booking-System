@@ -18,7 +18,7 @@ class FacilityCategory extends Model
         'description'
     ];
 
-    public function facility()
+    public function facilities()
     {
         return $this->hasMany(Facility::class, 'category_id', 'category_id');
     }

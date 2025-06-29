@@ -19,12 +19,12 @@ class FacilityController extends Controller
 
             // Head admins can view all facilities
             if ($user->role?->role_name === 'Head Admin') {
-                $facilities = Facility::with(['category', 'subcategory', 'status', 'department', 'roomDetail', 'images'])
+                $facilities = Facility::with(['category', 'subcategory', 'status', 'department', 'images'])
                     ->orderBy('facility_name')
                     ->get();
             } else {
                 $facilities = Facility::whereIn('department_id', $user->departments->pluck('department_id'))
-                    ->with(['category', 'subcategory', 'status', 'department', 'roomDetail', 'images'])
+                    ->with(['category', 'subcategory', 'status', 'department', 'images'])
                     ->orderBy('facility_name')
                     ->get();
             }
@@ -44,7 +44,7 @@ class FacilityController extends Controller
     public function publicIndex(): JsonResponse
     {
         try {
-            $facilities = Facility::with(['category', 'subcategory', 'status', 'department', 'roomDetail', 'images'])
+            $facilities = Facility::with(['category', 'subcategory', 'status', 'department', 'images'])
                 ->orderBy('facility_name')
                 ->get();
 
@@ -71,10 +71,10 @@ class FacilityController extends Controller
             'capacity' => 'required|integer|min:1',
             'category_id' => 'required|exists:facility_categories,category_id',
             'subcategory_id' => 'nullable|exists:facility_subcategories,subcategory_id',
-            'room_id' => 'nullable|exists:room_details,room_id',
             'department_id' => 'required|exists:departments,department_id',
             'is_indoors' => 'required|in:Indoors,Outdoors',
-            'rental_fee' => 'required|numeric|min:0',
+            'internal_fee' => 'required|numeric|min:0',
+            'external_fee' => 'required|numeric|min:0',
             'company_fee' => 'required|numeric|min:0',
             'rate_type' => 'required|in:Per Hour,Per Show/Event',
             'status_id' => 'required|exists:availability_statuses,status_id',
@@ -100,10 +100,10 @@ class FacilityController extends Controller
             'capacity' => $data['capacity'],
             'category_id' => $data['category_id'],
             'subcategory_id' => $data['subcategory_id'] ?? null,
-            'room_id' => $data['room_id'] ?? null,
             'department_id' => $data['department_id'],
             'is_indoors' => $data['is_indoors'],
-            'rental_fee' => $data['rental_fee'],
+            'internal_fee' => $data['internal_fee'],
+            'external_fee' => $data['external_fee'],
             'company_fee' => $data['company_fee'],
             'rate_type' => $data['rate_type'],
             'status_id' => $data['status_id'],
@@ -128,7 +128,7 @@ class FacilityController extends Controller
 
     public function show(Facility $facility): JsonResponse
     {
-        $facility->load(['category', 'subcategory', 'status', 'department', 'roomDetail', 'images']);
+        $facility->load(['category', 'subcategory', 'status', 'department', 'images']);
 
         return response()->json([
             'data' => $this->formatFacility($facility),
@@ -146,10 +146,10 @@ class FacilityController extends Controller
             'capacity' => 'sometimes|integer|min:1',
             'category_id' => 'sometimes|exists:facility_categories,category_id',
             'subcategory_id' => 'nullable|exists:facility_subcategories,subcategory_id',
-            'room_id' => 'nullable|exists:room_details,room_id',
             'department_id' => 'sometimes|exists:departments,department_id',
             'is_indoors' => 'sometimes|in:Indoors,Outdoors',
-            'rental_fee' => 'sometimes|numeric|min:0',
+            'internal_fee' => 'sometimes|numeric|min:0',
+            'external_fee' => 'sometimes|numeric|min:0',
             'company_fee' => 'sometimes|numeric|min:0',
             'rate_type' => 'sometimes|in:Per Hour,Per Show/Event',
             'status_id' => 'sometimes|exists:availability_statuses,status_id',
@@ -169,10 +169,10 @@ class FacilityController extends Controller
             'capacity' => $data['capacity'] ?? $facility->capacity,
             'category_id' => $data['category_id'] ?? $facility->category_id,
             'subcategory_id' => $data['subcategory_id'] ?? $facility->subcategory_id,
-            'room_id' => $data['room_id'] ?? $facility->room_id,
             'department_id' => $data['department_id'] ?? $facility->department_id,
             'is_indoors' => $data['is_indoors'] ?? $facility->is_indoors,
-            'rental_fee' => $data['rental_fee'] ?? $facility->rental_fee,
+            'internal_fee' => $data['internal_fee'] ?? $facility->internal_fee,
+            'external_fee' => $data['external_fee'] ?? $facility->external_fee,
             'company_fee' => $data['company_fee'] ?? $facility->company_fee,
             'rate_type' => $data['rate_type'] ?? $facility->rate_type,
             'status_id' => $data['status_id'] ?? $facility->status_id,
@@ -360,7 +360,7 @@ class FacilityController extends Controller
 
     private function formatFacility($facility): array
     {
-        $facility->load(['category', 'subcategory', 'status', 'department', 'roomDetail', 'images']);
+        $facility->load(['category', 'subcategory', 'status', 'department', 'images']);
 
         return [
             'facility_id' => $facility->facility_id,
@@ -376,16 +376,13 @@ class FacilityController extends Controller
                 'subcategory_id' => $facility->subcategory_id,
                 'subcategory_name' => $facility->subcategory->subcategory_name,
             ] : null,
-            'room' => $facility->roomDetail ? [
-                'room_id' => $facility->room_id,
-                'room_name' => $facility->roomDetail->room_name,
-            ] : null,
             'department' => [
                 'department_id' => $facility->department_id,
                 'department_name' => $facility->department->department_name,
             ],
             'is_indoors' => $facility->is_indoors,
-            'rental_fee' => $facility->rental_fee,
+            'internal_fee' => $facility->internal_fee,
+            'external_fee' => $facility->external_fee,
             'company_fee' => $facility->company_fee,
             'rate_type' => $facility->rate_type,
             'status' => [
@@ -402,7 +399,7 @@ class FacilityController extends Controller
 
     private function formatPublicFacility($facility): array
     {
-        $facility->load(['category', 'subcategory', 'status', 'department', 'roomDetail', 'images']);
+        $facility->load(['category', 'subcategory', 'status', 'department', 'images']);
 
         return [
             'facility_id' => $facility->facility_id,
@@ -418,16 +415,13 @@ class FacilityController extends Controller
                 'subcategory_id' => $facility->subcategory_id,
                 'subcategory_name' => $facility->subcategory->subcategory_name,
             ] : null,
-            'room' => $facility->roomDetail ? [
-                'room_id' => $facility->room_id,
-                'room_name' => $facility->roomDetail->room_name,
-            ] : null,
             'department' => [
                 'department_id' => $facility->department_id,
                 'department_name' => $facility->department->department_name,
             ],
             'is_indoors' => $facility->is_indoors,
-            'rental_fee' => $facility->rental_fee,
+            'internal_fee' => $facility->internal_fee,
+            'external_fee' => $facility->external_fee,
             'company_fee' => $facility->company_fee,
             'rate_type' => $facility->rate_type,
             'status' => [

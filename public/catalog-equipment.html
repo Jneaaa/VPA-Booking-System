@@ -296,7 +296,8 @@ async function fetchEquipment() {
         const data = await response.json();
         currentItems = data.data.map(item => ({
             ...item,
-            rental_fee: parseFloat(item.rental_fee) || 0,
+            internal_fee: parseFloat(item.internal_fee) || 0,
+            external_fee: parseFloat(item.external_fee) || 0,
             company_fee: parseFloat(item.company_fee) || 0
         }));
 
@@ -389,7 +390,7 @@ if (window.location.pathname.includes('catalog-equipment')) {
 
             facilities = data.data.map((facility) => ({
               ...facility,
-              rental_fee: parseFloat(facility.rental_fee) || 0, // Ensure rental_fee is a valid number
+              internal_fee: parseFloat(facility.internal_fee) || 0, // Ensure internal_fee is a valid number
             }));
 
             renderCatalogItems();
@@ -524,7 +525,7 @@ if (window.location.pathname.includes('catalog-equipment')) {
           catalogItemsContainer.appendChild(itemsWrapper);
 
           paginatedFacilities.forEach((facility) => {
-            const rentalFee = facility.rental_fee.toFixed(2); // Ensure rental_fee is formatted as a decimal
+            const rentalFee = facility.internal_fee.toFixed(2); // Ensure internal_fee is formatted as a decimal
             const card = document.createElement("div");
             card.classList.add("catalog-card");
 

@@ -6,8 +6,13 @@ use App\Models\LookupTables\FacilitySubcategory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class RoomDetail extends Model
+class FacilityDetail extends Model
 {
+
+    protected $table = "facility_details";
+
+    protected $primaryKey = "detail_id";
+
     use HasFactory;
 
     protected $fillable = [
@@ -19,12 +24,12 @@ class RoomDetail extends Model
         'floor_level',
     ];
 
-    public function subcategory()
+    public function subcategories()
     {
-        return $this->hasMany(FacilitySubcategory::class, 'room_id', 'room_id');
+        return $this->hasMany(FacilitySubcategory::class, 'detail_id', 'detail_id');
     }
     public function requisitions()
     {
-        return $this->hasMany(RequisitionForm::class, 'room_id', 'room_id');
+        return $this->hasMany(RequisitionForm::class, 'detail_id', 'detail_id');
     }
 }

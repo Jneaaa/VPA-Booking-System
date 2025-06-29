@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('facility_images', function (Blueprint $table) {
             $table->id('image_id');
             $table->unsignedBigInteger('facility_id');
-            $table->string('image_url')->default('https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp')->nullable;
+            $table->string('image_url')->default('https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp')->nullable();
             $table->string('cloudinary_public_id')->default('oxvsxogzu9koqhctnf7s')->nullable();
             $table->string('description', 80)->nullable();
             $table->integer('sort_order')->default(0);

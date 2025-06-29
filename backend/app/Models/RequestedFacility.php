@@ -18,6 +18,8 @@ class RequestedFacility extends Model
         'is_waived' => 'boolean'
     ];
 
+    public $timestamps = false;
+
     public function requisitionForm()
     {
         return $this->belongsTo(RequisitionForm::class, 'request_id', 'request_id');

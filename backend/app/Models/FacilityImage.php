@@ -16,13 +16,9 @@ class FacilityImage extends Model
         'facility_id',
         'image_url',
         'cloudinary_public_id',
-        'is_primary',
         'description',
         'sort_order',
-    ];
-    
-    protected $casts = [
-        'is_primary'
+        'image_type' 
     ];
 
 

@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RequisitionForm extends Model
 {
+    protected $table = "requisition_forms";
+    protected $primaryKey = 'request_id';
+    
     use HasFactory;
     protected $fillable = [
         'user_id',
@@ -38,6 +41,11 @@ class RequisitionForm extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    public function detail()
+    {
+        return $this->belongsTo(FacilityDetail::class, 'detail_id', 'detail_id');
     }
 
     public function purpose()
@@ -72,7 +80,7 @@ class RequisitionForm extends Model
 
     public function calendarEvents()
     {
-        return $this->hasMany(CalendarEvent::class, 'request_id', 'request_id');
+        return $this->belongsTo(CalendarEvent::class, 'event_id', 'event_id');
     }
 
 }

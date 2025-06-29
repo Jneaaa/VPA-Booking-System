@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class CalendarEvent extends Model
 {
     use HasFactory;
+
+    protected $table = "calendar_events";
+    
+    protected $primaryKey = "event_id";
+
     protected $fillable = [
         'request_id',
         'event_title',
@@ -18,9 +23,9 @@ class CalendarEvent extends Model
         'deleted_by',
     ];
 
-    public function requisitionForm()
+    public function requisitionForms()
     {
-        return $this->belongsTo(RequisitionForm::class, 'request_id', 'request_id');
+        return $this->hasMany(RequisitionForm::class, 'event_id', 'event_id');
     }
 
     public function createdBy()
