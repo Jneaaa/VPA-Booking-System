@@ -102,6 +102,50 @@
       border-radius: 0 !important;
       margin-bottom: 10px;
     }
+
+    .catalog-card {
+      display: flex;
+      position: relative;
+      padding: 15px;
+      margin: 0;
+      box-sizing: border-box;
+      background-color: #fff;
+      border: 1px solid #d3d3d3;
+      gap: 15px; /* Add spacing between the image and content */
+    }
+
+    .catalog-card .catalog-card-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+    }
+
+    .catalog-card .row.g-0 {
+      margin: 0; /* Remove row-level spacing */
+    }
+
+    .catalog-card .col-md-3 {
+      padding: 0 5px; /* Reduce left padding to match the right padding of the container */
+    }
+
+    .catalog-card .col-md-7 {
+      padding-left: 15px; /* Maintain padding between the image and content */
+    }
+
+    .catalog-card .col-md-2 {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      padding: 15px;
+      border-left: 1px solid #d3d3d3;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-color: #fff;
+    }
   </style>
 </head>
 
@@ -220,7 +264,7 @@
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item" href="catalog-equipment.html" data-catalog-type="equipment">
+                    <a class="dropdown-item" href="equipmentcatalog.html" data-catalog-type="equipment">
                       Equipment
                     </a>
                   </li>
@@ -228,6 +272,28 @@
               </div>
             </h4>
             <div class="d-flex gap-2 filter-sort-dropdowns">
+              <div class="dropdown">
+                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="statusDropdown">
+                  Status: Available
+                </button>
+                <ul class="dropdown-menu" id="statusFilterMenu">
+                  <li>
+                    <a class="dropdown-item status-option" href="#" data-status="All">All</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item status-option" href="#" data-status="Available">Available</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item status-option" href="#" data-status="Unavailable">Unavailable</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item status-option" href="#" data-status="Under Maintenance">Under Maintenance</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item status-option" href="#" data-status="Closed">Closed</a>
+                  </li>
+                </ul>
+              </div>
               <div class="dropdown">
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
                   id="layoutDropdown">
@@ -320,6 +386,7 @@
       initialized: false,
       facilities: [],
       calendar: null,
+      departments: [], // Added to store departments
       requisitionItems: (() => {
         try {
           const items = JSON.parse(localStorage.getItem("selectedItems"));
@@ -543,7 +610,7 @@
         AppState.requisitionItems = AppState.requisitionItems.filter(item => item.id !== parseInt(facilityId));
         this.saveItems();
 
-        
+
         Toast.show('Item removed from form!', 'success');
         this.updateRequisitionButton();
       },
@@ -585,11 +652,21 @@
       currentLayout: "list",
       currentPage: 1,
       itemsPerPage: 4,
+      currentStatus: "Available", // Default status set to "Available"
 
-      init() {
+      async init() {
+        await this.loadDepartments(); // Fetch departments before loading facilities
         this.loadCategories();
         this.loadFacilities();
         this.bindEvents();
+      },
+
+      async loadDepartments() {
+        try {
+          AppState.departments = await ApiService.get('/departments');
+        } catch (error) {
+          console.error('Failed to load departments:', error);
+        }
       },
 
       async loadCategories() {
@@ -641,6 +718,17 @@
           option.addEventListener("click", (e) => {
             e.preventDefault();
             this.sortFacilities(option.dataset.sort);
+            this.currentPage = 1;
+            this.renderCatalogItems();
+          });
+        });
+
+        // Status filter
+        document.querySelectorAll(".status-option").forEach(option => {
+          option.addEventListener("click", (e) => {
+            e.preventDefault();
+            this.currentStatus = option.dataset.status;
+            document.getElementById("statusDropdown").textContent = `Status: ${this.currentStatus}`;
             this.currentPage = 1;
             this.renderCatalogItems();
           });
@@ -762,12 +850,20 @@
       },
 
       getFilteredFacilities() {
-        if (this.currentCategory === "All") return AppState.facilities;
+        let facilities = AppState.facilities;
 
-        return AppState.facilities.filter(f =>
-          f.category?.category_name?.toLowerCase() === this.currentCategory.toLowerCase() ||
-          f.subcategory?.subcategory_name?.toLowerCase() === this.currentCategory.toLowerCase()
-        );
+        if (this.currentCategory !== "All") {
+          facilities = facilities.filter(f =>
+            f.category?.category_name?.toLowerCase() === this.currentCategory.toLowerCase() ||
+            f.subcategory?.subcategory_name?.toLowerCase() === this.currentCategory.toLowerCase()
+          );
+        }
+
+        if (this.currentStatus !== "All") {
+          facilities = facilities.filter(f => f.status?.status_name === this.currentStatus);
+        }
+
+        return facilities;
       },
 
       paginateFacilities(facilities) {
@@ -776,77 +872,100 @@
       },
 
       createFacilityElement(facility) {
-        const isSelected = AppState.requisitionItems.some(item => item.id === facility.id);
-        const rentalFee = facility.rental_fee.toFixed(2);
+        const isSelected = AppState.requisitionItems.some(item => item.id === facility.facility_id);
+        const rentalFee = parseFloat(facility.internal_fee).toFixed(2);
+        const statusColor = facility.status?.color_code || "#6c757d";
+        const statusName = facility.status?.status_name || "Unknown";
+
+        // Find department code
+        const department = AppState.departments.find(d => d.department_name === facility.department?.department_name);
+        const departmentCode = department?.department_code || "N/A";
 
         if (this.currentLayout === "list") {
           const card = document.createElement("div");
           card.classList.add("catalog-card");
           card.innerHTML = `
-        <div class="row g-0">
-          <div class="col-md-3">
-            <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
-              class="catalog-card-img" alt="${facility.facility_name}">
-          </div>
-          <div class="col-md-7">
-            <div class="card-body">
-              <h5 class="card-title">${facility.facility_name}</h5>
-              <p class="card-text text-muted mb-1">${facility.description || "No description available."}</p>
-              <div class="d-flex flex-wrap gap-3">
-                <span class="text-muted"><i class="bi bi-tag"></i> ${facility.category?.category_name || "Uncategorized"}</span>
-                <span class="text-muted"><i class="bi bi-tags"></i> ${facility.subcategory?.subcategory_name || "No Subcategory"}</span>
-                <span class="text-muted"><i class="bi bi-building"></i> ${facility.department?.department_name || "Unknown Department"}</span>
-                <span class="text-muted"><i class="bi bi-people"></i> Capacity: ${facility.capacity || "N/A"}</span>
+          <div class="row g-0">
+              <div class="col-md-3">
+                  <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
+                      class="catalog-card-img" alt="${facility.facility_name}">
               </div>
-            </div>
+              <div class="col-md-7">
+                  <div class="card-body">
+                      <h5 class="card-title d-flex align-items-center">
+                          ${facility.facility_name}
+                          <span class="badge ms-2" style="background-color: ${statusColor};">${statusName}</span>
+                      </h5>
+                      <div class="d-flex flex-wrap gap-2 mb-2">
+                          <span class="text-muted">${facility.category?.category_name || "Uncategorized"}</span> |
+                          <span class="text-muted">${facility.subcategory?.subcategory_name || "No Subcategory"}</span> |
+                          <span class="text-muted">${departmentCode}</span> |
+                          <span class="text-muted">Capacity: ${facility.capacity || "N/A"}</span>
+                      </div>
+                      <p class="card-text text-muted mb-1">${facility.description || "No description available."}</p>
+                      <p class="card-text text-muted"><i class="bi bi-geo-alt"></i> ${facility.location_note || "No location note available."}</p>
+                  </div>
+              </div>
+              <div class="col-md-2 d-flex flex-column justify-content-between p-3 border-start">
+                  <div>
+                      <div class="rental-fee fw-bold">₱${rentalFee}</div>
+                      <div class="text-muted">${facility.rate_type || "N/A"}</div>
+                  </div>
+                  <div class="d-grid gap-2 mt-auto">
+                      <button class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-primary'} add-to-form-btn" 
+                          data-facility-id="${facility.facility_id}" 
+                          data-type="facility">
+                          ${isSelected ? 'Remove from Form' : 'Add to Form'}
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary view-calendar-btn" 
+                          data-bs-toggle="modal" data-bs-target="#userCalendarModal" 
+                          data-facility-id="${facility.facility_id}">
+                          View Calendar
+                      </button>
+                  </div>
+              </div>
           </div>
-          <div class="col-md-2 d-flex flex-column justify-content-between p-3 border-start">
-            <div class="rental-fee fw-bold">₱${rentalFee}</div>
-            <div class="d-grid gap-2 mt-auto">
-              <button class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-primary'} add-to-form-btn" 
-                data-facility-id="${facility.id}">
-                ${isSelected ? 'Remove from Form' : 'Add to Form'}
-              </button>
-              <button class="btn btn-sm btn-outline-secondary view-calendar-btn" 
-                data-bs-toggle="modal" data-bs-target="#userCalendarModal" 
-                data-facility-id="${facility.id}">
-                View Calendar
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
+          `;
           return card;
         } else {
           const col = document.createElement("div");
           col.className = "col-md-6 col-lg-4 col-xl-3";
           col.innerHTML = `
-        <div class="card h-100">
-          <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
-            class="catalog-card-img" alt="${facility.facility_name}">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">${facility.facility_name}</h5>
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="badge bg-light text-dark"><i class="bi bi-tag"></i> ${facility.category?.category_name || "Uncategorized"}</span>
-              <span class="fw-bold rental-fee">₱${rentalFee}</span>
-            </div>
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="badge bg-light text-dark"><i class="bi bi-people"></i> Capacity: ${facility.capacity || "N/A"}</span>
-            </div>
-            <div class="mt-auto d-grid gap-2">
-              <button class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-primary'} add-to-form-btn" 
-                data-facility-id="${facility.id}">
-                ${isSelected ? 'Remove from Form' : 'Add to Form'}
-              </button>
-              <button class="btn btn-sm btn-outline-secondary view-calendar-btn" 
-                data-bs-toggle="modal" data-bs-target="#userCalendarModal" 
-                data-facility-id="${facility.id}">
-                View Calendar
-              </button>
-            </div>
+          <div class="card h-100">
+              <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
+                  class="catalog-card-img" alt="${facility.facility_name}">
+              <div class="card-body d-flex flex-column">
+                  <h5 class="card-title d-flex align-items-center">
+                      ${facility.facility_name}
+                      <span class="badge ms-2" style="background-color: ${statusColor};">${statusName}</span>
+                  </h5>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="text-muted">${facility.category?.category_name || "Uncategorized"}</span> |
+                      <span class="text-muted">${facility.subcategory?.subcategory_name || "No Subcategory"}</span> |
+                      <span class="text-muted">${departmentCode}</span> |
+                      <span class="text-muted">Capacity: ${facility.capacity || "N/A"}</span>
+                  </div>
+                  <p class="card-text text-muted">${facility.location_note || "No location note available."}</p>
+                  <p class="card-text text-muted mb-1">${facility.description || "No description available."}</p>
+                  <div>
+                      <div class="rental-fee fw-bold">₱${rentalFee}</div>
+                      <div class="text-muted">${facility.rate_type || "N/A"}</div>
+                  </div>
+                  <div class="mt-auto d-grid gap-2">
+                      <button class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-primary'} add-to-form-btn" 
+                          data-facility-id="${facility.facility_id}" 
+                          data-type="facility">
+                          ${isSelected ? 'Remove from Form' : 'Add to Form'}
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary view-calendar-btn" 
+                          data-bs-toggle="modal" data-bs-target="#userCalendarModal" 
+                          data-facility-id="${facility.facility_id}">
+                          View Calendar
+                      </button>
+                  </div>
+              </div>
           </div>
-        </div>
-      `;
+          `;
           return col;
         }
       },
@@ -986,6 +1105,87 @@
         CatalogModule.init();
         CalendarModule.init();
       }
+    });
+
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.add-to-form-btn');
+      if (btn) {
+        e.preventDefault();
+        const facilityId = btn.getAttribute('data-facility-id');
+        const type = btn.getAttribute('data-type');
+        const isAddAction = !btn.classList.contains('btn-danger');
+
+        try {
+          if (isAddAction) {
+            await fetch('http://127.0.0.1:8000/api/requisition/add-item', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ facility_id: facilityId, type }),
+            });
+            btn.classList.replace('btn-primary', 'btn-danger');
+            btn.textContent = 'Remove from Form';
+          } else {
+            // Handle removal logic if needed
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      }
+    });
+
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.add-to-form-btn');
+      if (btn) {
+        e.preventDefault();
+        const facilityId = btn.getAttribute('data-facility-id');
+        const isAddAction = !btn.classList.contains('btn-danger');
+
+        try {
+          if (isAddAction) {
+            // Add facility ID to localStorage
+            const selectedFacilities = JSON.parse(localStorage.getItem('selectedFacilities')) || [];
+            if (!selectedFacilities.includes(facilityId)) {
+              selectedFacilities.push(facilityId);
+              localStorage.setItem('selectedFacilities', JSON.stringify(selectedFacilities));
+            }
+
+            // Update button state
+            btn.classList.replace('btn-primary', 'btn-danger');
+            btn.textContent = 'Remove from Form';
+
+            // Trigger storage event for other pages
+            window.dispatchEvent(new Event('storage'));
+          } else {
+            // Remove facility ID from localStorage
+            const selectedFacilities = JSON.parse(localStorage.getItem('selectedFacilities')) || [];
+            const updatedFacilities = selectedFacilities.filter(id => id !== facilityId);
+            localStorage.setItem('selectedFacilities', JSON.stringify(updatedFacilities));
+
+            // Update button state
+            btn.classList.replace('btn-danger', 'btn-primary');
+            btn.textContent = 'Add to Form';
+
+            // Trigger storage event for other pages
+            window.dispatchEvent(new Event('storage'));
+          }
+        } catch (error) {
+          console.error('Error handling facility action:', error);
+        }
+      }
+    });
+
+    // Ensure data persists when switching pages
+    document.addEventListener('DOMContentLoaded', () => {
+      const selectedFacilities = JSON.parse(localStorage.getItem('selectedFacilities')) || [];
+      document.querySelectorAll('.add-to-form-btn').forEach(btn => {
+        const facilityId = btn.getAttribute('data-facility-id');
+        if (selectedFacilities.includes(facilityId)) {
+          btn.classList.replace('btn-primary', 'btn-danger');
+          btn.textContent = 'Remove from Form';
+        }
+      });
     });
   </script>
 

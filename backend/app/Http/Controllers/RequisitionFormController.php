@@ -70,42 +70,35 @@ public function saveUserInfo(Request $request)
             'type' => 'required|in:facility,equipment'
         ]);
     
-        $selectedItems = session()->get('selected_items', []);
+        // Initialize or get existing session data
+        $selectedItems = session('selected_items', []);
+    
         $id = $request->input($request->type . '_id');
     
-        // Validate item ID exists
         if (!$id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please select a valid item.'
-            ], 422);
+            return back()->withErrors(['message' => 'Please select a valid item.']);
         }
     
         // Check for duplicates
-        $alreadyExists = collect($selectedItems)->contains(fn($item) =>
+        if (collect($selectedItems)->contains(fn($item) => 
             $item['id'] == $id && $item['type'] === $request->type
-        );
-    
-        if ($alreadyExists) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This item is already in your selection.'
-            ], 422);
+        )) {
+            return back()->withErrors(['message' => 'Item already in selection.']);
         }
     
-        // Add new item to selection
+        // Add new item
         $selectedItems[] = [
             'id' => $id,
-            'type' => $request->type
+            'type' => $request->type,
+            'added_at' => now() // Optional: track when added
         ];
         
-        session()->put('selected_items', $selectedItems);
+        // Save to session
+        session(['selected_items' => $selectedItems]);
     
-        return response()->json([
-            'success' => true,
-            'message' => Str::ucfirst($request->type) . ' added to selection.',
-            'count' => count($selectedItems),
-            'selected_items' => $selectedItems
+        return back()->with([
+            'success' => Str::ucfirst($request->type) . ' added to selection.',
+            'selected_items' => $selectedItems // Optional: return updated list
         ]);
     }
 

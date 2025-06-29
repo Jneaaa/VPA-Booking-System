@@ -691,34 +691,7 @@
           <div class="form-section-card">
             <h5>Requested Facilities</h5>
             <div id="facilityList">
-              <div class="facility-card">
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="bi bi-trash"></i>
-                </button>
-                <img
-                  src="facility-image.jpg"
-                  alt="Facility Image"
-                  class="img-thumbnail"
-                />
-                <div class="facility-details">
-                  <h6 class="mb-1">Conference Room A</h6>
-                  <p class="text-muted mb-1">
-                    A spacious room equipped with modern amenities for meetings
-                    and conferences.
-                  </p>
-                  <div class="text-primary fw-bold">₱1,500.00</div>
-                </div>
-              </div>
-              <div class="attach-room-setup mt-2">
-                <label class="form-label">Attach your preferred room setup (if any)</label>
-                <div class="position-relative">
-                  <input
-                    type="file"
-                    class="form-control"
-                    id="roomSetupFile1"
-                  />
-                </div>
-              </div>
+              <!-- Facility items will be dynamically added here -->
             </div>
           </div>
         </div>
@@ -727,30 +700,16 @@
           <div class="form-section-card">
             <h5>Requested Equipment</h5>
             <div id="equipmentList">
-              <div class="equipment-card">
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="bi bi-trash"></i>
-                </button>
-                <img
-                  src="equipment-image.jpg"
-                  alt="Equipment Image"
-                  class="img-thumbnail"
-                />
-                <div class="equipment-details">
-                  <h6 class="mb-1">Projector</h6>
-                  <p class="text-muted mb-1">
-                    High-quality projector for presentations and events.
-                  </p>
-                  <div class="text-primary fw-bold">₱500.00</div>
-                </div>
-              </div>
+              <!-- Equipment items will be dynamically added here -->
             </div>
           </div>
         </div>
       </div>
 
       <div class="d-flex justify-content-center my-4">
-        <button type="submit" class="btn btn-primary me-2">Submit Form</button>
+        <button id="submitFormBtn" class="btn btn-primary me-2">
+          Submit Form
+        </button>
         <button type="reset" class="btn btn-secondary">Cancel</button>
       </div>
     </div>
@@ -897,15 +856,21 @@
         const submitButton = document.querySelector("button[type='submit']");
 
         function saveSelectionsToLocalStorage() {
-          const selectedFacilities = Array.from(facilityList.querySelectorAll(".facility-card")).map(
-            (card) => card.querySelector("h6").textContent
-          );
-          const selectedEquipment = Array.from(equipmentList.querySelectorAll(".equipment-card")).map(
-            (card) => card.querySelector("h6").textContent
-          );
+          const selectedFacilities = Array.from(
+            facilityList.querySelectorAll(".facility-card")
+          ).map((card) => card.querySelector("h6").textContent);
+          const selectedEquipment = Array.from(
+            equipmentList.querySelectorAll(".equipment-card")
+          ).map((card) => card.querySelector("h6").textContent);
 
-          localStorage.setItem("selectedFacilities", JSON.stringify(selectedFacilities));
-          localStorage.setItem("selectedEquipment", JSON.stringify(selectedEquipment));
+          localStorage.setItem(
+            "selectedFacilities",
+            JSON.stringify(selectedFacilities)
+          );
+          localStorage.setItem(
+            "selectedEquipment",
+            JSON.stringify(selectedEquipment)
+          );
 
           // Trigger storage event for other pages
           const event = new Event("storage");
@@ -913,11 +878,30 @@
         }
 
         function updateEmptyMessage(list, message) {
-          if (list.children.length === 0) {
-            const emptyMessage = document.createElement("p");
-            emptyMessage.className = "text-muted";
-            emptyMessage.textContent = message;
-            list.appendChild(emptyMessage);
+          // Check if there are any cards in the container
+          const hasCards = list.querySelector(
+            ".facility-card, .equipment-card"
+          );
+
+          // Find or create the empty message element
+          let emptyMessage = list.querySelector(".empty-message");
+
+          if (!hasCards) {
+            // If no cards and no message exists, create one
+            if (!emptyMessage) {
+              emptyMessage = document.createElement("p");
+              emptyMessage.className = "text-muted empty-message";
+              emptyMessage.textContent = message;
+              list.appendChild(emptyMessage);
+            } else {
+              // If message exists, make sure it's visible
+              emptyMessage.style.display = "block";
+            }
+          } else {
+            // If there are cards, hide the message if it exists
+            if (emptyMessage) {
+              emptyMessage.style.display = "none";
+            }
           }
         }
 
@@ -928,10 +912,14 @@
         }
 
         facilityList.addEventListener("click", function (event) {
+          
           if (event.target.closest(".btn-outline-danger")) {
             const card = event.target.closest(".facility-card");
             const roomSetupField = card.nextElementSibling; // Assume room setup field is directly after the card
-            if (roomSetupField && roomSetupField.classList.contains("attach-room-setup")) {
+            if (
+              roomSetupField &&
+              roomSetupField.classList.contains("attach-room-setup")
+            ) {
               roomSetupField.remove();
             }
             card.remove();
@@ -954,7 +942,8 @@
 
         function updateRoomSetupVisibility() {
           const facilityCards = facilityList.querySelectorAll(".facility-card");
-          const attachRoomSetupFields = facilityList.querySelectorAll(".attach-room-setup");
+          const attachRoomSetupFields =
+            facilityList.querySelectorAll(".attach-room-setup");
 
           // Ensure each facility card has a corresponding room setup field
           facilityCards.forEach((card, index) => {
@@ -964,7 +953,11 @@
           });
 
           // Hide extra room setup fields if no corresponding facility card exists
-          for (let i = facilityCards.length; i < attachRoomSetupFields.length; i++) {
+          for (
+            let i = facilityCards.length;
+            i < attachRoomSetupFields.length;
+            i++
+          ) {
             attachRoomSetupFields[i].style.display = "none";
           }
         }
@@ -1014,6 +1007,113 @@
           }
         }
       }
+
+      document
+        .getElementById("submitFormBtn")
+        .addEventListener("click", async (e) => {
+          e.preventDefault();
+          const facilities = Array.from(
+            document.querySelectorAll("#facilityList .facility-card")
+          ).map((card) => ({
+            facility_id: card.querySelector("h6").textContent, // Replace with actual facility ID
+            type: "facility",
+          }));
+          const equipment = Array.from(
+            document.querySelectorAll("#equipmentList .equipment-card")
+          ).map((card) => ({
+            facility_id: card.querySelector("h6").textContent, // Replace with actual equipment ID
+            type: "equipment",
+          }));
+
+          const data = [...facilities, ...equipment];
+
+          try {
+            await fetch("http://127.0.0.1:8000/api/requisition/add-item", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+            alert("Form submitted successfully!");
+          } catch (error) {
+            console.error("Error:", error);
+          }
+        });
+
+      // Listen for storage events to handle updates from the booking catalog
+      window.addEventListener("storage", async () => {
+        const selectedFacilities =
+          JSON.parse(localStorage.getItem("selectedFacilities")) || [];
+        const selectedEquipment =
+          JSON.parse(localStorage.getItem("selectedEquipment")) || [];
+
+        const facilityList = document.getElementById("facilityList");
+        const equipmentList = document.getElementById("equipmentList");
+
+        // Clear existing items
+        facilityList.innerHTML = "";
+        equipmentList.innerHTML = "";
+
+        // Fetch all facilities and equipment data from the API
+        let facilitiesData = [];
+        try {
+          const response = await fetch("http://127.0.0.1:8000/api/facilities");
+          const data = await response.json();
+          facilitiesData = data.data || [];
+        } catch (error) {
+          console.error("Failed to fetch facilities:", error);
+        }
+
+        // Add facilities to the Requested Facilities container
+        selectedFacilities.forEach((facilityId) => {
+          const facility = facilitiesData.find(
+            (f) => f.facility_id === parseInt(facilityId)
+          );
+          if (facility) {
+            const facilityCard = document.createElement("div");
+            facilityCard.className = "facility-card";
+            facilityCard.innerHTML = `
+              <button class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-trash"></i>
+              </button>
+              <div class="facility-details">
+                <h6 class="mb-1">${facility.facility_name}</h6>
+                <p class="text-muted mb-1">${
+                  facility.description || "No description available."
+                }</p>
+              </div>
+            `;
+            facilityList.appendChild(facilityCard);
+          }
+        });
+
+        // Add equipment to the Requested Equipment container
+        selectedEquipment.forEach((equipmentId) => {
+          const equipment = facilitiesData.find(
+            (e) => e.facility_id === parseInt(equipmentId)
+          ); // Replace with actual equipment API if available
+          if (equipment) {
+            const equipmentCard = document.createElement("div");
+            equipmentCard.className = "equipment-card";
+            equipmentCard.innerHTML = `
+              <button class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-trash"></i>
+              </button>
+              <div class="equipment-details">
+                <h6 class="mb-1">${equipment.facility_name}</h6>
+                <p class="text-muted mb-1">${
+                  equipment.description || "No description available."
+                }</p>
+              </div>
+            `;
+            equipmentList.appendChild(equipmentCard);
+          }
+        });
+      });
+
+      // Trigger storage event manually on page load to populate containers
+      window.dispatchEvent(new Event("storage"));
     </script>
   </body>
 </html>
