@@ -98,57 +98,155 @@
       border-radius: 50% !important;
     }
 
-    /* Add sharp edges and light grey borders to specific containers */
-    .quick-links-card,
-    .sidebar-card,
-    .catalog-card,
-    .dropdown-menu {
+    .toast {
       border-radius: 0 !important;
-      border: 1px solid #d3d3d3 !important;
+      margin-bottom: 10px;
     }
 
-    /* Remove border and shadows from the main container */
-    .container {
-      border: none !important;
-      box-shadow: none !important;
-    }
-
-    /* Style pagination to use CPU primary colors */
-    .pagination .page-item.active .page-link {
-      background-color: var(--cpu-primary) !important;
-      border-color: var(--cpu-primary) !important;
-      color: #fff !important;
-    }
-
-    .pagination .page-link {
-      color: var(--cpu-primary) !important;
-      border-color: lightgrey !important;
-    }
-
-    .pagination .page-item.disabled .page-link {
-      color: #6c757d !important;
-      border-color: #d3d3d3 !important;
-    }
-
-    /* Loading overlay styles */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
+    .catalog-card {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
+      position: relative;
+      padding: 15px;
+      margin: 0;
+      box-sizing: border-box;
+      background-color: #fff;
+      border: 1px solid #d3d3d3;
+      gap: 15px; /* Add spacing between the image and content */
     }
 
-    .loading-content {
-      background: white;
-      padding: 20px;
-      border-radius: 5px;
-      text-align: center;
+    .catalog-card .catalog-card-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+    }
+
+    .catalog-card .row.g-0 {
+      margin: 0; /* Remove row-level spacing */
+    }
+
+    .catalog-card .col-md-3 {
+      padding: 0 5px; /* Reduce left padding to match the right padding of the container */
+    }
+
+    .catalog-card .col-md-7 {
+      padding-left: 15px; /* Maintain padding between the image and content */
+    }
+
+    .catalog-card .col-md-2 {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      padding: 15px;
+      border-left: 1px solid #d3d3d3;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-color: #fff;
+    }
+
+    /* Adjusted grid card styling */
+    .catalog-card.grid-layout {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 15px;
+      background-color: #fff;
+      border: 1px solid #d3d3d3;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      height: auto; /* Adjust height dynamically to fit content */
+      min-height: 200px; /* Ensure minimum height */
+      padding-bottom: 20px; /* Add padding to prevent overflow */
+    }
+
+    .catalog-card.grid-layout:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .catalog-card.grid-layout img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .catalog-card.grid-layout .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .catalog-card.grid-layout .card-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .catalog-card.grid-layout .badge {
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      border-radius: 12px;
+    }
+
+    .catalog-card.grid-layout .card-text {
+      font-size: 0.9rem;
+      color: #666;
+      text-align: left;
+    }
+
+    .catalog-card.grid-layout .rental-fee {
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: left;
+      color: var(--cpu-primary);
+    }
+
+    .catalog-card.grid-layout .btn {
+      font-size: 0.85rem;
+      padding: 0.5rem 0.75rem;
+    }
+
+    .catalog-card.grid-layout .btn-outline-secondary {
+      color: #6c757d;
+      border-color: #6c757d;
+    }
+
+    .catalog-card.grid-layout .btn-outline-secondary:hover {
+      background-color: #6c757d;
+      color: #fff;
+    }
+
+    .catalog-card.grid-layout .btn-primary {
+      background-color: var(--cpu-primary);
+      border-color: var(--cpu-primary);
+    }
+
+    .catalog-card.grid-layout .btn-primary:hover {
+      background-color: var(--cpu-primary-hover);
+      border-color: var(--cpu-primary-hover);
+    }
+
+    .catalog-card.grid-layout .btn-danger {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+
+    .catalog-card.grid-layout .btn-danger:hover {
+      background-color: #a71d2a;
+      border-color: #a71d2a;
+    }
+
+    .catalog-card.grid-layout .d-flex.flex-wrap.gap-2 span {
+      font-size: 0.9rem; /* Match text size with location note */
+      color: #666; /* Ensure consistent color */
+      gap: 5px; /* Reduced gap between tags */
     }
   </style>
 </head>
@@ -243,6 +341,7 @@
             <button type="button" class="btn btn-outline-primary d-flex align-items-center"
               style="border-radius: 0; font-size: 1rem; padding: 0.4rem 0.7rem; width: 100%;" id="eventsCalendarBtn"
               data-bs-toggle="modal" data-bs-target="#userCalendarModal">Events Calendar</button>
+
           </div>
 
           <div class="sidebar-card">
@@ -267,7 +366,7 @@
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item active" href="equipmentcatalog.html" data-catalog-type="equipment">
+                    <a class="dropdown-item" href="equipmentcatalog.html" data-catalog-type="equipment">
                       Equipment
                     </a>
                   </li>
@@ -276,9 +375,31 @@
             </h4>
             <div class="d-flex gap-2 filter-sort-dropdowns">
               <div class="dropdown">
+                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="statusDropdown">
+                  Status: Available
+                </button>
+                <ul class="dropdown-menu" id="statusFilterMenu">
+                  <li>
+                    <a class="dropdown-item status-option" href="#" data-status="All">All</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item status-option" href="#" data-status="Available">Available</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item status-option" href="#" data-status="Unavailable">Unavailable</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item status-option" href="#" data-status="Under Maintenance">Under Maintenance</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item status-option" href="#" data-status="Closed">Closed</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="dropdown">
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
                   id="layoutDropdown">
-                  List Layout
+                  Grid Layout
                 </button>
                 <ul class="dropdown-menu">
                   <li>
@@ -331,8 +452,9 @@
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
-            <p class="mt-2">Loading Equipment...</p>
+            <p class="mt-2">Loading equipment...</p>
           </div>
+
 
           <!-- Catalog Items Container -->
           <div id="catalogItemsContainer" class="list-layout d-none"></div>
@@ -357,495 +479,821 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      let userCalendar;
-      const userCalendarEl = document.getElementById("userFullCalendar");
+    // Global state management
+    const AppState = {
+      initialized: false,
+      equipment: [],
+      calendar: null,
+      departments: [], // Added to store departments
+      requisitionItems: (() => {
+        try {
+          const items = JSON.parse(localStorage.getItem("selectedItems"));
+          return Array.isArray(items) ? items : [];
+        } catch (e) {
+          return [];
+        }
+      })(),
+      requisitionPurposes: [] // Added for storing purposes
+    };
 
-      function initializeCalendar() {
-        userCalendar = new FullCalendar.Calendar(userCalendarEl, {
+
+    // Toast notification system (unchanged)
+    const Toast = {
+      container: null,
+      init() {
+        this.container = document.getElementById('toastContainer') || this.createContainer();
+      },
+      createContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.style.position = 'fixed';
+        container.style.bottom = '20px';
+        container.style.right = '20px';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
+      },
+      show(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast show align-items-center text-white bg-${type}`;
+        toast.role = 'alert';
+        toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">${message}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    `;
+        this.container.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 5000 });
+        bsToast.show();
+        toast.addEventListener('hidden.bs.toast', () => toast.remove());
+      }
+    };
+
+    // API Service (unchanged)
+    const ApiService = {
+      baseUrl: 'http://127.0.0.1:8000/api',
+      async request(url, method = 'GET', body = null) {
+        const headers = {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        };
+        const config = {
+          method,
+          headers,
+          credentials: 'same-origin'
+        };
+        if (body) {
+          config.body = JSON.stringify(body);
+        }
+        const response = await fetch(`${this.baseUrl}${url}`, config);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      },
+      get(url) {
+        return this.request(url);
+      },
+      post(url, data) {
+        return this.request(url, 'POST', data);
+      }
+    };
+
+    // Enhanced Requisition Module
+    const RequisitionModule = {
+      init() {
+        this.bindEvents();
+        this.updateRequisitionButton();
+        this.fetchPurposes().then(() => {
+          // Auto-load items if we're on the booking page
+          if (window.location.pathname.includes('bookingpage.html')) {
+            this.initializeBookingPage();
+          }
+        });
+      },
+
+      bindEvents() {
+        document.addEventListener('click', (e) => {
+          const btn = e.target.closest('.add-to-form-btn');
+          if (btn) {
+            e.preventDefault();
+            this.handleItemAction(btn);
+          }
+        });
+
+        window.addEventListener('storage', () => this.updateRequisitionButton());
+      },
+
+      async fetchPurposes() {
+        try {
+          AppState.requisitionPurposes = await ApiService.get('/requisition-purposes');
+          this.populatePurposeDropdown();
+        } catch (error) {
+          console.error('Failed to load requisition purposes:', error);
+          Toast.show('Failed to load requisition purposes', 'error');
+        }
+      },
+
+      populatePurposeDropdown() {
+        const purposeSelect = document.getElementById('requisitionPurpose');
+        if (!purposeSelect) return; // Only on booking page
+
+        // Clear existing options
+        purposeSelect.innerHTML = '<option value="" selected disabled>Select a purpose</option>';
+
+        // Add new options
+        AppState.requisitionPurposes.forEach(purpose => {
+          const option = document.createElement('option');
+          option.value = purpose.id;
+          option.textContent = purpose.name;
+          purposeSelect.appendChild(option);
+        });
+      },
+
+      initializeBookingPage() {
+        this.populatePurposeDropdown();
+        this.displaySelectedItems();
+
+        // Load any previously selected purpose
+        const savedPurpose = localStorage.getItem('selectedPurpose');
+        if (savedPurpose && document.getElementById('requisitionPurpose')) {
+          document.getElementById('requisitionPurpose').value = savedPurpose;
+        }
+      },
+
+      displaySelectedItems() {
+        const itemsContainer = document.getElementById('selectedItemsContainer');
+        if (!itemsContainer) return;
+
+        itemsContainer.innerHTML = '';
+
+        if (AppState.requisitionItems.length === 0) {
+          itemsContainer.innerHTML = '<p class="text-muted">No items selected</p>';
+          return;
+        }
+
+        const list = document.createElement('ul');
+        list.className = 'list-group';
+
+        AppState.requisitionItems.forEach(item => {
+          const listItem = document.createElement('li');
+          listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+          listItem.innerHTML = `
+        ${item.name}
+        <button class="btn btn-sm btn-danger remove-item-btn" data-item-id="${item.id}">
+          <i class="bi bi-trash"></i>
+        </button>
+      `;
+          list.appendChild(listItem);
+        });
+
+        itemsContainer.appendChild(list);
+
+        // Add event listeners for remove buttons
+        document.querySelectorAll('.remove-item-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const itemId = btn.dataset.itemId;
+            this.removeItem(itemId);
+          });
+        });
+      },
+
+      async handleItemAction(button) {
+        const equipmentId = button.dataset.equipmentId;
+        const equipment = AppState.equipment.find(e => e.id === parseInt(equipmentId));
+
+        if (!equipment) {
+          Toast.show('Equipment not found', 'error');
+          return;
+        }
+
+        const isAddAction = !button.classList.contains('btn-danger');
+        const originalText = button.innerHTML;
+
+        button.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${isAddAction ? 'Adding...' : 'Removing...'}`;
+        button.disabled = true;
+
+        try {
+          if (isAddAction) {
+            await this.addItem(equipmentId, equipment);
+          } else {
+            await this.removeItem(equipmentId);
+          }
+        } finally {
+          button.disabled = false;
+        }
+      },
+
+      async addItem(equipmentId, equipment) {
+        await ApiService.post('/requisition/add-item', { equipment_id: equipmentId });
+
+        if (!AppState.requisitionItems.some(item => item.id === parseInt(equipmentId))) {
+          AppState.requisitionItems.push({
+            id: equipment.id,
+            name: equipment.equipment_name,
+            type: 'equipment'
+          });
+          this.saveItems();
+        }
+
+        Toast.show(`${equipment.equipment_name} added to form!`, 'success');
+        this.updateRequisitionButton();
+      },
+
+      async removeItem(equipmentId) {
+        await ApiService.post('/requisition/remove-item', { equipment_id: equipmentId });
+
+        AppState.requisitionItems = AppState.requisitionItems.filter(item => item.id !== parseInt(equipmentId));
+        this.saveItems();
+
+        Toast.show('Item removed from form!', 'success');
+        this.updateRequisitionButton();
+      },
+
+      saveItems() {
+        localStorage.setItem("selectedItems", JSON.stringify(AppState.requisitionItems));
+      },
+
+      updateRequisitionButton() {
+        const requisitionFormButton = document.getElementById("requisitionFormButton");
+        if (!requisitionFormButton) return;
+
+        const requisitionBadge = document.getElementById("requisitionBadge");
+        const count = AppState.requisitionItems.length;
+
+        if (count > 0) {
+          requisitionBadge.textContent = count;
+          requisitionBadge.classList.remove("d-none");
+          requisitionFormButton.classList.replace("btn-outline-primary", "btn-primary");
+
+          const tooltipContent = AppState.requisitionItems.map(item => `• ${item.name}`).join('<br>');
+          $(requisitionFormButton)
+            .attr('data-bs-toggle', 'tooltip')
+            .attr('data-bs-html', 'true')
+            .attr('title', `<strong>Selected Items (${count}):</strong><br>${tooltipContent}`);
+
+          new bootstrap.Tooltip(requisitionFormButton);
+        } else {
+          requisitionBadge.classList.add("d-none");
+          requisitionFormButton.classList.replace("btn-primary", "btn-outline-primary");
+          $(requisitionFormButton).tooltip('dispose');
+        }
+      }
+    };
+
+    // Catalog Module
+    const CatalogModule = {
+      currentCategory: "All",
+      currentLayout: "grid", // Changed default layout to "grid"
+      currentPage: 1,
+      itemsPerPage: 4,
+      currentStatus: "Available", // Default status set to "Available"
+
+      async init() {
+        await this.loadDepartments(); // Fetch departments before loading equipment
+        this.loadCategories();
+        this.loadEquipment();
+        this.bindEvents();
+      },
+
+      async loadDepartments() {
+        try {
+          AppState.departments = await ApiService.get('/departments');
+        } catch (error) {
+          console.error('Failed to load departments:', error);
+        }
+      },
+
+      async loadCategories() {
+        const categoryFilterList = document.getElementById("categoryFilterList");
+        categoryFilterList.innerHTML = '<p>Loading categories...</p>';
+
+        try {
+          const response = await fetch('http://127.0.0.1:8000/api/equipment-categories');
+          const categories = await response.json();
+
+          categoryFilterList.innerHTML = ''; // Clear loading message
+
+          // Add "All Categories" link
+          const allCategoriesLink = document.createElement("a");
+          allCategoriesLink.href = "#";
+          allCategoriesLink.classList.add("filter-item", "active");
+          allCategoriesLink.dataset.category = "All";
+          allCategoriesLink.textContent = "All Categories";
+          allCategoriesLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            this.updateCategoryFilter("All");
+          });
+          categoryFilterList.appendChild(allCategoriesLink);
+
+          // Add each category as a simple link (no subcategories)
+          categories.forEach(category => {
+            const categoryItem = document.createElement("a");
+            categoryItem.href = "#";
+            categoryItem.classList.add("filter-item");
+            categoryItem.dataset.category = category.category_name;
+            categoryItem.textContent = category.category_name;
+
+            categoryItem.addEventListener("click", (e) => {
+              e.preventDefault();
+              this.updateCategoryFilter(category.category_name);
+            });
+
+            categoryFilterList.appendChild(categoryItem);
+          });
+        } catch (error) {
+          categoryFilterList.innerHTML = '<p class="text-danger">Failed to load categories.</p>';
+          console.error("Error loading categories:", error);
+        }
+      },
+
+      async loadEquipment() {
+        const loadingIndicator = document.getElementById("loadingIndicator");
+        const catalogContainer = document.getElementById("catalogItemsContainer");
+
+        try {
+          loadingIndicator.classList.add("d-none");
+          catalogContainer.classList.remove("d-none");
+
+          const data = await ApiService.get('/equipment');
+          AppState.equipment = data.data.map(e => ({
+            ...e,
+            internal_fee: parseFloat(e.internal_fee) || 0
+          }));
+
+          this.renderCatalogItems();
+        } catch (error) {
+          loadingIndicator.innerHTML = '<div class="alert alert-danger">Failed to load equipment.</div>';
+        } finally {
+          loadingIndicator.classList.add("d-none");
+          catalogContainer.classList.remove("d-none");
+        }
+      },
+
+      bindEvents() {
+        // Layout toggle
+        document.querySelectorAll(".layout-option").forEach(option => {
+          option.addEventListener("click", (e) => {
+            e.preventDefault();
+            this.currentLayout = option.dataset.layout;
+            document.getElementById("layoutDropdown").textContent = `${option.textContent} Layout`;
+            this.currentPage = 1;
+            this.renderCatalogItems();
+          });
+        });
+
+        // Sorting
+        document.querySelectorAll(".sort-option").forEach(option => {
+          option.addEventListener("click", (e) => {
+            e.preventDefault();
+            this.sortEquipment(option.dataset.sort);
+            this.currentPage = 1;
+            this.renderCatalogItems();
+          });
+        });
+
+        // Status filter
+        document.querySelectorAll(".status-option").forEach(option => {
+          option.addEventListener("click", (e) => {
+            e.preventDefault();
+            this.currentStatus = option.dataset.status;
+            document.getElementById("statusDropdown").textContent = `Status: ${this.currentStatus}`;
+            this.currentPage = 1;
+            this.renderCatalogItems();
+          });
+        });
+      },
+
+      sortEquipment(sortType) {
+        switch (sortType) {
+          case 'price-asc':
+            AppState.equipment.sort((a, b) => (a.internal_fee || 0) - (b.internal_fee || 0));
+            break;
+          case 'price-desc':
+            AppState.equipment.sort((a, b) => (b.internal_fee || 0) - (a.internal_fee || 0));
+            break;
+          case 'name-asc':
+            AppState.equipment.sort((a, b) => (a.equipment_name || '').localeCompare(b.equipment_name || ''));
+            break;
+        }
+      },
+
+      updateCategoryFilter(category) {
+        document.querySelectorAll("#categoryFilterList .filter-item").forEach(item => {
+          item.classList.remove("active");
+        });
+
+        const activeItem = document.querySelector(`#categoryFilterList .filter-item[data-category="${category}"]`);
+        if (activeItem) {
+          activeItem.classList.add("active");
+        }
+
+        this.currentCategory = category;
+        this.currentPage = 1;
+        document.getElementById("currentCategoryTitle").querySelector(".dropdown-toggle").textContent =
+          `${this.currentCategory === "All" ? "All" : this.currentCategory} Equipment`;
+
+        this.renderCatalogItems();
+      },
+
+      renderCatalogItems() {
+        const container = document.getElementById("catalogItemsContainer");
+        container.innerHTML = "";
+        container.className = `${this.currentLayout}-layout`;
+
+        const filtered = this.getFilteredEquipment();
+        const paginated = this.paginateEquipment(filtered);
+
+        if (paginated.length === 0) {
+          container.innerHTML = '<p class="text-center text-muted mt-5">No equipment found.</p>';
+          return;
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = this.currentLayout === "grid" ? "row g-3" : "";
+
+        paginated.forEach(equipment => {
+          const element = this.createEquipmentElement(equipment);
+          wrapper.appendChild(element);
+        });
+
+        container.appendChild(wrapper);
+        this.renderPagination(filtered.length);
+      },
+
+      getFilteredEquipment() {
+        let equipment = AppState.equipment;
+
+        if (this.currentCategory !== "All") {
+          equipment = equipment.filter(e =>
+            e.category?.category_name?.toLowerCase() === this.currentCategory.toLowerCase()
+          );
+        }
+
+        if (this.currentStatus !== "All") {
+          equipment = equipment.filter(e => e.status?.status_name === this.currentStatus);
+        }
+
+        return equipment;
+      },
+
+      paginateEquipment(equipment) {
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        return equipment.slice(start, start + this.itemsPerPage);
+      },
+
+      createEquipmentElement(equipment) {
+        const isSelected = AppState.requisitionItems.some(item => item.id === equipment.equipment_id);
+        const rentalFee = parseFloat(equipment.internal_fee).toFixed(2);
+        const statusColor = equipment.status?.color_code || "#6c757d";
+        const statusName = equipment.status?.status_name || "Unknown";
+
+        // Find department code
+        const department = AppState.departments.find(d => d.department_name === equipment.department?.department_name);
+        const departmentCode = department?.department_code || "N/A";
+
+        // Get primary image
+        const primaryImage = equipment.images?.find(img => img.image_type === "Primary") || 
+                            (equipment.images?.length > 0 ? equipment.images[0] : null);
+
+        if (this.currentLayout === "list") {
+          const card = document.createElement("div");
+          card.classList.add("catalog-card");
+          card.innerHTML = `
+          <div class="row g-0">
+              <div class="col-md-3">
+                  <img src="${primaryImage?.image_url || 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
+                      class="catalog-card-img" alt="${equipment.equipment_name}">
+              </div>
+              <div class="col-md-7">
+                  <div class="card-body">
+                      <h5 class="card-title d-flex align-items-center">
+                          ${equipment.equipment_name}
+                          <span class="badge ms-2" style="background-color: ${statusColor};">${statusName}</span>
+                      </h5>
+                      <div class="d-flex flex-wrap gap-2 mb-2">
+                          <span class="text-muted">${equipment.category?.category_name || "Uncategorized"}</span> |
+                          <span class="text-muted">${equipment.brand || "No Brand"}</span> |
+                          <span class="text-muted">${departmentCode}</span> |
+                          <span class="text-muted">Qty: ${equipment.available_quantity || "N/A"}</span>
+                      </div>
+                      <p class="card-text text-muted mb-1">${equipment.description || "No description available."}</p>
+                      <p class="card-text text-muted"><i class="bi bi-geo-alt"></i> ${equipment.storage_location || "No location specified"}</p>
+                  </div>
+              </div>
+              <div class="col-md-2 d-flex flex-column justify-content-between p-3 border-start">
+                  <div>
+                      <div class="rental-fee fw-bold">₱${rentalFee}</div>
+                      <div class="text-muted">${equipment.rate_type || "N/A"}</div>
+                  </div>
+                  <div class="d-grid gap-2 mt-auto">
+                      <button class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-primary'} add-to-form-btn" 
+                          data-equipment-id="${equipment.equipment_id}" 
+                          data-type="equipment">
+                          ${isSelected ? 'Remove from Form' : 'Add to Form'}
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary view-calendar-btn" 
+                          data-bs-toggle="modal" data-bs-target="#userCalendarModal" 
+                          data-equipment-id="${equipment.equipment_id}">
+                          View Calendar
+                      </button>
+                  </div>
+              </div>
+          </div>
+          `;
+          return card;
+        } else {
+          const card = document.createElement("div");
+          card.className = "catalog-card grid-layout";
+          card.innerHTML = `
+            <img src="${primaryImage?.image_url || 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}" alt="${equipment.equipment_name}">
+            <div class="card-body">
+              <h5 class="card-title d-flex align-items-center">
+                ${equipment.equipment_name}
+                <span class="badge ms-2" style="background-color: ${statusColor};">${statusName}</span>
+              </h5>
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <span class="text-muted">${equipment.category?.category_name || "Uncategorized"}</span> |
+                <span class="text-muted">${equipment.brand || "No Brand"}</span> |
+                <span class="text-muted">${departmentCode}</span> |
+                <span class="text-muted">Qty: ${equipment.available_quantity || "N/A"}</span>
+              </div>
+              <p class="card-text text-muted">${equipment.description || "No description available."}</p>
+              <div class="rental-fee">₱${rentalFee}</div>
+              <div class="d-grid gap-2 mt-auto">
+                <button class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-primary'} add-to-form-btn" 
+                  data-equipment-id="${equipment.equipment_id}" 
+                  data-type="equipment">
+                  ${isSelected ? 'Remove from Form' : 'Add to Form'}
+                </button>
+                <button class="btn btn-sm btn-outline-secondary view-calendar-btn" 
+                  data-bs-toggle="modal" data-bs-target="#userCalendarModal" 
+                  data-equipment-id="${equipment.equipment_id}">
+                  View Calendar
+                </button>
+              </div>
+            </div>
+          `;
+          return card;
+        }
+      },
+
+      renderPagination(totalItems) {
+        const container = document.getElementById("pagination");
+        container.innerHTML = "";
+
+        const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+        if (totalPages <= 1) return;
+
+        const createPageItem = (content, disabled, onClick) => {
+          const li = document.createElement("li");
+          li.className = `page-item ${disabled ? "disabled" : ""}`;
+          li.innerHTML = `<a class="page-link" href="#">${content}</a>`;
+          li.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (!disabled) onClick();
+          });
+          return li;
+        };
+
+        // Previous
+        container.appendChild(createPageItem(
+          '&laquo;',
+          this.currentPage === 1,
+          () => {
+            this.currentPage--;
+            this.renderCatalogItems();
+            window.scrollTo(0, 0);
+          }
+        ));
+
+        // Pages
+        for (let i = 1; i <= totalPages; i++) {
+          container.appendChild(createPageItem(
+            i,
+            i === this.currentPage,
+            () => {
+              this.currentPage = i;
+              this.renderCatalogItems();
+              window.scrollTo(0, 0);
+            }
+          ));
+        }
+
+        // Next
+        container.appendChild(createPageItem(
+          '&raquo;',
+          this.currentPage === totalPages,
+          () => {
+            this.currentPage++;
+            this.renderCatalogItems();
+            window.scrollTo(0, 0);
+          }
+        ));
+      }
+    };
+
+    // Calendar Module
+    const CalendarModule = {
+      init() {
+        const modal = document.getElementById('userCalendarModal');
+        modal.addEventListener('shown.bs.modal', () => this.initializeCalendar());
+        modal.addEventListener('hidden.bs.modal', () => this.destroyCalendar());
+
+        document.addEventListener('click', (e) => {
+          if (e.target.closest('.view-calendar-btn')) {
+            // Could load equipment-specific calendar data here
+          }
+        });
+      },
+
+      initializeCalendar() {
+        if (AppState.calendar) return;
+
+        const calendarEl = document.getElementById('userFullCalendar');
+        AppState.calendar = new FullCalendar.Calendar(calendarEl, {
           initialView: 'dayGridMonth',
-          height: 'auto',
           headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,listWeek'
           },
+          height: 'auto',
           nowIndicator: true,
-          events: [
-            {
-              title: 'Booked: Projector',
-              start: '2025-07-02T10:00:00',
-              end: '2025-07-02T12:00:00',
-              backgroundColor: '#198754'
-            },
-            {
-              title: 'Microphone Reservation',
-              start: '2025-07-05',
-              backgroundColor: '#0d6efd'
-            },
-            {
-              title: 'Camera Equipment',
-              start: '2025-07-10T14:00:00',
-              end: '2025-07-10T16:00:00',
-              backgroundColor: '#dc3545'
-            }
-          ]
+          events: this.getCalendarEvents(),
+          eventClick: (info) => {
+            alert('Event: ' + info.event.title);
+          }
         });
-        userCalendar.render();
-      }
 
-      const modal = document.getElementById('userCalendarModal');
-      modal.addEventListener('shown.bs.modal', function () {
-        if (!userCalendar) {
-          initializeCalendar();
-        } else {
-          userCalendar.changeView('dayGridMonth');
-          userCalendar.today();
+        AppState.calendar.render();
+      },
+
+      destroyCalendar() {
+        if (AppState.calendar) {
+          AppState.calendar.destroy();
+          AppState.calendar = null;
+        }
+      },
+
+      getCalendarEvents() {
+        return [
+          {
+            title: 'Booked: Projector',
+            start: '2025-06-02T10:00:00',
+            end: '2025-06-02T12:00:00',
+            backgroundColor: '#198754'
+          },
+          {
+            title: 'Sound System Reservation',
+            start: '2025-06-05',
+            backgroundColor: '#0d6efd'
+          },
+          {
+            title: 'Microphone Checkout',
+            start: '2025-06-10T14:00:00',
+            end: '2025-06-10T16:00:00',
+            backgroundColor: '#dc3545'
+          }
+        ];
+      }
+    };
+
+    // Main Application Initialization
+    document.addEventListener("DOMContentLoaded", () => {
+      if (AppState.initialized) return;
+      AppState.initialized = true;
+
+      Toast.init();
+      RequisitionModule.init();
+
+      // Only initialize these if we're on the catalog page
+      if (window.location.pathname.includes('equipmentcatalog.html')) {
+        CatalogModule.init();
+        CalendarModule.init();
+      }
+    });
+
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.add-to-form-btn');
+      if (btn) {
+        e.preventDefault();
+        const equipmentId = btn.getAttribute('data-equipment-id');
+        const type = btn.getAttribute('data-type');
+        const isAddAction = !btn.classList.contains('btn-danger');
+
+        try {
+          if (isAddAction) {
+            await fetch('http://127.0.0.1:8000/api/requisition/add-item', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ equipment_id: equipmentId, type }),
+            });
+            btn.classList.replace('btn-primary', 'btn-danger');
+            btn.textContent = 'Remove from Form';
+          } else {
+            // Handle removal logic if needed
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      }
+    });
+
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.add-to-form-btn');
+      if (btn) {
+        e.preventDefault();
+        const equipmentId = btn.getAttribute('data-equipment-id');
+        const isAddAction = !btn.classList.contains('btn-danger');
+
+        try {
+          if (isAddAction) {
+            // Add equipment ID to localStorage
+            const selectedEquipment = JSON.parse(localStorage.getItem('selectedEquipment')) || [];
+            if (!selectedEquipment.includes(equipmentId)) {
+              selectedEquipment.push(equipmentId);
+              localStorage.setItem('selectedEquipment', JSON.stringify(selectedEquipment));
+            }
+
+            // Update button state
+            btn.classList.replace('btn-primary', 'btn-danger');
+            btn.textContent = 'Remove from Form';
+
+            // Trigger storage event for other pages
+            window.dispatchEvent(new Event('storage'));
+          } else {
+            // Remove equipment ID from localStorage
+            const selectedEquipment = JSON.parse(localStorage.getItem('selectedEquipment')) || [];
+            const updatedEquipment = selectedEquipment.filter(id => id !== equipmentId);
+            localStorage.setItem('selectedEquipment', JSON.stringify(updatedEquipment));
+
+            // Update button state
+            btn.classList.replace('btn-danger', 'btn-primary');
+            btn.textContent = 'Add to Form';
+
+            // Trigger storage event for other pages
+            window.dispatchEvent(new Event('storage'));
+          }
+        } catch (error) {
+          console.error('Error handling equipment action:', error);
+        }
+      }
+    });
+
+    // Ensure data persists when switching pages
+    document.addEventListener('DOMContentLoaded', () => {
+      const selectedEquipment = JSON.parse(localStorage.getItem('selectedEquipment')) || [];
+      document.querySelectorAll('.add-to-form-btn').forEach(btn => {
+        const equipmentId = btn.getAttribute('data-equipment-id');
+        if (selectedEquipment.includes(equipmentId)) {
+          btn.classList.replace('btn-primary', 'btn-danger');
+          btn.textContent = 'Remove from Form';
         }
       });
-
-      // Main application code
-      const categoryFilterList = document.getElementById("categoryFilterList");
-      const catalogItemsContainer = document.getElementById("catalogItemsContainer");
-      const currentCategoryTitle = document.getElementById("currentCategoryTitle");
-      const catalogHeroTitle = document.getElementById("catalogHeroTitle");
-      const loadingIndicator = document.getElementById("loadingIndicator");
-      const requisitionFormButton = document.getElementById("requisitionFormButton");
-      const requisitionBadge = document.getElementById("requisitionBadge");
-
-      let equipment = [];
-      let currentCategory = "All";
-      let currentLayout = "list";
-      let currentPage = 1;
-      const itemsPerPage = 4;
-      let requisitionItems = [];
-
-      // Show loading overlay
-      function showLoading() {
-        loadingIndicator.classList.remove("d-none");
-        catalogItemsContainer.classList.add("d-none");
-      }
-
-      // Hide loading overlay
-      function hideLoading() {
-        loadingIndicator.classList.add("d-none");
-        catalogItemsContainer.classList.remove("d-none");
-      }
-
-      // Fetch equipment from the API
-      async function fetchEquipment() {
-        try {
-          showLoading();
-          const response = await fetch("http://127.0.0.1:8000/api/equipment-categories", {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            credentials: "same-origin",
-          });
-
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-          const data = await response.json();
-          if (!data.data) throw new Error("Invalid data structure from API");
-
-          equipment = data.data.map(item => ({
-            ...item,
-            rental_fee: parseFloat(item.rental_fee) || 0,
-          }));
-
-          renderCatalogItems();
-          hideLoading();
-        } catch (error) {
-          console.error("Error fetching equipment:", error);
-          loadingIndicator.innerHTML = `
-            <div class="alert alert-danger">
-              Failed to load equipment. Please try again later.
-            </div>
-          `;
-        }
-      }
-
-      // Fetch categories and subcategories
-      async function fetchCategories() {
-        try {
-          const response = await fetch("http://127.0.0.1:8000/api/equipment-categories", {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          });
-
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          const data = await response.json();
-          renderCategoryFilterList(data);
-        } catch (error) {
-          console.error("Error fetching categories:", error);
-        }
-      }
-
-      // Render category filter list
-      function renderCategoryFilterList(categories) {
-        categoryFilterList.innerHTML = "";
-
-        categories.forEach((category) => {
-          const categoryItem = document.createElement("div");
-          categoryItem.classList.add("category-item");
-
-          const categoryHeader = document.createElement("span");
-          categoryHeader.classList.add("filter-item", "d-flex", "align-items-center", "justify-content-between");
-          categoryHeader.textContent = category.category_name;
-
-          if (category.subcategories && category.subcategories.length > 0) {
-            const toggleButton = document.createElement("i");
-            toggleButton.classList.add("bi", "bi-chevron-down", "ms-2", "toggle-icon");
-            toggleButton.dataset.bsToggle = "collapse";
-            toggleButton.dataset.bsTarget = `#subcategory-${category.category_id}`;
-            categoryHeader.appendChild(toggleButton);
-
-            const subcategoryList = document.createElement("div");
-            subcategoryList.classList.add("subcategory-list", "collapse");
-            subcategoryList.id = `subcategory-${category.category_id}`;
-
-            category.subcategories.forEach((subcategory) => {
-              const subcategoryItem = document.createElement("a");
-              subcategoryItem.href = "#";
-              subcategoryItem.classList.add("filter-item", "ms-3");
-              subcategoryItem.dataset.category = subcategory.subcategory_name;
-              subcategoryItem.textContent = subcategory.subcategory_name;
-              subcategoryList.appendChild(subcategoryItem);
-            });
-
-            categoryItem.appendChild(categoryHeader);
-            categoryItem.appendChild(subcategoryList);
-          } else {
-            categoryHeader.dataset.category = category.category_name;
-            categoryHeader.classList.add("clickable");
-            categoryHeader.addEventListener("click", function (e) {
-              e.preventDefault();
-              currentCategory = this.dataset.category;
-              currentCategoryTitle.textContent = `${currentCategory} Equipment`;
-              renderCatalogItems();
-            });
-            categoryItem.appendChild(categoryHeader);
-          }
-
-          categoryFilterList.appendChild(categoryItem);
-        });
-
-        attachCategoryFilterListeners();
-        setupCollapseAnimations();
-      }
-
-      // Setup collapse animations
-      function setupCollapseAnimations() {
-        const toggleIcons = document.querySelectorAll(".toggle-icon");
-        toggleIcons.forEach((icon) => {
-          const targetId = icon.dataset.bsTarget;
-          const targetElement = document.querySelector(targetId);
-
-          targetElement.addEventListener("show.bs.collapse", () => {
-            icon.classList.remove("bi-chevron-down");
-            icon.classList.add("bi-chevron-up");
-          });
-
-          targetElement.addEventListener("hide.bs.collapse", () => {
-            icon.classList.remove("bi-chevron-up");
-            icon.classList.add("bi-chevron-down");
-          });
-        });
-      }
-
-      // Fetch requisition purposes
-      async function fetchRequisitionPurposes() {
-        try {
-          const response = await fetch("http://127.0.0.1:8000/api/requisition-purposes");
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          return await response.json();
-        } catch (error) {
-          console.error("Error fetching requisition purposes:", error);
-          return [];
-        }
-      }
-
-      // Add item to requisition
-      async function addToRequisition(itemId) {
-        try {
-          showLoading();
-          const response = await fetch("http://127.0.0.1:8000/api/requisition/add-item", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ 
-              item_id: itemId,
-              item_type: "equipment" 
-            })
-          });
-
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          
-          const result = await response.json();
-          if (result.success) {
-            await updateRequisitionCount();
-            renderCatalogItems();
-          }
-        } catch (error) {
-          console.error("Error adding item to requisition:", error);
-          alert("Failed to add item to requisition. Please try again.");
-        } finally {
-          hideLoading();
-        }
-      }
-
-      // Remove item from requisition
-      async function removeFromRequisition(itemId) {
-        try {
-          showLoading();
-          const response = await fetch("http://127.0.0.1:8000/api/requisition/remove-item", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ 
-              item_id: itemId,
-              item_type: "equipment" 
-            })
-          });
-
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          
-          const result = await response.json();
-          if (result.success) {
-            await updateRequisitionCount();
-            renderCatalogItems();
-          }
-        } catch (error) {
-          console.error("Error removing item from requisition:", error);
-          alert("Failed to remove item from requisition. Please try again.");
-        } finally {
-          hideLoading();
-        }
-      }
-
-      // Get current requisition items count
-      async function updateRequisitionCount() {
-        try {
-          const response = await fetch("http://127.0.0.1:8000/api/requisition/items");
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          
-          const data = await response.json();
-          const count = data.data ? data.data.length : 0;
-          
-          if (count > 0) {
-            requisitionBadge.textContent = count;
-            requisitionBadge.classList.remove("d-none");
-            requisitionFormButton.classList.remove("btn-outline-primary");
-            requisitionFormButton.classList.add("btn-primary");
-          } else {
-            requisitionBadge.classList.add("d-none");
-            requisitionFormButton.classList.remove("btn-primary");
-            requisitionFormButton.classList.add("btn-outline-primary");
-          }
-        } catch (error) {
-          console.error("Error fetching requisition items:", error);
-        }
-      }
-
-      // Check if item is in requisition
-      async function isItemInRequisition(itemId) {
-        try {
-          const response = await fetch("http://127.0.0.1:8000/api/requisition/items");
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          
-          const data = await response.json();
-          if (!data.data) return false;
-          
-          return data.data.some(item => item.id === itemId && item.type === "equipment");
-        } catch (error) {
-          console.error("Error checking requisition items:", error);
-          return false;
-        }
-      }
-
-      // Render catalog items
-      async function renderCatalogItems() {
-        catalogItemsContainer.innerHTML = "";
-        catalogItemsContainer.className = currentLayout + "-layout";
-
-        const filteredEquipment = currentCategory === "All"
-          ? equipment
-          : equipment.filter(item => 
-              item.category?.category_name === currentCategory ||
-              item.subcategory?.subcategory_name === currentCategory
-            );
-
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const paginatedEquipment = filteredEquipment.slice(startIndex, startIndex + itemsPerPage);
-
-        const itemsWrapper = document.createElement("div");
-        itemsWrapper.className = "catalog-items-wrapper";
-        catalogItemsContainer.appendChild(itemsWrapper);
-
-        // Process items in parallel for better performance
-        const itemsWithStatus = await Promise.all(paginatedEquipment.map(async (item) => {
-          const isInRequisition = await isItemInRequisition(item.id);
-          return { ...item, isInRequisition };
-        }));
-
-        itemsWithStatus.forEach((item) => {
-          const rentalFee = item.rental_fee.toFixed(2);
-          const card = document.createElement("div");
-          card.classList.add("catalog-card");
-
-          if (currentLayout === "list") {
-            card.innerHTML = `
-              <img src="${item.images?.length > 0
-                ? item.images[0].image_url
-                : "https://via.placeholder.com/180x120"
-              }" class="catalog-card-img" alt="${item.equipment_name}">
-              <div class="catalog-card-details">
-                  <h5>${item.equipment_name}</h5>
-                  <p>${item.description || "No description available."}</p>
-                  <div class="catalog-card-meta">
-                      <div><i class="bi bi-tag"></i> ${item.category?.category_name || "Uncategorized"}</div>
-                      <div><i class="bi bi-tags"></i> ${item.subcategory?.subcategory_name || "No Subcategory"}</div>
-                      <div><i class="bi bi-building"></i> ${item.department?.department_name || "Unknown Department"}</div>
-                      <div><i class="bi bi-box"></i> Quantity: ${item.quantity || 1}</div>
-                  </div>
-              </div>
-              <div class="catalog-card-actions">
-                  <div class="rental-fee">₱${rentalFee}</div>
-                  <button class="btn btn-sm ${item.isInRequisition ? "btn-danger remove-btn" : "btn-primary add-btn"}" 
-                    data-item-id="${item.id}">
-                    ${item.isInRequisition ? "Remove from Form" : "Add to Form"}
-                  </button>
-                  <button class="btn btn-sm btn-outline-secondary">View Calendar</button>
-              </div>
-            `;
-          } else {
-            card.innerHTML = `
-              <img src="${item.images?.length > 0
-                ? item.images[0].image_url
-                : "https://via.placeholder.com/180x120"
-              }" class="catalog-card-img" alt="${item.equipment_name}">
-              <div class="catalog-card-details">
-                  <h5>${item.equipment_name}</h5>
-                  <div class="catalog-card-meta">
-                      <div><i class="bi bi-tag"></i> ${item.category?.category_name || "Uncategorized"}</div>
-                      <div><i class="bi bi-tags"></i> ${item.subcategory?.subcategory_name || "No Subcategory"}</div>
-                      <div><i class="bi bi-cash"></i> ₱${rentalFee}</div>
-                  </div>
-                  <button class="btn btn-sm ${item.isInRequisition ? "btn-danger remove-btn" : "btn-primary add-btn"} mt-2" 
-                    data-item-id="${item.id}">
-                    ${item.isInRequisition ? "Remove from Form" : "Add to Form"}
-                  </button>
-              </div>
-            `;
-          }
-
-          itemsWrapper.appendChild(card);
-        });
-
-        // Add event listeners to buttons
-        document.querySelectorAll(".add-btn").forEach(button => {
-          button.addEventListener("click", async () => {
-            const itemId = button.dataset.itemId;
-            await addToRequisition(itemId);
-          });
-        });
-
-        document.querySelectorAll(".remove-btn").forEach(button => {
-          button.addEventListener("click", async () => {
-            const itemId = button.dataset.itemId;
-            await removeFromRequisition(itemId);
-          });
-        });
-
-        renderPagination(filteredEquipment.length);
-      }
-
-      // Render pagination
-      function renderPagination(totalItems) {
-        const paginationTop = document.getElementById("pagination-top");
-        const paginationBottom = document.getElementById("pagination");
-        paginationTop.innerHTML = "";
-        paginationBottom.innerHTML = "";
-
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-        function createPaginationElement(page, label = null, isDisabled = false) {
-          const li = document.createElement("li");
-          li.className = `page-item${isDisabled ? " disabled" : ""}${page === currentPage ? " active" : ""}`;
-          li.innerHTML = `<a class="page-link" href="#">${label || page}</a>`;
-          if (!isDisabled) {
-            li.addEventListener("click", function (e) {
-              e.preventDefault();
-              currentPage = page;
-              renderCatalogItems();
-            });
-          }
-          return li;
-        }
-
-        // Add "Back" button
-        paginationTop.appendChild(createPaginationElement(currentPage - 1, "Back", currentPage === 1));
-        paginationBottom.appendChild(createPaginationElement(currentPage - 1, "Back", currentPage === 1));
-
-        // Add numbered pages
-        for (let i = 1; i <= totalPages; i++) {
-          paginationTop.appendChild(createPaginationElement(i));
-          paginationBottom.appendChild(createPaginationElement(i));
-        }
-
-        // Add "Next" button
-        paginationTop.appendChild(createPaginationElement(currentPage + 1, "Next", currentPage === totalPages));
-        paginationBottom.appendChild(createPaginationElement(currentPage + 1, "Next", currentPage === totalPages));
-      }
-
-      // Attach category filter listeners
-      function attachCategoryFilterListeners() {
-        const filterItems = document.querySelectorAll("#categoryFilterList .filter-item");
-        filterItems.forEach((item) => {
-          item.addEventListener("click", function (e) {
-            if (this.classList.contains("clickable")) {
-              e.preventDefault();
-              filterItems.forEach((li) => li.classList.remove("active"));
-              this.classList.add("active");
-              currentCategory = this.dataset.category;
-              currentCategoryTitle.textContent = `${currentCategory} Equipment`;
-              currentPage = 1;
-              renderCatalogItems();
-            }
-          });
-        });
-      }
-
-      // Setup layout toggle
-      function setupLayoutToggle() {
-        const layoutOptions = document.querySelectorAll(".layout-option");
-        layoutOptions.forEach((option) => {
-          option.addEventListener("click", function (e) {
-            e.preventDefault();
-            currentLayout = this.dataset.layout;
-            document.getElementById("layoutDropdown").textContent = `${this.textContent} Layout`;
-            renderCatalogItems();
-          });
-        });
-      }
-
-      // Initialize the application
-      async function init() {
-        await fetchEquipment();
-        await fetchCategories();
-        await updateRequisitionCount();
-        setupLayoutToggle();
-      }
-
-      init();
     });
   </script>
+
+  <style>
+    /* Your existing CSS remains the same */
+    .quick-links-card,
+    .sidebar-card,
+    .catalog-card,
+    .dropdown-menu {
+      border-radius: 0 !important;
+      border: 1px solid #d3d3d3 !important;
+    }
+
+    /* Remove border and shadows from the main container */
+    .container {
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Style pagination to use CPU primary colors */
+    .pagination .page-item.active .page-link {
+      background-color: var(--cpu-primary) !important;
+      border-color: var(--cpu-primary) !important;
+      color: #fff !important;
+    }
+
+    .pagination .page-link {
+      color: var(--cpu-primary) !important;
+      border-color: lightgrey !important;
+    }
+
+    .pagination .page-item.disabled .page-link {
+      color: #6c757d !important;
+      border-color: #d3d3d3 !important;
+    }
+  </style>
 </body>
+
 </html>

@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\RequisitionForm;
@@ -69,36 +67,80 @@ public function saveUserInfo(Request $request)
             'equipment_id' => 'sometimes|exists:equipment,equipment_id',
             'type' => 'required|in:facility,equipment'
         ]);
-    
-        // Initialize or get existing session data
+
         $selectedItems = session('selected_items', []);
-    
+
+        // Prevent overload: limit to 10 items
+        if (count($selectedItems) >= 10) {
+            return back()->withErrors(['message' => 'You have reached the maximum allowed items.']);
+        }
+
         $id = $request->input($request->type . '_id');
-    
+
         if (!$id) {
             return back()->withErrors(['message' => 'Please select a valid item.']);
         }
-    
-        // Check for duplicates
+
         if (collect($selectedItems)->contains(fn($item) => 
             $item['id'] == $id && $item['type'] === $request->type
         )) {
             return back()->withErrors(['message' => 'Item already in selection.']);
         }
-    
-        // Add new item
+
         $selectedItems[] = [
             'id' => $id,
             'type' => $request->type,
-            'added_at' => now() // Optional: track when added
+            'added_at' => now()
         ];
-        
-        // Save to session
-        session(['selected_items' => $selectedItems]);
-    
+
+        session(['selected_items' => $selectedItems]); // Ensure session is updated
+
+        // Calculate the sum of added facilities and equipment
+        $facilityCount = collect($selectedItems)->where('type', 'facility')->count();
+        $equipmentCount = collect($selectedItems)->where('type', 'equipment')->count();
+        $totalItems = $facilityCount + $equipmentCount;
+
         return back()->with([
             'success' => Str::ucfirst($request->type) . ' added to selection.',
-            'selected_items' => $selectedItems // Optional: return updated list
+            'selected_items' => session('selected_items'), // Return updated session data
+            'total_items' => $totalItems // Return the sum of facilities and equipment
+        ]);
+    }
+
+    // ----- Calculate total fee of added items ----- //
+
+    public function calculateFees()
+    {
+        $selectedItems = session('selected_items', []);
+
+        $facilityTotalFee = collect($selectedItems)->reduce(function ($total, $item) {
+            if ($item['type'] === 'facility') {
+                $facility = Facility::find($item['id']);
+                return $total + ($facility ? $facility->internal_fee : 0);
+            }
+            return $total;
+        }, 0);
+
+        $equipmentTotalFee = collect($selectedItems)->reduce(function ($total, $item) {
+            if ($item['type'] === 'equipment') {
+                $equipment = Equipment::find($item['id']);
+                return $total + ($equipment ? $equipment->internal_fee : 0);
+            }
+            return $total;
+        }, 0);
+
+        $totalFee = $facilityTotalFee + $equipmentTotalFee;
+
+        // Save fees in session
+        session()->put('fee_summary', [
+            'facility_total_fee' => $facilityTotalFee,
+            'equipment_total_fee' => $equipmentTotalFee,
+            'total_fee' => $totalFee
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'fee_summary' => session('fee_summary') // Return fee summary from session
         ]);
     }
 
@@ -115,7 +157,6 @@ public function saveUserInfo(Request $request)
         $selectedItems = session()->get('selected_items', []);
         $id = $request->input($request->type . '_id');
 
-        // Validate item exists in session
         $itemExists = collect($selectedItems)->contains(fn($item) =>
             $item['id'] == $id && $item['type'] === $request->type
         );
@@ -127,18 +168,17 @@ public function saveUserInfo(Request $request)
             ], 404);
         }
 
-        // Remove item from session
         $updatedItems = array_values(array_filter($selectedItems, function($item) use ($id, $request) {
             return !($item['id'] == $id && $item['type'] === $request->type);
         }));
 
-        session()->put('selected_items', $updatedItems);
+        session()->put('selected_items', $updatedItems); // Ensure session is updated
 
         return response()->json([
             'success' => true,
             'message' => Str::ucfirst($request->type) . ' removed successfully.',
-            'count' => count($updatedItems),
-            'selected_items' => $updatedItems
+            'count' => count(session('selected_items')), // Return updated session count
+            'selected_items' => session('selected_items') // Return updated session data
         ]);
     }
 
@@ -203,39 +243,35 @@ public function saveUserInfo(Request $request)
     public function tempUpload(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120', // 5MB max
+            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'upload_type' => 'required|in:Letter,Room Setup'
         ]);
 
         try {
-            // Determine Cloudinary folder based on upload type
             $folder = $request->upload_type === 'Letter' 
                 ? 'user-uploads/user-letters' 
                 : 'user-uploads/user-setups';
 
-            // Upload to Cloudinary
             $upload = Cloudinary::upload($request->file('file')->getRealPath(), [
                 'folder' => $folder,
                 'resource_type' => 'auto'
             ]);
 
-            // Create temporary record
             $userUpload = UserUpload::create([
                 'file_url' => $upload->getSecurePath(),
                 'cloudinary_public_id' => $upload->getPublicId(),
                 'upload_type' => $request->upload_type,
-                'upload_token' => Str::random(40), // Unique token for session reference
-                'request_id' => null // Will be set during final submission
+                'upload_token' => Str::random(40),
+                'request_id' => null
             ]);
 
-            // Store in session
             $uploadSession = session()->get('temp_uploads', []);
             $uploadSession[] = [
                 'upload_id' => $userUpload->upload_id,
                 'token' => $userUpload->upload_token,
                 'type' => $userUpload->upload_type
             ];
-            session()->put('temp_uploads', $uploadSession);
+            session()->put('temp_uploads', $uploadSession); // Ensure session is updated
 
             return response()->json([
                 'success' => true,
@@ -245,7 +281,8 @@ public function saveUserInfo(Request $request)
                     'url' => $userUpload->file_url,
                     'type' => $userUpload->upload_type,
                     'token' => $userUpload->upload_token
-                ]
+                ],
+                'temp_uploads' => session('temp_uploads') // Return updated session data
             ]);
 
         } catch (\Exception $e) {

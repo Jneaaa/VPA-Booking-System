@@ -34,6 +34,11 @@ class RequisitionForm extends Model
         'closed_by',
         'endorser',
         'date_endorsed',
+        'tentative_fee',
+        'approved_fee',
+        'official_receipt_no', 
+        'official_receipt_url', 
+        'official_receipt_public_id'
     ];
 
     // Relationships

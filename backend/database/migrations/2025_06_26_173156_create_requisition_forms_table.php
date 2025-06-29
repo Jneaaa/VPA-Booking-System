@@ -33,15 +33,22 @@ return new class extends Migration
             $table->boolean('is_late')->default(false);
             $table->dateTime('returned_at')->nullable();
 
-            // close form
-            $table->boolean('is_closed')->default(false);
-            $table->dateTime('closed_at')->nullable();
-            $table->unsignedBigInteger('closed_by')->nullable();
-
             // finalization
             $table->boolean('is_finalized')->default(false);
             $table->dateTime('finalized_at')->nullable();
             $table->unsignedBigInteger('finalized_by')->nullable();
+            $table->string('official_receipt_no', 50)->nullable();
+            $table->string('official_receipt_url')->nullable();
+            $table->string('official_receipt_public_id')->nullable();
+
+            // fees
+            $table->decimal('tentative_fee', 10, 2)->nullable();
+            $table->decimal('approved_fee', 10, 2)->nullable();
+
+            // close form
+            $table->boolean('is_closed')->default(false);
+            $table->dateTime('closed_at')->nullable();
+            $table->unsignedBigInteger('closed_by')->nullable();
 
             // endorsement
             $table->string('endorser', 50)->nullable();

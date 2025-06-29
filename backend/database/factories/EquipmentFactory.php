@@ -12,13 +12,15 @@ class EquipmentFactory extends Factory
 
     public function definition(): array
     {
+        $totalQuantity = $this->faker->numberBetween(1, 10);
         return [
             'equipment_name'       => 'Equipment #' . self::$counter++,
-            'description'          => 'Insert a short description of the facility here.',
+            'description'          => 'Insert a short description of the equipment here.',
             'brand'                => $this->faker->randomElement(['Brand name #1', 'Brand name #2', 'Brand name #3', 'Brand name #4']),
             'storage_location'     => $this->faker->randomElement(['Main Room', 'AV Room', 'Warehouse', 'Room 101']),
             'category_id'          => rand(1, 3), // Match seeded categories
-            'total_quantity'       => $this->faker->numberBetween(1, 10),
+            'total_quantity'       => $totalQuantity,
+            'available_quantity'   => $this->faker->numberBetween(1, $totalQuantity),
             'internal_fee'         => $this->faker->randomFloat(2, 100, 1000),
             'external_fee'         => $this->faker->randomFloat(2, 100, 1000),
             'company_fee'          => $this->faker->randomFloat(2, 50, 500),

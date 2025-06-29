@@ -25,19 +25,18 @@ Route::get('/users', [UserController::class, 'index']);
 
 // ----- Requisition Form Routes ----- //
 
+// Add requisition prefix for all requisition-related routes
 Route::prefix('requisition')->group(function () {
 
-// Requisition form - add/remove selected equipment or facilities (no auth)
+// add/remove selected equipment or facilities
 Route::post('/add-item', [RequisitionFormController::class, 'addToForm']);
 Route::post('/remove-item', [RequisitionFormController::class, 'removeFromForm']);
-
-
+// Display fees
+Route::get('/calculate-fees', [RequisitionFormController::class, 'calculateFees']);
 // File uploads
 Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);
-
 // Form submission
 Route::post('/submit', [RequisitionFormController::class, 'submitRequisition']);
-
 // View requisition
 Route::get('/{request_id}', [RequisitionFormController::class, 'show']);
     

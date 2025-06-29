@@ -146,6 +146,108 @@
       justify-content: space-between;
       background-color: #fff;
     }
+
+    /* Adjusted grid card styling */
+    .catalog-card.grid-layout {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 15px;
+      background-color: #fff;
+      border: 1px solid #d3d3d3;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      height: auto; /* Adjust height dynamically to fit content */
+      min-height: 200px; /* Ensure minimum height */
+      padding-bottom: 20px; /* Add padding to prevent overflow */
+    }
+
+    .catalog-card.grid-layout:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .catalog-card.grid-layout img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .catalog-card.grid-layout .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .catalog-card.grid-layout .card-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .catalog-card.grid-layout .badge {
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      border-radius: 12px;
+    }
+
+    .catalog-card.grid-layout .card-text {
+      font-size: 0.9rem;
+      color: #666;
+      text-align: left;
+    }
+
+    .catalog-card.grid-layout .rental-fee {
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: left;
+      color: var(--cpu-primary);
+    }
+
+    .catalog-card.grid-layout .btn {
+      font-size: 0.85rem;
+      padding: 0.5rem 0.75rem;
+    }
+
+    .catalog-card.grid-layout .btn-outline-secondary {
+      color: #6c757d;
+      border-color: #6c757d;
+    }
+
+    .catalog-card.grid-layout .btn-outline-secondary:hover {
+      background-color: #6c757d;
+      color: #fff;
+    }
+
+    .catalog-card.grid-layout .btn-primary {
+      background-color: var(--cpu-primary);
+      border-color: var(--cpu-primary);
+    }
+
+    .catalog-card.grid-layout .btn-primary:hover {
+      background-color: var(--cpu-primary-hover);
+      border-color: var(--cpu-primary-hover);
+    }
+
+    .catalog-card.grid-layout .btn-danger {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+
+    .catalog-card.grid-layout .btn-danger:hover {
+      background-color: #a71d2a;
+      border-color: #a71d2a;
+    }
+
+    .catalog-card.grid-layout .d-flex.flex-wrap.gap-2 span {
+      font-size: 0.9rem; /* Match text size with location note */
+      color: #666; /* Ensure consistent color */
+      gap: 5px; /* Reduced gap between tags */
+    }
   </style>
 </head>
 
@@ -297,7 +399,7 @@
               <div class="dropdown">
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
                   id="layoutDropdown">
-                  List Layout
+                  Grid Layout
                 </button>
                 <ul class="dropdown-menu">
                   <li>
@@ -649,7 +751,7 @@
     // Catalog Module
     const CatalogModule = {
       currentCategory: "All",
-      currentLayout: "list",
+      currentLayout: "grid", // Changed default layout to "grid"
       currentPage: 1,
       itemsPerPage: 4,
       currentStatus: "Available", // Default status set to "Available"
@@ -670,11 +772,80 @@
       },
 
       async loadCategories() {
+        const categoryFilterList = document.getElementById("categoryFilterList");
+        categoryFilterList.innerHTML = '<p>Loading categories...</p>';
+
         try {
-          const categories = await ApiService.get('/facility-categories');
-          this.renderCategoryFilter(categories);
+          const response = await fetch('http://127.0.0.1:8000/api/facility-categories/index');
+          const categories = await response.json();
+
+          categoryFilterList.innerHTML = ''; // Clear loading message
+
+          categories.forEach(category => {
+            const categoryItem = document.createElement("div");
+            categoryItem.classList.add("category-item");
+
+            const categoryHeader = document.createElement("a");
+            categoryHeader.href = "#";
+            categoryHeader.classList.add("filter-item", "d-flex", "align-items-center", "justify-content-between");
+            categoryHeader.textContent = `All ${category.category_name}`;
+            categoryHeader.dataset.category = category.category_name;
+
+            const toggleIcon = document.createElement("i");
+            toggleIcon.classList.add("bi", "bi-chevron-down", "ms-2", "toggle-icon");
+            toggleIcon.dataset.bsToggle = "collapse";
+            toggleIcon.dataset.bsTarget = `#subcategory-${category.category_id}`;
+
+            categoryHeader.addEventListener("click", (e) => {
+              if (e.target === categoryHeader || e.target === toggleIcon) {
+                e.preventDefault();
+                this.updateCategoryFilter(category.category_name);
+              }
+            });
+
+            categoryHeader.appendChild(toggleIcon);
+            categoryItem.appendChild(categoryHeader);
+
+            if (category.subcategories?.length > 0) {
+              const subcategoryList = document.createElement("div");
+              subcategoryList.classList.add("subcategory-list", "collapse");
+              subcategoryList.id = `subcategory-${category.category_id}`;
+
+              category.subcategories.forEach(subcategory => {
+                const subcategoryItem = document.createElement("a");
+                subcategoryItem.href = "#";
+                subcategoryItem.classList.add("filter-item", "ms-3");
+                subcategoryItem.dataset.category = subcategory.subcategory_name;
+                subcategoryItem.textContent = subcategory.subcategory_name;
+
+                subcategoryItem.addEventListener("click", (e) => {
+                  e.preventDefault();
+                  this.updateCategoryFilter(subcategory.subcategory_name);
+                });
+
+                subcategoryList.appendChild(subcategoryItem);
+              });
+
+              categoryItem.appendChild(subcategoryList);
+            }
+
+            categoryFilterList.appendChild(categoryItem);
+          });
+
+          const allCategoriesLink = document.createElement("a");
+          allCategoriesLink.href = "#";
+          allCategoriesLink.classList.add("filter-item", "active");
+          allCategoriesLink.dataset.category = "All";
+          allCategoriesLink.textContent = "All Categories";
+          allCategoriesLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            this.updateCategoryFilter("All");
+          });
+
+          categoryFilterList.prepend(allCategoriesLink);
         } catch (error) {
-          document.getElementById("categoryFilterList").innerHTML = '<p class="text-danger">Failed to load categories.</p>';
+          categoryFilterList.innerHTML = '<p class="text-danger">Failed to load categories.</p>';
+          console.error("Error loading categories:", error);
         }
       },
 
@@ -747,63 +918,6 @@
             AppState.facilities.sort((a, b) => (a.facility_name || '').localeCompare(b.facility_name || ''));
             break;
         }
-      },
-
-      renderCategoryFilter(categories) {
-        const container = document.getElementById("categoryFilterList");
-        container.innerHTML = `<a href="#" class="filter-item active" data-category="All">All Categories</a>`;
-
-        categories.forEach(category => {
-          const item = document.createElement("div");
-          item.classList.add("category-item");
-
-          const header = document.createElement("a");
-          header.href = "#";
-          header.classList.add("filter-item", "d-flex", "align-items-center", "justify-content-between");
-          header.textContent = category.category_name;
-          header.dataset.category = category.category_name;
-
-          if (category.subcategories?.length > 0) {
-            const toggle = document.createElement("i");
-            toggle.classList.add("bi", "bi-chevron-down", "ms-2", "toggle-icon");
-            toggle.dataset.bsToggle = "collapse";
-            toggle.dataset.bsTarget = `#subcategory-${category.id}`;
-            header.appendChild(toggle);
-
-            const subList = document.createElement("div");
-            subList.classList.add("subcategory-list", "collapse");
-            subList.id = `subcategory-${category.id}`;
-
-            category.subcategories.forEach(sub => {
-              const subItem = document.createElement("a");
-              subItem.href = "#";
-              subItem.classList.add("filter-item", "ms-3");
-              subItem.dataset.category = sub.subcategory_name;
-              subItem.textContent = sub.subcategory_name;
-              subItem.addEventListener("click", (e) => {
-                e.preventDefault();
-                this.updateCategoryFilter(sub.subcategory_name);
-              });
-              subList.appendChild(subItem);
-            });
-
-            item.appendChild(header);
-            item.appendChild(subList);
-          } else {
-            header.addEventListener("click", (e) => {
-              e.preventDefault();
-              this.updateCategoryFilter(category.category_name);
-            });
-            item.appendChild(header);
-          }
-
-          container.appendChild(item);
-        });
-
-        container.querySelector('[data-category="All"]').addEventListener("click", (e) => {
-          e.preventDefault();
-          this.updateCategoryFilter("All");
-        });
       },
 
       updateCategoryFilter(category) {
@@ -928,45 +1042,38 @@
           `;
           return card;
         } else {
-          const col = document.createElement("div");
-          col.className = "col-md-6 col-lg-4 col-xl-3";
-          col.innerHTML = `
-          <div class="card h-100">
-              <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}"
-                  class="catalog-card-img" alt="${facility.facility_name}">
-              <div class="card-body d-flex flex-column">
-                  <h5 class="card-title d-flex align-items-center">
-                      ${facility.facility_name}
-                      <span class="badge ms-2" style="background-color: ${statusColor};">${statusName}</span>
-                  </h5>
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                      <span class="text-muted">${facility.category?.category_name || "Uncategorized"}</span> |
-                      <span class="text-muted">${facility.subcategory?.subcategory_name || "No Subcategory"}</span> |
-                      <span class="text-muted">${departmentCode}</span> |
-                      <span class="text-muted">Capacity: ${facility.capacity || "N/A"}</span>
-                  </div>
-                  <p class="card-text text-muted">${facility.location_note || "No location note available."}</p>
-                  <p class="card-text text-muted mb-1">${facility.description || "No description available."}</p>
-                  <div>
-                      <div class="rental-fee fw-bold">₱${rentalFee}</div>
-                      <div class="text-muted">${facility.rate_type || "N/A"}</div>
-                  </div>
-                  <div class="mt-auto d-grid gap-2">
-                      <button class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-primary'} add-to-form-btn" 
-                          data-facility-id="${facility.facility_id}" 
-                          data-type="facility">
-                          ${isSelected ? 'Remove from Form' : 'Add to Form'}
-                      </button>
-                      <button class="btn btn-sm btn-outline-secondary view-calendar-btn" 
-                          data-bs-toggle="modal" data-bs-target="#userCalendarModal" 
-                          data-facility-id="${facility.facility_id}">
-                          View Calendar
-                      </button>
-                  </div>
+          const card = document.createElement("div");
+          card.className = "catalog-card grid-layout";
+          card.innerHTML = `
+            <img src="${facility.images?.length > 0 ? facility.images[0].image_url : 'https://placehold.co/300x200/E0E0E0/6C757D?text=Image'}" alt="${facility.facility_name}">
+            <div class="card-body">
+              <h5 class="card-title d-flex align-items-center">
+                ${facility.facility_name}
+                <span class="badge ms-2" style="background-color: ${statusColor};">${statusName}</span>
+              </h5>
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <span class="text-muted">${facility.category?.category_name || "Uncategorized"}</span> |
+                <span class="text-muted">${facility.subcategory?.subcategory_name || "No Subcategory"}</span> |
+                <span class="text-muted">${departmentCode}</span> |
+                <span class="text-muted">Capacity: ${facility.capacity || "N/A"}</span>
               </div>
-          </div>
+              <p class="card-text text-muted">${facility.description || "No description available."}</p>
+              <div class="rental-fee">₱${rentalFee}</div>
+              <div class="d-grid gap-2 mt-auto">
+                <button class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-primary'} add-to-form-btn" 
+                  data-facility-id="${facility.facility_id}" 
+                  data-type="facility">
+                  ${isSelected ? 'Remove from Form' : 'Add to Form'}
+                </button>
+                <button class="btn btn-sm btn-outline-secondary view-calendar-btn" 
+                  data-bs-toggle="modal" data-bs-target="#userCalendarModal" 
+                  data-facility-id="${facility.facility_id}">
+                  View Calendar
+                </button>
+              </div>
+            </div>
           `;
-          return col;
+          return card;
         }
       },
 

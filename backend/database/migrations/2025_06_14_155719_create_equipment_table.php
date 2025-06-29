@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('brand', 80)->nullable();
             $table->string('storage_location', 50);
             $table->unsignedTinyInteger('category_id');
+            $table->unsignedInteger('available_quantity')->default(1);
             $table->unsignedInteger('total_quantity')->default(1);
             $table->decimal('internal_fee', 10, 2);
             $table->decimal('external_fee', 10, 2);
