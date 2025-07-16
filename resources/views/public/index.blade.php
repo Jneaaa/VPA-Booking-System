@@ -9,30 +9,29 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <style>
-
     body {
-    background-color: rgba(0, 0, 0, 0.4);
-    background-image: url("{{ asset('assets/homepage.jpg') }}");
-    background-size: cover;
-    background-position: relative;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+      background-color: rgba(0, 0, 0, 0.4);
+      background-image: url("{{ asset('assets/homepage.jpg') }}");
+      background-size: cover;
+      background-position: relative;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); 
-    z-index: -1;
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: -1;
 
-  }
+    }
 
     .hero-section {
       min-height: 50vh;
@@ -91,7 +90,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      
+
     }
 
     .catalog-card img {
@@ -127,56 +126,55 @@
     .catalog-card .btn:hover {
       background-color: #be8200;
     }
-
   </style>
 </head>
 
 <body>
 
-@extends('layouts.app')
+  @extends('layouts.app')
 
-@section('title', 'Home')
+  @section('title', 'Home')
 
 
-@section('content')
-  <section class="hero-section text-white text-center">
+  @section('content')
+    <section class="hero-section text-white text-center">
     <h2 class="fw-bold">Simplify the way you book university facilities,<br>equipment, and services — all in one
       platform,<br>anytime, anywhere.</h2>
     <a href="reservation-form" class="btn btn-warning mt-3 fw-bold">Start Booking</a>
-  </section>
+    </section>
 
-  <section class="catalog-section container text-center">
+    <section class="catalog-section container text-center">
     <h4 class="fw-bold mb-2">Explore Available Resources</h4>
     <p class="text-muted mb-4">Browse available facilities, equipment, and services for your next event or activity.
       Everything’s up-to-date and ready to reserve.</p>
     <div class="row">
       <div class="col-md-4 mb-4">
-        <div class="catalog-card">
-          <img src="{{ asset('assets/facilities-pic2.JPG') }}" class="img-fluid rounded mb-2" alt="Facilities">
-          <h6>Facilities</h6>
-          <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
-          <a href="about-facilities" class="btn">Explore</a>
-        </div>
+      <div class="catalog-card">
+        <img src="{{ asset('assets/facilities-pic2.JPG') }}" class="img-fluid rounded mb-2" alt="Facilities">
+        <h6>Facilities</h6>
+        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
+        <a href="about-facilities" class="btn">Explore</a>
+      </div>
       </div>
       <div class="col-md-4 mb-4">
-        <div class="catalog-card">
-          <img src="{{ asset('assets/equipment-pic.jpg') }}" class="img-fluid rounded mb-2" alt="Equipment">
-          <h6>Equipment</h6>
-          <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
-          <a href="about-equipment" class="btn">Explore</a>
-        </div>
+      <div class="catalog-card">
+        <img src="{{ asset('assets/equipment-pic.jpg') }}" class="img-fluid rounded mb-2" alt="Equipment">
+        <h6>Equipment</h6>
+        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
+        <a href="about-equipment" class="btn">Explore</a>
+      </div>
       </div>
       <div class="col-md-4 mb-4">
-        <div class="catalog-card">
-          <img src="{{ asset('assets/services-pic.png') }}" class="img-fluid rounded mb-2" alt="Services">
-          <h6>Extra Services</h6>
-          <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
-          <a href="about-services" class="btn">Explore</a>
-        </div>
+      <div class="catalog-card">
+        <img src="{{ asset('assets/services-pic.png') }}" class="img-fluid rounded mb-2" alt="Services">
+        <h6>Extra Services</h6>
+        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
+        <a href="about-services" class="btn">Explore</a>
+      </div>
       </div>
     </div>
-  </section>
-@endsection
+    </section>
+  @endsection
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

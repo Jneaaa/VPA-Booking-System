@@ -111,7 +111,8 @@
       box-sizing: border-box;
       background-color: #fff;
       border: 1px solid #d3d3d3;
-      gap: 15px; /* Add spacing between the image and content */
+      gap: 15px;
+      /* Add spacing between the image and content */
     }
 
     .catalog-card .catalog-card-img {
@@ -123,15 +124,18 @@
     }
 
     .catalog-card .row.g-0 {
-      margin: 0; /* Remove row-level spacing */
+      margin: 0;
+      /* Remove row-level spacing */
     }
 
     .catalog-card .col-md-3 {
-      padding: 0 5px; /* Reduce left padding to match the right padding of the container */
+      padding: 0 5px;
+      /* Reduce left padding to match the right padding of the container */
     }
 
     .catalog-card .col-md-7 {
-      padding-left: 15px; /* Maintain padding between the image and content */
+      padding-left: 15px;
+      /* Maintain padding between the image and content */
     }
 
     .catalog-card .col-md-2 {
@@ -159,9 +163,12 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       overflow: hidden;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
-      height: auto; /* Adjust height dynamically to fit content */
-      min-height: 200px; /* Ensure minimum height */
-      padding-bottom: 20px; /* Add padding to prevent overflow */
+      height: auto;
+      /* Adjust height dynamically to fit content */
+      min-height: 200px;
+      /* Ensure minimum height */
+      padding-bottom: 20px;
+      /* Add padding to prevent overflow */
     }
 
     .catalog-card.grid-layout:hover {
@@ -244,178 +251,183 @@
     }
 
     .catalog-card.grid-layout .d-flex.flex-wrap.gap-2 span {
-      font-size: 0.9rem; /* Match text size with location note */
-      color: #666; /* Ensure consistent color */
-      gap: 5px; /* Reduced gap between tags */
+      font-size: 0.9rem;
+      /* Match text size with location note */
+      color: #666;
+      /* Ensure consistent color */
+      gap: 5px;
+      /* Reduced gap between tags */
     }
   </style>
 </head>
 
 <body>
 
-@extends('layouts.app')
+  @extends('layouts.app')
 
-@section('title', 'Facility Catalog')
+  @section('title', 'Facility Catalog')
 
 
-@section('content')
+  @section('content')
 
-  <section class="catalog-hero-section">
+    <section class="catalog-hero-section">
     <div class="catalog-hero-content">
       <h2 id="catalogHeroTitle">Facilities Catalog</h2>
     </div>
-  </section>
+    </section>
 
-  <main class="main-catalog-section">
+    <main class="main-catalog-section">
     <div class="container">
       <div class="row">
-        <div class="col-lg-3 col-md-4">
-          <div class="quick-links-card mb-4">
-            <p class="mb-2">
-              Not sure when to book?<br />View available timeslots here.
-            </p>
-            <a id="requisitionFormButton" href="bookingpage.html"
-              class="btn btn-primary d-flex justify-content-center align-items-center position-relative mb-2"
-              style="border-radius: 0; font-size: 0.9rem; padding: 0.4rem 0.7rem; text-align: center;">
-              <i class="bi bi-receipt me-2"></i> Your Requisition Form
-              <span id="requisitionBadge" class="badge bg-danger rounded-pill position-absolute d-none"
-                style="top: 0; right: 0; transform: translate(50%, -50%); font-size: 0.8rem;">
-                0
-              </span>
-            </a>
+      <div class="col-lg-3 col-md-4">
+        <div class="quick-links-card mb-4">
+        <p class="mb-2">
+          Not sure when to book?<br />View available timeslots here.
+        </p>
+        <a id="requisitionFormButton" href="bookingpage.html"
+          class="btn btn-primary d-flex justify-content-center align-items-center position-relative mb-2"
+          style="border-radius: 0; font-size: 0.9rem; padding: 0.4rem 0.7rem; text-align: center;">
+          <i class="bi bi-receipt me-2"></i> Your Requisition Form
+          <span id="requisitionBadge" class="badge bg-danger rounded-pill position-absolute d-none"
+          style="top: 0; right: 0; transform: translate(50%, -50%); font-size: 0.8rem;">
+          0
+          </span>
+        </a>
 
-            <button type="button" class="btn btn-outline-primary d-flex align-items-center"
-              style="border-radius: 0; font-size: 1rem; padding: 0.4rem 0.7rem; width: 100%;" id="eventsCalendarBtn"
-              data-bs-toggle="modal" data-bs-target="#userCalendarModal">Events Calendar</button>
+        <button type="button" class="btn btn-outline-primary d-flex align-items-center"
+          style="border-radius: 0; font-size: 1rem; padding: 0.4rem 0.7rem; width: 100%;" id="eventsCalendarBtn"
+          data-bs-toggle="modal" data-bs-target="#userCalendarModal">Events Calendar</button>
 
-          </div>
-
-          <div class="sidebar-card">
-            <h5>Browse by Category</h5>
-            <div class="filter-list" id="categoryFilterList"></div>
-          </div>
         </div>
 
-        <div class="col-lg-9 col-md-8">
-          <div class="right-content-header">
-            <h4 id="currentCategoryTitle" class="d-flex align-items-center">
-              <div class="dropdown">
-                <button class="btn btn-link dropdown-toggle text-decoration-none" type="button"
-                  id="chooseCatalogDropdown" data-bs-toggle="dropdown" aria-expanded="false"
-                  style="font-size: 1.2rem; color: inherit;">
-                  All Facilities
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="chooseCatalogDropdown">
-                  <li>
-                    <a class="dropdown-item" href="bookingcatalog.html" data-catalog-type="facilities">
-                      Facilities
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="equipmentcatalog.html" data-catalog-type="equipment">
-                      Equipment
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </h4>
-            <div class="d-flex gap-2 filter-sort-dropdowns">
-              <div class="dropdown">
-                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="statusDropdown">
-                  Status: Available
-                </button>
-                <ul class="dropdown-menu" id="statusFilterMenu">
-                  <li>
-                    <a class="dropdown-item status-option" href="#" data-status="All">All</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item status-option" href="#" data-status="Available">Available</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item status-option" href="#" data-status="Unavailable">Unavailable</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item status-option" href="#" data-status="Under Maintenance">Under Maintenance</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item status-option" href="#" data-status="Closed">Closed</a>
-                  </li>
-                </ul>
-              </div>
-              <div class="dropdown">
-                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                  id="layoutDropdown">
-                  Grid Layout
-                </button>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a class="dropdown-item layout-option" href="#" data-layout="list">List</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item layout-option" href="#" data-layout="grid">Grid</a>
-                  </li>
-                </ul>
-              </div>
-              <div class="dropdown">
-                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Filter By
-                </button>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a class="dropdown-item" href="#">Price (Low to High)</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">Price (High to Low)</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">Alphabetical (A-Z)</a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal fade" id="userCalendarModal" tabindex="-1" aria-labelledby="userCalendarModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="userCalendarModalLabel">View Booking Events Calendar</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <div id="userFullCalendar"></div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Loading Indicator -->
-          <div id="loadingIndicator" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Loading facilities...</p>
-          </div>
-
-
-          <!-- Catalog Items Container -->
-          <div id="catalogItemsContainer" class="list-layout d-none"></div>
-
-          <div class="text-center mt-4">
-            <nav>
-              <ul id="pagination-top" class="pagination justify-content-center"></ul>
-              <ul id="pagination" class="pagination justify-content-center"></ul>
-            </nav>
-          </div>
+        <div class="sidebar-card">
+        <h5>Browse by Category</h5>
+        <div class="filter-list" id="categoryFilterList"></div>
         </div>
       </div>
+
+      <div class="col-lg-9 col-md-8">
+        <div class="right-content-header">
+        <h4 id="currentCategoryTitle" class="d-flex align-items-center">
+          <div class="dropdown">
+          <button class="btn btn-link dropdown-toggle text-decoration-none" type="button"
+            id="chooseCatalogDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+            style="font-size: 1.2rem; color: inherit;">
+            All Facilities
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="chooseCatalogDropdown">
+            <li>
+            <a class="dropdown-item" href="bookingcatalog.html" data-catalog-type="facilities">
+              Facilities
+            </a>
+            </li>
+            <li>
+            <a class="dropdown-item" href="equipmentcatalog.html" data-catalog-type="equipment">
+              Equipment
+            </a>
+            </li>
+          </ul>
+          </div>
+        </h4>
+        <div class="d-flex gap-2 filter-sort-dropdowns">
+          <div class="dropdown">
+          <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+            id="statusDropdown">
+            Status: Available
+          </button>
+          <ul class="dropdown-menu" id="statusFilterMenu">
+            <li>
+            <a class="dropdown-item status-option" href="#" data-status="All">All</a>
+            </li>
+            <li>
+            <a class="dropdown-item status-option" href="#" data-status="Available">Available</a>
+            </li>
+            <li>
+            <a class="dropdown-item status-option" href="#" data-status="Unavailable">Unavailable</a>
+            </li>
+            <li>
+            <a class="dropdown-item status-option" href="#" data-status="Under Maintenance">Under
+              Maintenance</a>
+            </li>
+            <li>
+            <a class="dropdown-item status-option" href="#" data-status="Closed">Closed</a>
+            </li>
+          </ul>
+          </div>
+          <div class="dropdown">
+          <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+            id="layoutDropdown">
+            Grid Layout
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+            <a class="dropdown-item layout-option" href="#" data-layout="list">List</a>
+            </li>
+            <li>
+            <a class="dropdown-item layout-option" href="#" data-layout="grid">Grid</a>
+            </li>
+          </ul>
+          </div>
+          <div class="dropdown">
+          <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Filter By
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+            <a class="dropdown-item" href="#">Price (Low to High)</a>
+            </li>
+            <li>
+            <a class="dropdown-item" href="#">Price (High to Low)</a>
+            </li>
+            <li>
+            <a class="dropdown-item" href="#">Alphabetical (A-Z)</a>
+            </li>
+          </ul>
+          </div>
+        </div>
+        </div>
+
+        <div class="modal fade" id="userCalendarModal" tabindex="-1" aria-labelledby="userCalendarModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="userCalendarModalLabel">View Booking Events Calendar</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="userFullCalendar"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+          </div>
+        </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading facilities...</p>
+        </div>
+
+
+        <!-- Catalog Items Container -->
+        <div id="catalogItemsContainer" class="list-layout d-none"></div>
+
+        <div class="text-center mt-4">
+        <nav>
+          <ul id="pagination-top" class="pagination justify-content-center"></ul>
+          <ul id="pagination" class="pagination justify-content-center"></ul>
+        </nav>
+        </div>
+      </div>
+      </div>
     </div>
-  </main>
-@endsection
+    </main>
+  @endsection
 
   <script src="{{ asset('js/public/script.js') }}"></script>
   <script>

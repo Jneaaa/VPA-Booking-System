@@ -194,19 +194,40 @@
         }
 
         /* Status Colors */
-        .status-pending { background-color: #ffc107; color: #333; }
-        .status-approved { background-color: #28a745; color: white; }
-        .status-rejected { background-color: #dc3545; color: white; }
-        .status-paid { background-color: #007bff; color: white; }
-        .status-completed { background-color: #6c757d; color: white; }
+        .status-pending {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .status-approved {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-rejected {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .status-paid {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .status-completed {
+            background-color: #6c757d;
+            color: white;
+        }
 
         /* Styles for the new "Permit Issued To" section */
         .permit-issued-to {
             text-align: center;
             margin-bottom: 25px;
             padding: 20px;
-            background-color: #e9f7ff; /* Light blue background */
-            border: 1px solid #cceeff; /* Light blue border */
+            background-color: #e9f7ff;
+            /* Light blue background */
+            border: 1px solid #cceeff;
+            /* Light blue border */
             border-radius: 8px;
         }
 
@@ -226,24 +247,30 @@
         .permit-issued-to .name {
             font-size: 1.5rem;
             font-weight: bold;
-            color: #0056b3; /* Darker blue for emphasis */
+            color: #0056b3;
+            /* Darker blue for emphasis */
             text-transform: uppercase;
             margin-bottom: 10px;
         }
-        
+
         .permit-issued-to .detail-row {
             display: flex;
-            justify-content: center; /* Center items for a cleaner look */
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
-            gap: 15px; /* Space between items */
+            justify-content: center;
+            /* Center items for a cleaner look */
+            flex-wrap: wrap;
+            /* Allow wrapping on smaller screens */
+            gap: 15px;
+            /* Space between items */
             margin-top: 15px;
             padding-top: 15px;
             border-top: 1px dashed #cceeff;
         }
 
         .permit-issued-to .detail-row span {
-            flex: 1 1 auto; /* Allow items to grow/shrink but maintain base width */
-            min-width: 250px; /* Minimum width before wrapping */
+            flex: 1 1 auto;
+            /* Allow items to grow/shrink but maintain base width */
+            min-width: 250px;
+            /* Minimum width before wrapping */
             text-align: left;
         }
 
@@ -274,91 +301,106 @@
 
         /* Print Button Styles */
         @media print {
-            .navbar, .top-header-bar, footer, .btn-group, .d-flex.justify-content-end.mt-4, .print-button-container {
+
+            .navbar,
+            .top-header-bar,
+            footer,
+            .btn-group,
+            .d-flex.justify-content-end.mt-4,
+            .print-button-container {
                 display: none !important;
             }
+
             .main-content {
                 margin-top: 0;
                 padding-top: 0;
             }
+
             .section-card {
                 box-shadow: none;
-                border: 1px solid #dee2e6; /* Add light border for print */
-                margin-bottom: 10px; /* Reduce margin for print */
+                border: 1px solid #dee2e6;
+                /* Add light border for print */
+                margin-bottom: 10px;
+                /* Reduce margin for print */
             }
+
             .permit-issued-to {
                 box-shadow: none;
                 border: 1px solid #cceeff;
             }
+
             body {
                 background-color: white;
             }
+
             .container {
-                width: 100% !important; /* Make container full width for printing */
+                width: 100% !important;
+                /* Make container full width for printing */
                 max-width: none !important;
             }
-            .row > div {
-                flex: 0 0 100% !important; /* Make columns full width for printing */
+
+            .row>div {
+                flex: 0 0 100% !important;
+                /* Make columns full width for printing */
                 max-width: 100% !important;
             }
         }
-
     </style>
 </head>
 
 <body>
-  <header class="top-header-bar">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div class="cpu-brand">
-            <img src="{{ asset('assets/public/cpu-logo.png') }}" alt="CPU Logo">
-            <div>
-                <div class="title">Central Philippine University</div>
-                <div class="subtitle">Equipment and Facility Booking Services</div>
+    <header class="top-header-bar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="cpu-brand">
+                <img src="{{ asset('assets/public/cpu-logo.png') }}" alt="CPU Logo">
+                <div>
+                    <div class="title">Central Philippine University</div>
+                    <div class="subtitle">Equipment and Facility Booking Services</div>
+                </div>
+            </div>
+            <div class="admin-login">
+                <span>Are you an Admin? <a href="admin pages/adminlogin.html">Login here.</a></span>
             </div>
         </div>
-        <div class="admin-login">
-            <span>Are you an Admin? <a href="admin pages/adminlogin.html">Login here.</a></span>
-        </div>
-    </div>
-</header>
+    </header>
 
-<nav class="navbar navbar-expand-lg main-navbar">
-    <div class="container">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" href="index">Home</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
-                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Booking Catalog
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="facilities">About Facilities</a></li>
-                        <li><a class="dropdown-item" href="equipmentpage">About Equipment</a></li>
-                        <li><a class="dropdown-item" href="extraservicespage">About Services</a></li>
-                        <li><a class="dropdown-item" href="bookingcatalog">Booking Catalog</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="mybookingpage">My Bookings</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="policies">Reservation Policies</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="feedbackpage">Rate Our Services</a>
-                </li>
-            </ul>
-            <a href="bookingpage" class="btn btn-book-now ms-lg-3">Book Now</a>
+    <nav class="navbar navbar-expand-lg main-navbar">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Booking Catalog
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="facilities">About Facilities</a></li>
+                            <li><a class="dropdown-item" href="equipmentpage">About Equipment</a></li>
+                            <li><a class="dropdown-item" href="extraservicespage">About Services</a></li>
+                            <li><a class="dropdown-item" href="bookingcatalog">Booking Catalog</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="mybookingpage">My Bookings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="policies">Reservation Policies</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="feedbackpage">Rate Our Services</a>
+                    </li>
+                </ul>
+                <a href="bookingpage" class="btn btn-book-now ms-lg-3">Book Now</a>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
     <div class="container main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -383,7 +425,8 @@
                 <span><span class="label">Venue:</span> MTCL 7, Computer Laboratory, Computer Science Department</span>
             </div>
             <div class="detail-row">
-                <span><span class="label">Date & Time:</span> May 19, 2025 - May 20, 2025 (10:00 AM - 11:00 AM Daily)</span>
+                <span><span class="label">Date & Time:</span> May 19, 2025 - May 20, 2025 (10:00 AM - 11:00 AM
+                    Daily)</span>
             </div>
         </div>
 
@@ -405,7 +448,8 @@
                     </div>
                     <div class="detail-item">
                         <span class="label">Purpose Description:</span>
-                        <span class="value">Weekly workshop for students to learn advanced topics in web development, including Laravel and React.</span>
+                        <span class="value">Weekly workshop for students to learn advanced topics in web development,
+                            including Laravel and React.</span>
                     </div>
                     <div class="detail-item">
                         <span class="label">Attached Letter:</span>
@@ -500,7 +544,8 @@
                     <ul class="included-equipment-list">
                         <li><span>Tables needed:</span> <span>15</span></li>
                         <li><span>Chairs needed:</span> <span>30</span></li>
-                        <li><span>Preferred Layout:</span> <span><a href="#" class="text-decoration-none">circular_setup.jpg</a></span></li>
+                        <li><span>Preferred Layout:</span> <span><a href="#"
+                                    class="text-decoration-none">circular_setup.jpg</a></span></li>
                         <li><span>Additional Notes:</span> <span>Please ensure good lighting and sound.</span></li>
                     </ul>
                 </div>
@@ -512,13 +557,15 @@
                         <p class="title">VP for Administration</p>
                         <p class="mt-3"><small class="text-muted">Date Approved: June 18, 2025</small></p>
                     </div>
-                    <p class="text-center mt-4 text-muted">This reservation has been officially approved and payment confirmed. Please present this receipt on your scheduled date.</p>
+                    <p class="text-center mt-4 text-muted">This reservation has been officially approved and payment
+                        confirmed. Please present this receipt on your scheduled date.</p>
                 </div>
             </div>
         </div>
 
         <div class="d-flex justify-content-end mt-4 print-button-container">
-            <button type="button" class="btn btn-secondary me-2" onclick="window.history.back()">Back to My Bookings</button>
+            <button type="button" class="btn btn-secondary me-2" onclick="window.history.back()">Back to My
+                Bookings</button>
             <button type="button" class="btn btn-primary" onclick="window.print()">Save/Print as PDF</button>
         </div>
     </div>
