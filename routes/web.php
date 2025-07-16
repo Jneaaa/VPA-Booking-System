@@ -21,33 +21,32 @@ Route::get('/', function () {
 });
 
 // Public views
-Route::view('/bookingcatalog', 'frontend-backup.public.bookingcatalog');
-Route::view('/bookingpage', 'frontend-backup.public.bookingpage');
-Route::view('/catalog-equipment', 'frontend-backup.public.catalog-equipment');
-Route::view('/equipmentcatalog', 'frontend-backup.public.equipmentcatalog');
-Route::view('/equipmentpage', 'frontend-backup.public.equipmentpage');
-Route::view('/extraservicespage', 'frontend-backup.public.extraservicespage');
-Route::view('/facilities', 'frontend-backup.public.facilities');
-Route::view('/feedbackpage', 'frontend-backup.public.feedbackpage');
-Route::view('/finalreceiptpage', 'frontend-backup.public.finalreceiptpage');
-Route::view('/index', 'frontend-backup.public.index');
-Route::view('/mybookingpage', 'frontend-backup.public.mybookingpage');
-Route::view('/paymentpage', 'frontend-backup.public.paymentpage');
-Route::view('/policies', 'frontend-backup.public.policies');
+Route::view('/facility-catalog', 'public.facility-catalog');
+Route::view('/reservation-form', 'public.reservation-form');
+Route::view('/equipment-catalog', 'public.equipment-catalog');
+Route::view('/about-equipment', 'public.about-equipment');
+Route::view('/about-services', 'public.about-services');
+Route::view('/about-facilities', 'public.about-facilities');
+Route::view('/user-feedback', 'public.user-feedback');
+Route::view('/official-receipt', 'public.official-receipt');
+Route::view('/index', 'public.index');
+Route::view('/your-bookings', 'public.your-bookings');
+Route::view('/user-payment', 'public.user-payment');
+Route::view('/policies', 'public.policies');
 
 // Admin views
-Route::view('/admin/add-equipment', 'frontend-backup.admin.add-equipment');
-Route::view('/admin/add-facility', 'frontend-backup.admin.add-facility');
-Route::view('/admin/admin-page-template', 'frontend-backup.admin.admin-page-template');
-Route::view('/admin/admin-roles-page', 'frontend-backup.admin.admin-roles-page');
-Route::view('/admin/adminlogin', 'frontend-backup.admin.adminlogin');
-Route::view('/admin/admins', 'frontend-backup.admin.admins');
-Route::view('/admin/calendar', 'frontend-backup.admin.calendar');
-Route::view('/admin/dashboard', 'frontend-backup.admin.dashboard');
-Route::view('/admin/equipment', 'frontend-backup.admin.equipment');
-Route::view('/admin/facilities', 'frontend-backup.admin.facilities');
-Route::view('/admin/manage-facility', 'frontend-backup.admin.manage-facility');
-Route::view('/admin/requisitions', 'frontend-backup.admin.requisitions');
+Route::view('/admin/add-equipment', 'admin.add-equipment');
+Route::view('/admin/add-facility', 'admin.add-facility');
+Route::view('/admin/admin-page-template', 'admin.admin-page-template');
+Route::view('/admin/admin-roles', 'admin.admin-roles');
+Route::view('/admin/admin-login', 'admin.admin-login');
+Route::view('/admin/admins', 'admin.admins');
+Route::view('/admin/calendar', 'admin.calendar');
+Route::view('/admin/dashboard', 'admin.dashboard');
+Route::view('/admin/manage-equipment', 'admin.manage-equipment');
+Route::view('/admin/manage-facilities', 'admin.manage-facilities');
+Route::view('/admin/manage-facility', 'admin.manage-facility');
+Route::view('/admin/manage-requests', 'admin.manage-requests');
 
 Route::get('/login', function () {
     return view('auth.login');

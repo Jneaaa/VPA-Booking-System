@@ -12,7 +12,7 @@
 
     body {
     background-color: rgba(0, 0, 0, 0.4);
-    background-image: url("{{ asset('assets/public/homepage.jpg') }}");
+    background-image: url("{{ asset('assets/homepage.jpg') }}");
     background-size: cover;
     background-position: relative;
     background-repeat: no-repeat;
@@ -132,63 +132,17 @@
 </head>
 
 <body>
-  <header class="top-header-bar">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div class="cpu-brand">
-            <img src="{{ asset('assets/public/cpu-logo.png') }}" alt="CPU Logo">
-            <div>
-                <div class="title">Central Philippine University</div>
-                <div class="subtitle">Equipment and Facility Booking Services</div>
-            </div>
-        </div>
-        <div class="admin-login">
-            <span>Are you an Admin? <a href="admin pages/adminlogin.html">Login here.</a></span>
-        </div>
-    </div>
-</header>
 
-<nav class="navbar navbar-expand-lg main-navbar">
-    <div class="container">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" href="index">Home</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
-                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Booking Catalog
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="facilities">About Facilities</a></li>
-                        <li><a class="dropdown-item" href="equipmentpage">About Equipment</a></li>
-                        <li><a class="dropdown-item" href="extraservicespage">About Services</a></li>
-                        <li><a class="dropdown-item" href="bookingcatalog">Booking Catalog</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="mybookingpage">My Bookings</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="policies">Reservation Policies</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="feedbackpage">Rate Our Services</a>
-                </li>
-            </ul>
-            <a href="bookingpage" class="btn btn-book-now ms-lg-3">Book Now</a>
-        </div>
-    </div>
-</nav>
+@extends('layouts.app')
 
+@section('title', 'Home')
+
+
+@section('content')
   <section class="hero-section text-white text-center">
     <h2 class="fw-bold">Simplify the way you book university facilities,<br>equipment, and services — all in one
       platform,<br>anytime, anywhere.</h2>
-    <a href="bookingcatalog.html" class="btn btn-warning mt-3 fw-bold">Start Booking</a>
+    <a href="reservation-form" class="btn btn-warning mt-3 fw-bold">Start Booking</a>
   </section>
 
   <section class="catalog-section container text-center">
@@ -198,37 +152,31 @@
     <div class="row">
       <div class="col-md-4 mb-4">
         <div class="catalog-card">
-          <img src="{{ asset('assets/public/facilities-pic2.JPG') }}" class="img-fluid rounded mb-2" alt="Facilities">
+          <img src="{{ asset('assets/facilities-pic2.JPG') }}" class="img-fluid rounded mb-2" alt="Facilities">
           <h6>Facilities</h6>
           <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
-          <a href="facilities.html" class="btn">Explore</a>
+          <a href="about-facilities" class="btn">Explore</a>
         </div>
       </div>
       <div class="col-md-4 mb-4">
         <div class="catalog-card">
-          <img src="{{ asset('assets/public/equipment-pic.jpg') }}" class="img-fluid rounded mb-2" alt="Equipment">
+          <img src="{{ asset('assets/equipment-pic.jpg') }}" class="img-fluid rounded mb-2" alt="Equipment">
           <h6>Equipment</h6>
           <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
-          <a href="equipmentpage.html" class="btn">Explore</a>
+          <a href="about-equipment" class="btn">Explore</a>
         </div>
       </div>
       <div class="col-md-4 mb-4">
         <div class="catalog-card">
-          <img src="{{ asset('assets/public/services-pic.png') }}" class="img-fluid rounded mb-2" alt="Services">
+          <img src="{{ asset('assets/services-pic.png') }}" class="img-fluid rounded mb-2" alt="Services">
           <h6>Extra Services</h6>
           <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
-          <a href="extraservicespage.html" class="btn">Explore</a>
+          <a href="about-services" class="btn">Explore</a>
         </div>
       </div>
     </div>
   </section>
-
-  <footer class="footer-container">
-    <div class="container text-center">
-      <p class="mb-0">&copy; 2025 Central Philippine University | All Rights Reserved</p>
-    </div>
-  </footer>
-
+@endsection
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
