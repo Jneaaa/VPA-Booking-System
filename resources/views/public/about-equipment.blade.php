@@ -18,14 +18,13 @@
 
 
         .hero-section {
-            background: url('{{ asset('assets/public/equipment-pic1.jpg') }}') center center / cover no-repeat;
+            background: url('{{ asset('assets/equipment-pic1.jpg') }}') center center / cover no-repeat;
             height: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-
             margin-bottom: 2rem;
             padding: 2rem;
 
@@ -96,58 +95,12 @@
 
 <body>
 <body>
-  <header class="top-header-bar">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div class="cpu-brand">
-            <img src="{{ asset('assets/public/cpu-logo.png') }}" alt="CPU Logo">
-            <div>
-                <div class="title">Central Philippine University</div>
-                <div class="subtitle">Equipment and Facility Booking Services</div>
-            </div>
-        </div>
-        <div class="admin-login">
-            <span>Are you an Admin? <a href="admin pages/adminlogin.html">Login here.</a></span>
-        </div>
-    </div>
-</header>
 
-<nav class="navbar navbar-expand-lg main-navbar">
-    <div class="container">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="index">Home</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" aria-current="page" href="#" id="navbarDropdown"
-                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Booking Catalog
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="facilities">About Facilities</a></li>
-                        <li><a class="dropdown-item active" href="equipmentpage">About Equipment</a></li>
-                        <li><a class="dropdown-item" href="extraservicespage">About Services</a></li>
-                        <li><a class="dropdown-item" href="bookingcatalog">Booking Catalog</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="mybookingpage">My Bookings</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="policies">Reservation Policies</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="feedbackpage">Rate Our Services</a>
-                </li>
-            </ul>
-            <a href="bookingpage" class="btn btn-book-now ms-lg-3">Book Now</a>
-        </div>
-    </div>
-</nav>
+@extends('layouts.app')
+
+@section('title', 'About Equipment')
+
+@section('content')
 
     <section class="hero-section">
         <h1>Equipment</h1>
@@ -161,7 +114,7 @@
         <div class="row mt-4">
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/mic.jpg') }}" class="card-img-top card-img" alt="Microphone">
+                    <img src="{{ asset('assets/mic.jpg') }}" class="card-img-top card-img" alt="Microphone">
                     <div class="card-body">
                         <h5 class="card-title">Microphone</h5>
                         <p class="card-text">Perfect for speaking engagements and presentations, ensuring clear audio.
@@ -171,7 +124,7 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/laptop.jpg') }}" class="card-img-top card-img" alt="Laptop">
+                    <img src="{{ asset('assets/laptop.jpg') }}" class="card-img-top card-img" alt="Laptop">
                     <div class="card-body">
                         <h5 class="card-title">Laptop</h5>
                         <p class="card-text">Available for academic use, research, and event hosting, fully equipped.
@@ -181,7 +134,7 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/projector.jpg') }}" class="card-img-top card-img" alt="Projector">
+                    <img src="{{ asset('assets/projector.jpg') }}" class="card-img-top card-img" alt="Projector">
                     <div class="card-body">
                         <h5 class="card-title">Projector</h5>
                         <p class="card-text">High-resolution projectors for impactful presentations and large-scale
@@ -191,7 +144,7 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/speaker.jpg') }}" class="card-img-top card-img" alt="Speaker">
+                    <img src="{{ asset('assets/speaker.jpg') }}" class="card-img-top card-img" alt="Speaker">
                     <div class="card-body">
                         <h5 class="card-title">Portable Speaker System</h5>
                         <p class="card-text">Ideal for events requiring audio amplification in various settings.</p>
@@ -200,7 +153,7 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/camera.jpg') }}" class="card-img-top card-img" alt="Camera">
+                    <img src="{{ asset('assets/camera.jpg') }}" class="card-img-top card-img" alt="Camera">
                     <div class="card-body">
                         <h5 class="card-title">Digital Camera</h5>
                         <p class="card-text">Capture high-quality photos and videos for academic projects or events.</p>
@@ -209,7 +162,7 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/whiteboard.jpg') }}" class="card-img-top card-img" alt="Whiteboard">
+                    <img src="{{ asset('assets/whiteboard.jpg') }}" class="card-img-top card-img" alt="Whiteboard">
                     <div class="card-body">
                         <h5 class="card-title">Interactive Whiteboard</h5>
                         <p class="card-text">Enhance your presentations and collaborative sessions with an interactive
@@ -237,10 +190,7 @@
             </ul>
         </nav>
     </section>
-
-    <footer>
-        <p>&copy; 2025 Central Philippine University. All rights reserved.</p>
-    </footer>
+    @endsection
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/public/equipment.js') }}"></script>

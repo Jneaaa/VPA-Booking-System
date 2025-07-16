@@ -19,7 +19,7 @@
         }
 
         .hero-section {
-            background: url('{{ asset('assets/public/image_cb5cef.jpg') }}') center center / cover no-repeat;
+            background: url('{{ asset('assets/facilities-pic2.jpg') }}') center center / cover no-repeat;
             height: 200px;
             display: flex;
             align-items: center;
@@ -92,61 +92,15 @@
 </head>
 
 <body>
-  <header class="top-header-bar">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div class="cpu-brand">
-            <img src="{{ asset('assets/public/cpu-logo.png') }}" alt="CPU Logo">
-            <div>
-                <div class="title">Central Philippine University</div>
-                <div class="subtitle">Equipment and Facility Booking Services</div>
-            </div>
-        </div>
-        <div class="admin-login">
-            <span>Are you an Admin? <a href="admin pages/adminlogin.html">Login here.</a></span>
-        </div>
-    </div>
-</header>
+@extends('layouts.app')
 
-<nav class="navbar navbar-expand-lg main-navbar">
-    <div class="container">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="index">Home</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown"
-                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Booking Catalog
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="facilities">About Facilities</a></li>
-                        <li><a class="dropdown-item" href="equipmentpage">About Equipment</a></li>
-                        <li><a class="dropdown-item" href="extraservicespage">About Services</a></li>
-                        <li><a class="dropdown-item" href="bookingcatalog">Booking Catalog</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="mybookingpage">My Bookings</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="policies">Reservation Policies</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="feedbackpage">Rate Our Services</a>
-                </li>
-            </ul>
-            <a href="bookingpage" class="btn btn-book-now ms-lg-3">Book Now</a>
-        </div>
-    </div>
-</nav>
+@section('title', 'About Facilities')
 
 
-    <section class="hero-section" style="background-image: url('{{ asset('assets/public/facilities-pic2.JPG') }}');">
+@section('content')
+
+
+    <section class="hero-section">
         <h1>Facilities</h1>
     </section>
 
@@ -156,7 +110,7 @@
         <div class="row mt-4">
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Meeting Room A">
+                    <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Meeting Room A">
                     <div class="card-body">
                         <h5 class="card-title">Meeting Room A</h5>
                         <p class="card-text">A versatile space ideal for small group meetings and discussions.</p>
@@ -165,7 +119,7 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Lecture Hall B">
+                    <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Lecture Hall B">
                     <div class="card-body">
                         <h5 class="card-title">Lecture Hall B</h5>
                         <p class="card-text">Equipped for large presentations and lectures with ample seating.</p>
@@ -174,7 +128,7 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Auditorium C">
+                    <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Auditorium C">
                     <div class="card-body">
                         <h5 class="card-title">Auditorium C</h5>
                         <p class="card-text">A grand hall perfect for ceremonies, performances, and major events.</p>
@@ -183,7 +137,7 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Gymnasium">
+                    <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Gymnasium">
                     <div class="card-body">
                         <h5 class="card-title">Gymnasium</h5>
                         <p class="card-text">Multi-purpose facility for sports, large gatherings, and exhibitions.</p>
@@ -192,7 +146,7 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Library Annex">
+                    <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Library Annex">
                     <div class="card-body">
                         <h5 class="card-title">Library Annex</h5>
                         <p class="card-text">A quiet study area or a spacious room for academic workshops.</p>
@@ -201,7 +155,7 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/public/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Computer Lab 1">
+                    <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Computer Lab 1">
                     <div class="card-body">
                         <h5 class="card-title">Computer Lab 1</h5>
                         <p class="card-text">Fully equipped with computers for classes, training, and testing.</p>
@@ -211,7 +165,7 @@
         </div>
         <div class="col-md-4 mb-4">
             <div class="card h-100">
-                <img src="{{ asset('assets/public/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Mary Thomas Computer Laboratory">
+                <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Mary Thomas Computer Laboratory">
                 <div class="card-body">
                     <h5 class="card-title">Mary Thomas Computer Laboratory</h5>
                     <p class="card-text">Fully equipped with computers for classes, training, and testing.</p>
@@ -238,12 +192,7 @@
             </ul>
         </nav>
     </section>
-
-    <footer>
-        <div class="container text-center">
-            <p class="mb-0">&copy; 2025 Central Philippine University. All rights reserved.</p>
-        </div>
-    </footer>
+@endsection
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/public/facilities.js') }}"></script>
