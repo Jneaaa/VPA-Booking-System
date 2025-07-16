@@ -101,72 +101,75 @@
 </head>
 
 <body>
-@extends('layouts.app')
+    @extends('layouts.app')
 
-@section('title', 'About Services')
+    @section('title', 'About Services')
 
 
-@section('content')
+    @section('content')
 
-    <section class="hero-section">
-        <h1>Extra Services</h1>
-    </section>
+        <section class="hero-section">
+            <h1>Extra Services</h1>
+        </section>
 
-    <section class="section-content container">
-        <h2 class="mb-3">Event Support & Services</h2>
-        <p class="mb-4">Our staff are ready to assist your event needs. We offer services like technical support,
-            security personnel,
-            and logistics assistance to make sure your event runs smoothly.</p>
-        <div class="row mt-4">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Security Personnel">
-                    <div class="card-body">
-                        <h5 class="card-title">Security Personnel</h5>
-                        <p class="card-text">Professional staff to ensure safety and manage crowd control during your
-                            event.</p>
+        <section class="section-content container">
+            <h2 class="mb-3">Event Support & Services</h2>
+            <p class="mb-4">Our staff are ready to assist your event needs. We offer services like technical support,
+                security personnel,
+                and logistics assistance to make sure your event runs smoothly.</p>
+            <div class="row mt-4">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img"
+                            alt="Security Personnel">
+                        <div class="card-body">
+                            <h5 class="card-title">Security Personnel</h5>
+                            <p class="card-text">Professional staff to ensure safety and manage crowd control during your
+                                event.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img"
+                            alt="Technical Support">
+                        <div class="card-body">
+                            <h5 class="card-title">Technical Support</h5>
+                            <p class="card-text">Get help with setting up projectors, sound systems, and other technical
+                                requirements.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img"
+                            alt="Logistics Assistance">
+                        <div class="card-body">
+                            <h5 class="card-title">Logistics Assistance</h5>
+                            <p class="card-text">Help with event setup, decor, and general coordination for smooth
+                                operations.</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Technical Support">
-                    <div class="card-body">
-                        <h5 class="card-title">Technical Support</h5>
-                        <p class="card-text">Get help with setting up projectors, sound systems, and other technical
-                            requirements.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Logistics Assistance">
-                    <div class="card-body">
-                        <h5 class="card-title">Logistics Assistance</h5>
-                        <p class="card-text">Help with event setup, decor, and general coordination for smooth
-                            operations.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4">
-            <ul class="pagination">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </section>
-@endsection
+            <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4">
+                <ul class="pagination">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </section>
+    @endsection
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/public/extraservices.js') }}"></script>
