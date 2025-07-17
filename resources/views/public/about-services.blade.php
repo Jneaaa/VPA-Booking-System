@@ -175,13 +175,9 @@
     <script src="{{ asset('js/public/extraservices.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const dropdownToggle = document.querySelectorAll('.dropdown-toggle');
-            dropdownToggle.forEach(function (toggle) {
-                toggle.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    const dropdownMenu = this.nextElementSibling;
-                    dropdownMenu.classList.toggle('show');
-                });
+            const dropdownElements = document.querySelectorAll('.dropdown-toggle');
+            dropdownElements.forEach(dropdown => {
+                new bootstrap.Dropdown(dropdown);
             });
         });
     </script>

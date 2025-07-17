@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RequisitionFormController; 
+use App\Http\Controllers\RequisitionFormController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\UserController;
@@ -55,8 +55,8 @@ Route::get('/login', function () {
 
 Route::prefix('requisition')->group(function () {
 
-    Route::post('/add-item', [RequisitionFormController::class, 'addToForm']); 
-    });
+    Route::post('/add-item', [RequisitionFormController::class, 'addToForm']);
+});
 
 // ----- User Routes ----- //
 
@@ -68,17 +68,20 @@ Route::get('/users', [UserController::class, 'index']);
 // Add requisition prefix for all requisition-related routes
 Route::prefix('requisition')->group(function () {
 
-// add/remove selected equipment or facilities
-Route::post('/remove-item', [RequisitionFormController::class, 'removeFromForm']);
-// Display fees
-Route::get('/calculate-fees', [RequisitionFormController::class, 'calculateFees']);
-// File uploads
-Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);
-// Form submission
-Route::post('/submit', [RequisitionFormController::class, 'submitRequisition']);
-// View requisition
-Route::get('/{request_id}', [RequisitionFormController::class, 'show']);
-    
+    // save user info to session
+    Route::post('/save-user-info', [RequisitionFormController::class, 'saveUserInfo']);
+    // add equipment or facilities to the requisition form
+    Route::post('/add-item', [RequisitionFormController::class, 'addToForm']);
+    // remove selected equipment or facilities
+    Route::post('/remove-item', [RequisitionFormController::class, 'removeFromForm']);
+    // Display fees
+    Route::get('/calculate-fees', [RequisitionFormController::class, 'calculateFees']);
+    // check availability
+    Route::post('/check-availability', [RequisitionFormController::class, 'checkAvailability']);
+    // File uploads
+    Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);
+    // Form submission
+    Route::post('/submit', [RequisitionFormController::class, 'submitForm']);
 });
 
 // ------ Dropdowns and Categories ------ //
@@ -101,28 +104,28 @@ Route::get('/facilities/{facility}', [FacilityController::class, 'show']);
 // ---- Protected Catalog Routes ---- //
 
 // Equipment
-    Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/equipment', [EquipmentController::class, 'index']);
     Route::post('/equipment', [EquipmentController::class, 'store']);
     Route::get('/equipment/{equipment}', [EquipmentController::class, 'show']);
     Route::put('/equipment/{equipment}', [EquipmentController::class, 'update']);
     Route::delete('/equipment/{equipment}', [EquipmentController::class, 'destroy']);
 
-// Facilities
+    // Facilities
 
     Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::get('/admin/facilities', [FacilityController::class, 'index']);
-    Route::post('/admin/facilities', [FacilityController::class, 'store']);
-    Route::put('/admin/facilities/{facility}', [FacilityController::class, 'update']);
-    Route::delete('/admin/facilities/{facility}', [FacilityController::class, 'destroy']);
-    
-// ----- Image management ----- //
+        Route::get('/admin/facilities', [FacilityController::class, 'index']);
+        Route::post('/admin/facilities', [FacilityController::class, 'store']);
+        Route::put('/admin/facilities/{facility}', [FacilityController::class, 'update']);
+        Route::delete('/admin/facilities/{facility}', [FacilityController::class, 'destroy']);
 
-    // Equipment
-    Route::post('/equipment/{equipmentId}/images/upload', [EquipmentController::class, 'uploadImage']);
-    Route::post('/equipment/{equipmentId}/images/bulk-upload', [EquipmentController::class, 'uploadMultipleImages']);
-    Route::delete('/equipment/{equipmentId}/images/{imageId}', [EquipmentController::class, 'deleteImage']);
-    Route::post('/equipment/{equipmentId}/images/reorder', [EquipmentController::class, 'reorderImages']);
+        // ----- Image management ----- //
+
+        // Equipment
+        Route::post('/equipment/{equipmentId}/images/upload', [EquipmentController::class, 'uploadImage']);
+        Route::post('/equipment/{equipmentId}/images/bulk-upload', [EquipmentController::class, 'uploadMultipleImages']);
+        Route::delete('/equipment/{equipmentId}/images/{imageId}', [EquipmentController::class, 'deleteImage']);
+        Route::post('/equipment/{equipmentId}/images/reorder', [EquipmentController::class, 'reorderImages']);
     });
 
     // Facility
@@ -130,7 +133,7 @@ Route::get('/facilities/{facility}', [FacilityController::class, 'show']);
     Route::post('/admin/facilities/{facilityId}/images/bulk', [FacilityController::class, 'uploadMultipleImages']);
     Route::delete('/admin/facilities/{facilityId}/images/{imageId}', [FacilityController::class, 'deleteImage']);
     Route::post('/admin/facilities/{facilityId}/images/reorder', [FacilityController::class, 'reorderImages']);
-    });
+});
 
 
 // --------- Admin Image Uploads --------- //
@@ -180,7 +183,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('admin')->middleware(['auth:sanctum', 'check.admin.role'])->group(function () {
-        
+
         // Equipment Routes
         Route::apiResource('equipment', EquipmentController::class);
 

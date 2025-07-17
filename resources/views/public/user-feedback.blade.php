@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}">
     <style>
         body {
-            background: url('{{ asset('assets/public/cpu-pic1.jpg') }}') center/cover no-repeat fixed;
+            background: url('{{ asset('assets/cpu-pic1.jpg') }}') center/cover no-repeat fixed;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -108,11 +108,9 @@
 </head>
 
 <body>
+    
     @extends('layouts.app')
-
     @section('title', 'User Feedback')
-
-
     @section('content')
 
         <div class="container main-content-wrapper d-flex justify-content-center align-items-center">
