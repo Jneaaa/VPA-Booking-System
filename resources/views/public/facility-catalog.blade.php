@@ -429,15 +429,14 @@
     </main>
   @endsection
 
-  <script src="{{ asset('js/public/script.js') }}"></script>
   <script>
-    // Global state management
 
+    // Global state management
     const AppState = {
       initialized: false,
       facilities: [],
       calendar: null,
-      departments: [], // Added to store departments
+      departments: [], 
       requisitionItems: (() => {
         try {
           const items = JSON.parse(localStorage.getItem("selectedItems"));
@@ -950,7 +949,7 @@
           card.innerHTML = `
           <div class="row g-0">
               <div class="col-md-3">
-                  <img src="{{ asset('assets/public/facilities-pic.jpg') }}" alt="Facilities">
+                  <img src="{{ asset('assets/facilities-pic.jpg') }}" alt="Facilities">
               </div>
               <div class="col-md-7">
                   <div class="card-body">

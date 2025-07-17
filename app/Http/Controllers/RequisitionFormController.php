@@ -50,6 +50,11 @@ class RequisitionFormController extends Controller
             'contact_number', 'organization_name', 'school_id'
         ]);
 
+        // Sanitize inputs
+        $userInfo['email'] = filter_var($userInfo['email'], FILTER_SANITIZE_EMAIL);
+        $userInfo['first_name'] = htmlspecialchars($userInfo['first_name'], ENT_QUOTES);
+        $userInfo['last_name'] = htmlspecialchars($userInfo['last_name'], ENT_QUOTES);
+
         session(['user_info' => $userInfo]);
 
         return $this->jsonResponse(true, 'User information saved successfully.', ['user_info' => $userInfo]);
@@ -178,6 +183,11 @@ class RequisitionFormController extends Controller
             return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
         }
 
+        // Validate time slot first
+        if ($request->start_date == $request->end_date && $request->start_time >= $request->end_time) {
+            return $this->jsonResponse(false, 'End time must be after start time.', [], 422);
+        }
+
         $conflictStatusIds = FormStatusCode::whereIn('status_name', ['Scheduled', 'Ongoing'])
             ->pluck('status_id')
             ->toArray();
@@ -231,6 +241,10 @@ class RequisitionFormController extends Controller
                 ['folder' => $folder, 'resource_type' => 'auto']
             );
 
+            if (!$upload->getSecurePath()) {
+                throw new \Exception('Cloudinary upload failed: No secure URL returned.');
+            }
+
             $userUpload = UserUpload::create([
                 'file_url' => $upload->getSecurePath(),
                 'cloudinary_public_id' => $upload->getPublicId(),
@@ -263,7 +277,7 @@ class RequisitionFormController extends Controller
         }
     }
 
-    // ----- Submit requisition form ----- //
+    // ----- Submit requisition form with overbooking protection ----- //
     public function submitForm(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -289,11 +303,17 @@ class RequisitionFormController extends Controller
             $tempUploads = session('temp_uploads', []);
 
             if (!$userInfo) {
-                throw new \Exception('User information not found in session. Please complete step 1.');
+                throw new \Exception('User information not found. Please complete step 1.');
             }
 
             if (empty($selectedItems)) {
-                throw new \Exception('No items selected for requisition. Please add at least one facility or equipment.');
+                throw new \Exception('Your booking cart is empty. Add items before submitting.');
+            }
+
+            // Check for conflicts again right before submission
+            $conflictCheck = $this->checkAvailability($request);
+            if (!$conflictCheck->getData()->available) {
+                throw new \Exception('Time slot no longer available. Please choose another.');
             }
 
             // Create or update user
@@ -317,7 +337,7 @@ class RequisitionFormController extends Controller
                 'tentative_fee' => session('fee_summary.total_fee', 0),
             ]);
 
-            // Process selected items
+            // Process selected items with stock validation
             foreach ($selectedItems as $item) {
                 if ($item['type'] === 'facility') {
                     RequestedFacility::create([
@@ -326,12 +346,20 @@ class RequisitionFormController extends Controller
                         'is_waived' => false,
                     ]);
                 } elseif ($item['type'] === 'equipment') {
+                    $equipment = Equipment::find($item['id']);
+                    if (!$equipment || $equipment->available_quantity < $item['quantity']) {
+                        throw new \Exception("Not enough {$equipment->name} in stock.");
+                    }
+
                     RequestedEquipment::create([
                         'request_id' => $requisitionForm->request_id,
                         'equipment_id' => $item['id'],
                         'quantity' => $item['quantity'] ?? 1,
                         'is_waived' => false,
                     ]);
+
+                    // Deduct stock
+                    $equipment->decrement('available_quantity', $item['quantity']);
                 }
             }
 
