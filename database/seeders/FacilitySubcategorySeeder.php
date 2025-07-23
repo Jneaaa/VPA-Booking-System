@@ -15,6 +15,8 @@ class FacilitySubcategorySeeder extends Seeder
             ['category_id' => 1, 'subcategory_name' => 'Event Halls'],
             ['category_id' => 1, 'subcategory_name' => 'Academic Buildings'],
             ['category_id' => 1, 'subcategory_name' => 'Worship Spaces'],
+            ['category_id' => 1, 'subcategory_name' => 'Auditoriums'],
+            ['category_id' => 1, 'subcategory_name' => 'Libraries'],
 
             // Indoor Facilities 
             ['category_id' => 2, 'subcategory_name' => 'Classrooms'],

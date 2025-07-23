@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -27,13 +26,13 @@ class AvailabilityStatusSeeder extends Seeder
                 'color_code' => '#ffc107',
             ],
             [
-                'status_name' => 'Closed',
-                'color_code' => '#6c757d',
+                'status_name' => 'Reserved',
+                'color_code' => '#007bff',
             ],
             [
                 'status_name' => 'Hidden',
                 'color_code' => '#343a40',
-            ]
+            ],
          ]);
     }
 }

@@ -23,9 +23,10 @@ class EquipmentItemFactory extends Factory
             'item_name' => $this->faker->words(2, true),
             'image_url' => 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp',
             'cloudinary_public_id' => 'oxvsxogzu9koqhctnf7s',
+            'status_id' => rand(1, 4), // Assuming condition IDs 1-3 exist
             'condition_id' => rand(1, 3), // Assuming condition IDs 1-3 exist
             'barcode_number' => $this->faker->unique()->bothify('??#########'),
-            'item_notes' => $this->faker->optional()->sentence,
+            'item_notes' => '',
             'created_by' => null, // Will be set when creating
             'updated_by' => null,
             'deleted_by' => null,

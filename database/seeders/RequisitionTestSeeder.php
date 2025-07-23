@@ -16,7 +16,6 @@ use Carbon\Carbon;
 use App\Models\FacilityEquipment;
 use App\Models\EquipmentImage;
 use App\Models\FacilityImage;
-use App\Models\RoomDetail;
 use App\Models\LookupTables\FacilitySubcategory;
 use App\Models\FacilityAmenity;
 
@@ -38,24 +37,6 @@ class RequisitionTestSeeder extends Seeder
         $detailSubcategories = FacilitySubcategory::whereIn('category_id', [2, 3]) // Indoor Facilities, Residencies
             ->pluck('subcategory_id')
             ->toArray();
-
-        // Create facilities
-        if (Facility::count() === 0) {
-            $facilities = Facility::factory()->count(10)->create();
-
-            foreach ($facilities as $facility) {
-                FacilityImage::factory()->create([
-                    'facility_id' => $facility->facility_id,
-                    'image_type' => 'Primary',
-                    'sort_order' => 0,
-                ]);
-
-                FacilityImage::factory()->count(rand(0, 2))->create([
-                    'facility_id' => $facility->facility_id,
-                    'image_type' => 'Secondary',
-                ]);
-            }
-        }
 
         // Create equipment
         if (Equipment::count() === 0) {
@@ -91,18 +72,7 @@ class RequisitionTestSeeder extends Seeder
             // Pick a facility for this requisition
             $facility = Facility::inRandomOrder()->first();
 
-            // Conditionally create room details
-            $detailId = null;
-            if (in_array($facility->subcategory_id, $detailSubcategories)) {
-                $detail = RoomDetail::factory()->create([
-                    'subcategory_id' => $facility->subcategory_id,
-                    'room_number' => $this->generateRoomNumber($facility->subcategory_id),
-                    'floor_level' => rand(1, 5),
-                    'building_name' => $this->generateBuildingName($facility->subcategory_id),
-                    'building_code' => strtoupper(fake()->lexify('??')),
-                ]);
-                $detailId = $detail->detail_id;
-            }
+           
 
             // Create requisition form with detail_id only if applicable
             $requisition = RequisitionForm::factory()->create([
@@ -112,7 +82,6 @@ class RequisitionTestSeeder extends Seeder
                 'start_date' => Carbon::today()->addDays(rand(-30, 30)),
                 'end_date' => Carbon::today()->addDays(rand(1, 7)),
                 'is_finalized' => fake()->boolean(70),
-                'detail_id' => $detailId,
             ]);
 
             // Attach facility

@@ -20,7 +20,6 @@ class Equipment extends Model
         'storage_location',
         'category_id',
         'department_id',
-        'available_quantity',
         'total_quantity',
         'internal_fee',
         'external_fee',

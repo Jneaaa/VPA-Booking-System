@@ -16,7 +16,6 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id')->index();
             $table->string('access_code', 10);
             $table->integer('num_participants');
-            $table->unsignedBigInteger('detail_id')->nullable();
             $table->unsignedTinyInteger('purpose_id')->index();
             $table->string('other_purpose', 250)->nullable();
             $table->string('additional_requests', 250)->nullable();
@@ -57,7 +56,6 @@ return new class extends Migration
 
             // Foreign Keys
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
-            $table->foreign('detail_id')->references('detail_id')->on('facility_details')->onDelete('cascade');
             $table->foreign('purpose_id')->references('purpose_id')->on('requisition_purposes')->onDelete('restrict');
             $table->foreign('status_id')->references('status_id')->on('form_status_codes')->onDelete('restrict');
             $table->foreign('finalized_by')->references('admin_id')->on('admins')->onDelete('set null');

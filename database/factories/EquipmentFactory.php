@@ -20,7 +20,6 @@ class EquipmentFactory extends Factory
             'storage_location'     => $this->faker->randomElement(['Main Room', 'AV Room', 'Warehouse', 'Room 101']),
             'category_id'          => rand(1, 3), // Match seeded categories
             'total_quantity'       => $totalQuantity,
-            'available_quantity'   => $this->faker->numberBetween(1, $totalQuantity),
             'internal_fee'         => $this->faker->randomFloat(2, 100, 1000),
             'external_fee'         => $this->faker->randomFloat(2, 100, 1000),
             'rate_type'            => $this->faker->randomElement(['Per Hour', 'Per Event']),

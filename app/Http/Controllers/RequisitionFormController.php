@@ -346,20 +346,30 @@ class RequisitionFormController extends Controller
                         'is_waived' => false,
                     ]);
                 } elseif ($item['type'] === 'equipment') {
-                    $equipment = Equipment::find($item['id']);
-                    if (!$equipment || $equipment->available_quantity < $item['quantity']) {
-                        throw new \Exception("Not enough {$equipment->name} in stock.");
+                    $equipmentItems = \App\Models\EquipmentItem::where('equipment_id', $item['id'])
+                    ->whereIn('condition_id', [1, 2, 3])
+                    ->whereNull('deleted_at')
+                    ->limit($item['quantity'] ?? 1)
+                    ->get();
+                
+
+                    if ($equipmentItems->count() < ($item['quantity'] ?? 1)) {
+                        throw new \Exception("Not enough items available for equipment ID {$item['id']}.");
                     }
 
-                    RequestedEquipment::create([
-                        'request_id' => $requisitionForm->request_id,
-                        'equipment_id' => $item['id'],
-                        'quantity' => $item['quantity'] ?? 1,
-                        'is_waived' => false,
-                    ]);
+                    foreach ($equipmentItems as $equipmentItem) {
+                        RequestedEquipment::create([
+                            'request_id' => $requisitionForm->request_id,
+                            'equipment_id' => $item['id'],
+                            'item_id' => $equipmentItem->item_id,
+                            'is_waived' => false,
+                        ]);
 
-                    // Deduct stock
-                    $equipment->decrement('available_quantity', $item['quantity']);
+                        // Mark item as rented (soft delete or update status)
+                        DB::table('equipment_items')
+                            ->where('item_id', $equipmentItem->item_id)
+                            ->update(['deleted_at' => now()]);
+                    }
                 }
             }
 
