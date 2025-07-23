@@ -2,17 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Models\FacilityDetail;
+use App\Models\RoomDetail;
 use App\Models\LookupTables\FacilityCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FacilityDetail>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\RoomDetail>
  */
-class FacilityDetailFactory extends Factory
+class RoomDetailFactory extends Factory
 {
 
-    protected $model = FacilityDetail::class;
+    protected $model = RoomDetail::class;
     /**
      * Define the model's default state.
      *

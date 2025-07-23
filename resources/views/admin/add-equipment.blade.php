@@ -334,7 +334,6 @@
                               <label for="rateType" class="form-label">Rate Type</label>
                               <select class="form-select" id="rateType" required>
                                 <option value="Hour">Per Hour</option>
-                                <option value="Show">Per Show</option>
                                 <option value="Event">Per Event</option>
                               </select>
                             </div>
@@ -858,7 +857,6 @@
                 total_quantity: document.getElementById('totalQuantity').value,
                 internal_fee: document.getElementById('internal_fee').value,
                 external_fee: document.getElementById('external_fee').value,
-                company_fee: document.getElementById('companyFee').value,
                 type_id: document.getElementById('rateType').value,
                 status_id: document.getElementById('availabilityStatus').value,
                 department_id: document.getElementById('department').value,

@@ -234,8 +234,8 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="is_indoors" class="form-label">Indoors/Outdoors *</label>
-                                    <select class="form-select" id="is_indoors" required>
+                                    <label for="location_type" class="form-label">Indoors/Outdoors *</label>
+                                    <select class="form-select" id="location_type" required>
                                         <option value="Indoors">Indoors</option>
                                         <option value="Outdoors">Outdoors</option>
                                     </select>

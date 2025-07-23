@@ -2,7 +2,7 @@
 
 namespace App\Models\LookupTables;
 
-use App\Models\FacilityDetail;
+use App\Models\RoomDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -22,9 +22,9 @@ class FacilitySubcategory extends Model
     {
         return $this->belongsTo(FacilityCategory::class, 'category_id', 'category_id');
     }
-    public function facilityDetail()
+    public function roomDetail()
     {
-        return $this->belongsTo(FacilityDetail::class, 'detail_id', 'detail_id');
+        return $this->belongsTo(RoomDetail::class, 'room_detail_id', 'room_detail_id');
     }
 
 

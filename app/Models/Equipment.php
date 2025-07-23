@@ -24,7 +24,6 @@ class Equipment extends Model
         'total_quantity',
         'internal_fee',
         'external_fee',
-        'company_fee',
         'rate_type',
         'status_id',
         'maximum_rental_hour',
