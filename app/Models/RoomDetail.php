@@ -6,7 +6,7 @@ use App\Models\LookupTables\FacilitySubcategory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class FacilityDetail extends Model
+class RoomDetail extends Model
 {
 
     protected $table = "facility_details";
@@ -16,7 +16,6 @@ class FacilityDetail extends Model
     use HasFactory;
 
     protected $fillable = [
-        'subcategory_id',
         'room_name',
         'building_name',
         'building_code',

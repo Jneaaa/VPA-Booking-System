@@ -3,9 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Facility;
-use App\Models\FacilityAmenity;
-use App\Models\FacilityDetail;
+use Illuminate\Support\Facades\DB;
 
 class FacilitySeeder extends Seeder
 {
@@ -13,37 +11,160 @@ class FacilitySeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
-{
-    // Step 1: Create facilities and store them
-    $facilities = Facility::factory()->count(10)->create();
-
-    // Step 2: Loop over each saved facility
-    foreach ($facilities as $facility) {
-        // Extra check: force save if needed
-        if (!$facility->exists || !$facility->facility_id) {
-            $facility->save();
-        }
-
-        if ($facility->category_id === 4) {
-            $detail = FacilityDetail::where('category_id', $facility->category_id)->inRandomOrder()->first();
-            if ($detail) {
-                $facility->detail_id = $detail->detail_id;
-                $facility->save();
-            }
-        }
-
-        // Final debug check
-        if (!$facility->facility_id) {
-            dump('⚠️ NULL facility ID:', $facility);
-            continue; // skip to next
-        }
-
-        // Create 1–3 amenities
-        for ($i = 0; $i < rand(1, 3); $i++) {
-            FacilityAmenity::factory()->create([
-                'facility_id' => $facility->facility_id,
-            ]);
-        }
+    {
+        DB::table('facilities')->insert([
+            [
+                'facility_name' => 'Mary Thomas Building (MT)',
+                'description' => 'Insert a descriptive facility description here.',
+                'maximum_rental_hour' => 5,
+                'category_id' => 1,
+                'subcategory_id' => 2,
+                'location_note' => 'Near gate 3',
+                'capacity' => 500,
+                'department_id' => 4,
+                'location_type' => 'Indoors',
+                'internal_fee' => 500.00,
+                'external_fee' => 650.00,
+                'rate_type' => 'Per Hour',
+                'status_id' => 1,
+                'last_booked_at' => null,
+                'created_by' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'facility_name' => 'Mary Thomas Computer Lab (MTCL)',
+                'description' => '',
+                'maximum_rental_hour' => 12,
+                'category_id' => 1,
+                'subcategory_id' => 1,
+                'location_note' => '',
+                'capacity' => null,
+                'department_id' => null,
+                'location_type' => null,
+                'internal_fee' => null,
+                'external_fee' => null,
+                'rate_type' => null,
+                'status_id' => null,
+                'last_booked_at' => null,
+                'created_by' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'facility_name' => '',
+                'description' => '',
+                'maximum_rental_hour' => null,
+                'category_id' => null,
+                'subcategory_id' => null,
+                'location_note' => '',
+                'capacity' => null,
+                'department_id' => null,
+                'location_type' => null,
+                'internal_fee' => null,
+                'external_fee' => null,
+                'rate_type' => null,
+                'status_id' => null,
+                'last_booked_at' => null,
+                'created_by' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'facility_name' => '',
+                'description' => '',
+                'maximum_rental_hour' => null,
+                'category_id' => null,
+                'subcategory_id' => null,
+                'location_note' => '',
+                'capacity' => null,
+                'department_id' => null,
+                'location_type' => null,
+                'internal_fee' => null,
+                'external_fee' => null,
+                'rate_type' => null,
+                'status_id' => null,
+                'last_booked_at' => null,
+                'created_by' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'facility_name' => '',
+                'description' => '',
+                'maximum_rental_hour' => null,
+                'category_id' => null,
+                'subcategory_id' => null,
+                'location_note' => '',
+                'capacity' => null,
+                'department_id' => null,
+                'location_type' => null,
+                'internal_fee' => null,
+                'external_fee' => null,
+                'rate_type' => null,
+                'status_id' => null,
+                'last_booked_at' => null,
+                'created_by' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'facility_name' => '',
+                'description' => '',
+                'maximum_rental_hour' => null,
+                'category_id' => null,
+                'subcategory_id' => null,
+                'location_note' => '',
+                'capacity' => null,
+                'department_id' => null,
+                'location_type' => null,
+                'internal_fee' => null,
+                'external_fee' => null,
+                'rate_type' => null,
+                'status_id' => null,
+                'last_booked_at' => null,
+                'created_by' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'facility_name' => '',
+                'description' => '',
+                'maximum_rental_hour' => null,
+                'category_id' => null,
+                'subcategory_id' => null,
+                'location_note' => '',
+                'capacity' => null,
+                'department_id' => null,
+                'location_type' => null,
+                'internal_fee' => null,
+                'external_fee' => null,
+                'rate_type' => null,
+                'status_id' => null,
+                'last_booked_at' => null,
+                'created_by' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'facility_name' => '',
+                'description' => '',
+                'maximum_rental_hour' => null,
+                'category_id' => null,
+                'subcategory_id' => null,
+                'location_note' => '',
+                'capacity' => null,
+                'department_id' => null,
+                'location_type' => null,
+                'internal_fee' => null,
+                'external_fee' => null,
+                'rate_type' => null,
+                'status_id' => null,
+                'last_booked_at' => null,
+                'created_by' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
-}
 }

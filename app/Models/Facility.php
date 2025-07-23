@@ -22,10 +22,9 @@ class Facility extends Model
         'location_note',
         'capacity',
         'department_id',
-        'is_indoors',
+        'location_type',
         'internal_fee',
         'external_fee',
-        'company_fee',
         'rate_type',
         'status_id',
         'last_booked_at',
@@ -36,7 +35,6 @@ class Facility extends Model
 
     protected $casts = [
         'last_booked_at' => 'datetime',
-        'is_indoors' => 'boolean',
     ];
 
     // Relationships

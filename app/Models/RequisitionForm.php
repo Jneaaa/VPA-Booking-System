@@ -50,7 +50,7 @@ class RequisitionForm extends Model
 
     public function detail()
     {
-        return $this->belongsTo(FacilityDetail::class, 'detail_id', 'detail_id');
+        return $this->belongsTo(RoomDetail::class, 'detail_id', 'detail_id');
     }
 
     public function purpose()

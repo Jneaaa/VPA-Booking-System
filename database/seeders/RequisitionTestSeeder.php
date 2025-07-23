@@ -16,7 +16,7 @@ use Carbon\Carbon;
 use App\Models\FacilityEquipment;
 use App\Models\EquipmentImage;
 use App\Models\FacilityImage;
-use App\Models\FacilityDetail;
+use App\Models\RoomDetail;
 use App\Models\LookupTables\FacilitySubcategory;
 use App\Models\FacilityAmenity;
 
@@ -94,7 +94,7 @@ class RequisitionTestSeeder extends Seeder
             // Conditionally create room details
             $detailId = null;
             if (in_array($facility->subcategory_id, $detailSubcategories)) {
-                $detail = FacilityDetail::factory()->create([
+                $detail = RoomDetail::factory()->create([
                     'subcategory_id' => $facility->subcategory_id,
                     'room_number' => $this->generateRoomNumber($facility->subcategory_id),
                     'floor_level' => rand(1, 5),

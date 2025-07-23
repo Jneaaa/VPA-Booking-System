@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'CPU Booking')</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <!-- Add other assets (Bootstrap, etc.) here -->
 </head>
 <body>

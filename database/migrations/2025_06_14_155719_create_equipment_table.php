@@ -14,16 +14,15 @@ return new class extends Migration
         Schema::create('equipment', function (Blueprint $table) {
             $table->id('equipment_id');
             $table->string('equipment_name', 50);
-            $table->string('description', 255)->nullable();
-            $table->string('brand', 80)->nullable();
-            $table->string('storage_location', 50);
+            $table->string('description', 255)->default('No description provided for this equipment.');
+            $table->string('brand', 80)->default('N/A');
+            $table->string('storage_location', 50)->default('No storage location specified.');
             $table->unsignedTinyInteger('category_id');
             $table->unsignedInteger('available_quantity')->default(1);
             $table->unsignedInteger('total_quantity')->default(1);
             $table->decimal('internal_fee', 10, 2);
             $table->decimal('external_fee', 10, 2);
-            $table->decimal('company_fee', 10, 2);
-            $table->enum('rate_type', ['Per Hour', 'Per Show/Event'])->default('Per Hour');
+            $table->enum('rate_type', ['Per Hour', 'Per Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');
             $table->unsignedTinyInteger('department_id');
             $table->unsignedInteger('maximum_rental_hour')->default(1);
