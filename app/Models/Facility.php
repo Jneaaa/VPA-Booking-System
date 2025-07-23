@@ -89,6 +89,18 @@ class Facility extends Model
         return $this->belongsTo(Admin::class, 'deleted_by', 'admin_id');
     }
 
+    // Relationships for building and room details
+
+    public function parentFacility()
+    {
+        return $this->belongsTo(Facility::class, 'parent_facility_id', 'facility_id');
+    }
+
+    public function childFacilities()
+    {
+        return $this->hasMany(Facility::class, 'parent_facility_id', 'facility_id');
+    }
+
     // Scopes
     public function scopeByDepartment($query, $departmentId)
     {

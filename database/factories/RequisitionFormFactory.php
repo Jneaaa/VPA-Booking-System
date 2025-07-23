@@ -29,9 +29,6 @@ class RequisitionFormFactory extends Factory
             
             'status_id' => \App\Models\FormStatusCode::inRandomOrder()->value('status_id') ?? 1,
             
-            // Room details - will be set conditionally in the seeder
-            'detail_id' => null,
-            
             // Booking schedule
             'start_date' => $this->faker->dateTimeBetween('now', '+1 week')->format('Y-m-d'),
             'end_date' => $this->faker->dateTimeBetween('+1 week', '+2 weeks')->format('Y-m-d'),

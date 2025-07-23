@@ -78,7 +78,12 @@ class FacilityController extends Controller
             'rate_type' => 'required|in:Per Hour,Per Event',
             'status_id' => 'required|exists:availability_statuses,status_id',
             'maximum_rental_hour' => 'required|integer|min:1',
-
+            'parent_facility_id' => 'nullable|exists:facilities,facility_id',
+            'room_code' => 'nullable|string|max:50',
+            'floor_level' => 'nullable|integer|min:1',
+            'building_code' => 'nullable|string|max:20',
+            'total_levels' => 'nullable|integer|min:1',
+            'total_rooms' => 'nullable|integer|min:1',
             'images' => 'sometimes|array',
             'images.*.image_url' => 'required|url|max:500',
             'images.*.description' => 'nullable|string',
@@ -106,6 +111,12 @@ class FacilityController extends Controller
             'rate_type' => $data['rate_type'],
             'status_id' => $data['status_id'],
             'maximum_rental_hour' => $data['maximum_rental_hour'],
+            'parent_facility_id' => $data['parent_facility_id'] ?? null,
+            'room_code' => $data['room_code'] ?? null,
+            'floor_level' => $data['floor_level'] ?? null,
+            'building_code' => $data['building_code'] ?? null,
+            'total_levels' => $data['total_levels'] ?? null,
+            'total_rooms' => $data['total_rooms'] ?? null,
             'created_by' => $user->admin_id
         ]);
 
@@ -151,6 +162,12 @@ class FacilityController extends Controller
             'rate_type' => 'sometimes|in:Per Hour,Per Event',
             'status_id' => 'sometimes|exists:availability_statuses,status_id',
             'maximum_rental_hour' => 'sometimes|integer|min:1',
+            'parent_facility_id' => 'nullable|exists:facilities,facility_id',
+            'room_code' => 'nullable|string|max:50',
+            'floor_level' => 'nullable|integer|min:1',
+            'building_code' => 'nullable|string|max:20',
+            'total_levels' => 'nullable|integer|min:1',
+            'total_rooms' => 'nullable|integer|min:1',
         ]);
 
         $user = auth()->user();
@@ -173,6 +190,12 @@ class FacilityController extends Controller
             'rate_type' => $data['rate_type'] ?? $facility->rate_type,
             'status_id' => $data['status_id'] ?? $facility->status_id,
             'maximum_rental_hour' => $data['maximum_rental_hour'] ?? $facility->maximum_rental_hour,
+            'parent_facility_id' => $data['parent_facility_id'] ?? $facility->parent_facility_id,
+            'room_code' => $data['room_code'] ?? $facility->room_code,
+            'floor_level' => $data['floor_level'] ?? $facility->floor_level,
+            'building_code' => $data['building_code'] ?? $facility->building_code,
+            'total_levels' => $data['total_levels'] ?? $facility->total_levels,
+            'total_rooms' => $data['total_rooms'] ?? $facility->total_rooms,
             'updated_by' => $user->admin_id,
         ]);
 
@@ -386,6 +409,12 @@ class FacilityController extends Controller
                 'color_code' => $facility->status->color_code,
             ],
             'maximum_rental_hour' => $facility->maximum_rental_hour,
+            'parent_facility_id' => $facility->parent_facility_id,
+            'room_code' => $facility->room_code,
+            'floor_level' => $facility->floor_level,
+            'building_code' => $facility->building_code,
+            'total_levels' => $facility->total_levels,
+            'total_rooms' => $facility->total_rooms,
             'images' => $facility->images,
             'created_at' => $facility->created_at,
             'updated_at' => $facility->updated_at,

@@ -15,10 +15,9 @@ return new class extends Migration
             $table->id('equipment_id');
             $table->string('equipment_name', 50);
             $table->string('description', 255)->default('No description provided for this equipment.');
-            $table->string('brand', 80)->default('N/A');
+            $table->string('brand', 80)->default('Not applicable.');
             $table->string('storage_location', 50)->default('No storage location specified.');
             $table->unsignedTinyInteger('category_id');
-            $table->unsignedInteger('available_quantity')->default(1);
             $table->unsignedInteger('total_quantity')->default(1);
             $table->decimal('internal_fee', 10, 2);
             $table->decimal('external_fee', 10, 2);

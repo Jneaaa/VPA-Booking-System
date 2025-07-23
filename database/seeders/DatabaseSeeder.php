@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
             AdminDepartmentSeeder::class,
             FacilityCategorySeeder::class,
             FacilitySubcategorySeeder::class,
+            FacilitySeeder::class,
+            FacilityImageSeeder::class,
             RequisitionPurposeSeeder::class,
             FormStatusCodeSeeder::class,
             RequisitionTestSeeder::class,

@@ -15,9 +15,17 @@ return new class extends Migration
 
             $table->id('facility_id');
             $table->unsignedBigInteger('parent_facility_id')->nullable();
-            $table->unsignedBigInteger('room_details_id')->nullable(); // for indoor type facilities: fill up room code and what floor level its in. it also includes a Subcategory FK that points to its parent subcategory where it belongs to, so this field will only show up in the UI if the correct subcategory is selected (please validate if logic is correct)
-            $table->unsignedBigInteger('building_details_id')->nullable(); // for building type facilities: fill up building code, total floor levels, and total rooms. same subcategory logic as room details.
 
+            // for rooms
+            $table->string('room_code', 50)->nullable();
+            $table->unsignedTinyInteger('floor_level')->default(1)->nullable();
+
+            // for buildings 
+            $table->string('building_code', 20)->nullable();
+            $table->unsignedTinyInteger('total_levels')->default(1)->nullable(); 
+            $table->unsignedTinyInteger('total_rooms')->default(1)->nullable();
+
+            // general details
             $table->string('facility_name', 50);
             $table->string('description', 250)->default('No description provided for this facility.');
             $table->unsignedInteger('maximum_rental_hour')->default(1);
@@ -27,10 +35,14 @@ return new class extends Migration
             $table->unsignedInteger('capacity')->default(1);
             $table->unsignedTinyInteger('department_id');
             $table->enum('location_type', ['Indoors', 'Outdoors']);
+
+            // fees and rates
             $table->decimal('internal_fee', 10, 2);
             $table->decimal('external_fee', 10, 2);
             $table->enum('rate_type', ['Per Hour', 'Per Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');
+
+            // Timestamps
             $table->timestamps();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();
@@ -39,8 +51,6 @@ return new class extends Migration
 
             // Foreign key constraints 
             $table->foreign('parent_facility_id')->references('facility_id')->on('facilities')->onDelete('cascade'); 
-            $table->foreign('building_details_id')->references('building_details_id')->on('building_details');
-            $table->foreign('room_details_id')->references('room_details_id')->on('room_details');
             $table->foreign('category_id')->references('category_id')->on('facility_categories');
             $table->foreign('subcategory_id')->references('subcategory_id')->on('facility_subcategories');
             $table->foreign('department_id')->references('department_id')->on('departments');
