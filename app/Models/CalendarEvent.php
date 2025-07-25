@@ -18,9 +18,6 @@ class CalendarEvent extends Model
         'request_id',
         'event_title',
         'eventDesc',
-        'created_by',
-        'updated_by',
-        'deleted_by',
     ];
 
     public function requisitionForms()

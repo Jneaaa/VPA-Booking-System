@@ -13,9 +13,7 @@ use App\Models\RequestedEquipment;
 use App\Models\CalendarEvent;
 use App\Models\Admin;
 use Carbon\Carbon;
-use App\Models\FacilityEquipment;
 use App\Models\EquipmentImage;
-use App\Models\FacilityImage;
 use App\Models\LookupTables\FacilitySubcategory;
 use App\Models\FacilityAmenity;
 
@@ -61,9 +59,6 @@ class RequisitionTestSeeder extends Seeder
                 ]);
             }
         }
-
-        // Create facility-equipment relationships
-        FacilityEquipment::factory()->count(20)->create();
 
         // Create requisition forms
         for ($i = 0; $i < 15; $i++) {

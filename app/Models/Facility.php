@@ -13,12 +13,17 @@ class Facility extends Model
     protected $primaryKey = 'facility_id';
 
     protected $fillable = [
+        'parent_facility_id',
         'facility_name',
         'description',
+        'room_code',
+        'floor_level',
+        'building_code',
+        'total_levels',
+        'total_rooms',
         'maximum_rental_hour',
         'category_id',
         'subcategory_id',
-        'detail_id',
         'location_note',
         'capacity',
         'department_id',
@@ -27,14 +32,6 @@ class Facility extends Model
         'external_fee',
         'rate_type',
         'status_id',
-        'last_booked_at',
-        'created_by',
-        'updated_by',
-        'deleted_by',
-    ];
-
-    protected $casts = [
-        'last_booked_at' => 'datetime',
     ];
 
     // Relationships
@@ -42,11 +39,6 @@ class Facility extends Model
     public function amenities()
     {
         return $this->hasMany(FacilityAmenity::class, 'facility_id', 'facility_id');
-    }
-
-    public function equipment()
-    {
-        return $this->hasMany(FacilityEquipment::class, 'facility_id', 'facility_id');
     }
 
     public function category()

@@ -181,16 +181,6 @@ Route::middleware('auth:sanctum')->group(function () {
         $user->load('departments'); // Ensure departments are included
         return response()->json($user);
     });
-
-    Route::prefix('admin')->middleware(['auth:sanctum', 'check.admin.role'])->group(function () {
-
-        // Equipment Routes
-        Route::apiResource('equipment', EquipmentController::class);
-
-        // Facility Routes
-        Route::apiResource('facilities', FacilityController::class);
-
-    });
 });
 
 
