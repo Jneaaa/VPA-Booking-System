@@ -26,22 +26,9 @@ class Equipment extends Model
         'rate_type',
         'status_id',
         'maximum_rental_hour',
-        'last_booked_at',
-        'created_by',
-        'updated_by',
-        'deleted_by'
-    ];
-
-    protected $casts = [
-        'last_booked_at'
     ];
 
     // Relationships
-
-    public function facilities()
-    {
-        return $this->belongsToMany(Facility::class, 'facility_equipment', 'equipment_id', 'facility_id');
-    }
 
     public function category()
     {

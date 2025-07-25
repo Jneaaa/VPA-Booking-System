@@ -19,18 +19,10 @@ class EquipmentItem extends Model
         'item_name',
         'image_url',
         'cloudinary_public_id',
+        'status_id',
         'condition_id',
         'barcode_number',
         'item_notes',
-        'created_by',
-        'updated_by',
-        'deleted_by'
-    ];
-
-    protected $dates = [
-        'created_by',
-        'updated_by',
-        'deleted_by'
     ];
 
     // Relationships
