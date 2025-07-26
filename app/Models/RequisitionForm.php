@@ -13,10 +13,8 @@ class RequisitionForm extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
-        'access_code',
         'num_participants',
         'purpose_id',
-        'other_purpose',
         'additional_requests',
         'status_id',
         'start_date',
@@ -38,8 +36,26 @@ class RequisitionForm extends Model
         'approved_fee',
         'official_receipt_no', 
         'official_receipt_url', 
-        'official_receipt_public_id'
+        'official_receipt_public_id',
+        'calendar_title',
+        'calendar_description'
     ];
+
+    protected $casts = [
+        'start_date' => 'string',
+        'end_date' => 'string',
+        'start_time' => 'string',
+        'end_time' => 'string',
+        'returned_at' => 'datetime',
+        'finalized_at' => 'datetime',
+        'closed_at' => 'datetime',
+        'date_endorsed' => 'datetime',
+        'is_late' => 'boolean',
+        'is_finalized' => 'boolean',
+        'is_closed' => 'boolean',
+        'tentative_fee' => 'decimal:2',
+        'approved_fee' => 'decimal:2',
+    ];  
 
     // Relationships
 
@@ -55,7 +71,7 @@ class RequisitionForm extends Model
 
     public function status()
     {
-        return $this->belongsTo(FormStatusCode::class, 'status_id', 'status_id');
+        return $this->belongsTo(FormStatus::class, 'status_id', 'status_id');
     }
 
     public function finalizedBy()

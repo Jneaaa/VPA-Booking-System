@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('form_status_codes', function (Blueprint $table) {
+        Schema::create('form_statuses', function (Blueprint $table) {
             $table->tinyIncrements('status_id');
             $table->string('status_name', 50)->index();
             $table->string('color_code',50);
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('form_status_codes');
+        Schema::dropIfExists('form_statuses');
     }
 };

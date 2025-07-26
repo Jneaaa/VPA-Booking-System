@@ -320,38 +320,48 @@
         <h5>Your Contact Information</h5>
         <div class="row">
         <div class="col-md-12">
+          <label class="form-label">Applicant Type</label>
           <select id="applicantType" class="form-select mb-2" aria-label="Type of Applicant">
           <option selected>Type of Applicant</option>
           <option value="Internal">Internal</option>
           <option value="External">External</option>
           </select>
         </div>
-        <div class="col-md-12">
-          <input type="text" class="form-control mb-2" placeholder="Organization Name (optional)" />
-        </div>
-        <div class="col-md-12">
-          <input type="email" class="form-control mb-2" placeholder="Email" required />
+        <div class="col-md-6">
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-control" required />
         </div>
         <div class="col-md-6">
-          <input type="text" class="form-control" placeholder="First Name" required />
-        </div>
-        <div class="col-md-6">
-          <input type="text" class="form-control" placeholder="Last Name" required />
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-control" required />
         </div>
         <div id="studentIdField" class="col-md-6">
-          <input type="text" class="form-control" placeholder="CPU Student ID" />
+          <label class="form-label">CPU Student ID</label>
+          <input type="text" class="form-control" />
         </div>
         <div class="col-md-6">
-          <input type="text" class="form-control" placeholder="Contact Number" />
+          <label class="form-label">Contact Number</label>
+          <input type="text" class="form-control" />
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-control mb-2" required />
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">Organization Name</label>
+          <input type="text" class="form-control mb-2" />
         </div>
         </div>
       </div>
       </div>
 
       <div class="col-md-6 d-flex flex-column">
-      <div class="form-section-card flex-grow-1">
+      <div class="form-section-card flex-grow-1" style="padding-bottom: 15px;">
         <div class="d-flex justify-content-between align-items-center">
         <h5>Booking Schedule</h5>
+        </div>
+        <div class="d-flex justify-content-center mt-2">
+        <i class="bi bi-calendar-check" style="font-size: 3rem; color:var(--cpu-primary);"></i>
         </div>
         <p id="selectedDateTime" class="text-muted">
         No date and time selected.
@@ -484,6 +494,10 @@
           Check Availability
         </button>
         </div>
+        <p class="text-muted mt-4" style="font-size: 0.875rem;">
+        In case of emergency, please ensure to cancel reservations at least 5 days before the scheduled date to
+        avoid complications.
+        </p>
       </div>
       </div>
     </div>
@@ -495,38 +509,63 @@
         <h5>Reservation Details</h5>
         <div class="row">
         <div class="col-md-6">
-          <input type="number" class="form-control mb-2" placeholder="No. of Participants" />
+          <label class="form-label">Number of Participants</label>
+          <input type="number" class="form-control mb-2" />
         </div>
         <div class="col-md-6">
-          <select class="form-select mb-2" aria-label="Activity/Purpose">
-          <option selected>Activity/Purpose:</option>
-          <option value="1">Meeting</option>
-          <option value="2">Workshop</option>
-          <option value="3">Event</option>
+          <label class="form-label">Activity/Purpose</label>
+          <select id="activityPurposeField" class="form-select mb-2" aria-label="Activity/Purpose">
+          <option selected disabled>Loading...</option>
           </select>
+          <script>
+          document.addEventListener('DOMContentLoaded', async function () {
+            const activityPurposeField = document.getElementById('activityPurposeField');
+            try {
+            const response = await fetch('http://127.0.0.1:8000/api/requisition-purposes');
+            const data = await response.json();
+            activityPurposeField.innerHTML = '<option selected disabled>Select Activity/Purpose</option>';
+            data.forEach(purpose => {
+              const option = document.createElement('option');
+              option.value = purpose.id; // Assuming the API returns an 'id' field
+              option.textContent = purpose.purpose_name;
+              activityPurposeField.appendChild(option);
+            });
+            } catch (error) {
+            console.error('Error fetching purposes:', error);
+            activityPurposeField.innerHTML = '<option disabled>Error loading purposes</option>';
+            }
+          });
+          </script>
         </div>
         <div class="col-md-6">
-          <textarea class="form-control mb-2" rows="2"
-          placeholder="Write a brief description of the purpose of your requisition."></textarea>
-        </div>
-        <div class="col-md-6 mt-0">
-          <textarea class="form-control mb-2" rows="2" placeholder="Other Purpose"></textarea>
+          <label class="form-label">Endorser Name</label>
+          <input type="text" class="form-control" />
         </div>
         <div class="col-md-6">
-          <label class="form-label mt-3">Please attach formal letter.</label>
+          <label class="form-label">Date Endorsed</label>
+          <input type="date" class="form-control mb-2" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Additional Requests</label>
+          <textarea class="form-control mb-2" rows="3"
+          placeholder="Write a brief description of any additional requests you may have."></textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label mt-1">Attach Formal Letter</label>
           <div class="position-relative">
-          <input type="file" class="form-control mb-3" id="attachLetter"
+          <input type="file" class="form-control mb-1" id="attachLetter"
             onchange="toggleRemoveButton('attachLetter', 'removeAttachLetterBtn')" />
-          <button type="butt.on" id="removeAttachLetterBtn"
+          <button type="button" id="removeAttachLetterBtn"
             class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 d-none"
             style="color: black; background: none; border: none"
             onclick="removeFile('attachLetter', 'removeAttachLetterBtn')">
             x
           </button>
           </div>
-        </div>
-        <div class="col-md-6">
-          <textarea class="form-control mb-2" rows="3" placeholder="Additional Requests"></textarea>
+          <small class="text-muted" style="margin-top: -5px;">
+          This file is required to explain the requisition's intent and serves as a formal request to the Vice
+          President of Administration.
+          </small>
         </div>
         </div>
       </div>
@@ -587,387 +626,451 @@
       </button>
     </div>
     </div>
-
   @endsection
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    function togglePopup(id) {
-      const popup = document.getElementById(id);
-      const overlay = document.getElementById("overlay");
-      popup.classList.toggle("show");
-      overlay.classList.toggle("show");
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-      $("#miniCalendar")
-        .datepicker({
-          format: "mm/dd/yyyy",
-          todayHighlight: true,
-          weekStart: 0, // Sunday
-          autoclose: true,
-        })
-        .on("changeDate", function (e) {
-          console.log("Selected date:", e.date);
-        });
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-      const selectedDateTime = document.getElementById("selectedDateTime");
-      const startDateField = document.getElementById("startDateField");
-      const endDateField = document.getElementById("endDateField");
-      const startTimeField = document.getElementById("startTimeField");
-      const endTimeField = document.getElementById("endTimeField");
-      const clearSelectionBtn = document.getElementById("clearSelectionBtn");
-
-      function formatDateToLong(dateString) {
-        const options = { year: "numeric", month: "long", day: "numeric" };
-        const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", options);
-      }
-
-      function updateSelectedDateTime() {
-        const startDate = startDateField.value;
-        const endDate = endDateField.value;
-        const startTime = startTimeField.value;
-        const endTime = endTimeField.value;
-        if (startDate && endDate && startTime && endTime) {
-          const formattedStartDate = formatDateToLong(startDate);
-          const formattedEndDate = formatDateToLong(endDate);
-          selectedDateTime.textContent = `Selected: ${formattedStartDate} ${startTime} to ${formattedEndDate} ${endTime}`;
-        } else {
-          selectedDateTime.textContent = "No date and time selected.";
+      // Global helper functions
+      function togglePopup(id) {
+        const popup = document.getElementById(id);
+        const overlay = document.getElementById("overlay");
+        if (popup && overlay) {
+          popup.classList.toggle("show");
+          overlay.classList.toggle("show");
         }
       }
 
-      startDateField.addEventListener("change", updateSelectedDateTime);
-      endDateField.addEventListener("change", updateSelectedDateTime);
-      startTimeField.addEventListener("change", updateSelectedDateTime);
-      endTimeField.addEventListener("change", updateSelectedDateTime);
-
-      clearSelectionBtn.addEventListener("click", function () {
-        startDateField.value = "";
-        endDateField.value = "";
-        startTimeField.value = "";
-        endTimeField.value = "";
-        updateSelectedDateTime();
-      });
-
-      const toggleReservationBtn = document.getElementById(
-        "toggleReservationBtn"
-      );
-      const reservationContent =
-        document.getElementById("reservationContent");
-
-      toggleReservationBtn.addEventListener("click", function () {
-        if (
-          reservationContent.style.maxHeight === "0px" ||
-          !reservationContent.style.maxHeight
-        ) {
-          reservationContent.style.maxHeight =
-            reservationContent.scrollHeight + "px";
-          reservationContent.style.opacity = "1";
-          toggleReservationBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
-        } else {
-          reservationContent.style.maxHeight = "0px";
-          reservationContent.style.opacity = "0";
-          toggleReservationBtn.innerHTML =
-            '<i class="bi bi-chevron-down"></i>';
-        }
-      });
-
-      // Initialize max-height for smooth animation
-      reservationContent.style.maxHeight =
-        reservationContent.scrollHeight + "px";
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-      const applicantType = document.getElementById("applicantType");
-      const studentIdField = document.getElementById("studentIdField");
-
-      applicantType.addEventListener("change", function () {
-        if (applicantType.value === "External") {
-          studentIdField.style.display = "none";
-        } else {
-          studentIdField.style.display = "block";
-        }
-      });
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-      const facilityList = document.getElementById("facilityList");
-      const equipmentList = document.getElementById("equipmentList");
-      const submitButton = document.querySelector("button[type='submit']");
-
-      function saveSelectionsToLocalStorage() {
-        const selectedFacilities = Array.from(
-          facilityList.querySelectorAll(".facility-card")
-        ).map((card) => card.querySelector("h6").textContent);
-        const selectedEquipment = Array.from(
-          equipmentList.querySelectorAll(".equipment-card")
-        ).map((card) => card.querySelector("h6").textContent);
-
-        localStorage.setItem(
-          "selectedFacilities",
-          JSON.stringify(selectedFacilities)
-        );
-        localStorage.setItem(
-          "selectedEquipment",
-          JSON.stringify(selectedEquipment)
-        );
-
-        // Trigger storage event for other pages
-        const event = new Event("storage");
-        window.dispatchEvent(event);
-      }
-
-      function updateEmptyMessage(list, message) {
-        // Check if there are any cards in the container
-        const hasCards = list.querySelector(
-          ".facility-card, .equipment-card"
-        );
-
-        // Find or create the empty message element
-        let emptyMessage = list.querySelector(".empty-message");
-
-        if (!hasCards) {
-          // If no cards and no message exists, create one
-          if (!emptyMessage) {
-            emptyMessage = document.createElement("p");
-            emptyMessage.className = "text-muted empty-message";
-            emptyMessage.textContent = message;
-            list.appendChild(emptyMessage);
-          } else {
-            // If message exists, make sure it's visible
-            emptyMessage.style.display = "block";
+      function removeFile(inputId, buttonId) {
+        const inputField = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        if (inputField) {
+          inputField.value = "";
+          if (button) {
+            button.classList.add("d-none");
           }
-        } else {
-          // If there are cards, hide the message if it exists
-          if (emptyMessage) {
+        }
+      }
+
+      function toggleRemoveButton(inputId, buttonId) {
+        const inputField = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        if (inputField && button) {
+          if (inputField.value) {
+            button.classList.remove("d-none");
+          } else {
+            button.classList.add("d-none");
+          }
+        }
+      }
+
+      function adjustEndTime() {
+        const startTimeField = document.getElementById("startTimeField");
+        const endTimeField = document.getElementById("endTimeField");
+
+        if (startTimeField && endTimeField) {
+          const startTimeIndex = startTimeField.selectedIndex;
+          if (startTimeIndex !== -1) {
+            endTimeField.selectedIndex = Math.min(
+              startTimeIndex + 2,
+              endTimeField.options.length - 1
+            );
+          }
+        }
+      }
+
+      // Main DOMContentLoaded handler
+      document.addEventListener("DOMContentLoaded", function() {
+        // Initialize calendar functionality (removed jQuery version)
+        const miniCalendar = document.getElementById("miniCalendar");
+        if (miniCalendar) {
+          // You would need to initialize a vanilla JS datepicker here
+          // or remove this if not needed
+        }
+
+        // Date/time selection handling
+        const selectedDateTime = document.getElementById("selectedDateTime");
+        const startDateField = document.getElementById("startDateField");
+        const endDateField = document.getElementById("endDateField");
+        const startTimeField = document.getElementById("startTimeField");
+        const endTimeField = document.getElementById("endTimeField");
+        const clearSelectionBtn = document.getElementById("clearSelectionBtn");
+
+        function formatDateToLong(dateString) {
+          const options = { year: "numeric", month: "long", day: "numeric" };
+          const date = new Date(dateString);
+          return date.toLocaleDateString("en-US", options);
+        }
+
+        function updateSelectedDateTime() {
+          if (selectedDateTime && startDateField && endDateField && startTimeField && endTimeField) {
+            const startDate = startDateField.value;
+            const endDate = endDateField.value;
+            const startTime = startTimeField.value;
+            const endTime = endTimeField.value;
+            if (startDate && endDate && startTime && endTime) {
+              const formattedStartDate = formatDateToLong(startDate);
+              const formattedEndDate = formatDateToLong(endDate);
+              selectedDateTime.textContent = `Selected: ${formattedStartDate} ${startTime} to ${formattedEndDate} ${endTime}`;
+            } else {
+              selectedDateTime.textContent = "No date and time selected.";
+            }
+          }
+        }
+
+        if (startDateField) startDateField.addEventListener("change", updateSelectedDateTime);
+        if (endDateField) endDateField.addEventListener("change", updateSelectedDateTime);
+        if (startTimeField) startTimeField.addEventListener("change", updateSelectedDateTime);
+        if (endTimeField) endTimeField.addEventListener("change", updateSelectedDateTime);
+
+        if (clearSelectionBtn) {
+          clearSelectionBtn.addEventListener("click", function() {
+            if (startDateField) startDateField.value = "";
+            if (endDateField) endDateField.value = "";
+            if (startTimeField) startTimeField.value = "12:00 AM";
+            if (endTimeField) endTimeField.value = "12:00 AM";
+            updateSelectedDateTime();
+          });
+        }
+
+        // Toggle reservation content
+        const toggleReservationBtn = document.getElementById("toggleReservationBtn");
+        const reservationContent = document.getElementById("reservationContent");
+
+        if (toggleReservationBtn && reservationContent) {
+          toggleReservationBtn.addEventListener("click", function() {
+            if (reservationContent.style.maxHeight === "0px" || !reservationContent.style.maxHeight) {
+              reservationContent.style.maxHeight = reservationContent.scrollHeight + "px";
+              reservationContent.style.opacity = "1";
+              toggleReservationBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
+            } else {
+              reservationContent.style.maxHeight = "0px";
+              reservationContent.style.opacity = "0";
+              toggleReservationBtn.innerHTML = '<i class="bi bi-chevron-down"></i>';
+            }
+          });
+          // Initialize max-height
+          reservationContent.style.maxHeight = reservationContent.scrollHeight + "px";
+        }
+
+        // Applicant type handling
+        const applicantType = document.getElementById("applicantType");
+        const studentIdField = document.getElementById("studentIdField");
+
+        if (applicantType && studentIdField) {
+          applicantType.addEventListener("change", function() {
+            studentIdField.style.display = this.value === "External" ? "none" : "block";
+          });
+        }
+
+        // Facility and equipment list handling
+        const facilityList = document.getElementById("facilityList");
+        const equipmentList = document.getElementById("equipmentList");
+        const submitButton = document.getElementById("submitFormBtn");
+
+        function saveSelectionsToLocalStorage() {
+          if (!facilityList || !equipmentList) return;
+
+          const selectedFacilities = Array.from(
+            facilityList.querySelectorAll(".facility-card")
+          ).map((card) => card.querySelector("h6")?.textContent || "");
+          
+          const selectedEquipment = Array.from(
+            equipmentList.querySelectorAll(".equipment-card")
+          ).map((card) => card.querySelector("h6")?.textContent || "");
+
+          localStorage.setItem(
+            "selectedFacilities",
+            JSON.stringify(selectedFacilities)
+          );
+          localStorage.setItem(
+            "selectedEquipment",
+            JSON.stringify(selectedEquipment)
+          );
+
+          window.dispatchEvent(new Event("storage"));
+        }
+
+        function updateEmptyMessage(list, message) {
+          if (!list) return;
+
+          const hasCards = list.querySelector(".facility-card, .equipment-card");
+          let emptyMessage = list.querySelector(".empty-message");
+
+          if (!hasCards) {
+            if (!emptyMessage) {
+              emptyMessage = document.createElement("p");
+              emptyMessage.className = "text-muted empty-message";
+              emptyMessage.textContent = message;
+              list.appendChild(emptyMessage);
+            } else {
+              emptyMessage.style.display = "block";
+            }
+          } else if (emptyMessage) {
             emptyMessage.style.display = "none";
           }
         }
-      }
 
-      function toggleSubmitButton() {
-        const hasFacilities = facilityList.querySelector(".facility-card");
-        const hasEquipment = equipmentList.querySelector(".equipment-card");
-        submitButton.disabled = !(hasFacilities || hasEquipment);
-      }
-
-      facilityList.addEventListener("click", function (event) {
-
-        if (event.target.closest(".btn-outline-danger")) {
-          const card = event.target.closest(".facility-card");
-          const roomSetupField = card.nextElementSibling; // Assume room setup field is directly after the card
-          if (
-            roomSetupField &&
-            roomSetupField.classList.contains("attach-room-setup")
-          ) {
-            roomSetupField.remove();
-          }
-          card.remove();
-          updateRoomSetupVisibility();
-          updateEmptyMessage(facilityList, "No facility added yet.");
-          toggleSubmitButton();
-          saveSelectionsToLocalStorage();
+        function toggleSubmitButton() {
+          if (!submitButton || !facilityList || !equipmentList) return;
+          
+          const hasFacilities = facilityList.querySelector(".facility-card");
+          const hasEquipment = equipmentList.querySelector(".equipment-card");
+          submitButton.disabled = !(hasFacilities || hasEquipment);
         }
-      });
 
-      equipmentList.addEventListener("click", function (event) {
-        if (event.target.closest(".btn-outline-danger")) {
-          const card = event.target.closest(".equipment-card");
-          card.remove();
-          updateEmptyMessage(equipmentList, "No equipment added yet.");
-          toggleSubmitButton();
-          saveSelectionsToLocalStorage();
-        }
-      });
-
-      function updateRoomSetupVisibility() {
-        const facilityCards = facilityList.querySelectorAll(".facility-card");
-        const attachRoomSetupFields =
-          facilityList.querySelectorAll(".attach-room-setup");
-
-        // Ensure each facility card has a corresponding room setup field
-        facilityCards.forEach((card, index) => {
-          if (attachRoomSetupFields[index]) {
-            attachRoomSetupFields[index].style.display = "block";
-          }
-        });
-
-        // Hide extra room setup fields if no corresponding facility card exists
-        for (
-          let i = facilityCards.length;
-          i < attachRoomSetupFields.length;
-          i++
-        ) {
-          attachRoomSetupFields[i].style.display = "none";
-        }
-      }
-
-      // Initialize empty messages and submit button state
-      updateEmptyMessage(facilityList, "No facility added yet.");
-      updateEmptyMessage(equipmentList, "No equipment added yet.");
-      toggleSubmitButton();
-      updateRoomSetupVisibility();
-      saveSelectionsToLocalStorage();
-    });
-
-    function removeFile(inputId, buttonId) {
-      const inputField = document.getElementById(inputId);
-      const button = document.getElementById(buttonId);
-      if (inputField) {
-        inputField.value = ""; // Clear the file input
-        if (button) {
-          button.classList.add("d-none"); // Hide the 'x' button
-        }
-      }
-    }
-
-    function toggleRemoveButton(inputId, buttonId) {
-      const inputField = document.getElementById(inputId);
-      const button = document.getElementById(buttonId);
-      if (inputField && button) {
-        if (inputField.value) {
-          button.classList.remove("d-none"); // Show the 'x' button
-        } else {
-          button.classList.add("d-none"); // Hide the 'x' button
-        }
-      }
-    }
-
-    function adjustEndTime() {
-      const startTimeField = document.getElementById("startTimeField");
-      const endTimeField = document.getElementById("endTimeField");
-
-      if (startTimeField && endTimeField) {
-        const startTimeIndex = startTimeField.selectedIndex;
-        if (startTimeIndex !== -1) {
-          endTimeField.selectedIndex = Math.min(
-            startTimeIndex + 2,
-            endTimeField.options.length - 1
-          ); // Ensure at least 1 hour gap
-        }
-      }
-    }
-
-    document
-      .getElementById("submitFormBtn")
-      .addEventListener("click", async (e) => {
-        e.preventDefault();
-        const facilities = Array.from(
-          document.querySelectorAll("#facilityList .facility-card")
-        ).map((card) => ({
-          facility_id: card.querySelector("h6").textContent, // Replace with actual facility ID
-          type: "facility",
-        }));
-        const equipment = Array.from(
-          document.querySelectorAll("#equipmentList .equipment-card")
-        ).map((card) => ({
-          facility_id: card.querySelector("h6").textContent, // Replace with actual equipment ID
-          type: "equipment",
-        }));
-
-        const data = [...facilities, ...equipment];
-
-        try {
-          await fetch("http://127.0.0.1:8000/api/requisition/add-item", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
+        if (facilityList) {
+          facilityList.addEventListener("click", function(event) {
+            if (event.target.closest(".btn-outline-danger")) {
+              const card = event.target.closest(".facility-card");
+              if (card) {
+                const roomSetupField = card.nextElementSibling;
+                if (roomSetupField && roomSetupField.classList.contains("attach-room-setup")) {
+                  roomSetupField.remove();
+                }
+                card.remove();
+                updateEmptyMessage(facilityList, "No facility added yet.");
+                toggleSubmitButton();
+                saveSelectionsToLocalStorage();
+              }
+            }
           });
-          alert("Form submitted successfully!");
-        } catch (error) {
-          console.error("Error:", error);
         }
-      });
 
-    // Listen for storage events to handle updates from the booking catalog
-    window.addEventListener("storage", async () => {
-      const selectedFacilities =
-        JSON.parse(localStorage.getItem("selectedFacilities")) || [];
-      const selectedEquipment =
-        JSON.parse(localStorage.getItem("selectedEquipment")) || [];
+        if (equipmentList) {
+          equipmentList.addEventListener("click", function(event) {
+            if (event.target.closest(".btn-outline-danger")) {
+              const card = event.target.closest(".equipment-card");
+              if (card) {
+                card.remove();
+                updateEmptyMessage(equipmentList, "No equipment added yet.");
+                toggleSubmitButton();
+                saveSelectionsToLocalStorage();
+              }
+            }
+          });
+        }
 
-      const facilityList = document.getElementById("facilityList");
-      const equipmentList = document.getElementById("equipmentList");
+        // Initialize lists
+        updateEmptyMessage(facilityList, "No facility added yet.");
+        updateEmptyMessage(equipmentList, "No equipment added yet.");
+        toggleSubmitButton();
 
-      // Clear existing items
-      facilityList.innerHTML = "";
-      equipmentList.innerHTML = "";
+        // Form submission
+        if (submitButton) {
+          submitButton.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const facilities = Array.from(
+              document.querySelectorAll("#facilityList .facility-card")
+            ).map((card) => ({
+              facility_id: card.querySelector("h6")?.textContent || "",
+              type: "facility",
+            }));
+            
+            const equipment = Array.from(
+              document.querySelectorAll("#equipmentList .equipment-card")
+            ).map((card) => ({
+              facility_id: card.querySelector("h6")?.textContent || "",
+              type: "equipment",
+            }));
 
-      // Fetch all facilities and equipment data from the API
-      let facilitiesData = [];
-      try {
-        const response = await fetch("http://127.0.0.1:8000/api/facilities");
-        const data = await response.json();
-        facilitiesData = data.data || [];
-      } catch (error) {
-        console.error("Failed to fetch facilities:", error);
-      }
+            const data = [...facilities, ...equipment];
 
-      // Add facilities to the Requested Facilities container
-      selectedFacilities.forEach((facilityId) => {
-        const facility = facilitiesData.find(
-          (f) => f.facility_id === parseInt(facilityId)
-        );
-        if (facility) {
-          const facilityCard = document.createElement("div");
-          facilityCard.className = "facility-card";
-          facilityCard.innerHTML = `
-              <button class="btn btn-outline-danger btn-sm">
-                <i class="bi bi-trash"></i>
-              </button>
-              <div class="facility-details">
-                <h6 class="mb-1">${facility.facility_name}</h6>
-                <p class="text-muted mb-1">${facility.description || "No description available."
-            }</p>
-              </div>
+            try {
+              const response = await fetch("http://127.0.0.1:8000/api/requisition/add-item", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+              });
+              
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              
+              alert("Form submitted successfully!");
+            } catch (error) {
+              console.error("Error:", error);
+              alert("Error submitting form: " + error.message);
+            }
+          });
+        }
+
+        // Check availability button
+        const checkAvailabilityBtn = document.getElementById("checkAvailabilityBtn");
+        const availabilityResult = document.createElement("span");
+        availabilityResult.id = "availabilityResult";
+        availabilityResult.style.marginLeft = "1px"; // Reduced margin to lessen spacing
+        availabilityResult.style.fontWeight = "bold";
+        checkAvailabilityBtn.parentNode.appendChild(availabilityResult);
+
+        if (checkAvailabilityBtn) {
+          checkAvailabilityBtn.addEventListener("click", async function() {
+            const button = this;
+            const startDate = document.getElementById("startDateField")?.value;
+            const endDate = document.getElementById("endDateField")?.value;
+            const startTime = document.getElementById("startTimeField")?.value;
+            const endTime = document.getElementById("endTimeField")?.value;
+
+            if (!startDate || !endDate || !startTime || !endTime) {
+              alert("Please select a complete schedule before checking availability.");
+              return;
+            }
+
+            // Save original button content
+            const originalButtonContent = button.innerHTML;
+
+            // Show loading state
+            button.innerHTML = `
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Checking...
             `;
-          facilityList.appendChild(facilityCard);
+            button.disabled = true;
+            availabilityResult.innerHTML = ""; // Clear previous result
+
+            try {
+              // Convert 12-hour time to 24-hour format
+              function convertTo24Hour(time12h) {
+                const [time, modifier] = time12h.split(' ');
+                let [hours, minutes] = time.split(':');
+                if (hours === '12') hours = '00';
+                if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
+                return `${hours.padStart(2, '0')}:${minutes}`;
+              }
+
+              const startTime24 = convertTo24Hour(startTime);
+              const endTime24 = convertTo24Hour(endTime);
+
+              const selectedStart = new Date(`${startDate}T${startTime24}`);
+              const selectedEnd = new Date(`${endDate}T${endTime24}`);
+
+              if (selectedStart >= selectedEnd) {
+                throw new Error("End date/time must be after start date/time");
+              }
+
+              const response = await fetch("http://127.0.0.1:8000/api/active-schedules");
+              if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+              const scheduleData = await response.json();
+              let isConflict = false;
+              const schedules = Array.isArray(scheduleData) ? scheduleData : [scheduleData];
+
+              schedules.forEach(schedule => {
+                const scheduleStart = new Date(`${schedule.start_date}T${schedule.start_time}`);
+                const scheduleEnd = new Date(`${schedule.end_date}T${schedule.end_time}`);
+                if (
+                  (selectedStart >= scheduleStart && selectedStart < scheduleEnd) ||
+                  (selectedEnd > scheduleStart && selectedEnd <= scheduleEnd) ||
+                  (selectedStart <= scheduleStart && selectedEnd >= scheduleEnd)
+                ) {
+                  isConflict = true;
+                }
+              });
+
+              if (isConflict) {
+                availabilityResult.innerHTML = `
+                  <i class="bi bi-x-circle-fill text-danger" style="font-size: 1.5rem;"></i>
+                `; // Red filled circle with "X"
+              } else {
+                availabilityResult.innerHTML = `
+                  <i class="bi bi-check-circle-fill text-success" style="font-size: 1.5rem;"></i>
+                `; // Green filled circle with checkmark
+              }
+            } catch (error) {
+              console.error("Error checking availability:", error);
+              availabilityResult.innerHTML = `
+                <i class="bi bi-exclamation-circle-fill text-warning" style="font-size: 1.5rem;"></i>
+              `; // Yellow filled circle with exclamation mark for errors
+            } finally {
+              button.disabled = false;
+              button.innerHTML = originalButtonContent;
+            }
+          });
         }
-      });
 
-      // Add equipment to the Requested Equipment container
-      selectedEquipment.forEach((equipmentId) => {
-        const equipment = facilitiesData.find(
-          (e) => e.facility_id === parseInt(equipmentId)
-        ); // Replace with actual equipment API if available
-        if (equipment) {
-          const equipmentCard = document.createElement("div");
-          equipmentCard.className = "equipment-card";
-          equipmentCard.innerHTML = `
-              <button class="btn btn-outline-danger btn-sm">
-                <i class="bi bi-trash"></i>
-              </button>
-              <div class="equipment-details">
-                <h6 class="mb-1">${equipment.facility_name}</h6>
-                <p class="text-muted mb-1">${equipment.description || "No description available."
-            }</p>
-              </div>
-            `;
-          equipmentList.appendChild(equipmentCard);
-        }
-      });
-    });
+        // Storage event handling for facility/equipment lists
+        window.addEventListener("storage", async () => {
+          const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities")) || [];
+          const selectedEquipment = JSON.parse(localStorage.getItem("selectedEquipment")) || [];
 
-    // Trigger storage event manually on page load to populate containers
-    window.dispatchEvent(new Event("storage"));
+          const facilityList = document.getElementById("facilityList");
+          const equipmentList = document.getElementById("equipmentList");
 
-    document.addEventListener('DOMContentLoaded', function () {
-      const dropdownToggle = document.querySelectorAll('.dropdown-toggle');
-      dropdownToggle.forEach(function (toggle) {
-        toggle.addEventListener('click', function (event) {
-          event.preventDefault();
-          const dropdownMenu = this.nextElementSibling;
-          dropdownMenu.classList.toggle('show');
+          if (!facilityList || !equipmentList) return;
+
+          // Clear existing items
+          facilityList.innerHTML = "";
+          equipmentList.innerHTML = "";
+
+          // Fetch all facilities data from the API
+          let facilitiesData = [];
+          try {
+            const response = await fetch("http://127.0.0.1:8000/api/facilities");
+            const data = await response.json();
+            facilitiesData = data.data || [];
+          } catch (error) {
+            console.error("Failed to fetch facilities:", error);
+          }
+
+          // Add facilities to the container
+          selectedFacilities.forEach((facilityId) => {
+            const facility = facilitiesData.find(
+              (f) => f.facility_id === parseInt(facilityId)
+            );
+            if (facility) {
+              const facilityCard = document.createElement("div");
+              facilityCard.className = "facility-card";
+              facilityCard.innerHTML = `
+                <button class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-trash"></i>
+                </button>
+                <div class="facility-details">
+                  <h6 class="mb-1">${facility.facility_name}</h6>
+                  <p class="text-muted mb-1">${facility.description || "No description available."}</p>
+                </div>
+              `;
+              facilityList.appendChild(facilityCard);
+            }
+          });
+
+          // Add equipment to the container
+          selectedEquipment.forEach((equipmentId) => {
+            const equipment = facilitiesData.find(
+              (e) => e.facility_id === parseInt(equipmentId)
+            );
+            if (equipment) {
+              const equipmentCard = document.createElement("div");
+              equipmentCard.className = "equipment-card";
+              equipmentCard.innerHTML = `
+                <button class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-trash"></i>
+                </button>
+                <div class="equipment-details">
+                  <h6 class="mb-1">${equipment.facility_name}</h6>
+                  <p class="text-muted mb-1">${equipment.description || "No description available."}</p>
+                </div>
+              `;
+              equipmentList.appendChild(equipmentCard);
+            }
+          });
+
+          toggleSubmitButton();
+        });
+
+        // Trigger initial storage event
+        window.dispatchEvent(new Event("storage"));
+
+        // Dropdown toggle handling
+        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+        dropdownToggles.forEach(function(toggle) {
+          toggle.addEventListener('click', function(event) {
+            event.preventDefault();
+            const dropdownMenu = this.nextElementSibling;
+            if (dropdownMenu) {
+              dropdownMenu.classList.toggle('show');
+            }
+          });
         });
       });
-    });
-  </script>
+    </script>
 </body>
-
 </html>

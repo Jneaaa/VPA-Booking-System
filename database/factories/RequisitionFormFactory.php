@@ -14,6 +14,11 @@ class RequisitionFormFactory extends Factory
     {
         // Get a random facility subcategory that requires details
         $detailSubcategories = [4,5,6,7,8,9]; // IDs for subcategories that need details
+
+        $startDate = $this->faker->dateTimeBetween('now', '+1 week');
+        $endDate = $this->faker->dateTimeBetween($startDate, '+2 weeks');
+        $startTime = $this->faker->time('H:i'); // Exclude seconds
+        $endTime = $this->faker->time('H:i', strtotime($startTime) + 3600); // Exclude seconds
         
         return [
             'user_id' => \App\Models\User::factory(),
@@ -21,19 +26,16 @@ class RequisitionFormFactory extends Factory
             'num_participants' => $this->faker->numberBetween(5, 100),
             'purpose_id' => \App\Models\RequisitionPurpose::inRandomOrder()->value('purpose_id') ?? 1,
             
-            // Other purpose with 30% chance
-            'other_purpose' => $this->faker->optional(0.3, null)->passthrough('Insert another purpose explanation here.'),
-            
             // Additional requests with 50% chance
             'additional_requests' => $this->faker->optional(0.5)->sentence(),
             
-            'status_id' => \App\Models\FormStatusCode::inRandomOrder()->value('status_id') ?? 1,
+            'status_id' => \App\Models\FormStatus::inRandomOrder()->value('status_id') ?? 1,
             
             // Booking schedule
-            'start_date' => $this->faker->dateTimeBetween('now', '+1 week')->format('Y-m-d'),
-            'end_date' => $this->faker->dateTimeBetween('+1 week', '+2 weeks')->format('Y-m-d'),
-            'start_time' => $this->faker->time('H:i:s'),
-            'end_time' => $this->faker->time('H:i:s'),
+            'start_date' => $startDate->format('Y-m-d'),
+            'end_date' => $endDate->format('Y-m-d'),
+            'start_time' => $startTime,
+            'end_time' => $endTime,
             
             // Late returns
             'is_late' => false,
