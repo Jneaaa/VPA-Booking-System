@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             FacilitySeeder::class,
             FacilityImageSeeder::class,
             RequisitionPurposeSeeder::class,
-            FormStatusCodeSeeder::class,
+            FormStatusSeeder::class,
             RequisitionTestSeeder::class,
             
             // Add other seeders here if needed

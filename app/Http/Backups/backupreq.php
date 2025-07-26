@@ -14,7 +14,7 @@ use App\Models\Facility;
 use App\Models\Equipment;
 use App\Models\User;
 use App\Models\UserUpload;
-use App\Models\FormStatusCode;
+use App\Models\FormStatus;
 
 
 class backupreq extends Controller
@@ -207,7 +207,7 @@ public function saveUserInfo(Request $request)
         ]);
 
         // Get active status IDs (Scheduled=4, Ongoing=5)
-        $conflictStatusIds = FormStatusCode::whereIn('status_name', ['Scheduled', 'Ongoing'])
+        $conflictStatusIds = FormStatus::whereIn('status_name', ['Scheduled', 'Ongoing'])
             ->pluck('status_id')
             ->toArray();
 
@@ -349,7 +349,7 @@ public function saveUserInfo(Request $request)
             'end_date' => $request->end_date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
-            'status_id' => FormStatusCode::where('status_name', 'Pending Approval')->value('status_id'),
+            'status_id' => FormStatus::where('status_name', 'Pending Approval')->value('status_id'),
             'tentative_fee' => session('fee_summary.total_fee', 0),
         ]);
 

@@ -30,9 +30,6 @@
                 <strong>Time:</strong> {{ $requisition->start_time }} to {{ $requisition->end_time }}<br>
                 <strong>Participants:</strong> {{ $requisition->num_participants }}<br>
                 <strong>Purpose:</strong> {{ $requisition->purpose->purpose_name }}<br>
-                @if($requisition->other_purpose)
-                <strong>Additional Purpose Info:</strong> {{ $requisition->other_purpose }}<br>
-                @endif
                 <strong>Tentative Fee:</strong> ₱{{ number_format($requisition->tentative_fee, 2) }}
             </p>
             

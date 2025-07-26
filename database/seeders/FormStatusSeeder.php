@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\FormStatusCode;
+use App\Models\FormStatus;
 
-class FormStatusCodeSeeder extends Seeder
+class FormStatusSeeder extends Seeder
 {
     public function run(): void
     {
@@ -23,7 +23,7 @@ class FormStatusCodeSeeder extends Seeder
         ];
 
         foreach ($statuses as $status) {
-            FormStatusCode::firstOrCreate(
+            FormStatus::firstOrCreate(
                 ['status_name' => $status['status_name']],
                 ['color_code' => $status['color_code']]
             );

@@ -62,7 +62,49 @@ class EquipmentController extends Controller
             ], 500);
         }
     }
-    
+
+    public function calculateAvailableQuantity(Equipment $equipment): JsonResponse
+    {
+        try {
+            $availableCount = $equipment->items()
+                ->where('status_id', 1) // available status only
+                ->whereIn('condition_id', [1, 2, 3]) // new, good, fair
+                ->count();
+
+            return response()->json([
+                'equipment_id' => $equipment->equipment_id,
+                'available_quantity' => $availableCount
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error calculating available quantity', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Failed to calculate available quantity',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function calculateTotalQuantity(Equipment $equipment): JsonResponse
+    {
+        try {
+            $totalCount = $equipment->items()
+                ->where('status_id', '!=', 5) // Exclude Hidden status
+                ->count();
+
+            return response()->json([
+                'equipment_id' => $equipment->equipment_id,
+                'total_quantity' => $totalCount
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error calculating total quantity', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Failed to calculate total quantity',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     // ----- Store Equipment ----- //
 
     public function store(Request $request): JsonResponse

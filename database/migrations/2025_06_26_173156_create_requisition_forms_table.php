@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('access_code', 10);
             $table->integer('num_participants');
             $table->unsignedTinyInteger('purpose_id')->index();
-            $table->string('other_purpose', 250)->nullable();
             $table->string('additional_requests', 250)->nullable();
             $table->unsignedTinyInteger('status_id')->index();
 
@@ -40,7 +39,7 @@ return new class extends Migration
             $table->string('official_receipt_url')->nullable();
             $table->string('official_receipt_public_id')->nullable();
 
-            // fees
+            // fees set by admins
             $table->decimal('tentative_fee', 10, 2)->nullable();
             $table->decimal('approved_fee', 10, 2)->nullable();
 
@@ -54,10 +53,14 @@ return new class extends Migration
             $table->dateTime('date_endorsed')->nullable();
             $table->timestamps();
 
+            // calendar event details
+            $table->string('calendar_title', 50)->default('Rental Request');
+            $table->string('calendar_description', 100)->default('Rental request for facility usage');
+
             // Foreign Keys
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
             $table->foreign('purpose_id')->references('purpose_id')->on('requisition_purposes')->onDelete('restrict');
-            $table->foreign('status_id')->references('status_id')->on('form_status_codes')->onDelete('restrict');
+            $table->foreign('status_id')->references('status_id')->on('form_statuses')->onDelete('restrict');
             $table->foreign('finalized_by')->references('admin_id')->on('admins')->onDelete('set null');
             $table->foreign('closed_by')->references('admin_id')->on('admins')->onDelete('set null');
         });

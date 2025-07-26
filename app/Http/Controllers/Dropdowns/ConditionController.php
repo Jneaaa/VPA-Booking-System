@@ -9,7 +9,7 @@ class ConditionController extends Controller
 {
     public function index()
     {
-        $conditions = Condition::orderBy('condition_id')->get(['condition_name', 'condition_name']);
+        $conditions = Condition::orderBy('condition_id')->get(['condition_id', 'condition_name']);
         return response()->json($conditions);
     }
 }

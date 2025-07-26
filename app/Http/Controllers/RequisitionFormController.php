@@ -6,6 +6,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Models\RequisitionForm;
 use App\Models\RequestedEquipment;
@@ -14,10 +15,28 @@ use App\Models\Facility;
 use App\Models\Equipment;
 use App\Models\User;
 use App\Models\UserUpload;
-use App\Models\FormStatusCode;
+use App\Models\FormStatus;
+use Carbon\Carbon;
 
 class RequisitionFormController extends Controller
 {
+    public function activeSchedules()
+    {
+        $activeStatuses = [2, 3, 4]; // awaiting payment, scheduled, ongoing
+
+        $schedules = RequisitionForm::whereIn('status_id', $activeStatuses)
+            ->get(['start_date', 'start_time', 'end_date', 'end_time', 'status_id'])
+            ->map(function ($schedule) {
+                $schedule->start_time = substr($schedule->start_time, 0, 5); // keep HH:MM
+                $schedule->end_time = substr($schedule->end_time, 0, 5);
+                return $schedule;
+            });
+
+        return response()->json([
+            'schedules' => $schedules
+        ]);
+    }
+
     // Common response structure
     protected function jsonResponse($success, $message, $data = [], $status = 200)
     {
@@ -46,8 +65,13 @@ class RequisitionFormController extends Controller
         }
 
         $userInfo = $request->only([
-            'user_type', 'first_name', 'last_name', 'email', 
-            'contact_number', 'organization_name', 'school_id'
+            'user_type',
+            'first_name',
+            'last_name',
+            'email',
+            'contact_number',
+            'organization_name',
+            'school_id'
         ]);
 
         // Sanitize inputs
@@ -112,7 +136,7 @@ class RequisitionFormController extends Controller
         $userType = session('user_info.user_type', 'Internal');
 
         $feeField = $userType === 'Internal' ? 'internal_fee' : 'external_fee';
-        
+
         $facilityTotalFee = collect($selectedItems)
             ->where('type', 'facility')
             ->reduce(function ($total, $item) use ($feeField) {
@@ -128,7 +152,7 @@ class RequisitionFormController extends Controller
             }, 0);
 
         $totalFee = $facilityTotalFee + $equipmentTotalFee;
-        
+
         $feeSummary = compact('facilityTotalFee', 'equipmentTotalFee', 'totalFee');
         session(['fee_summary' => $feeSummary]);
 
@@ -155,7 +179,8 @@ class RequisitionFormController extends Controller
         $id = $request->input($request->type . '_id');
         $type = $request->type;
 
-        $updatedItems = array_values(array_filter($selectedItems, 
+        $updatedItems = array_values(array_filter(
+            $selectedItems,
             fn($item) => !($item['id'] == $id && $item['type'] === $type)
         ));
 
@@ -171,54 +196,79 @@ class RequisitionFormController extends Controller
     public function checkAvailability(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'start_time' => 'required|date_format:H:i:s',
-            'end_time' => 'required|date_format:H:i:s|after:start_time',
-            'facility_id' => 'sometimes|required|exists:facilities,facility_id',
-            'equipment_id' => 'sometimes|required|exists:equipment,equipment_id'
+            'start_date' => 'required|date_format:Y-m-d',
+            'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'facility_id' => 'nullable|exists:facilities,facility_id',
+            'equipment_id' => 'nullable|exists:equipment,equipment_id',
+            'request_id' => 'sometimes|exists:requisition_forms,request_id' // For edit scenarios
         ]);
-
+    
         if ($validator->fails()) {
             return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
         }
-
-        // Validate time slot first
-        if ($request->start_date == $request->end_date && $request->start_time >= $request->end_time) {
+    
+        // Create Carbon instances without seconds
+        $requestStart = Carbon::createFromFormat('Y-m-d H:i', $request->start_date . ' ' . $request->start_time);
+        $requestEnd = Carbon::createFromFormat('Y-m-d H:i', $request->end_date . ' ' . $request->end_time);
+    
+        // Validate time slot
+        if ($requestStart >= $requestEnd) {
             return $this->jsonResponse(false, 'End time must be after start time.', [], 422);
         }
-
-        $conflictStatusIds = FormStatusCode::whereIn('status_name', ['Scheduled', 'Ongoing'])
+    
+        // Get status IDs that indicate a conflict (Scheduled, Ongoing)
+        $conflictStatusIds = FormStatus::whereIn('status_name', ['Awaiting Payment', 'Scheduled', 'Ongoing'])
             ->pluck('status_id')
             ->toArray();
-
-        $query = RequisitionForm::where(function($query) use ($request) {
-                $query->whereBetween('start_date', [$request->start_date, $request->end_date])
-                    ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
-                    ->orWhere(fn($q) => $q->where('start_date', '<=', $request->start_date)
-                        ->where('end_date', '>=', $request->end_date));
-            })
-            ->where(function($query) use ($request) {
-                $query->where('start_time', '<', $request->end_time)
-                    ->where('end_time', '>', $request->start_time);
-            })
-            ->whereIn('status_id', $conflictStatusIds);
-
+    
+            $query = RequisitionForm::where(function($query) use ($requestStart, $requestEnd, $conflictStatusIds) {
+                // Check for overlapping date ranges
+                $query->where(function($q) use ($requestStart, $requestEnd) {
+                    $q->whereBetween('start_date', [$requestStart->format('Y-m-d'), $requestEnd->format('Y-m-d')])
+                      ->orWhereBetween('end_date', [$requestStart->format('Y-m-d'), $requestEnd->format('Y-m-d')])
+                      ->orWhere(function($q) use ($requestStart, $requestEnd) {
+                          $q->where('start_date', '<=', $requestStart->format('Y-m-d'))
+                            ->where('end_date', '>=', $requestEnd->format('Y-m-d'));
+                      });
+                })
+                // Check for overlapping time ranges (without seconds)
+                ->where(function($q) use ($requestStart, $requestEnd) {
+                    $q->where(function($inner) use ($requestStart, $requestEnd) {
+                        $inner->where('start_time', '<=', $requestEnd->format('H:i'))
+                              ->where('end_time', '>=', $requestStart->format('H:i'));
+                    });
+                })
+                ->whereIn('status_id', $conflictStatusIds);
+        }); // <-- Add missing semicolon here
+    
+        // Exclude current request if editing
+        if ($request->has('request_id')) {
+            $query->where('request_id', '!=', $request->request_id);
+        }
+    
+        // Check for specific facility conflicts
         if ($request->has('facility_id')) {
-            $query->whereHas('requestedFacilities', fn($q) => $q->where('facility_id', $request->facility_id));
+            $query->whereHas('requestedFacilities', function($q) use ($request) {
+                $q->where('facility_id', $request->facility_id);
+            });
         }
-
+    
+        // Check for specific equipment conflicts
         if ($request->has('equipment_id')) {
-            $query->whereHas('requestedEquipment', fn($q) => $q->where('equipment_id', $request->equipment_id));
+            $query->whereHas('requestedEquipment', function($q) use ($request) {
+                $q->where('equipment_id', $request->equipment_id);
+            });
         }
-
+    
         $conflicts = $query->exists();
-
+    
         return $this->jsonResponse(true, $conflicts ? 
             'Time slot conflicts with an existing booking.' : 'Time slot is available.', 
             ['available' => !$conflicts]
         );
-    }
+        }
 
     // ----- Temporary user uploads before submission ----- //
     public function tempUpload(Request $request)
@@ -233,11 +283,11 @@ class RequisitionFormController extends Controller
         }
 
         try {
-            $folder = $request->upload_type === 'Letter' ? 
+            $folder = $request->upload_type === 'Letter' ?
                 'user-uploads/user-letters' : 'user-uploads/user-setups';
-            
+
             $upload = Cloudinary::upload(
-                $request->file('file')->getRealPath(), 
+                $request->file('file')->getRealPath(),
                 ['folder' => $folder, 'resource_type' => 'auto']
             );
 
@@ -259,7 +309,7 @@ class RequisitionFormController extends Controller
                 'token' => $userUpload->upload_token,
                 'type' => $userUpload->upload_type
             ];
-            
+
             session(['temp_uploads' => $tempUploads]);
 
             return $this->jsonResponse(true, 'File uploaded successfully.', [
@@ -333,7 +383,7 @@ class RequisitionFormController extends Controller
                 'end_date' => $request->end_date,
                 'start_time' => $request->start_time,
                 'end_time' => $request->end_time,
-                'status_id' => FormStatusCode::where('status_name', 'Pending Approval')->value('status_id'),
+                'status_id' => FormStatus::where('status_name', 'Pending Approval')->value('status_id'),
                 'tentative_fee' => session('fee_summary.total_fee', 0),
             ]);
 
@@ -347,11 +397,11 @@ class RequisitionFormController extends Controller
                     ]);
                 } elseif ($item['type'] === 'equipment') {
                     $equipmentItems = \App\Models\EquipmentItem::where('equipment_id', $item['id'])
-                    ->whereIn('condition_id', [1, 2, 3])
-                    ->whereNull('deleted_at')
-                    ->limit($item['quantity'] ?? 1)
-                    ->get();
-                
+                        ->whereIn('condition_id', [1, 2, 3])
+                        ->whereNull('deleted_at')
+                        ->limit($item['quantity'] ?? 1)
+                        ->get();
+
 
                     if ($equipmentItems->count() < ($item['quantity'] ?? 1)) {
                         throw new \Exception("Not enough items available for equipment ID {$item['id']}.");
@@ -381,7 +431,7 @@ class RequisitionFormController extends Controller
 
             // Clear session data
             session()->forget(['user_info', 'selected_items', 'fee_summary', 'temp_uploads']);
-            
+
             DB::commit();
 
             return $this->jsonResponse(true, 'Requisition submitted successfully!', [
