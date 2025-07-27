@@ -3,38 +3,22 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\RequisitionForm;
 use App\Models\Facility;
 use App\Models\Equipment;
 use App\Models\EquipmentItem;
 use App\Models\RequestedFacility;
 use App\Models\RequestedEquipment;
-use App\Models\CalendarEvent;
 use App\Models\Admin;
 use Carbon\Carbon;
 use App\Models\EquipmentImage;
-use App\Models\LookupTables\FacilitySubcategory;
 use App\Models\FacilityAmenity;
+use Illuminate\Support\Str;
 
 class RequisitionTestSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create admin users
-        if (Admin::count() === 0) {
-            Admin::factory()->count(3)->create();
-        }
-
-        // Create regular users
-        if (User::count() === 0) {
-            User::factory()->count(10)->create();
-        }
-
-        // Get subcategories that require room details
-        $detailSubcategories = FacilitySubcategory::whereIn('category_id', [2, 3]) // Indoor Facilities, Residencies
-            ->pluck('subcategory_id')
-            ->toArray();
 
         // Create equipment
         if (Equipment::count() === 0) {
@@ -62,21 +46,49 @@ class RequisitionTestSeeder extends Seeder
 
         // Create requisition forms
         for ($i = 0; $i < 15; $i++) {
-            $user = User::inRandomOrder()->first();
 
             // Pick a facility for this requisition
             $facility = Facility::inRandomOrder()->first();
 
-           
-
-            // Create requisition form with detail_id only if applicable
+            // Create requisition form with additional fields
             $requisition = RequisitionForm::factory()->create([
-                'user_id' => $user->user_id,
+                'first_name' => fake()->firstName(),
+                'last_name' => fake()->lastName(),
+                'email' => fake()->safeEmail(),
+                'school_id' => fake()->optional()->regexify('[A-Z]{2}[0-9]{6}'),
+                'organization_name' => fake()->optional()->company(),
+                'contact_number' => fake()->optional()->regexify('[0-9]{10,15}'),
                 'status_id' => rand(1, 10),
                 'purpose_id' => rand(1, 10),
                 'start_date' => Carbon::today()->addDays(rand(-30, 30)),
                 'end_date' => Carbon::today()->addDays(rand(1, 7)),
-                'is_finalized' => fake()->boolean(70),
+                'start_time' => Carbon::createFromTime(rand(8, 18), 0, 0),
+                'end_time' => Carbon::createFromTime(rand(19, 23), 0, 0),
+                'access_code' => Str::random(10),
+                'num_participants' => rand(10, 100),
+                'additional_requests' => fake()->optional()->sentence(),
+                'formal_letter_url' => fake()->url(),
+                'formal_letter_public_id' => Str::uuid(),
+                'facility_layout_url' => fake()->url(),
+                'facility_layout_public_id' => Str::uuid(),
+                'late_penalty_fee' => null,
+                'is_late' => false,
+                'returned_at' => null,
+                'is_finalized' => false,
+                'finalized_at' => null,
+                'finalized_by' => null,
+                'official_receipt_no' => null,
+                'official_receipt_url' => null,
+                'official_receipt_public_id' => null,
+                'tentative_fee' => fake()->randomFloat(2, 1000, 5000),
+                'approved_fee' => null,
+                'is_closed' => false,
+                'closed_at' => null,
+                'closed_by' => null,
+                'endorser' => null,
+                'date_endorsed' => null,
+                'calendar_title' => 'Rental Request',
+                'calendar_description' => 'Rental request for facility usage',
             ]);
 
             // Attach facility
@@ -102,48 +114,6 @@ class RequisitionTestSeeder extends Seeder
                     'is_waived' => fake()->boolean(20),
                 ]);
             }
-
-            // Calendar event if Active or Ongoing
-            if (in_array($requisition->status_id, [4, 5]) &&
-                ($requisition->start_date > now() || ($requisition->start_date <= now() && $requisition->end_date >= now()))) {
-                CalendarEvent::create([
-                    'request_id' => $requisition->request_id,
-                    'event_title' => 'Reservation: ' . $user->name,
-                    'eventDesc' => 'Status: ' . $requisition->status->status_name,
-                    'created_by' => Admin::inRandomOrder()->value('admin_id'),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
         }
-    }
-
-    private function generateRoomNumber($subcategoryId): string
-    {
-        $prefixes = [
-            4 => 'CR',
-            5 => 'CNF',
-            6 => 'CL',
-            7 => 'SL',
-            8 => 'DR',
-            9 => 'GR',
-        ];
-
-        $prefix = $prefixes[$subcategoryId] ?? 'RM';
-        return $prefix . fake()->numerify('###');
-    }
-
-    private function generateBuildingName($subcategoryId): string
-    {
-        $buildings = [
-            4 => 'Academic Building',
-            5 => 'Administration Building',
-            6 => 'Computer Center',
-            7 => 'Science Complex',
-            8 => 'Dormitory Building',
-            9 => 'Guest House',
-        ];
-
-        return $buildings[$subcategoryId] ?? 'Building ' . fake()->word();
     }
 }

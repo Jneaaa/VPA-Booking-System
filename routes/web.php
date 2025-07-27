@@ -34,7 +34,6 @@ Route::view('/admin/manage-equipment', 'admin.manage-equipment');
 Route::view('/admin/manage-facilities', 'admin.manage-facilities');
 Route::view('/admin/manage-facility', 'admin.manage-facility');
 Route::view('/admin/manage-requests', 'admin.manage-requests');
-
 // ----- Auth Routes ----- //
 Route::get('/login', function () {
     return view('auth.login');

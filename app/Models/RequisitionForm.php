@@ -12,7 +12,13 @@ class RequisitionForm extends Model
     
     use HasFactory;
     protected $fillable = [
-        'user_id',
+        'user_type',
+        'first_name',
+        'last_name',
+        'email',
+        'school_id',
+        'organization_name',
+        'contact_number',
         'num_participants',
         'purpose_id',
         'additional_requests',
@@ -58,11 +64,6 @@ class RequisitionForm extends Model
     ];  
 
     // Relationships
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
 
     public function purpose()
     {
