@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\AdminAuthController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\RequisitionFormController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\EquipmentController;
@@ -22,11 +21,8 @@ use App\Http\Controllers\Dropdowns\ConditionController;
 use App\Http\Controllers\Dropdowns\RequisitionPurposeController;
 
 
-// ---------------- User Routes ---------------- //
+// ---------------- Admin Routes ---------------- //
 
-Route::get('/users', [UserController::class, 'index']);
-
-// Admin routes
 Route::get('/admins', [AdminController::class, 'getAllAdmins']);
 Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']);
 
@@ -44,12 +40,11 @@ Route::get('/facility-subcategories/{category}', [FacilitySubcategoryController:
 Route::get('/requisition-purposes', [RequisitionPurposeController::class, 'index']);
 Route::get('/active-schedules', [RequisitionFormController::class, 'activeSchedules']);
 
+
 // ---------------- Equipment Quantity Routes ---------------- //
 
 Route::get('/available-equipment/{equipment}', [EquipmentController::class, 'calculateAvailableQuantity']);
 Route::get('/total-equipment/{equipment}', [EquipmentController::class, 'calculateTotalQuantity']);
-
-
 
 // ---------------- Public Catalog Routes ---------------- //
 
@@ -60,7 +55,7 @@ Route::get('/facilities/{facility}', [FacilityController::class, 'show']);
 // ---------------- Requisition Form Routes ---------------- //
 
 Route::prefix('requisition')->group(function () {
-    Route::post('/save-user-info', [RequisitionFormController::class, 'saveUserInfo']);
+    Route::post('/save-request-info', [RequisitionFormController::class, 'saveRequestInfo']);
     Route::post('/add-item', [RequisitionFormController::class, 'addToForm']);
     Route::post('/remove-item', [RequisitionFormController::class, 'removeFromForm']);
     Route::get('/calculate-fees', [RequisitionFormController::class, 'calculateFees']);

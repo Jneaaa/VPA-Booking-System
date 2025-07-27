@@ -13,8 +13,6 @@ use App\Models\RequestedEquipment;
 use App\Models\RequestedFacility;
 use App\Models\Facility;
 use App\Models\Equipment;
-use App\Models\User;
-use App\Models\UserUpload;
 use App\Models\FormStatus;
 use Carbon\Carbon;
 
@@ -47,41 +45,65 @@ class RequisitionFormController extends Controller
         ], $status);
     }
 
-    // ----- Save user information in session ----- //
-    public function saveUserInfo(Request $request)
+    // ----- Save form details in session ----- //
+    public function saveRequestInfo(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            // User information
             'user_type' => 'required|in:Internal,External',
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
             'email' => 'required|email|max:100',
             'contact_number' => 'nullable|string|max:15',
             'organization_name' => 'nullable|string|max:100',
-            'school_id' => 'nullable|string|max:20'
+            'school_id' => 'nullable|string|max:20',
+            // Requisition details
+            'additional_requests' => 'nullable|string|max:250',
+            'num_participants' => 'required|integer|min:1',
+            'purpose_id' => 'required|exists:requisition_purposes,purpose_id',
+            'endorser' => 'nullable|string|max:50',
+            'date_endorsed' => 'nullable|date_format:Y-m-d',
+            // Booking schedule
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
         ]);
 
         if ($validator->fails()) {
             return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
         }
 
-        $userInfo = $request->only([
+        $requestInfo = $request->only([
             'user_type',
             'first_name',
             'last_name',
             'email',
-            'contact_number',
+            'school_id',
             'organization_name',
-            'school_id'
+            'contact_number',
+            'num_participants',
+            'purpose_id',
+            'additional_requests',
+            'formal_letter_url',
+            'formal_letter_public_id',
+            'facility_layout_url',
+            'facility_layout_public_id',
+            'upload_token',
+            'start_date',
+            'end_date',
+            'start_time',
+            'end_time',
         ]);
 
         // Sanitize inputs
-        $userInfo['email'] = filter_var($userInfo['email'], FILTER_SANITIZE_EMAIL);
-        $userInfo['first_name'] = htmlspecialchars($userInfo['first_name'], ENT_QUOTES);
-        $userInfo['last_name'] = htmlspecialchars($userInfo['last_name'], ENT_QUOTES);
+        $requestInfo['email'] = filter_var($requestInfo['email'], FILTER_SANITIZE_EMAIL);
+        $requestInfo['first_name'] = htmlspecialchars($requestInfo['first_name'], ENT_QUOTES);
+        $requestInfo['last_name'] = htmlspecialchars($requestInfo['last_name'], ENT_QUOTES);
 
-        session(['user_info' => $userInfo]);
+        session(['request_info' => $requestInfo]);
 
-        return $this->jsonResponse(true, 'User information saved successfully.', ['user_info' => $userInfo]);
+        return $this->jsonResponse(true, 'Form details saved successfully.', ['request_info' => $requestInfo]);
     }
 
     // ----- Add items to session ----- //
@@ -133,7 +155,7 @@ class RequisitionFormController extends Controller
     public function calculateFees()
     {
         $selectedItems = session('selected_items', []);
-        $userType = session('user_info.user_type', 'Internal');
+        $userType = session('request_info.user_type', 'Internal');
 
         $feeField = $userType === 'Internal' ? 'internal_fee' : 'external_fee';
 
@@ -204,126 +226,144 @@ class RequisitionFormController extends Controller
             'equipment_id' => 'nullable|exists:equipment,equipment_id',
             'request_id' => 'sometimes|exists:requisition_forms,request_id' // For edit scenarios
         ]);
-    
+
         if ($validator->fails()) {
             return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
         }
-    
+
         // Create Carbon instances without seconds
         $requestStart = Carbon::createFromFormat('Y-m-d H:i', $request->start_date . ' ' . $request->start_time);
         $requestEnd = Carbon::createFromFormat('Y-m-d H:i', $request->end_date . ' ' . $request->end_time);
-    
+
         // Validate time slot
         if ($requestStart >= $requestEnd) {
             return $this->jsonResponse(false, 'End time must be after start time.', [], 422);
         }
-    
+
         // Get status IDs that indicate a conflict (Scheduled, Ongoing)
         $conflictStatusIds = FormStatus::whereIn('status_name', ['Awaiting Payment', 'Scheduled', 'Ongoing'])
             ->pluck('status_id')
             ->toArray();
-    
-            $query = RequisitionForm::where(function($query) use ($requestStart, $requestEnd, $conflictStatusIds) {
-                // Check for overlapping date ranges
-                $query->where(function($q) use ($requestStart, $requestEnd) {
-                    $q->whereBetween('start_date', [$requestStart->format('Y-m-d'), $requestEnd->format('Y-m-d')])
-                      ->orWhereBetween('end_date', [$requestStart->format('Y-m-d'), $requestEnd->format('Y-m-d')])
-                      ->orWhere(function($q) use ($requestStart, $requestEnd) {
-                          $q->where('start_date', '<=', $requestStart->format('Y-m-d'))
+
+        $query = RequisitionForm::where(function ($query) use ($requestStart, $requestEnd, $conflictStatusIds) {
+            // Check for overlapping date ranges
+            $query->where(function ($q) use ($requestStart, $requestEnd) {
+                $q->whereBetween('start_date', [$requestStart->format('Y-m-d'), $requestEnd->format('Y-m-d')])
+                    ->orWhereBetween('end_date', [$requestStart->format('Y-m-d'), $requestEnd->format('Y-m-d')])
+                    ->orWhere(function ($q) use ($requestStart, $requestEnd) {
+                        $q->where('start_date', '<=', $requestStart->format('Y-m-d'))
                             ->where('end_date', '>=', $requestEnd->format('Y-m-d'));
-                      });
-                })
+                    });
+            })
                 // Check for overlapping time ranges (without seconds)
-                ->where(function($q) use ($requestStart, $requestEnd) {
-                    $q->where(function($inner) use ($requestStart, $requestEnd) {
+                ->where(function ($q) use ($requestStart, $requestEnd) {
+                    $q->where(function ($inner) use ($requestStart, $requestEnd) {
                         $inner->where('start_time', '<=', $requestEnd->format('H:i'))
-                              ->where('end_time', '>=', $requestStart->format('H:i'));
+                            ->where('end_time', '>=', $requestStart->format('H:i'));
                     });
                 })
                 ->whereIn('status_id', $conflictStatusIds);
         }); // <-- Add missing semicolon here
-    
+
         // Exclude current request if editing
         if ($request->has('request_id')) {
             $query->where('request_id', '!=', $request->request_id);
         }
-    
+
         // Check for specific facility conflicts
         if ($request->has('facility_id')) {
-            $query->whereHas('requestedFacilities', function($q) use ($request) {
+            $query->whereHas('requestedFacilities', function ($q) use ($request) {
                 $q->where('facility_id', $request->facility_id);
             });
         }
-    
+
         // Check for specific equipment conflicts
         if ($request->has('equipment_id')) {
-            $query->whereHas('requestedEquipment', function($q) use ($request) {
+            $query->whereHas('requestedEquipment', function ($q) use ($request) {
                 $q->where('equipment_id', $request->equipment_id);
             });
         }
-    
+
         $conflicts = $query->exists();
-    
-        return $this->jsonResponse(true, $conflicts ? 
-            'Time slot conflicts with an existing booking.' : 'Time slot is available.', 
+
+        return $this->jsonResponse(
+            true,
+            $conflicts ?
+            'Time slot conflicts with an existing booking.' : 'Time slot is available.',
             ['available' => !$conflicts]
         );
-        }
+    }
 
     // ----- Temporary user uploads before submission ----- //
+
     public function tempUpload(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'upload_type' => 'required|in:Letter,Room Setup'
+            'formal_letter_url' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'facility_layout_url' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
         if ($validator->fails()) {
-            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
         try {
-            $folder = $request->upload_type === 'Letter' ?
-                'user-uploads/user-letters' : 'user-uploads/user-setups';
 
-            $upload = Cloudinary::upload(
-                $request->file('file')->getRealPath(),
-                ['folder' => $folder, 'resource_type' => 'auto']
-            );
+            \Log::debug('Cloudinary Config:', [
+                'cloud_name' => config('cloudinary.cloud_name'),
+                'api_key' => config('cloudinary.api_key'),
+                'api_secret' => config('cloudinary.api_secret'),
+            ]);
+
+            // Determine which field was uploaded
+            $field = $request->hasFile('formal_letter_url') ? 'formal_letter_url' : 'facility_layout_url';
+            $file = $request->file($field);
+
+            // Define upload folder based on field
+            $folder = $field === 'formal_letter_url'
+                ? 'user-uploads/user-letters'
+                : 'user-uploads/user-setups';
+
+            // Upload to Cloudinary
+            $upload = Cloudinary::upload($file->getRealPath(), [
+                'folder' => $folder,
+                'resource_type' => 'auto',
+            ]);
 
             if (!$upload->getSecurePath()) {
-                throw new \Exception('Cloudinary upload failed: No secure URL returned.');
+                throw new \Exception('Cloudinary upload failed.');
             }
 
-            $userUpload = UserUpload::create([
-                'file_url' => $upload->getSecurePath(),
-                'cloudinary_public_id' => $upload->getPublicId(),
-                'upload_type' => $request->upload_type,
-                'upload_token' => Str::random(40),
-                'request_id' => null
-            ]);
+            // Generate a unique token for this upload
+            $uploadToken = Str::random(40);
 
+            // Store in session (to reference later when saving to DB)
             $tempUploads = session('temp_uploads', []);
-            $tempUploads[] = [
-                'upload_id' => $userUpload->upload_id,
-                'token' => $userUpload->upload_token,
-                'type' => $userUpload->upload_type
+            $tempUploads[$field] = [
+                'file_url' => $upload->getSecurePath(),
+                'public_id' => $upload->getPublicId(),
+                'upload_token' => $uploadToken,
             ];
-
             session(['temp_uploads' => $tempUploads]);
 
-            return $this->jsonResponse(true, 'File uploaded successfully.', [
-                'upload' => [
-                    'id' => $userUpload->upload_id,
-                    'url' => $userUpload->file_url,
-                    'type' => $userUpload->upload_type,
-                    'token' => $userUpload->upload_token
+            return response()->json([
+                'success' => true,
+                'message' => 'File uploaded successfully.',
+                'data' => [
+                    'field' => $field,
+                    'file_url' => $upload->getSecurePath(),
+                    'public_id' => $upload->getPublicId(),
+                    'upload_token' => $uploadToken,
                 ],
-                'temp_uploads' => $tempUploads
             ]);
-
         } catch (\Exception $e) {
-            return $this->jsonResponse(false, 'Upload failed: ' . $e->getMessage(), [], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload failed: ' . $e->getMessage(),
+            ], 500);
         }
     }
 
@@ -347,38 +387,49 @@ class RequisitionFormController extends Controller
         DB::beginTransaction();
 
         try {
-            // Validate session data exists
-            $userInfo = session('user_info');
+            $requestInfo = session('request_info');
             $selectedItems = session('selected_items', []);
             $tempUploads = session('temp_uploads', []);
 
-            if (!$userInfo) {
-                throw new \Exception('User information not found. Please complete step 1.');
+            if (!$requestInfo) {
+                throw new \Exception('User information not found. Please fill in all required fields.');
             }
 
             if (empty($selectedItems)) {
                 throw new \Exception('Your booking cart is empty. Add items before submitting.');
             }
 
-            // Check for conflicts again right before submission
             $conflictCheck = $this->checkAvailability($request);
             if (!$conflictCheck->getData()->available) {
                 throw new \Exception('Time slot no longer available. Please choose another.');
             }
 
-            // Create or update user
-            $user = User::updateOrCreate(
-                ['email' => $userInfo['email']],
-                $userInfo
-            );
+            // Match uploads from session
+            $letterUpload = collect($tempUploads)->firstWhere('type', 'Letter');
+            $setupUpload = collect($tempUploads)->firstWhere('type', 'Setup');
+
+            if (!$letterUpload) {
+                throw new \Exception('A formal letter must be uploaded.');
+            }
 
             // Create requisition form
             $requisitionForm = RequisitionForm::create([
-                'user_id' => $user->user_id,
-                'access_code' => Str::upper(Str::random(8)),
+                'user_type' => $requestInfo['user_type'],
+                'first_name' => $requestInfo['first_name'],
+                'last_name' => $requestInfo['last_name'],
+                'email' => $requestInfo['email'],
+                'contact_number' => $requestInfo['contact_number'] ?? null,
+                'organization_name' => $requestInfo['organization_name'] ?? null,
+                'school_id' => $requestInfo['school_id'] ?? null,
+                'access_code' => Str::upper(Str::random(10)),
                 'purpose_id' => $request->purpose_id,
                 'num_participants' => $request->num_participants,
                 'additional_requests' => $request->additional_requests,
+                'formal_letter_url' => $letterUpload['url'],
+                'formal_letter_public_id' => $letterUpload['public_id'],
+                'facility_layout_url' => $setupUpload['url'],
+                'facility_layout_public_id' => $setupUpload['public_id'],
+                'upload_token' => $letterUpload['token'], // assume same token used for both
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
                 'start_time' => $request->start_time,
@@ -387,7 +438,7 @@ class RequisitionFormController extends Controller
                 'tentative_fee' => session('fee_summary.total_fee', 0),
             ]);
 
-            // Process selected items with stock validation
+            // Save selected items
             foreach ($selectedItems as $item) {
                 if ($item['type'] === 'facility') {
                     RequestedFacility::create([
@@ -402,7 +453,6 @@ class RequisitionFormController extends Controller
                         ->limit($item['quantity'] ?? 1)
                         ->get();
 
-
                     if ($equipmentItems->count() < ($item['quantity'] ?? 1)) {
                         throw new \Exception("Not enough items available for equipment ID {$item['id']}.");
                     }
@@ -415,7 +465,6 @@ class RequisitionFormController extends Controller
                             'is_waived' => false,
                         ]);
 
-                        // Mark item as rented (soft delete or update status)
                         DB::table('equipment_items')
                             ->where('item_id', $equipmentItem->item_id)
                             ->update(['deleted_at' => now()]);
@@ -423,14 +472,8 @@ class RequisitionFormController extends Controller
                 }
             }
 
-            // Process temporary uploads
-            foreach ($tempUploads as $upload) {
-                UserUpload::where('upload_token', $upload['token'])
-                    ->update(['request_id' => $requisitionForm->request_id]);
-            }
-
-            // Clear session data
-            session()->forget(['user_info', 'selected_items', 'fee_summary', 'temp_uploads']);
+            // Clear session
+            session()->forget(['request_info', 'selected_items', 'fee_summary', 'temp_uploads']);
 
             DB::commit();
 
