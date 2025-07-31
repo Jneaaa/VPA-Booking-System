@@ -26,17 +26,9 @@
                     <a class="nav-link {{ Request::is('index') ? 'active' : '' }}" href="{{ url('index') }}">Home</a>
                 </li>
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle {{ Request::is('facility-catalog', 'equipment-catalog') ? 'active' : '' }}"
-                        href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Booking Catalog
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item {{ Request::is('facility-catalog') ? 'active' : '' }}"
-                                href="{{ url('facility-catalog') }}">Facilities Catalog</a></li>
-                        <li><a class="dropdown-item {{ Request::is('equipment-catalog') ? 'active' : '' }}"
-                                href="{{ url('equipment-catalog') }}">Equipment Catalog</a></li>
-                    </ul>
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('booking-catalog') ? 'active' : '' }}"
+                        href="{{ url('booking-catalog') }}">Booking Catalog</a>
                 </li>
 
                 <li class="nav-item">

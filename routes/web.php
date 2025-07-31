@@ -8,7 +8,7 @@ Route::get('/', function () {
 });
 
 // ----- Public Views ----- //
-Route::view('/facility-catalog', 'public.facility-catalog');
+Route::view('/booking-catalog', 'public.booking-catalog');
 Route::view('/reservation-form', 'public.reservation-form');
 Route::view('/equipment-catalog', 'public.equipment-catalog');
 Route::view('/about-equipment', 'public.about-equipment');

@@ -307,13 +307,13 @@
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle {{ Request::is('facility-catalog', 'equipment-catalog') ? 'active' : '' }}"
+                    <a class="nav-link dropdown-toggle {{ Request::is('booking-catalog', 'equipment-catalog') ? 'active' : '' }}"
                         href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Booking Catalog
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item {{ Request::is('facility-catalog') ? 'active' : '' }}"
-                                href="{{ url('facility-catalog') }}">Facilities Catalog</a></li>
+                        <li><a class="dropdown-item {{ Request::is('booking-catalog') ? 'active' : '' }}"
+                                href="{{ url('booking-catalog') }}">Facilities Catalog</a></li>
                         <li><a class="dropdown-item {{ Request::is('equipment-catalog') ? 'active' : '' }}"
                                 href="{{ url('equipment-catalog') }}">Equipment Catalog</a></li>
                     </ul>
@@ -350,7 +350,7 @@
                 </li>
             </ul>
 
-            <a href="{{ url('facility-catalog') }}" class="btn btn-book-now ms-lg-3">Back To Catalog</a>
+            <a href="{{ url('booking-catalog') }}" class="btn btn-book-now ms-lg-3">Back To Catalog</a>
         </div>
     </div>
 </nav>
