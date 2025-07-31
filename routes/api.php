@@ -40,12 +40,6 @@ Route::get('/facility-subcategories/{category}', [FacilitySubcategoryController:
 Route::get('/requisition-purposes', [RequisitionPurposeController::class, 'index']);
 Route::get('/active-schedules', [RequisitionFormController::class, 'activeSchedules']);
 
-
-// ---------------- Equipment Quantity Routes ---------------- //
-
-Route::get('/available-equipment/{equipment}', [EquipmentController::class, 'calculateAvailableQuantity']);
-Route::get('/total-equipment/{equipment}', [EquipmentController::class, 'calculateTotalQuantity']);
-
 // ---------------- Public Catalog Routes ---------------- //
 
 Route::get('/equipment', [EquipmentController::class, 'publicIndex']);

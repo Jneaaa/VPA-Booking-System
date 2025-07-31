@@ -53,26 +53,24 @@
 
           <div class="col-lg-9 col-md-8">
             <div class="right-content-header">
-              <h4 id="currentCategoryTitle" class="d-flex align-items-center">
-                <div class="dropdown">
-                  <button class="btn btn-link dropdown-toggle text-decoration-none" type="button"
-                    id="chooseCatalogDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    All Facilities
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="chooseCatalogDropdown">
-                    <li>
-                      <a class="dropdown-item" href="facility-catalog" data-catalog-type="facilities">
-                        Facilities
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="equipment-catalog" data-catalog-type="equipment">
-                        Equipment
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </h4>
+              <div class="dropdown">
+                <button class="btn btn-link dropdown-toggle text-decoration-none" type="button"
+                  id="chooseCatalogDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  All Facilities
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="chooseCatalogDropdown">
+                  <li>
+                    <a class="dropdown-item" href="facility-catalog" data-catalog-type="facilities">
+                      Facilities
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="equipment-catalog" data-catalog-type="equipment">
+                      Equipment
+                    </a>
+                  </li>
+                </ul>
+              </div>
               <div class="d-flex gap-2 filter-sort-dropdowns">
                 <div class="dropdown">
                   <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
@@ -192,6 +190,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="{{ asset('js/public/facility-catalog.js') }}"></script>
+  
 </body>
 
 </html>

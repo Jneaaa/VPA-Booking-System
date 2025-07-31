@@ -1162,5 +1162,173 @@
         });
       });
     </script>
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load cart items on page load
+    loadCartItems();
+
+    // Event listeners for removing items
+    document.getElementById('facilityList').addEventListener('click', function(e) {
+        if (e.target.closest('.btn-outline-danger')) {
+            const card = e.target.closest('.facility-card');
+            const facilityId = card.querySelector('h6').textContent;
+            removeFromCart(facilityId, 'facility');
+        }
+    });
+
+    document.getElementById('equipmentList').addEventListener('click', function(e) {
+        if (e.target.closest('.btn-outline-danger')) {
+            const card = e.target.closest('.equipment-card');
+            const equipmentId = card.querySelector('h6').textContent;
+            removeFromCart(equipmentId, 'equipment');
+        }
+    });
+
+    // Form submission
+    document.getElementById('submitFormBtn').addEventListener('click', submitForm);
+});
+
+async function loadCartItems() {
+    try {
+        // Load facilities
+        const facilitiesResponse = await fetch('/api/facilities');
+        const facilitiesData = await facilitiesResponse.json();
+        const facilities = facilitiesData.data || [];
+
+        // Load cart items
+        const cartResponse = await fetch('/api/requisition/calculate-fees');
+        const cartData = await cartResponse.json();
+        const cartItems = cartData.data?.selected_items || [];
+
+        // Render facilities
+        const facilityList = document.getElementById('facilityList');
+        facilityList.innerHTML = '';
+
+        const facilityItems = cartItems.filter(item => item.type === 'facility');
+        if (facilityItems.length === 0) {
+            facilityList.innerHTML = '<p class="text-muted empty-message">No facility added yet.</p>';
+        } else {
+            facilityItems.forEach(item => {
+                const facility = facilities.find(f => f.facility_id == item.id);
+                if (facility) {
+                    const facilityCard = document.createElement('div');
+                    facilityCard.className = 'facility-card';
+                    facilityCard.innerHTML = `
+                        <button class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        ${facility.images && facility.images.length ? 
+                            `<img src="${facility.images[0].image_url}" alt="${facility.facility_name}">` : 
+                            `<div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">No Image</div>`}
+                        <div class="facility-details">
+                            <h6 class="mb-1">${facility.facility_id}</h6>
+                            <p class="text-muted mb-1">${facility.facility_name}</p>
+                            <small>${facility.description || 'No description available.'}</small>
+                        </div>
+                    `;
+                    facilityList.appendChild(facilityCard);
+                }
+            });
+        }
+
+        // Enable/disable submit button based on cart items
+        document.getElementById('submitFormBtn').disabled = cartItems.length === 0;
+    } catch (error) {
+        console.error('Error loading cart items:', error);
+    }
+}
+
+async function removeFromCart(id, type) {
+    try {
+        const response = await fetch('/api/requisition/remove-item', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                [`${type}_id`]: id,
+                type: type
+            })
+        });
+
+        if (response.ok) {
+            loadCartItems(); // Refresh the list
+            showToast('Item removed from cart');
+        } else {
+            throw new Error('Failed to remove item');
+        }
+    } catch (error) {
+        console.error('Error removing from cart:', error);
+        showToast('Failed to remove item', 'error');
+    }
+}
+
+async function submitForm() {
+    // Get form data
+    const formData = {
+        user_type: document.getElementById('applicantType').value,
+        first_name: document.querySelector('input[name="first_name"]').value,
+        last_name: document.querySelector('input[name="last_name"]').value,
+        email: document.querySelector('input[type="email"]').value,
+        contact_number: document.querySelector('input[name="contact_number"]').value,
+        organization_name: document.querySelector('input[name="organization_name"]').value,
+        school_id: document.querySelector('input[name="school_id"]')?.value || '',
+        num_participants: document.querySelector('input[name="num_participants"]').value,
+        purpose_id: document.getElementById('activityPurposeField').value,
+        additional_requests: document.querySelector('textarea[name="additional_requests"]').value,
+        start_date: document.getElementById('startDateField').value,
+        end_date: document.getElementById('endDateField').value,
+        start_time: document.getElementById('startTimeField').value,
+        end_time: document.getElementById('endTimeField').value,
+        endorser: document.querySelector('input[name="endorser"]').value || null,
+        date_endorsed: document.querySelector('input[name="date_endorsed"]').value || null
+    };
+
+    try {
+        // First save request info
+        const saveResponse = await fetch('/api/requisition/save-request-info', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (!saveResponse.ok) {
+            throw new Error('Failed to save request info');
+        }
+
+        // Then submit the form
+        const submitResponse = await fetch('/api/requisition/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await submitResponse.json();
+
+        if (submitResponse.ok) {
+            showToast('Form submitted successfully!', 'success');
+            // Redirect or show success message with access code
+            window.location.href = `/your-bookings?access_code=${result.data.access_code}`;
+        } else {
+            throw new Error(result.message || 'Submission failed');
+        }
+    } catch (error) {
+        console.error('Error submitting form:', error);
+        showToast(error.message, 'error');
+    }
+}
+
+function showToast(message, type = 'success') {
+    // Implement your toast notification here or use Bootstrap's toast
+    alert(message); // Simple fallback
+}
+</script>
 </body>
 </html>
