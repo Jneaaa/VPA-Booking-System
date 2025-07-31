@@ -21,26 +21,34 @@ class EquipmentController extends Controller
 
             // Head admins can view all equipment
             if ($user->role?->role_name === 'Head Admin') {
-                $equipment = Equipment::with(['category', 'status', 'department', 'items', 'images'])
+                $equipment = Equipment::with(['category', 'status', 'department', 'items.condition', 'images'])
                     ->orderBy('equipment_name')
                     ->get();
             } else {
+                // Users can only see equipment in their departments
                 $equipment = Equipment::whereIn('department_id', $user->departments->pluck('department_id'))
-                    ->with(['category', 'status', 'department', 'items', 'images'])
+                    ->with(['category', 'status', 'department', 'items.condition', 'images'])
                     ->orderBy('equipment_name')
                     ->get();
             }
 
-            $formatted = $equipment->map(fn ($item) => $this->formatEquipment($item));
+            $formatted = $equipment->map(fn ($item) => array_merge(
+                $this->formatEquipment($item),
+                [
+                    'images' => $item->images, // Include EquipmentImages
+                    'available_quantity' => $this->calculateAvailableQuantity($item)->getData(true)['available_quantity'],
+                    'total_quantity' => $this->calculateTotalQuantity($item)->getData(true)['total_quantity']
+                ]
+            ));
 
             return response()->json(['data' => $formatted]);
-            } catch (\Exception $e) {
-                \Log::error('Error fetching equipment data', ['error' => $e->getMessage()]);
-                return response()->json([
-                    'message' => 'Failed to fetch equipment data',
-                    'error' => $e->getMessage()
-                ], 500);
-            }
+        } catch (\Exception $e) {
+            \Log::error('Error fetching equipment data', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Failed to fetch equipment data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
     
 
@@ -51,7 +59,14 @@ class EquipmentController extends Controller
                 ->orderBy('equipment_name')
                 ->get();
     
-            $formatted = $equipment->map(fn ($item) => $this->formatPublicEquipment($item));
+            $formatted = $equipment->map(fn ($item) => array_merge(
+                $this->formatPublicEquipment($item),
+                [
+                    'images' => $item->images, // Include EquipmentImages
+                    'available_quantity' => $this->calculateAvailableQuantity($item)->getData(true)['available_quantity'],
+                    'total_quantity' => $this->calculateTotalQuantity($item)->getData(true)['total_quantity']
+                ]
+            ));
     
             return response()->json(['data' => $formatted]);
         } catch (\Exception $e) {

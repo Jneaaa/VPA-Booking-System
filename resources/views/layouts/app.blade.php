@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'CPU Booking')</title>
     <!-- Add other assets (Bootstrap, etc.) here -->
 </head>
