@@ -16,12 +16,12 @@
 <body>
   @extends('layouts.app')
 
-  @section('title', 'Facility Catalog')
+  @section('title', 'Booking Catalog')
 
   @section('content')
     <section class="catalog-hero-section">
       <div class="catalog-hero-content">
-        <h2 id="catalogHeroTitle">Facilities Catalog</h2>
+        <h2 id="catalogHeroTitle">Facility & Equipment Catalog</h2>
       </div>
     </section>
 
@@ -60,7 +60,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="chooseCatalogDropdown">
                   <li>
-                    <a class="dropdown-item" href="facility-catalog" data-catalog-type="facilities">
+                    <a class="dropdown-item" href="booking-catalog" data-catalog-type="facilities">
                       Facilities
                     </a>
                   </li>
@@ -170,7 +170,7 @@
               <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-              <p class="mt-2">Loading facilities...</p>
+              <p class="mt-2">Loading catalog items...</p>
             </div>
 
             <!-- Catalog Items Container -->
@@ -189,7 +189,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="{{ asset('js/public/facility-catalog.js') }}"></script>
+  <script src="{{ asset('js/public/booking-catalog.js') }}"></script>
   
 </body>
 

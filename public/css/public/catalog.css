@@ -9,7 +9,7 @@ body {
 
 /* Catalog Hero Section */
 .catalog-hero-section {
-  background-image: url("{{ asset('homepage.jpg') }}");
+  background-image: url("{{ asset('assets/homepage.jpg') }}");
   background-size: cover;
   background-position: center;
   min-height: 170px;
