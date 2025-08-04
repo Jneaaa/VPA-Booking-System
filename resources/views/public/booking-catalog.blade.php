@@ -11,6 +11,21 @@
 
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <link rel="stylesheet" href="{{ asset('css/public/catalog.css') }}" />
+  <style>
+      /* Catalog Hero Section */
+  .catalog-hero-section {
+    background-image: url("{{ asset('assets/homepage.jpg') }}");
+    background-size: cover;
+    background-position: center;
+    min-height: 170px;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 20px;
+    position: relative;
+    z-index: 0;
+  }
+
+  </style>
 </head>
 
 <body>
