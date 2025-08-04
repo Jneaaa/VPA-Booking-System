@@ -7,19 +7,6 @@ body {
   min-height: 100vh;
 }
 
-/* Catalog Hero Section */
-.catalog-hero-section {
-  background-image: url("{{ asset('assets/homepage.jpg') }}");
-  background-size: cover;
-  background-position: center;
-  min-height: 170px;
-  display: flex;
-  align-items: flex-end;
-  padding-bottom: 20px;
-  position: relative;
-  z-index: 0;
-}
-
 .catalog-hero-section::before {
   content: "";
   position: absolute;

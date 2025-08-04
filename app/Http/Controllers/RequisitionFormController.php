@@ -16,6 +16,137 @@ use App\Models\Equipment;
 use App\Models\FormStatus;
 use Carbon\Carbon;
 
+/* CONTROLLER DOCUMENTATION (expand to view):
+
+Lookup Tables:
+
+    AvailabilityStatus (status_id in availability_statuses table):
+    '1', 'Available', '#28a745', '1'
+    '2', 'Unavailable', '#dc3545', '1'
+    '3', 'Under Maintenance', '#ffc107', '1'
+    '4', 'Reserved', '#007bff', '1'
+    '5', 'Hidden', '#343a40', '1'
+
+    FormStatus (status_id in form_statuses table):
+    '1', 'Pending Approval', '#FFA500'
+    '2', 'In Review', '#00BFFF'
+    '3', 'Awaiting Payment', '#FF69B4'
+    '4', 'Scheduled', '#9370DB'
+    '5', 'Ongoing', '#1E90FF'
+    '6', 'Returned', '#20B2AA'
+    '7', 'Late Return', '#DC143C'
+    '8', 'Completed', '#32CD32'
+    '9', 'Rejected', '#B22222'
+    '10', 'Cancelled', '#A9A9A9'
+
+    RequisitionPurposes (purpose_id in requisition_purposes table):
+    '8', 'Alumni - Class Reunion'
+    '9', 'Alumni - Personal Events'
+    '7', 'Alumni-Organized Events'
+    '5', 'CPU Organization Led Activity'
+    '2', 'Equipment Rental'
+    '10', 'External Event'
+    '1', 'Facility Rental'
+    '6', 'Student-Organized Activity'
+    '3', 'Subject Requirement - Class, Seminar, Conference'
+    '4', 'University Program/Activity'
+
+    Condition (condition_id in conditions table):
+    '1', 'New', '#28a745'
+    '2', 'Good', '#20c997'
+    '3', 'Fair', '#ffc107'
+    '4', 'Needs Maintenance', '#fd7e14'
+    '5', 'Damaged', '#dc3545'
+    '6', 'In Use', '#6f42c1'
+
+User should fill in these fields (Upon form submission, the following data will be saved in DB: requisition_forms table):
+
+    (this info is copied from app/Models/RequisitionForm.php)
+
+    protected $fillable = [
+
+        // User information
+        'user_type',
+        'first_name',
+        'last_name',
+        'email',
+        'school_id',
+        'organization_name',
+        'contact_number',
+
+        // Requisition details
+        'num_participants',
+        'purpose_id',
+        'additional_requests',
+        'endorser',
+        'date_endorsed',
+
+        // User uploads. Formal letter is required, facility layout is optional. Acceptable formats: png, jpg, jpeg, pdf.
+
+        'formal_letter_url', // this is the formal letter uploaded by the user.
+        'formal _letter_public_id', // this is the public ID of the formal letter uploaded to Cloudinary.
+        'facility_layout_url', // this is the facility layout uploaded by the user.
+        'facility_layout_public_id', // this is the public ID of the facility layout uploaded to
+        'upload_token', // this is a unique token generated for the upload, used to reference the file later.
+
+
+        // Booking schedule. this must NOT conflict with existing bookings. Ensure no overlapping dates/times in the controller logic. 
+
+        'start_date',
+        'end_date',
+        'start_time',
+        'end_time',
+
+        // Requested items. This will be saved in the requested_facilities and requested_equipment tables.
+        'requested_facilities', // this is an array of facility IDs requested by the user.
+        'requested_equipment', // this is an array of equipment IDs requested by the user.
+        
+        
+
+        // Requisition status tracking. Left null if not applicable, status_id will be set to 'Pending Approval' (1) upon submission.
+
+        'status_id', 
+        'is_late',
+        'late_penalty_fee',
+        'returned_at',
+        'is_finalized',
+        'finalized_at',
+        'finalized_by',
+        'is_closed',
+        'closed_at',
+        'closed_by',
+        'official_receipt_no', 
+        'official_receipt_url', 
+        'official_receipt_public_id',
+        'calendar_title',
+        'calendar_description'
+        
+        'tentative_fee', // this is the total calculated fee of all selected items upon submission.
+        'approved_fee' // this is the final approved fee after review. left null for now, until the admins have finalized the requisition form and set the approved fee.
+
+    ];
+
+    protected $casts = [
+        'start_date' => 'string',
+        'end_date' => 'string',
+        'start_time' => 'string',
+        'end_time' => 'string',
+        'returned_at' => 'datetime',
+        'finalized_at' => 'datetime',
+        'closed_at' => 'datetime',
+        'date_endorsed' => 'datetime',
+        'is_late' => 'boolean',
+        'is_finalized' => 'boolean',
+        'is_closed' => 'boolean',
+        'tentative_fee' => 'decimal:2',
+        'approved_fee' => 'decimal:2',
+    ];  
+
+
+
+*/
+
+
 class RequisitionFormController extends Controller
 {
     public function activeSchedules()
