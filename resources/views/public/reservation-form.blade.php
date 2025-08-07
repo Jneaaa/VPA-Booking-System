@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
   <title>
     Central Philippine University - Equipment and Facility Booking Services
   </title>
@@ -274,6 +275,104 @@
       margin-right: 30px;
       /* Further reduce right margin */
     }
+
+    .selected-item-card {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .selected-item-image {
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+    }
+
+    .selected-item-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .selected-item-details {
+      flex-grow: 1;
+    }
+
+    .selected-item-details h6 {
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .quantity-control input {
+      width: 60px;
+      text-align: center;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 2px;
+    }
+
+    .quantity-control button {
+      padding: 0 8px;
+      font-size: 14px;
+    }
+
+    .delete-item-btn {
+      align-self: flex-start;
+    }
+
+    .selected-items-container .selected-item-card {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .selected-item-details {
+      flex-grow: 1;
+    }
+
+    .selected-item-details h6 {
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .selected-item-details .fee {
+      color: #28a745;
+      font-weight: 500;
+    }
+
+    .selected-item-details .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .delete-item-btn {
+      color: #dc3545;
+      background: none;
+      border: none;
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    .delete-item-btn:hover {
+      color: #bd2130;
+    }
   </style>
 </head>
 
@@ -358,6 +457,8 @@
 </script>
 
     <div class="container main-content">
+    <form id="reservationForm" method="POST">
+        @csrf
     <!-- Complete Your Reservation Section -->
     <div class="row">
       <div class="col-12">
@@ -652,8 +753,9 @@
       <div class="col-md-6">
       <div class="form-section-card">
         <h5>Requested Facilities</h5>
-        <div id="facilityList">
+        <div id="facilityList" class="selected-items-container">
         <!-- Facility items will be dynamically added here -->
+        <div class="text-muted empty-message">No facilities added yet.</div>
         </div>
       </div>
       </div>
@@ -661,8 +763,9 @@
       <div class="col-md-6">
       <div class="form-section-card">
         <h5>Requested Equipment</h5>
-        <div id="equipmentList">
+        <div id="equipmentList" class="selected-items-container">
         <!-- Equipment items will be dynamically added here -->
+        <div class="text-muted empty-message">No equipment added yet.</div>
         </div>
       </div>
       </div>
@@ -674,6 +777,7 @@
       </button>
       <button type="reset" class="btn btn-secondary">Cancel</button>
     </div>
+    </form>
     </div>
 
     <div id="facilityPopup" class="popup">
@@ -707,620 +811,8 @@
     </div>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-      // Global helper functions
-      function togglePopup(id) {
-        const popup = document.getElementById(id);
-        const overlay = document.getElementById("overlay");
-        if (popup && overlay) {
-          popup.classList.toggle("show");
-          overlay.classList.toggle("show");
-        }
-      }
-
-      function removeFile(inputId, buttonId) {
-        const inputField = document.getElementById(inputId);
-        const button = document.getElementById(buttonId);
-        if (inputField) {
-          inputField.value = "";
-          if (button) {
-            button.classList.add("d-none");
-          }
-        }
-      }
-
-      function toggleRemoveButton(inputId, buttonId) {
-        const inputField = document.getElementById(inputId);
-        const button = document.getElementById(buttonId);
-        if (inputField && button) {
-          if (inputField.value) {
-            button.classList.remove("d-none");
-          } else {
-            button.classList.add("d-none");
-          }
-        }
-      }
-
-      function adjustEndTime() {
-        const startTimeField = document.getElementById("startTimeField");
-        const endTimeField = document.getElementById("endTimeField");
-
-        if (startTimeField && endTimeField) {
-          const startTimeIndex = startTimeField.selectedIndex;
-          if (startTimeIndex !== -1) {
-            endTimeField.selectedIndex = Math.min(
-              startTimeIndex + 2,
-              endTimeField.options.length - 1
-            );
-          }
-        }
-      }
-
-      // Main DOMContentLoaded handler
-      document.addEventListener("DOMContentLoaded", function() {
-        // Initialize calendar functionality (removed jQuery version)
-        const miniCalendar = document.getElementById("miniCalendar");
-        if (miniCalendar) {
-          // You would need to initialize a vanilla JS datepicker here
-          // or remove this if not needed
-        }
-
-        // Date/time selection handling
-        const selectedDateTime = document.getElementById("selectedDateTime");
-        const startDateField = document.getElementById("startDateField");
-        const endDateField = document.getElementById("endDateField");
-        const startTimeField = document.getElementById("startTimeField");
-        const endTimeField = document.getElementById("endTimeField");
-        const clearSelectionBtn = document.getElementById("clearSelectionBtn");
-
-        function formatDateToLong(dateString) {
-          const options = { year: "numeric", month: "long", day: "numeric" };
-          const date = new Date(dateString);
-          return date.toLocaleDateString("en-US", options);
-        }
-
-        function updateSelectedDateTime() {
-          if (selectedDateTime && startDateField && endDateField && startTimeField && endTimeField) {
-            const startDate = startDateField.value;
-            const endDate = endDateField.value;
-            const startTime = startTimeField.value;
-            const endTime = endTimeField.value;
-            if (startDate && endDate && startTime && endTime) {
-              const formattedStartDate = formatDateToLong(startDate);
-              const formattedEndDate = formatDateToLong(endDate);
-              selectedDateTime.textContent = `Selected: ${formattedStartDate} ${startTime} to ${formattedEndDate} ${endTime}`;
-            } else {
-              selectedDateTime.textContent = "No date and time selected.";
-            }
-          }
-        }
-
-        if (startDateField) startDateField.addEventListener("change", updateSelectedDateTime);
-        if (endDateField) endDateField.addEventListener("change", updateSelectedDateTime);
-        if (startTimeField) startTimeField.addEventListener("change", updateSelectedDateTime);
-        if (endTimeField) endTimeField.addEventListener("change", updateSelectedDateTime);
-
-        if (clearSelectionBtn) {
-          clearSelectionBtn.addEventListener("click", function() {
-            if (startDateField) startDateField.value = "";
-            if (endDateField) endDateField.value = "";
-            if (startTimeField) startTimeField.value = "12:00 AM";
-            if (endTimeField) endTimeField.value = "12:00 AM";
-            updateSelectedDateTime();
-          });
-        }
-
-        // Toggle reservation content
-        const toggleReservationBtn = document.getElementById("toggleReservationBtn");
-        const reservationContent = document.getElementById("reservationContent");
-
-        if (toggleReservationBtn && reservationContent) {
-          toggleReservationBtn.addEventListener("click", function() {
-            if (reservationContent.style.maxHeight === "0px" || !reservationContent.style.maxHeight) {
-              reservationContent.style.maxHeight = reservationContent.scrollHeight + "px";
-              reservationContent.style.opacity = "1";
-              toggleReservationBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
-            } else {
-              reservationContent.style.maxHeight = "0px";
-              reservationContent.style.opacity = "0";
-              toggleReservationBtn.innerHTML = '<i class="bi bi-chevron-down"></i>';
-            }
-          });
-          // Initialize max-height
-          reservationContent.style.maxHeight = reservationContent.scrollHeight + "px";
-        }
-
-        // Applicant type handling
-        const applicantType = document.getElementById("applicantType");
-        const studentIdField = document.getElementById("studentIdField");
-
-        if (applicantType && studentIdField) {
-          applicantType.addEventListener("change", function() {
-            studentIdField.style.display = this.value === "External" ? "none" : "block";
-          });
-        }
-
-        // Facility and equipment list handling
-        const facilityList = document.getElementById("facilityList");
-        const equipmentList = document.getElementById("equipmentList");
-        const submitButton = document.getElementById("submitFormBtn");
-
-        function saveSelectionsToLocalStorage() {
-          if (!facilityList || !equipmentList) return;
-
-          const selectedFacilities = Array.from(
-            facilityList.querySelectorAll(".facility-card")
-          ).map((card) => card.querySelector("h6")?.textContent || "");
-          
-          const selectedEquipment = Array.from(
-            equipmentList.querySelectorAll(".equipment-card")
-          ).map((card) => card.querySelector("h6")?.textContent || "");
-
-          localStorage.setItem(
-            "selectedFacilities",
-            JSON.stringify(selectedFacilities)
-          );
-          localStorage.setItem(
-            "selectedEquipment",
-            JSON.stringify(selectedEquipment)
-          );
-
-          window.dispatchEvent(new Event("storage"));
-        }
-
-        function updateEmptyMessage(list, message) {
-          if (!list) return;
-
-          const hasCards = list.querySelector(".facility-card, .equipment-card");
-          let emptyMessage = list.querySelector(".empty-message");
-
-          if (!hasCards) {
-            if (!emptyMessage) {
-              emptyMessage = document.createElement("p");
-              emptyMessage.className = "text-muted empty-message";
-              emptyMessage.textContent = message;
-              list.appendChild(emptyMessage);
-            } else {
-              emptyMessage.style.display = "block";
-            }
-          } else if (emptyMessage) {
-            emptyMessage.style.display = "none";
-          }
-        }
-
-        function toggleSubmitButton() {
-          if (!submitButton || !facilityList || !equipmentList) return;
-          
-          const hasFacilities = facilityList.querySelector(".facility-card");
-          const hasEquipment = equipmentList.querySelector(".equipment-card");
-          submitButton.disabled = !(hasFacilities || hasEquipment);
-        }
-
-        if (facilityList) {
-          facilityList.addEventListener("click", function(event) {
-            if (event.target.closest(".btn-outline-danger")) {
-              const card = event.target.closest(".facility-card");
-              if (card) {
-                const roomSetupField = card.nextElementSibling;
-                if (roomSetupField && roomSetupField.classList.contains("attach-room-setup")) {
-                  roomSetupField.remove();
-                }
-                card.remove();
-                updateEmptyMessage(facilityList, "No facility added yet.");
-                toggleSubmitButton();
-                saveSelectionsToLocalStorage();
-              }
-            }
-          });
-        }
-
-        if (equipmentList) {
-          equipmentList.addEventListener("click", function(event) {
-            if (event.target.closest(".btn-outline-danger")) {
-              const card = event.target.closest(".equipment-card");
-              if (card) {
-                card.remove();
-                updateEmptyMessage(equipmentList, "No equipment added yet.");
-                toggleSubmitButton();
-                saveSelectionsToLocalStorage();
-              }
-            }
-          });
-        }
-
-        // Initialize lists
-        updateEmptyMessage(facilityList, "No facility added yet.");
-        updateEmptyMessage(equipmentList, "No equipment added yet.");
-        toggleSubmitButton();
-
-        // Form submission
-        if (submitButton) {
-          submitButton.addEventListener("click", async (e) => {
-            e.preventDefault();
-            const facilities = Array.from(
-              document.querySelectorAll("#facilityList .facility-card")
-            ).map((card) => ({
-              facility_id: card.querySelector("h6")?.textContent || "",
-              type: "facility",
-            }));
-            
-            const equipment = Array.from(
-              document.querySelectorAll("#equipmentList .equipment-card")
-            ).map((card) => ({
-              facility_id: card.querySelector("h6")?.textContent || "",
-              type: "equipment",
-            }));
-
-            const data = [...facilities, ...equipment];
-
-            try {
-              const response = await fetch("http://127.0.0.1:8000/api/requisition/add-item", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-              });
-              
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-              
-              alert("Form submitted successfully!");
-            } catch (error) {
-              console.error("Error:", error);
-              alert("Error submitting form: " + error.message);
-            }
-          });
-        }
-
-        // Check availability button
-        const checkAvailabilityBtn = document.getElementById("checkAvailabilityBtn");
-        const availabilityResult = document.createElement("span");
-        availabilityResult.id = "availabilityResult";
-        availabilityResult.style.marginLeft = "1px"; // Reduced margin to lessen spacing
-        availabilityResult.style.fontWeight = "bold";
-        checkAvailabilityBtn.parentNode.appendChild(availabilityResult);
-
-        if (checkAvailabilityBtn) {
-          checkAvailabilityBtn.addEventListener("click", async function() {
-            const button = this;
-            const startDate = document.getElementById("startDateField")?.value;
-            const endDate = document.getElementById("endDateField")?.value;
-            const startTime = document.getElementById("startTimeField")?.value;
-            const endTime = document.getElementById("endTimeField")?.value;
-
-            if (!startDate || !endDate || !startTime || !endTime) {
-              alert("Please select a complete schedule before checking availability.");
-              return;
-            }
-
-            // Save original button content
-            const originalButtonContent = button.innerHTML;
-
-            // Show loading state
-            button.innerHTML = `
-              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              Checking...
-            `;
-            button.disabled = true;
-            availabilityResult.innerHTML = ""; // Clear previous result
-
-            try {
-              // Convert 12-hour time to 24-hour format
-              function convertTo24Hour(time12h) {
-                const [time, modifier] = time12h.split(' ');
-                let [hours, minutes] = time.split(':');
-                if (hours === '12') hours = '00';
-                if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
-                return `${hours.padStart(2, '0')}:${minutes}`;
-              }
-
-              const startTime24 = convertTo24Hour(startTime);
-              const endTime24 = convertTo24Hour(endTime);
-
-              const selectedStart = new Date(`${startDate}T${startTime24}`);
-              const selectedEnd = new Date(`${endDate}T${endTime24}`);
-
-              if (selectedStart >= selectedEnd) {
-                throw new Error("End date/time must be after start date/time");
-              }
-
-              const response = await fetch("http://127.0.0.1:8000/api/active-schedules");
-              if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-              const scheduleData = await response.json();
-              let isConflict = false;
-              const schedules = Array.isArray(scheduleData) ? scheduleData : [scheduleData];
-
-              schedules.forEach(schedule => {
-                const scheduleStart = new Date(`${schedule.start_date}T${schedule.start_time}`);
-                const scheduleEnd = new Date(`${schedule.end_date}T${schedule.end_time}`);
-                if (
-                  (selectedStart >= scheduleStart && selectedStart < scheduleEnd) ||
-                  (selectedEnd > scheduleStart && selectedEnd <= scheduleEnd) ||
-                  (selectedStart <= scheduleStart && selectedEnd >= scheduleEnd)
-                ) {
-                  isConflict = true;
-                }
-              });
-
-              if (isConflict) {
-                availabilityResult.innerHTML = `
-                  <i class="bi bi-x-circle-fill text-danger" style="font-size: 1.5rem;"></i>
-                  <span class="text-danger ms-1" style="font-size: 0.875rem;">Timeslot is unavailable.</span>
-                `; // Red filled circle with "X" and message
-              } else {
-                availabilityResult.innerHTML = `
-                  <i class="bi bi-check-circle-fill text-success" style="font-size: 1.5rem;"></i>
-                  <span class="text-success ms-1" style="font-size: 0.875rem;">Timeslot is available.</span>
-                `; // Green filled circle with checkmark and message
-              }
-            } catch (error) {
-              console.error("Error checking availability:", error);
-              availabilityResult.innerHTML = `
-                <i class="bi bi-exclamation-circle-fill text-warning" style="font-size: 1.5rem;"></i>
-                <span class="text-warning ms-1" style="font-size: 0.875rem;">Something went wrong.</span>
-              `; // Yellow filled circle with exclamation mark and message
-            } finally {
-              button.disabled = false;
-              button.innerHTML = originalButtonContent;
-            }
-          });
-        }
-
-        // Storage event handling for facility/equipment lists
-        window.addEventListener("storage", async () => {
-          const selectedFacilities = JSON.parse(localStorage.getItem("selectedFacilities")) || [];
-          const selectedEquipment = JSON.parse(localStorage.getItem("selectedEquipment")) || [];
-
-          const facilityList = document.getElementById("facilityList");
-          const equipmentList = document.getElementById("equipmentList");
-
-          if (!facilityList || !equipmentList) return;
-
-          // Clear existing items
-          facilityList.innerHTML = "";
-          equipmentList.innerHTML = "";
-
-          // Fetch all facilities data from the API
-          let facilitiesData = [];
-          try {
-            const response = await fetch("http://127.0.0.1:8000/api/facilities");
-            const data = await response.json();
-            facilitiesData = data.data || [];
-          } catch (error) {
-            console.error("Failed to fetch facilities:", error);
-          }
-
-          // Add facilities to the container
-          selectedFacilities.forEach((facilityId) => {
-            const facility = facilitiesData.find(
-              (f) => f.facility_id === parseInt(facilityId)
-            );
-            if (facility) {
-              const facilityCard = document.createElement("div");
-              facilityCard.className = "facility-card";
-              facilityCard.innerHTML = `
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="bi bi-trash"></i>
-                </button>
-                <div class="facility-details">
-                  <h6 class="mb-1">${facility.facility_name}</h6>
-                  <p class="text-muted mb-1">${facility.description || "No description available."}</p>
-                </div>
-              `;
-              facilityList.appendChild(facilityCard);
-            }
-          });
-
-          // Add equipment to the container
-          selectedEquipment.forEach((equipmentId) => {
-            const equipment = facilitiesData.find(
-              (e) => e.facility_id === parseInt(equipmentId)
-            );
-            if (equipment) {
-              const equipmentCard = document.createElement("div");
-              equipmentCard.className = "equipment-card";
-              equipmentCard.innerHTML = `
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="bi bi-trash"></i>
-                </button>
-                <div class="equipment-details">
-                  <h6 class="mb-1">${equipment.facility_name}</h6>
-                  <p class="text-muted mb-1">${equipment.description || "No description available."}</p>
-                </div>
-              `;
-              equipmentList.appendChild(equipmentCard);
-            }
-          });
-
-          toggleSubmitButton();
-        });
-
-        // Trigger initial storage event
-        window.dispatchEvent(new Event("storage"));
-
-        // Dropdown toggle handling
-        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-        dropdownToggles.forEach(function(toggle) {
-          toggle.addEventListener('click', function(event) {
-            event.preventDefault();
-            const dropdownMenu = this.nextElementSibling;
-            if (dropdownMenu) {
-              dropdownMenu.classList.toggle('show');
-            }
-          });
-        });
-      });
-    </script>
-  <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Load cart items on page load
-    loadCartItems();
-
-    // Event listeners for removing items
-    document.getElementById('facilityList').addEventListener('click', function(e) {
-        if (e.target.closest('.btn-outline-danger')) {
-            const card = e.target.closest('.facility-card');
-            const facilityId = card.querySelector('h6').textContent;
-            removeFromCart(facilityId, 'facility');
-        }
-    });
-
-    document.getElementById('equipmentList').addEventListener('click', function(e) {
-        if (e.target.closest('.btn-outline-danger')) {
-            const card = e.target.closest('.equipment-card');
-            const equipmentId = card.querySelector('h6').textContent;
-            removeFromCart(equipmentId, 'equipment');
-        }
-    });
-
-    // Form submission
-    document.getElementById('submitFormBtn').addEventListener('click', submitForm);
-});
-
-async function loadCartItems() {
-    try {
-        // Load facilities
-        const facilitiesResponse = await fetch('/api/facilities');
-        const facilitiesData = await facilitiesResponse.json();
-        const facilities = facilitiesData.data || [];
-
-        // Load cart items
-        const cartResponse = await fetch('/api/requisition/calculate-fees');
-        const cartData = await cartResponse.json();
-        const cartItems = cartData.data?.selected_items || [];
-
-        // Render facilities
-        const facilityList = document.getElementById('facilityList');
-        facilityList.innerHTML = '';
-
-        const facilityItems = cartItems.filter(item => item.type === 'facility');
-        if (facilityItems.length === 0) {
-            facilityList.innerHTML = '<p class="text-muted empty-message">No facility added yet.</p>';
-        } else {
-            facilityItems.forEach(item => {
-                const facility = facilities.find(f => f.facility_id == item.id);
-                if (facility) {
-                    const facilityCard = document.createElement('div');
-                    facilityCard.className = 'facility-card';
-                    facilityCard.innerHTML = `
-                        <button class="btn btn-outline-danger btn-sm">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                        ${facility.images && facility.images.length ? 
-                            `<img src="${facility.images[0].image_url}" alt="${facility.facility_name}">` : 
-                            `<div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">No Image</div>`}
-                        <div class="facility-details">
-                            <h6 class="mb-1">${facility.facility_id}</h6>
-                            <p class="text-muted mb-1">${facility.facility_name}</p>
-                            <small>${facility.description || 'No description available.'}</small>
-                        </div>
-                    `;
-                    facilityList.appendChild(facilityCard);
-                }
-            });
-        }
-
-        // Enable/disable submit button based on cart items
-        document.getElementById('submitFormBtn').disabled = cartItems.length === 0;
-    } catch (error) {
-        console.error('Error loading cart items:', error);
-    }
-}
-
-async function removeFromCart(id, type) {
-    try {
-        const response = await fetch('/api/requisition/remove-item', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({
-                [`${type}_id`]: id,
-                type: type
-            })
-        });
-
-        if (response.ok) {
-            loadCartItems(); // Refresh the list
-            showToast('Item removed from cart');
-        } else {
-            throw new Error('Failed to remove item');
-        }
-    } catch (error) {
-        console.error('Error removing from cart:', error);
-        showToast('Failed to remove item', 'error');
-    }
-}
-
-async function submitForm() {
-    // Get form data
-    const formData = {
-        user_type: document.getElementById('applicantType').value,
-        first_name: document.querySelector('input[name="first_name"]').value,
-        last_name: document.querySelector('input[name="last_name"]').value,
-        email: document.querySelector('input[type="email"]').value,
-        contact_number: document.querySelector('input[name="contact_number"]').value,
-        organization_name: document.querySelector('input[name="organization_name"]').value,
-        school_id: document.querySelector('input[name="school_id"]')?.value || '',
-        num_participants: document.querySelector('input[name="num_participants"]').value,
-        purpose_id: document.getElementById('activityPurposeField').value,
-        additional_requests: document.querySelector('textarea[name="additional_requests"]').value,
-        start_date: document.getElementById('startDateField').value,
-        end_date: document.getElementById('endDateField').value,
-        start_time: document.getElementById('startTimeField').value,
-        end_time: document.getElementById('endTimeField').value,
-        endorser: document.querySelector('input[name="endorser"]').value || null,
-        date_endorsed: document.querySelector('input[name="date_endorsed"]').value || null
-    };
-
-    try {
-        // First save request info
-        const saveResponse = await fetch('/api/requisition/save-request-info', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify(formData)
-        });
-
-        if (!saveResponse.ok) {
-            throw new Error('Failed to save request info');
-        }
-
-        // Then submit the form
-        const submitResponse = await fetch('/api/requisition/submit', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const result = await submitResponse.json();
-
-        if (submitResponse.ok) {
-            showToast('Form submitted successfully!', 'success');
-            // Redirect or show success message with access code
-            window.location.href = `/your-bookings?access_code=${result.data.access_code}`;
-        } else {
-            throw new Error(result.message || 'Submission failed');
-        }
-    } catch (error) {
-        console.error('Error submitting form:', error);
-        showToast(error.message, 'error');
-    }
-}
-
-function showToast(message, type = 'success') {
-    // Implement your toast notification here or use Bootstrap's toast
-    alert(message); // Simple fallback
-}
-</script>
+  {{-- Remove all inline JS related to reservation form logic --}}
+  {{-- Reference reservation-form.js --}}
+  <script src="{{ asset('js/public/reservation-form.js') }}"></script>
 </body>
 </html>
