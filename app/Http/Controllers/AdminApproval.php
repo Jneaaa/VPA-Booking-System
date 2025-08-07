@@ -120,9 +120,9 @@ class AdminApproval extends Controller
 
         */  
 
-        // A form's status_id will be set to 'In Review' (2) if at least one admin has viewed the form and is currently reviewing it.
+        // A form's status_id will remain as 'Pending Approval' (1) until the required number of approvals has been reached. 
         // A form's status_id will be set to 'Awaiting Payment' (3) if the required number of approvals has been reached, allowing an admin to manually set the 'is_finalized' field in the requisition_forms table to true, with the 'finalized_by' field set to the admin's ID.
-        
+
 
     }
 

@@ -48,7 +48,7 @@ Route::get('/facilities/{facility}', [FacilityController::class, 'show']);
 
 // ---------------- Requisition Form Routes ---------------- //
 
-Route::prefix('requisition')->group(function () {
+Route::prefix('requisition')->middleware('web')->group(function () {
     Route::post('/save-request-info', [RequisitionFormController::class, 'saveRequestInfo']);
     Route::post('/add-item', [RequisitionFormController::class, 'addToForm']);
     Route::post('/remove-item', [RequisitionFormController::class, 'removeFromForm']);
@@ -120,3 +120,5 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 });
+
+// All RequisitionFormController API routes are already present.

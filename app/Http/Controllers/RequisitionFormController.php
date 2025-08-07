@@ -14,20 +14,22 @@ use App\Models\RequestedFacility;
 use App\Models\Facility;
 use App\Models\Equipment;
 use App\Models\FormStatus;
+use App\Models\AvailabilityStatus;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Session;
 
 /* CONTROLLER DOCUMENTATION (expand to view):
 
 Lookup Tables:
 
-    AvailabilityStatus (status_id in availability_statuses table):
+    AvailabilityStatus Model (status_id in availability_statuses table):
     '1', 'Available', '#28a745', '1'
     '2', 'Unavailable', '#dc3545', '1'
     '3', 'Under Maintenance', '#ffc107', '1'
     '4', 'Reserved', '#007bff', '1'
     '5', 'Hidden', '#343a40', '1'
 
-    FormStatus (status_id in form_statuses table):
+    FormStatus Model (status_id in form_statuses table):
     '1', 'Pending Approval', '#FFA500'
     '2', 'In Review', '#00BFFF'
     '3', 'Awaiting Payment', '#FF69B4'
@@ -39,7 +41,7 @@ Lookup Tables:
     '9', 'Rejected', '#B22222'
     '10', 'Cancelled', '#A9A9A9'
 
-    RequisitionPurposes (purpose_id in requisition_purposes table):
+    RequisitionPurpose Model (purpose_id in requisition_purposes table):
     '8', 'Alumni - Class Reunion'
     '9', 'Alumni - Personal Events'
     '7', 'Alumni-Organized Events'
@@ -51,13 +53,15 @@ Lookup Tables:
     '3', 'Subject Requirement - Class, Seminar, Conference'
     '4', 'University Program/Activity'
 
-    Condition (condition_id in conditions table):
+    Condition Model (condition_id in conditions table):
     '1', 'New', '#28a745'
     '2', 'Good', '#20c997'
     '3', 'Fair', '#ffc107'
     '4', 'Needs Maintenance', '#fd7e14'
     '5', 'Damaged', '#dc3545'
     '6', 'In Use', '#6f42c1'
+
+    Note: Condition applies only to equipment. This is used to determine what equipment_item is available for booking. Only New, good, and fair conditions are available for booking.
 
 User should fill in these fields (Upon form submission, the following data will be saved in DB: requisition_forms table):
 
@@ -66,20 +70,20 @@ User should fill in these fields (Upon form submission, the following data will 
     protected $fillable = [
 
         // User information
-        'user_type',
-        'first_name',
-        'last_name',
-        'email',
-        'school_id',
-        'organization_name',
-        'contact_number',
+        'user_type', // 'Internal' or 'External'
+        'first_name', // required
+        'last_name', // required
+        'email', // required
+        'school_id', // null for external, required for internal users
+        'organization_name',  // optional
+        'contact_number', // optional
 
         // Requisition details
-        'num_participants',
-        'purpose_id',
-        'additional_requests',
-        'endorser',
-        'date_endorsed',
+        'num_participants', // required, must be at least 1
+        'purpose_id', // this is the purpose of the requisition, e.g., 'Facility Rental', 'Equipment Rental', etc.
+        'additional_requests', // optional, additional requests or notes
+        'endorser', // optional, name of the endorser (if applicable)
+        'date_endorsed', // optional, date endorsed by the endorser (if applicable)
 
         // User uploads. Formal letter is required, facility layout is optional. Acceptable formats: png, jpg, jpeg, pdf.
 
@@ -89,7 +93,6 @@ User should fill in these fields (Upon form submission, the following data will 
         'facility_layout_public_id', // this is the public ID of the facility layout uploaded to
         'upload_token', // this is a unique token generated for the upload, used to reference the file later.
 
-
         // Booking schedule. this must NOT conflict with existing bookings. Ensure no overlapping dates/times in the controller logic. 
 
         'start_date',
@@ -97,30 +100,29 @@ User should fill in these fields (Upon form submission, the following data will 
         'start_time',
         'end_time',
 
-        // Requested items. This will be saved in the requested_facilities and requested_equipment tables.
+        // Requested items. This will be saved in the requested_facilities and requested_equipment tables:
+
         'requested_facilities', // this is an array of facility IDs requested by the user.
         'requested_equipment', // this is an array of equipment IDs requested by the user.
-        
-        
 
         // Requisition status tracking. Left null if not applicable, status_id will be set to 'Pending Approval' (1) upon submission.
 
-        'status_id', 
-        'is_late',
-        'late_penalty_fee',
-        'returned_at',
-        'is_finalized',
-        'finalized_at',
-        'finalized_by',
-        'is_closed',
-        'closed_at',
-        'closed_by',
-        'official_receipt_no', 
-        'official_receipt_url', 
-        'official_receipt_public_id',
-        'calendar_title',
-        'calendar_description'
-        
+        'status_id', // this is the status of the requisition form, e.g., 'Pending Approval', 'In Review', etc.
+        'is_late', // this is a boolean field that indicates if the requisition form is late. Set to true if the form is submitted after the end date.
+        'late_penalty_fee', // this is the late penalty fee manually applied by the admins if the form is late.
+        'returned_at', date and time that the requested_equipment was returned.
+        'is_finalized', // this is a boolean field that indicates if the requisition form is finalized. Set to true if the form is finalized by an admin.
+        'finalized_at', // date and time that the requisition form was finalized.
+        'finalized_by', // this is the ID of the admin who finalized the requisition form.
+        'is_closed', // this is a boolean field that indicates if the requisition form is closed. Set to true if the form is closed by an admin.
+        'closed_at', // date and time that the requisition form was closed.
+        'closed_by', // this is the ID of the admin who closed the requisition form.
+        'official_receipt_no', this is the official receipt number issued by the admin upon finalization of the requisition form.
+        'official_receipt_url', // this is the official receipt URL uploaded by the admin upon finalization of the requisition form.
+        'official_receipt_public_id', // this is the public ID of the official receipt uploaded to Cloudinary.
+        'calendar_title', // this is the title of the calendar event created for the requisition form.
+        'calendar_description', // this is the description of the calendar event created for the requisition form.
+
         'tentative_fee', // this is the total calculated fee of all selected items upon submission.
         'approved_fee' // this is the final approved fee after review. left null for now, until the admins have finalized the requisition form and set the approved fee.
 
@@ -141,8 +143,6 @@ User should fill in these fields (Upon form submission, the following data will 
         'tentative_fee' => 'decimal:2',
         'approved_fee' => 'decimal:2',
     ];  
-
-
 
 */
 
@@ -216,11 +216,6 @@ class RequisitionFormController extends Controller
             'num_participants',
             'purpose_id',
             'additional_requests',
-            'formal_letter_url',
-            'formal_letter_public_id',
-            'facility_layout_url',
-            'facility_layout_public_id',
-            'upload_token',
             'start_date',
             'end_date',
             'start_time',
@@ -251,7 +246,7 @@ class RequisitionFormController extends Controller
             return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
         }
 
-        $selectedItems = session('selected_items', []);
+        $selectedItems = Session::get('selected_items', []);
         $id = $request->input($request->type . '_id');
         $type = $request->type;
 
@@ -269,12 +264,13 @@ class RequisitionFormController extends Controller
         $newItem = [
             'id' => $id,
             'type' => $type,
-            'added_at' => now(),
+            'added_at' => now()->toDateTimeString(),
             'quantity' => $request->quantity ?? 1
         ];
 
         $selectedItems[] = $newItem;
-        session(['selected_items' => $selectedItems]);
+        Session::put('selected_items', $selectedItems);
+        Session::save(); // Explicitly save the session
 
         return $this->jsonResponse(true, ucfirst($type) . ' added successfully.', [
             'selected_items' => $selectedItems,
@@ -355,73 +351,116 @@ class RequisitionFormController extends Controller
             'end_time' => 'required|date_format:H:i|after:start_time',
             'facility_id' => 'nullable|exists:facilities,facility_id',
             'equipment_id' => 'nullable|exists:equipment,equipment_id',
-            'request_id' => 'sometimes|exists:requisition_forms,request_id' // For edit scenarios
+            'request_id' => 'sometimes|exists:requisition_forms,request_id'
         ]);
 
         if ($validator->fails()) {
             return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
         }
 
-        // Create Carbon instances without seconds
         $requestStart = Carbon::createFromFormat('Y-m-d H:i', $request->start_date . ' ' . $request->start_time);
         $requestEnd = Carbon::createFromFormat('Y-m-d H:i', $request->end_date . ' ' . $request->end_time);
 
-        // Validate time slot
         if ($requestStart >= $requestEnd) {
             return $this->jsonResponse(false, 'End time must be after start time.', [], 422);
         }
 
-        // Get status IDs that indicate a conflict (Scheduled, Ongoing)
         $conflictStatusIds = FormStatus::whereIn('status_name', ['Awaiting Payment', 'Scheduled', 'Ongoing'])
             ->pluck('status_id')
             ->toArray();
 
-        $query = RequisitionForm::where(function ($query) use ($requestStart, $requestEnd, $conflictStatusIds) {
-            // Check for overlapping date ranges
-            $query->where(function ($q) use ($requestStart, $requestEnd) {
-                $q->whereBetween('start_date', [$requestStart->format('Y-m-d'), $requestEnd->format('Y-m-d')])
-                    ->orWhereBetween('end_date', [$requestStart->format('Y-m-d'), $requestEnd->format('Y-m-d')])
-                    ->orWhere(function ($q) use ($requestStart, $requestEnd) {
-                        $q->where('start_date', '<=', $requestStart->format('Y-m-d'))
-                            ->where('end_date', '>=', $requestEnd->format('Y-m-d'));
-                    });
-            })
-                // Check for overlapping time ranges (without seconds)
-                ->where(function ($q) use ($requestStart, $requestEnd) {
-                    $q->where(function ($inner) use ($requestStart, $requestEnd) {
-                        $inner->where('start_time', '<=', $requestEnd->format('H:i'))
-                            ->where('end_time', '>=', $requestStart->format('H:i'));
+        $conflicts = false;
+        $conflictItems = [];
+
+        // If facility_id or equipment_id is provided, check just that one
+        if ($request->filled('facility_id') || $request->filled('equipment_id')) {
+            $query = RequisitionForm::where(function ($query) use ($request, $requestStart, $requestEnd, $conflictStatusIds) {
+                $query->where(function ($q) use ($requestStart, $requestEnd) {
+                    $q->where(function ($dateQ) use ($requestStart, $requestEnd) {
+                        $dateQ->where('start_date', '<=', $requestEnd->format('Y-m-d'))
+                            ->where('end_date', '>=', $requestStart->format('Y-m-d'));
                     });
                 })
-                ->whereIn('status_id', $conflictStatusIds);
-        }); // <-- Add missing semicolon here
-
-        // Exclude current request if editing
-        if ($request->has('request_id')) {
-            $query->where('request_id', '!=', $request->request_id);
-        }
-
-        // Check for specific facility conflicts
-        if ($request->has('facility_id')) {
-            $query->whereHas('requestedFacilities', function ($q) use ($request) {
-                $q->where('facility_id', $request->facility_id);
+                    ->where(function ($q) use ($requestStart, $requestEnd) {
+                        $q->where(function ($inner) use ($requestStart, $requestEnd) {
+                            // Allow partial overlaps and edge cases
+                            $inner->where('start_time', '<', $requestEnd->format('H:i'))
+                                ->where('end_time', '>', $requestStart->format('H:i'));
+                        });
+                    })
+                    ->whereIn('status_id', $conflictStatusIds);
             });
-        }
 
-        // Check for specific equipment conflicts
-        if ($request->has('equipment_id')) {
-            $query->whereHas('requestedEquipment', function ($q) use ($request) {
-                $q->where('equipment_id', $request->equipment_id);
-            });
-        }
+            if ($request->has('request_id')) {
+                $query->where('request_id', '!=', $request->request_id);
+            }
+            if ($request->filled('facility_id')) {
+                $query->whereHas('requestedFacilities', function ($q) use ($request) {
+                    $q->where('facility_id', $request->facility_id);
+                });
+            }
+            if ($request->filled('equipment_id')) {
+                $query->whereHas('requestedEquipment', function ($q) use ($request) {
+                    $q->where('equipment_id', $request->equipment_id);
+                });
+            }
 
-        $conflicts = $query->exists();
+            $conflicts = $query->exists();
+            if ($conflicts) {
+                $conflictItems[] = [
+                    'type' => $request->filled('facility_id') ? 'facility' : 'equipment',
+                    'id' => $request->facility_id ?? $request->equipment_id
+                ];
+            }
+        } else {
+            // Check all items in the cart/session
+            $selectedItems = session('selected_items', []);
+            foreach ($selectedItems as $item) {
+                $query = RequisitionForm::where(function ($query) use ($requestStart, $requestEnd, $conflictStatusIds) {
+                    $query->where(function ($q) use ($requestStart, $requestEnd) {
+                        $q->where(function ($dateQ) use ($requestStart, $requestEnd) {
+                            $dateQ->where('start_date', '<=', $requestEnd->format('Y-m-d'))
+                                ->where('end_date', '>=', $requestStart->format('Y-m-d'));
+                        });
+                    })
+                        ->where(function ($q) use ($requestStart, $requestEnd) {
+                            $q->where(function ($inner) use ($requestStart, $requestEnd) {
+                                // Allow partial overlaps and edge cases
+                                $inner->where('start_time', '<', $requestEnd->format('H:i'))
+                                    ->where('end_time', '>', $requestStart->format('H:i'));
+                            });
+                        })
+                        ->whereIn('status_id', $conflictStatusIds);
+                });
+
+                if ($request->has('request_id')) {
+                    $query->where('request_id', '!=', $request->request_id);
+                }
+                if ($item['type'] === 'facility') {
+                    $query->whereHas('requestedFacilities', function ($q) use ($item) {
+                        $q->where('facility_id', $item['id']);
+                    });
+                }
+                if ($item['type'] === 'equipment') {
+                    $query->whereHas('requestedEquipment', function ($q) use ($item) {
+                        $q->where('equipment_id', $item['id']);
+                    });
+                }
+
+                if ($query->exists()) {
+                    $conflicts = true;
+                    $conflictItems[] = $item;
+                }
+            }
+        }
 
         return $this->jsonResponse(
             true,
-            $conflicts ?
-            'Time slot conflicts with an existing booking.' : 'Time slot is available.',
-            ['available' => !$conflicts]
+            $conflicts ? 'Time slot conflicts with an existing booking.' : 'Time slot is available.',
+            [
+                'available' => !$conflicts,
+                'conflict_items' => $conflictItems
+            ]
         );
     }
 
