@@ -9,7 +9,8 @@ Route::middleware('web')->group(function () {
     });
 
     // ----- Public Views ----- //
-    Route::view('/booking-catalog', 'public.booking-catalog');
+    Route::view('/facility-catalog', 'public.facility-catalog');
+    Route::view('/equipment-catalog', 'public.equipment-catalog');
     Route::view('/reservation-form', 'public.reservation-form');
     Route::view('/equipment-catalog', 'public.equipment-catalog');
     Route::view('/about-equipment', 'public.about-equipment');

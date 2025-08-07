@@ -239,7 +239,7 @@ class RequisitionFormController extends Controller
             'facility_id' => 'required_without:equipment_id|exists:facilities,facility_id',
             'equipment_id' => 'required_without:facility_id|exists:equipment,equipment_id',
             'type' => 'required|in:facility,equipment',
-            'quantity' => 'sometimes|integer|min:1'
+            'quantity' => 'required_if:type,equipment|integer|min:1'
         ]);
 
         if ($validator->fails()) {
@@ -249,9 +249,22 @@ class RequisitionFormController extends Controller
         $selectedItems = Session::get('selected_items', []);
         $id = $request->input($request->type . '_id');
         $type = $request->type;
+        $quantity = $request->quantity ?? 1;
 
         // Check for duplicate item
-        if (collect($selectedItems)->contains(fn($item) => $item['id'] == $id && $item['type'] === $type)) {
+        $existingIndex = collect($selectedItems)->search(function ($item) use ($id, $type) {
+            return $item['id'] == $id && $item['type'] === $type;
+        });
+
+        if ($existingIndex !== false) {
+            // Update quantity if equipment
+            if ($type === 'equipment') {
+                $selectedItems[$existingIndex]['quantity'] = $quantity;
+                Session::put('selected_items', $selectedItems);
+                return $this->jsonResponse(true, 'Equipment quantity updated.', [
+                    'selected_items' => $selectedItems
+                ]);
+            }
             return $this->jsonResponse(false, 'This item is already in your requisition.', [], 422);
         }
 
@@ -264,17 +277,44 @@ class RequisitionFormController extends Controller
         $newItem = [
             'id' => $id,
             'type' => $type,
-            'added_at' => now()->toDateTimeString(),
-            'quantity' => $request->quantity ?? 1
+            'quantity' => $quantity,
+            'added_at' => now()->toDateTimeString()
         ];
 
         $selectedItems[] = $newItem;
         Session::put('selected_items', $selectedItems);
-        Session::save(); // Explicitly save the session
 
         return $this->jsonResponse(true, ucfirst($type) . ' added successfully.', [
-            'selected_items' => $selectedItems,
-            'total_items' => count($selectedItems)
+            'selected_items' => $selectedItems
+        ]);
+    }
+
+    // ----- Remove items from session ----- //
+    public function removeFromForm(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'facility_id' => 'required_without:equipment_id|exists:facilities,facility_id',
+            'equipment_id' => 'required_without:facility_id|exists:equipment,equipment_id',
+            'type' => 'required|in:facility,equipment'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
+        }
+
+        $selectedItems = Session::get('selected_items', []);
+        $id = $request->input($request->type . '_id');
+        $type = $request->type;
+
+        $updatedItems = array_values(array_filter(
+            $selectedItems,
+            fn($item) => !($item['id'] == $id && $item['type'] === $type)
+        ));
+
+        session(['selected_items' => $updatedItems]);
+
+        return $this->jsonResponse(true, ucfirst($type) . ' removed successfully.', [
+            'selected_items' => $updatedItems
         ]);
     }
 
@@ -311,35 +351,6 @@ class RequisitionFormController extends Controller
         ]);
     }
 
-    // ----- Remove items from session ----- //
-    public function removeFromForm(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'facility_id' => 'required_without:equipment_id|exists:facilities,facility_id',
-            'equipment_id' => 'required_without:facility_id|exists:equipment,equipment_id',
-            'type' => 'required|in:facility,equipment'
-        ]);
-
-        if ($validator->fails()) {
-            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
-        }
-
-        $selectedItems = session('selected_items', []);
-        $id = $request->input($request->type . '_id');
-        $type = $request->type;
-
-        $updatedItems = array_values(array_filter(
-            $selectedItems,
-            fn($item) => !($item['id'] == $id && $item['type'] === $type)
-        ));
-
-        session(['selected_items' => $updatedItems]);
-
-        return $this->jsonResponse(true, ucfirst($type) . ' removed successfully.', [
-            'selected_items' => $updatedItems,
-            'total_items' => count($updatedItems)
-        ]);
-    }
 
     // ----- Check for booking schedule conflicts ----- //
     public function checkAvailability(Request $request)
