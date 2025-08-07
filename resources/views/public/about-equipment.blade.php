@@ -1,5 +1,9 @@
 @extends('layouts.app')
-<head>
+
+@section('title', 'About Services - Equipment')
+
+@section('content')
+
     <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}">
     <style>
         body {
@@ -84,116 +88,108 @@
             margin-top: auto;
         }
     </style>
-</head>
 
-<body>
-        @section('title', 'About Equipment')
+    <section class="hero-section">
+        <h1>Equipment</h1>
+    </section>
 
-        @section('content')
-
-            <section class="hero-section">
-                <h1>Equipment</h1>
-            </section>
-
-            <section class="section-content container">
-                <h2 class="mb-3">What You Can Borrow</h2>
-                <p class="mb-4">We offer various types of equipment such as projectors, microphones, and laptops to support
-                    academic and
-                    extracurricular activities. Browse through our available equipment below.</p>
-                <div class="row mt-4">
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
-                            <img src="{{ asset('assets/mic.jpg') }}" class="card-img-top card-img" alt="Microphone">
-                            <div class="card-body">
-                                <h5 class="card-title">Microphone</h5>
-                                <p class="card-text">Perfect for speaking engagements and presentations, ensuring clear
-                                    audio.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
-                            <img src="{{ asset('assets/laptop.jpg') }}" class="card-img-top card-img" alt="Laptop">
-                            <div class="card-body">
-                                <h5 class="card-title">Laptop</h5>
-                                <p class="card-text">Available for academic use, research, and event hosting, fully
-                                    equipped.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
-                            <img src="{{ asset('assets/projector.jpg') }}" class="card-img-top card-img" alt="Projector">
-                            <div class="card-body">
-                                <h5 class="card-title">Projector</h5>
-                                <p class="card-text">High-resolution projectors for impactful presentations and large-scale
-                                    screenings.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
-                            <img src="{{ asset('assets/speaker.jpg') }}" class="card-img-top card-img" alt="Speaker">
-                            <div class="card-body">
-                                <h5 class="card-title">Portable Speaker System</h5>
-                                <p class="card-text">Ideal for events requiring audio amplification in various settings.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
-                            <img src="{{ asset('assets/camera.jpg') }}" class="card-img-top card-img" alt="Camera">
-                            <div class="card-body">
-                                <h5 class="card-title">Digital Camera</h5>
-                                <p class="card-text">Capture high-quality photos and videos for academic projects or events.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
-                            <img src="{{ asset('assets/whiteboard.jpg') }}" class="card-img-top card-img" alt="Whiteboard">
-                            <div class="card-body">
-                                <h5 class="card-title">Interactive Whiteboard</h5>
-                                <p class="card-text">Enhance your presentations and collaborative sessions with an
-                                    interactive
-                                    display.</p>
-                            </div>
-                        </div>
+    <section class="section-content container">
+        <h2 class="mb-3">What You Can Borrow</h2>
+        <p class="mb-4">We offer various types of equipment such as projectors, microphones, and laptops to support
+            academic and
+            extracurricular activities. Browse through our available equipment below.</p>
+        <div class="row mt-4">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/mic.jpg') }}" class="card-img-top card-img" alt="Microphone">
+                    <div class="card-body">
+                        <h5 class="card-title">Microphone</h5>
+                        <p class="card-text">Perfect for speaking engagements and presentations, ensuring clear
+                            audio.
+                        </p>
                     </div>
                 </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/laptop.jpg') }}" class="card-img-top card-img" alt="Laptop">
+                    <div class="card-body">
+                        <h5 class="card-title">Laptop</h5>
+                        <p class="card-text">Available for academic use, research, and event hosting, fully
+                            equipped.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/projector.jpg') }}" class="card-img-top card-img" alt="Projector">
+                    <div class="card-body">
+                        <h5 class="card-title">Projector</h5>
+                        <p class="card-text">High-resolution projectors for impactful presentations and large-scale
+                            screenings.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/speaker.jpg') }}" class="card-img-top card-img" alt="Speaker">
+                    <div class="card-body">
+                        <h5 class="card-title">Portable Speaker System</h5>
+                        <p class="card-text">Ideal for events requiring audio amplification in various settings.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/camera.jpg') }}" class="card-img-top card-img" alt="Camera">
+                    <div class="card-body">
+                        <h5 class="card-title">Digital Camera</h5>
+                        <p class="card-text">Capture high-quality photos and videos for academic projects or events.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/whiteboard.jpg') }}" class="card-img-top card-img" alt="Whiteboard">
+                    <div class="card-body">
+                        <h5 class="card-title">Interactive Whiteboard</h5>
+                        <p class="card-text">Enhance your presentations and collaborative sessions with an
+                            interactive
+                            display.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4">
-                    <ul class="pagination">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </section>
-        @endsection
+        <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4">
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </section>
+@endsection
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const dropdownElements = document.querySelectorAll('.dropdown-toggle');
-                dropdownElements.forEach(dropdown => {
-                    new bootstrap.Dropdown(dropdown);
-                });
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownElements = document.querySelectorAll('.dropdown-toggle');
+            dropdownElements.forEach(dropdown => {
+                new bootstrap.Dropdown(dropdown);
             });
-        </script>
-    </body>
-
-</html>
+        });
+    </script>
+@endsection

@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bookings</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+@section('title', 'Booking Catalog - Facilities & Equipment')
+
+@section('content')
     <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
     <style>
         body {
@@ -265,16 +262,6 @@
             }
         }
     </style>
-</head>
-
-<body>
-
-@extends('layouts.app')
-
-@section('title', 'Your Bookings')
-
-
-@section('content')
 
     <main class="main-content d-flex align-items-center justify-content-center">
         <div class="content-wrapper">
@@ -416,8 +403,9 @@
         </div>
     </main>
 
-    @endsection
+@endsection
 
+@section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function showResults() {
@@ -446,6 +434,4 @@
             }
         };
     </script>
-</body>
-
-</html>
+@endsection

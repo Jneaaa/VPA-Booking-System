@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Central Philippine University - User Feedback</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+@section('title', 'Rate Our Booking Services')
+
+@section('content')
     <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}">
     <style>
         body {
@@ -105,148 +102,135 @@
             /* Pushes footer to the bottom */
         }
     </style>
-</head>
+    <div class="container main-content-wrapper d-flex justify-content-center align-items-center">
+        <div class="feedback-container col-md-8 col-lg-7">
+            <h3 class="text-center mb-4">Share Your Experience</h3>
+            <form id="feedbackForm">
+                <div class="mb-4">
+                    <label class="form-label d-block mb-2">1. How would you rate the system's performance?</label>
+                    <div class="btn-group rating-options d-flex flex-wrap" role="group"
+                        aria-label="System Performance Rating">
+                        <input type="radio" class="btn-check" name="performanceRating" id="perfPoor" value="Poor"
+                            autocomplete="off">
+                        <label class="btn" for="perfPoor">Poor</label>
 
-<body>
-    
-    @extends('layouts.app')
-    @section('title', 'User Feedback')
-    @section('content')
+                        <input type="radio" class="btn-check" name="performanceRating" id="perfFair" value="Fair"
+                            autocomplete="off">
+                        <label class="btn" for="perfFair">Fair</label>
 
-        <div class="container main-content-wrapper d-flex justify-content-center align-items-center">
-            <div class="feedback-container col-md-8 col-lg-7">
-                <h3 class="text-center mb-4">Share Your Experience</h3>
-                <form id="feedbackForm">
-                    <div class="mb-4">
-                        <label class="form-label d-block mb-2">1. How would you rate the system's performance?</label>
-                        <div class="btn-group rating-options d-flex flex-wrap" role="group"
-                            aria-label="System Performance Rating">
-                            <input type="radio" class="btn-check" name="performanceRating" id="perfPoor" value="Poor"
-                                autocomplete="off">
-                            <label class="btn" for="perfPoor">Poor</label>
+                        <input type="radio" class="btn-check" name="performanceRating" id="perfSatisfactory"
+                            value="Satisfactory" autocomplete="off">
+                        <label class="btn" for="perfSatisfactory">Satisfactory</label>
 
-                            <input type="radio" class="btn-check" name="performanceRating" id="perfFair" value="Fair"
-                                autocomplete="off">
-                            <label class="btn" for="perfFair">Fair</label>
+                        <input type="radio" class="btn-check" name="performanceRating" id="perfVeryGood" value="Very Good"
+                            autocomplete="off">
+                        <label class="btn" for="perfVeryGood">Very Good</label>
 
-                            <input type="radio" class="btn-check" name="performanceRating" id="perfSatisfactory"
-                                value="Satisfactory" autocomplete="off">
-                            <label class="btn" for="perfSatisfactory">Satisfactory</label>
-
-                            <input type="radio" class="btn-check" name="performanceRating" id="perfVeryGood"
-                                value="Very Good" autocomplete="off">
-                            <label class="btn" for="perfVeryGood">Very Good</label>
-
-                            <input type="radio" class="btn-check" name="performanceRating" id="perfOutstanding"
-                                value="Outstanding" autocomplete="off">
-                            <label class="btn" for="perfOutstanding">Outstanding</label>
-                        </div>
+                        <input type="radio" class="btn-check" name="performanceRating" id="perfOutstanding"
+                            value="Outstanding" autocomplete="off">
+                        <label class="btn" for="perfOutstanding">Outstanding</label>
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label class="form-label d-block mb-2">2. How satisfied were you with your booking
-                            experience?</label>
-                        <div class="btn-group rating-options d-flex flex-wrap" role="group"
-                            aria-label="Booking Experience Satisfaction">
-                            <input type="radio" class="btn-check" name="satisfactionRating" id="satPoor" value="Poor"
-                                autocomplete="off">
-                            <label class="btn" for="satPoor">Poor</label>
+                <div class="mb-4">
+                    <label class="form-label d-block mb-2">2. How satisfied were you with your booking
+                        experience?</label>
+                    <div class="btn-group rating-options d-flex flex-wrap" role="group"
+                        aria-label="Booking Experience Satisfaction">
+                        <input type="radio" class="btn-check" name="satisfactionRating" id="satPoor" value="Poor"
+                            autocomplete="off">
+                        <label class="btn" for="satPoor">Poor</label>
 
-                            <input type="radio" class="btn-check" name="satisfactionRating" id="satFair" value="Fair"
-                                autocomplete="off">
-                            <label class="btn" for="satFair">Fair</label>
+                        <input type="radio" class="btn-check" name="satisfactionRating" id="satFair" value="Fair"
+                            autocomplete="off">
+                        <label class="btn" for="satFair">Fair</label>
 
-                            <input type="radio" class="btn-check" name="satisfactionRating" id="satGood" value="Good"
-                                autocomplete="off">
-                            <label class="btn" for="satGood">Good</label>
+                        <input type="radio" class="btn-check" name="satisfactionRating" id="satGood" value="Good"
+                            autocomplete="off">
+                        <label class="btn" for="satGood">Good</label>
 
-                            <input type="radio" class="btn-check" name="satisfactionRating" id="satVeryGood"
-                                value="Very Good" autocomplete="off">
-                            <label class="btn" for="satVeryGood">Very Good</label>
+                        <input type="radio" class="btn-check" name="satisfactionRating" id="satVeryGood" value="Very Good"
+                            autocomplete="off">
+                        <label class="btn" for="satVeryGood">Very Good</label>
 
-                            <input type="radio" class="btn-check" name="satisfactionRating" id="satExcellent"
-                                value="Excellent" autocomplete="off">
-                            <label class="btn" for="satExcellent">Excellent</label>
-                        </div>
+                        <input type="radio" class="btn-check" name="satisfactionRating" id="satExcellent" value="Excellent"
+                            autocomplete="off">
+                        <label class="btn" for="satExcellent">Excellent</label>
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label class="form-label d-block mb-2">3. How easy was it to use our booking system?</label>
-                        <div class="btn-group rating-options d-flex flex-wrap" role="group" aria-label="Ease of Use">
-                            <input type="radio" class="btn-check" name="easeRating" id="easeVeryDifficult"
-                                value="Very difficult" autocomplete="off">
-                            <label class="btn" for="easeVeryDifficult">Very difficult</label>
+                <div class="mb-4">
+                    <label class="form-label d-block mb-2">3. How easy was it to use our booking system?</label>
+                    <div class="btn-group rating-options d-flex flex-wrap" role="group" aria-label="Ease of Use">
+                        <input type="radio" class="btn-check" name="easeRating" id="easeVeryDifficult"
+                            value="Very difficult" autocomplete="off">
+                        <label class="btn" for="easeVeryDifficult">Very difficult</label>
 
-                            <input type="radio" class="btn-check" name="easeRating" id="easeDifficult" value="Difficult"
-                                autocomplete="off">
-                            <label class="btn" for="easeDifficult">Difficult</label>
+                        <input type="radio" class="btn-check" name="easeRating" id="easeDifficult" value="Difficult"
+                            autocomplete="off">
+                        <label class="btn" for="easeDifficult">Difficult</label>
 
-                            <input type="radio" class="btn-check" name="easeRating" id="easeNeutral" value="Neutral"
-                                autocomplete="off">
-                            <label class="btn" for="easeNeutral">Neutral</label>
+                        <input type="radio" class="btn-check" name="easeRating" id="easeNeutral" value="Neutral"
+                            autocomplete="off">
+                        <label class="btn" for="easeNeutral">Neutral</label>
 
-                            <input type="radio" class="btn-check" name="easeRating" id="easeEasy" value="Easy"
-                                autocomplete="off">
-                            <label class="btn" for="easeEasy">Easy</label>
+                        <input type="radio" class="btn-check" name="easeRating" id="easeEasy" value="Easy"
+                            autocomplete="off">
+                        <label class="btn" for="easeEasy">Easy</label>
 
-                            <input type="radio" class="btn-check" name="easeRating" id="easeVeryEasy" value="Very Easy"
-                                autocomplete="off">
-                            <label class="btn" for="easeVeryEasy">Very Easy</label>
-                        </div>
+                        <input type="radio" class="btn-check" name="easeRating" id="easeVeryEasy" value="Very Easy"
+                            autocomplete="off">
+                        <label class="btn" for="easeVeryEasy">Very Easy</label>
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label class="form-label d-block mb-2">4. How likely are you to use our system again?</label>
-                        <div class="btn-group rating-options d-flex flex-wrap" role="group"
-                            aria-label="Likelihood to Use Again">
-                            <input type="radio" class="btn-check" name="likelihoodRating" id="likelyVeryUnlikely"
-                                value="Very Unlikely" autocomplete="off">
-                            <label class="btn" for="likelyVeryUnlikely">Very Unlikely</label>
+                <div class="mb-4">
+                    <label class="form-label d-block mb-2">4. How likely are you to use our system again?</label>
+                    <div class="btn-group rating-options d-flex flex-wrap" role="group"
+                        aria-label="Likelihood to Use Again">
+                        <input type="radio" class="btn-check" name="likelihoodRating" id="likelyVeryUnlikely"
+                            value="Very Unlikely" autocomplete="off">
+                        <label class="btn" for="likelyVeryUnlikely">Very Unlikely</label>
 
-                            <input type="radio" class="btn-check" name="likelihoodRating" id="likelyUnlikely"
-                                value="Unlikely" autocomplete="off">
-                            <label class="btn" for="likelyUnlikely">Unlikely</label>
+                        <input type="radio" class="btn-check" name="likelihoodRating" id="likelyUnlikely" value="Unlikely"
+                            autocomplete="off">
+                        <label class="btn" for="likelyUnlikely">Unlikely</label>
 
-                            <input type="radio" class="btn-check" name="likelihoodRating" id="likelyNeutral" value="Neutral"
-                                autocomplete="off">
-                            <label class="btn" for="likelyNeutral">Neutral</label>
+                        <input type="radio" class="btn-check" name="likelihoodRating" id="likelyNeutral" value="Neutral"
+                            autocomplete="off">
+                        <label class="btn" for="likelyNeutral">Neutral</label>
 
-                            <input type="radio" class="btn-check" name="likelihoodRating" id="likelyLikely" value="Likely"
-                                autocomplete="off">
-                            <label class="btn" for="likelyLikely">Likely</label>
+                        <input type="radio" class="btn-check" name="likelihoodRating" id="likelyLikely" value="Likely"
+                            autocomplete="off">
+                        <label class="btn" for="likelyLikely">Likely</label>
 
-                            <input type="radio" class="btn-check" name="likelihoodRating" id="likelyVeryLikely"
-                                value="Very Likely" autocomplete="off">
-                            <label class="btn" for="likelyVeryLikely">Very Likely</label>
-                        </div>
+                        <input type="radio" class="btn-check" name="likelihoodRating" id="likelyVeryLikely"
+                            value="Very Likely" autocomplete="off">
+                        <label class="btn" for="likelyVeryLikely">Very Likely</label>
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="additionalFeedback" class="form-label">Additional feedback (How can we improve our
-                            system?)</label>
-                        <textarea class="form-control" id="additionalFeedback" rows="4" maxlength="250"></textarea>
-                        <div class="word-count">
-                            <span id="charCount">0</span>/250 words
-                        </div>
+                <div class="mb-3">
+                    <label for="additionalFeedback" class="form-label">Additional feedback (How can we improve our
+                        system?)</label>
+                    <textarea class="form-control" id="additionalFeedback" rows="4" maxlength="250"></textarea>
+                    <div class="word-count">
+                        <span id="charCount">0</span>/250 words
                     </div>
+                </div>
 
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary">Submit Feedback</button>
-                    </div>
-                </form>
-            </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                </div>
+            </form>
         </div>
-
-        <div id="thankYouPopup" class="thank-you-popup">
-            <h5>Thank You for Your Feedback!</h5>
-            <p>Your input helps us improve our services for everyone. We appreciate your time!</p>
-            <div class="d-flex justify-content-center">
-                <button class="btn btn-outline-primary" onclick="window.location.href='index.html'">Back to Home</button>
-                <button class="btn btn-primary ms-3" onclick="window.location.href='bookingpage.html'">Book Again</button>
-            </div>
+    </div>
+    <div id="thankYouPopup" class="thank-you-popup">
+        <h5>Thank You for Your Feedback!</h5>
+        <p>Your input helps us improve our services for everyone. We appreciate your time!</p>
+        <div class="d-flex justify-content-center">
+            <button class="btn btn-outline-primary" onclick="window.location.href='index.html'">Back to Home</button>
+            <button class="btn btn-primary ms-3" onclick="window.location.href='bookingpage.html'">Book Again</button>
         </div>
-
-    @endsection
-</body>
-
-</html>
+    </div>
+@endsection

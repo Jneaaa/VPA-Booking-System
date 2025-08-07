@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Booking Catalog')
+@section('title', 'Booking Catalog - Facilities & Equipment')
 
 @section('content')
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
