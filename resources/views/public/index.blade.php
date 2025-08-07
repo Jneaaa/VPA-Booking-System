@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Central Philippine University Booking</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+@section('title', 'CPU Facility & Equipment Booking Services')
+
+@section('content')
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <style>
     body {
@@ -127,16 +123,7 @@
       background-color: #be8200;
     }
   </style>
-</head>
 
-<body>
-
-  @extends('layouts.app')
-
-  @section('title', 'Home')
-
-
-  @section('content')
     <section class="hero-section text-white text-center">
     <h2 class="fw-bold">Simplify the way you book university facilities,<br>equipment, and services — all in one
       platform,<br>anytime, anywhere.</h2>
@@ -175,7 +162,3 @@
     </div>
     </section>
   @endsection
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>
