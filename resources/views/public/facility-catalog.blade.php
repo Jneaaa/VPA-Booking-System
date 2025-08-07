@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Booking Catalog - Facilities & Equipment')
+@section('title', 'Booking Catalog - Facilities')
 
 @section('content')
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
@@ -22,7 +22,7 @@
 
   <section class="catalog-hero-section">
     <div class="catalog-hero-content">
-    <h2 id="catalogHeroTitle">Facility & Equipment Catalog</h2>
+    <h2 id="catalogHeroTitle">Facility Catalog</h2>
     </div>
   </section>
 
@@ -61,16 +61,17 @@
         </button>
         <ul class="dropdown-menu" aria-labelledby="chooseCatalogDropdown">
           <li>
-          <a class="dropdown-item" href="booking-catalog" data-catalog-type="facilities">
+          <a class="dropdown-item" href="{{ asset('facility-catalog') }}" data-catalog-type="facilities">
             Facilities
           </a>
           </li>
           <li>
-          <a class="dropdown-item" href="equipment-catalog" data-catalog-type="equipment">
+          <a class="dropdown-item" href="{{ asset('equipment-catalog') }}" data-catalog-type="equipment">
             Equipment
           </a>
           </li>
         </ul>
+
         </div>
         <div class="d-flex gap-2 filter-sort-dropdowns">
         <div class="dropdown">
@@ -189,5 +190,5 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('js/public/booking-catalog.js') }}"></script>
+  <script src="{{ asset('js/public/facility-catalog.js') }}"></script>
 @endsection
