@@ -34,14 +34,16 @@
         <p class="mb-2">
         Not sure when to book?<br />View available timeslots here.
         </p>
-        <a id="requisitionFormButton" href="reservation-form"
-        class="btn btn-primary d-flex justify-content-center align-items-center position-relative mb-2">
-        <i class="bi bi-receipt me-2"></i> Your Requisition Form
-        <span id="requisitionBadge" class="badge bg-danger rounded-pill position-absolute d-none">
+        <div style="position:relative;">
+        <span id="requisitionBadge" class="badge bg-danger rounded-pill position-absolute"
+          style="top:-0.7rem; right:-0.7rem; font-size:0.8em; z-index:2; display:none;">
           0
         </span>
+        <a id="requisitionFormButton" href="reservation-form"
+          class="btn btn-primary d-flex justify-content-center align-items-center position-relative mb-2">
+          <i class="bi bi-receipt me-2"></i> Your Requisition Form
         </a>
-
+        </div>
         <button type="button" class="btn btn-outline-primary d-flex align-items-center" id="eventsCalendarBtn"
         data-bs-toggle="modal" data-bs-target="#userCalendarModal">Events Calendar</button>
       </div>
@@ -268,11 +270,15 @@
     }
     // Update cart badge
     function updateCartBadge() {
+    const badge = document.getElementById("requisitionBadge");
+    if (!badge) return;
     if (selectedItems.length > 0) {
-      requisitionBadge.textContent = selectedItems.length;
-      requisitionBadge.classList.remove("d-none");
+      badge.textContent = selectedItems.length;
+      badge.style.display = "";
+      badge.classList.remove("d-none");
     } else {
-      requisitionBadge.classList.add("d-none");
+      badge.style.display = "none";
+      badge.classList.add("d-none");
     }
     }
 
@@ -349,93 +355,110 @@
     }
 
     function getFacilityButtonHtml(facility) {
-    const isSelected = selectedItems.some(
-      item => parseInt(item.id) === facility.facility_id && item.type === "facility"
-    );
-
     const isUnavailable = facility.status.status_id === 2; // Status ID 2 = Unavailable
 
     if (isUnavailable) {
       return `
-        <button class="btn btn-secondary add-remove-btn" 
-          data-id="${facility.facility_id}" 
-          data-type="facility" 
-          disabled
-          style="cursor: not-allowed; opacity: 0.65;">
-          Unavailable
-        </button>
-      `;
+      <button class="btn btn-secondary add-remove-btn" 
+      data-id="${facility.facility_id}" 
+      data-type="facility" 
+      disabled
+      style="cursor: not-allowed; opacity: 0.65;">
+      Unavailable
+      </button>
+    `;
     }
 
-    const selectedItem = isSelected ? selectedItems.find(
-        item => parseInt(item.id) === equipment.equipment_id
-    ) : null;
+    const isSelected = selectedItems.some(
+      item => parseInt(item.id) === facility.facility_id && item.type === "facility"
+    );
 
     if (isSelected) {
       return `
-        <button class="btn btn-danger add-remove-btn" 
-          data-id="${facility.facility_id}" 
-          data-type="facility" 
-          data-action="remove">
-          Remove from form
-        </button>
-      `;
+      <button class="btn btn-danger add-remove-btn" 
+      data-id="${facility.facility_id}" 
+      data-type="facility" 
+      data-action="remove">
+      Remove from form
+      </button>
+    `;
     } else {
       return `
-        <button class="btn btn-primary add-remove-btn" 
-          data-id="${facility.facility_id}" 
-          data-type="facility" 
-          data-action="add">
-          Add to form
-        </button>
-      `;
+      <button class="btn btn-primary add-remove-btn" 
+      data-id="${facility.facility_id}" 
+      data-type="facility" 
+      data-action="add">
+      Add to form
+      </button>
+    `;
     }
     }
 
     // Event delegation for Add/Remove buttons
-    function setupEventListeners() { }
+    function setupEventListeners() {
+    // Event delegation for Add/Remove buttons
+    catalogItemsContainer.addEventListener("click", async (e) => {
+      const button = e.target.closest(".add-remove-btn");
+      if (!button || button.disabled) return;  // Add check for disabled buttons
+
+      const id = button.dataset.id;
+      const type = button.dataset.type;
+      const action = button.dataset.action;
+
+      try {
+      if (action === "add") {
+        await addToForm(id, type);
+      } else if (action === "remove") {
+        await removeFromForm(id, type);
+      }
+      } catch (error) {
+      console.error("Error handling form action:", error);
+      }
+    });
+    }
+
     // Render Functions
     function renderCategoryFilters() {
-  categoryFilterList.innerHTML = "";
+    categoryFilterList.innerHTML = "";
 
-  // "All Categories" option
-  const allCategoriesItem = document.createElement("div");
-  allCategoriesItem.className = "category-item";
-  allCategoriesItem.innerHTML = `
+    // "All Categories" option
+    const allCategoriesItem = document.createElement("div");
+    allCategoriesItem.className = "category-item";
+    allCategoriesItem.innerHTML = `
     <div class="form-check">
       <input class="form-check-input category-filter" type="checkbox" id="allCategories" value="All" checked disabled>
       <label class="form-check-label" for="allCategories">All Categories</label>
     </div>
-  `;
-  categoryFilterList.appendChild(allCategoriesItem);
+    `;
+    categoryFilterList.appendChild(allCategoriesItem);
 
-  // Render categories and subcategories
-  facilityCategories.forEach((category) => {
-    const categoryItem = document.createElement("div");
-    categoryItem.className = "category-item";
-    categoryItem.innerHTML = `
+    // Render categories and subcategories
+    facilityCategories.forEach((category) => {
+      const categoryItem = document.createElement("div");
+      categoryItem.className = "category-item";
+      categoryItem.innerHTML = `
       <div class="form-check d-flex justify-content-between align-items-center">
-        <div>
-          <input class="form-check-input category-filter" type="checkbox" id="category${category.category_id}" value="${category.category_id}">
-          <label class="form-check-label" for="category${category.category_id}">${category.category_name}</label>
-        </div>
-        <i class="bi bi-chevron-up toggle-arrow" style="cursor:pointer"></i>
+      <div>
+      <input class="form-check-input category-filter" type="checkbox" id="category${category.category_id}" value="${category.category_id}">
+      <label class="form-check-label" for="category${category.category_id}">${category.category_name}</label>
+      </div>
+      <i class="bi bi-chevron-up toggle-arrow" style="cursor:pointer"></i>
       </div>
       <div class="subcategory-list ms-3" style="overflow: hidden; max-height: 0; transition: max-height 0.3s ease;">
-        ${category.subcategories.map(sub => `
-          <div class="form-check">
-            <input class="form-check-input subcategory-filter" type="checkbox" id="subcategory${sub.subcategory_id}" value="${sub.subcategory_id}" data-category="${category.category_id}">
-            <label class="form-check-label" for="subcategory${sub.subcategory_id}">${sub.subcategory_name}</label>
-          </div>
-        `).join("")}
+      ${category.subcategories.map(sub => `
+      <div class="form-check">
+      <input class="form-check-input subcategory-filter" type="checkbox" id="subcategory${sub.subcategory_id}" value="${sub.subcategory_id}" data-category="${category.category_id}">
+      <label class="form-check-label" for="subcategory${sub.subcategory_id}">${sub.subcategory_name}</label>
+      </div>
+      `).join("")}
       </div>
     `;
-    categoryFilterList.appendChild(categoryItem);
+      categoryFilterList.appendChild(categoryItem);
 
-    // Toggle subcategory list
-    const toggleArrow = categoryItem.querySelector(".toggle-arrow");
-    const subcategoryList = categoryItem.querySelector(".subcategory-list");
-    toggleArrow.addEventListener("click", function () {
+      // Toggle subcategory list
+      const toggleArrow = categoryItem.querySelector(".toggle-arrow");
+      const subcategoryList = categoryItem.querySelector(".subcategory-list");
+      toggleArrow.addEventListener("click", function () {
       const isExpanded = subcategoryList.style.maxHeight !== "0px";
       if (isExpanded) {
         subcategoryList.style.maxHeight = "0";
@@ -444,75 +467,75 @@
       }
       toggleArrow.classList.toggle("bi-chevron-down");
       toggleArrow.classList.toggle("bi-chevron-up");
+      });
     });
-  });
 
-  // --- Filtering Logic ---
-  const allCategoriesCheckbox = document.getElementById("allCategories");
-  const categoryCheckboxes = Array.from(document.querySelectorAll('.category-filter')).filter(cb => cb.id !== "allCategories");
-  const subcategoryCheckboxes = Array.from(document.querySelectorAll('.subcategory-filter'));
+    // --- Filtering Logic ---
+    const allCategoriesCheckbox = document.getElementById("allCategories");
+    const categoryCheckboxes = Array.from(document.querySelectorAll('.category-filter')).filter(cb => cb.id !== "allCategories");
+    const subcategoryCheckboxes = Array.from(document.querySelectorAll('.subcategory-filter'));
 
-  // Helper: update All Categories checkbox state
-  function updateAllCategoriesCheckbox() {
-    const anyChecked = categoryCheckboxes.some(c => c.checked) || subcategoryCheckboxes.some(s => s.checked);
-    if (anyChecked) {
+    // Helper: update All Categories checkbox state
+    function updateAllCategoriesCheckbox() {
+      const anyChecked = categoryCheckboxes.some(c => c.checked) || subcategoryCheckboxes.some(s => s.checked);
+      if (anyChecked) {
       allCategoriesCheckbox.checked = false;
       allCategoriesCheckbox.disabled = false;
-    } else {
+      } else {
       allCategoriesCheckbox.checked = true;
       allCategoriesCheckbox.disabled = true;
+      }
     }
-  }
 
-  // Helper: update category checkbox state based on its subcategories
-  function updateCategoryCheckboxState(catId) {
-    const catCheckbox = document.getElementById("category" + catId);
-    const relatedSubs = subcategoryCheckboxes.filter(sub => sub.dataset.category === catId);
-    const anySubChecked = relatedSubs.some(sub => sub.checked);
-    catCheckbox.checked = anySubChecked;
-    catCheckbox.disabled = relatedSubs.every(sub => sub.disabled);
-    // Remove bold if disabled
-    const label = catCheckbox.nextElementSibling;
-    if (catCheckbox.disabled) {
+    // Helper: update category checkbox state based on its subcategories
+    function updateCategoryCheckboxState(catId) {
+      const catCheckbox = document.getElementById("category" + catId);
+      const relatedSubs = subcategoryCheckboxes.filter(sub => sub.dataset.category === catId);
+      const anySubChecked = relatedSubs.some(sub => sub.checked);
+      catCheckbox.checked = anySubChecked;
+      catCheckbox.disabled = relatedSubs.every(sub => sub.disabled);
+      // Remove bold if disabled
+      const label = catCheckbox.nextElementSibling;
+      if (catCheckbox.disabled) {
       label.style.fontWeight = "";
+      }
     }
-  }
 
-  // When a category is checked/unchecked, enable/disable its subcategories
-  categoryCheckboxes.forEach(cb => {
-    cb.addEventListener('change', function () {
+    // When a category is checked/unchecked, enable/disable its subcategories
+    categoryCheckboxes.forEach(cb => {
+      cb.addEventListener('change', function () {
       const catId = cb.value;
       const relatedSubs = subcategoryCheckboxes.filter(sub => sub.dataset.category === catId);
       if (!cb.checked) {
         relatedSubs.forEach(sub => {
-          sub.checked = false;
-          sub.disabled = true;
-          // Remove bold if disabled
-          sub.nextElementSibling.style.fontWeight = "";
+        sub.checked = false;
+        sub.disabled = true;
+        // Remove bold if disabled
+        sub.nextElementSibling.style.fontWeight = "";
         });
       } else {
         relatedSubs.forEach(sub => {
-          sub.disabled = false;
+        sub.disabled = false;
         });
       }
       updateAllCategoriesCheckbox();
       filterAndRenderItems();
+      });
     });
-  });
 
-  // When a subcategory is checked/unchecked, update parent category and All Categories
-  subcategoryCheckboxes.forEach(sub => {
-    sub.addEventListener('change', function () {
+    // When a subcategory is checked/unchecked, update parent category and All Categories
+    subcategoryCheckboxes.forEach(sub => {
+      sub.addEventListener('change', function () {
       const catId = sub.dataset.category;
       updateCategoryCheckboxState(catId);
       updateAllCategoriesCheckbox();
       filterAndRenderItems();
+      });
     });
-  });
 
-  // When "All Categories" is checked
-  allCategoriesCheckbox.addEventListener('change', function () {
-    if (this.checked) {
+    // When "All Categories" is checked
+    allCategoriesCheckbox.addEventListener('change', function () {
+      if (this.checked) {
       categoryCheckboxes.forEach(cb => {
         cb.checked = false;
         cb.disabled = false;
@@ -525,62 +548,62 @@
       });
       allCategoriesCheckbox.disabled = true;
       filterAndRenderItems();
-    }
-  });
+      }
+    });
 
-  // Initial state: only "All Categories" checked and disabled, all others unchecked/enabled
-  allCategoriesCheckbox.checked = true;
-  allCategoriesCheckbox.disabled = true;
-  categoryCheckboxes.forEach(cb => { cb.checked = false; cb.disabled = false; cb.nextElementSibling.style.fontWeight = ""; });
-  subcategoryCheckboxes.forEach(sub => { sub.checked = false; sub.disabled = false; sub.nextElementSibling.style.fontWeight = ""; });
-}
+    // Initial state: only "All Categories" checked and disabled, all others unchecked/enabled
+    allCategoriesCheckbox.checked = true;
+    allCategoriesCheckbox.disabled = true;
+    categoryCheckboxes.forEach(cb => { cb.checked = false; cb.disabled = false; cb.nextElementSibling.style.fontWeight = ""; });
+    subcategoryCheckboxes.forEach(sub => { sub.checked = false; sub.disabled = false; sub.nextElementSibling.style.fontWeight = ""; });
+    }
 
     function filterItems() {
-  const allCategoriesCheckbox = document.getElementById("allCategories");
-  const categoryCheckboxes = Array.from(document.querySelectorAll('.category-filter')).filter(cb => cb.id !== "allCategories");
-  const subcategoryCheckboxes = Array.from(document.querySelectorAll('.subcategory-filter'));
+    const allCategoriesCheckbox = document.getElementById("allCategories");
+    const categoryCheckboxes = Array.from(document.querySelectorAll('.category-filter')).filter(cb => cb.id !== "allCategories");
+    const subcategoryCheckboxes = Array.from(document.querySelectorAll('.subcategory-filter'));
 
-  // Only keep allowed status
-  filteredItems = [...allFacilities].filter(f => allowedStatusIds.includes(f.status.status_id));
+    // Only keep allowed status
+    filteredItems = [...allFacilities].filter(f => allowedStatusIds.includes(f.status.status_id));
 
-  // Filter by status dropdown
-  if (statusFilter === "Available") {
-    filteredItems = filteredItems.filter(f => f.status.status_id === 1);
-  } else if (statusFilter === "Unavailable") {
-    filteredItems = filteredItems.filter(f => f.status.status_id === 2);
-  }
+    // Filter by status dropdown
+    if (statusFilter === "Available") {
+      filteredItems = filteredItems.filter(f => f.status.status_id === 1);
+    } else if (statusFilter === "Unavailable") {
+      filteredItems = filteredItems.filter(f => f.status.status_id === 2);
+    }
 
-  // Category/subcategory filtering
-  if (allCategoriesCheckbox.checked) {
-    return filteredItems;
-  }
+    // Category/subcategory filtering
+    if (allCategoriesCheckbox.checked) {
+      return filteredItems;
+    }
 
-  const selectedCategories = categoryCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
-  const selectedSubcategories = subcategoryCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
+    const selectedCategories = categoryCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
+    const selectedSubcategories = subcategoryCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
 
-  if (selectedCategories.length === 0 && selectedSubcategories.length === 0) {
-    filteredItems = [];
-    return filteredItems;
-  }
+    if (selectedCategories.length === 0 && selectedSubcategories.length === 0) {
+      filteredItems = [];
+      return filteredItems;
+    }
 
-  filteredItems = filteredItems.filter(facility => {
-    // If subcategories are selected, match subcategory
-    if (selectedSubcategories.length > 0 && facility.subcategory) {
+    filteredItems = filteredItems.filter(facility => {
+      // If subcategories are selected, match subcategory
+      if (selectedSubcategories.length > 0 && facility.subcategory) {
       if (selectedSubcategories.includes(facility.subcategory.subcategory_id.toString())) {
         return true;
       }
-    }
-    // If categories are selected, match category
-    if (selectedCategories.length > 0) {
+      }
+      // If categories are selected, match category
+      if (selectedCategories.length > 0) {
       if (selectedCategories.includes(facility.category.category_id.toString())) {
         return true;
       }
-    }
-    return false;
-  });
+      }
+      return false;
+    });
 
-  return filteredItems;
-}
+    return filteredItems;
+    }
 
     function renderItems(items) {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -614,108 +637,75 @@
     });
     }
 
-    function getButtonHtml(item, type) {
-    const id = item.facility_id;
-    const isSelected = selectedItems.some(
-      (selectedItem) =>
-      parseInt(selectedItem.id) === id && selectedItem.type === type
-    );
-
-    if (isSelected) {
-      return `<button class="btn btn-danger add-remove-btn" data-id="${id}" data-type="${type}" data-action="remove">Remove From Form</button>`;
-    } else {
-      return `<button class="btn btn-primary add-remove-btn" data-id="${id}" data-type="${type}" data-action="add">Add To Form</button>`;
-    }
-    }
-
-    function renderFacilitiesGrid(facilities) {
-    catalogItemsContainer.innerHTML = facilities
-      .map((facility) => {
+function renderFacilitiesGrid(facilities) {
+  catalogItemsContainer.innerHTML = facilities
+    .map((facility) => {
       const primaryImage =
         facility.images?.find((img) => img.image_type === "Primary")
-        ?.image_url || "https://via.placeholder.com/300x200";
+          ?.image_url || "https://via.placeholder.com/300x200";
 
       return `
-      <div class="catalog-card">
-      <img src="${primaryImage}" alt="${facility.facility_name
-        }" class="catalog-card-img">
-      <div class="catalog-card-details">
-      <h5 data-id="${facility.facility_id}">${facility.facility_name
-        }</h5>
-      <span class="status-banner" style="background-color: ${facility.status.color_code
-        };">
-      ${facility.status.status_name}
-      </span>
-      <div class="catalog-card-meta">
-      <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"
-        }</span>
-      <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name ||
-        facility.category.category_name
-        }</span>
-      </div>
-      <p class="facility-description">${facility.description?.substring(0, 100) ||
-        "No description available."
-        }${facility.description?.length > 100 ? "..." : ""}</p>
-      <div class="catalog-card-fee">
-      <i class="bi bi-cash-stack"></i> ₱${parseFloat(
-        facility.external_fee
-        ).toLocaleString()} (${facility.rate_type})
-      </div>
-      </div>
-      <div class="catalog-card-actions">
-      ${getButtonHtml(facility, "facility")}
-      <button class="btn btn-outline-secondary">View Calendar</button>
-      </div>
-      </div>
+        <div class="catalog-card">
+          <img src="${primaryImage}" alt="${facility.facility_name}" class="catalog-card-img">
+          <div class="catalog-card-details">
+            <h5 data-id="${facility.facility_id}">${facility.facility_name}</h5>
+            <span class="status-banner" style="background-color: ${facility.status.color_code}">
+              ${facility.status.status_name}
+            </span>
+            <div class="catalog-card-meta">
+              <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"}</span>
+              <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name || facility.category.category_name}</span>
+            </div>
+            <p class="facility-description">${facility.description?.substring(0, 100) || "No description available."}${facility.description?.length > 100 ? "..." : ""}</p>
+            <div class="catalog-card-fee">
+              <i class="bi bi-cash-stack"></i> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})
+            </div>
+          </div>
+          <div class="catalog-card-actions">
+            ${getFacilityButtonHtml(facility)}
+            <button class="btn btn-outline-secondary">View Calendar</button>
+          </div>
+        </div>
       `;
-      })
-      .join("");
-    }
+    })
+    .join("");
+}
 
-    function renderFacilitiesList(facilities) {
-    catalogItemsContainer.innerHTML = facilities
-      .map((facility) => {
+function renderFacilitiesList(facilities) {
+  catalogItemsContainer.innerHTML = facilities
+    .map((facility) => {
       const primaryImage =
         facility.images?.find((img) => img.image_type === "Primary")
-        ?.image_url || "https://via.placeholder.com/300x200";
+          ?.image_url || "https://via.placeholder.com/300x200";
 
       return `
-      <div class="catalog-card">
-      <img src="${primaryImage}" alt="${facility.facility_name
-        }" class="catalog-card-img">
-      <div class="catalog-card-details">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-      <h5 data-id="${facility.facility_id}">${facility.facility_name
-        }</h5>
-      <span class="status-banner" style="background-color: ${facility.status.color_code
-        };">
-      ${facility.status.status_name}
-      </span>
-      </div>
-      <div class="catalog-card-meta">
-      <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"
-        }</span>
-      <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name ||
-        facility.category.category_name
-        }</span>
-      </div>
-      <p class="facility-description">${facility.description || "No description available."
-        }</p>
-      <div class="catalog-card-fee">
-      <i class="bi bi-cash-stack"></i> ₱${parseFloat(
-        facility.external_fee
-        ).toLocaleString()} (${facility.rate_type})
-      </div>
-      </div>
-      <div class="catalog-card-actions">
-      ${getButtonHtml(facility, "facility")}
-      <button class="btn btn-outline-secondary">View Calendar</button>
-      </div>
-      </div>
+        <div class="catalog-card">
+          <img src="${primaryImage}" alt="${facility.facility_name}" class="catalog-card-img">
+          <div class="catalog-card-details">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 data-id="${facility.facility_id}">${facility.facility_name}</h5>
+              <span class="status-banner" style="background-color: ${facility.status.color_code}">
+                ${facility.status.status_name}
+              </span>
+            </div>
+            <div class="catalog-card-meta">
+              <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"}</span>
+              <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name || facility.category.category_name}</span>
+            </div>
+            <p class="facility-description">${facility.description || "No description available."}</p>
+            <div class="catalog-card-fee">
+              <i class="bi bi-cash-stack"></i> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})
+            </div>
+          </div>
+          <div class="catalog-card-actions">
+            ${getFacilityButtonHtml(facility)}
+            <button class="btn btn-outline-secondary">View Calendar</button>
+          </div>
+        </div>
       `;
-      })
-      .join("");
-    }
+    })
+    .join("");
+}
 
     function renderPagination(totalItems) {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -789,41 +779,41 @@
 
     // Layout toggle
     document.querySelectorAll(".layout-option").forEach((option) => {
-      option.addEventListener("click", (e) => {
-        e.preventDefault();
-        currentLayout = option.dataset.layout;
-        // Set active class and update layoutDropdown button text
-        document.querySelectorAll(".layout-option").forEach((opt) => opt.classList.remove("active"));
-        option.classList.add("active");
-        const layoutDropdownBtn = document.getElementById("layoutDropdown");
-        if (currentLayout === "grid") {
-          layoutDropdownBtn.textContent = "Grid Layout";
-        } else {
-          layoutDropdownBtn.textContent = "List Layout";
-        }
-        filterAndRenderItems();
-      });
+    option.addEventListener("click", (e) => {
+      e.preventDefault();
+      currentLayout = option.dataset.layout;
+      // Set active class and update layoutDropdown button text
+      document.querySelectorAll(".layout-option").forEach(opt => opt.classList.remove("active"));
+      option.classList.add("active");
+      const layoutDropdownBtn = document.getElementById("layoutDropdown");
+      if (currentLayout === "grid") {
+      layoutDropdownBtn.textContent = "Grid Layout";
+      } else {
+      layoutDropdownBtn.textContent = "List Layout";
+      }
+      filterAndRenderItems();
+    });
     });
 
     // Set initial layoutDropdown button text and active class on DOMContentLoaded
     document.addEventListener("DOMContentLoaded", function () {
-      // ...existing code...
-      // Set initial layoutDropdown button text and active class
-      const layoutDropdownBtn = document.getElementById("layoutDropdown");
-      if (currentLayout === "grid") {
-        layoutDropdownBtn.textContent = "Grid Layout";
-        document.querySelectorAll(".layout-option").forEach(opt => {
-          if (opt.dataset.layout === "grid") opt.classList.add("active");
-          else opt.classList.remove("active");
-        });
-      } else {
-        layoutDropdownBtn.textContent = "List Layout";
-        document.querySelectorAll(".layout-option").forEach(opt => {
-          if (opt.dataset.layout === "list") opt.classList.add("active");
-          else opt.classList.remove("active");
-        });
-      }
-      // ...existing code...
+    // ...existing code...
+    // Set initial layoutDropdown button text and active class
+    const layoutDropdownBtn = document.getElementById("layoutDropdown");
+    if (currentLayout === "grid") {
+      layoutDropdownBtn.textContent = "Grid Layout";
+      document.querySelectorAll(".layout-option").forEach(opt => {
+      if (opt.dataset.layout === "grid") opt.classList.add("active");
+      else opt.classList.remove("active");
+      });
+    } else {
+      layoutDropdownBtn.textContent = "List Layout";
+      document.querySelectorAll(".layout-option").forEach(opt => {
+      if (opt.dataset.layout === "list") opt.classList.add("active");
+      else opt.classList.remove("active");
+      });
+    }
+    // ...existing code...
     });
 
     // Status dropdown filter
@@ -871,52 +861,43 @@
       const facility = allFacilities.find((f) => f.facility_id == facilityId);
       if (!facility) return;
 
-      const primaryImage =
-      facility.images?.find((img) => img.image_type === "Primary")
-        ?.image_url || "https://via.placeholder.com/800x400";
-
+      const primaryImage = facility.images?.find((img) => img.image_type === "Primary")?.image_url || "https://via.placeholder.com/800x400";
+      const isUnavailable = facility.status.status_id === 2;
       const isSelected = selectedItems.some(
       (selectedItem) =>
         parseInt(selectedItem.id) === facility.facility_id &&
         selectedItem.type === "facility"
       );
 
-      document.getElementById("facilityDetailModalLabel").textContent =
-      facility.facility_name;
+      document.getElementById("facilityDetailModalLabel").textContent = facility.facility_name;
       document.getElementById("facilityDetailContent").innerHTML = `
       <div class="row">
       <div class="col-md-6">
-      <img src="${primaryImage}" alt="${facility.facility_name
-      }" class="facility-image img-fluid">
+        <img src="${primaryImage}" alt="${facility.facility_name}" class="facility-image img-fluid">
       </div>
       <div class="col-md-6">
-      <div class="facility-details">
-      <p><strong>Status:</strong> <span class="badge" style="background-color: ${facility.status.color_code
-      }">${facility.status.status_name}</span></p>
-      <p><strong>Category:</strong> ${facility.category.category_name
-      }</p>
-      <p><strong>Subcategory:</strong> ${facility.subcategory?.subcategory_name || "N/A"
-      }</p>
-      <p><strong>Capacity:</strong> ${facility.capacity}</p>
-      <p><strong>Rate:</strong> ₱${parseFloat(
-        facility.external_fee
-      ).toLocaleString()} (${facility.rate_type})</p>
-      <p><strong>Description:</strong></p>
-      <p>${facility.description || "No description available."
-      }</p>
-      </div>
-      <div class="mt-3">
-       <button class="btn ${isSelected ? "btn-danger" : "btn-primary"
-      } add-remove-btn" 
-       data-id="${facility.facility_id}" 
-       data-type="facility" 
-       data-action="${isSelected ? "remove" : "add"}">
-       ${isSelected ? "Remove from Form" : "Add to Form"}
-       </button>
+        <div class="facility-details">
+        <p><strong>Status:</strong> <span class="badge" style="background-color: ${facility.status.color_code}">${facility.status.status_name}</span></p>
+        <p><strong>Category:</strong> ${facility.category.category_name}</p>
+        <p><strong>Subcategory:</strong> ${facility.subcategory?.subcategory_name || "N/A"}</p>
+        <p><strong>Capacity:</strong> ${facility.capacity}</p>
+        <p><strong>Rate:</strong> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})</p>
+        <p><strong>Description:</strong></p>
+        <p>${facility.description || "No description available."}</p>
+        </div>
+        <div class="mt-3">
+        ${isUnavailable
+        ? `<button class="btn btn-secondary" disabled style="cursor: not-allowed; opacity: 0.65;">Unavailable</button>`
+        : `<button class="btn ${isSelected ? "btn-danger" : "btn-primary"} add-remove-btn" 
+            data-id="${facility.facility_id}" 
+            data-type="facility" 
+            data-action="${isSelected ? "remove" : "add"}">
+            ${isSelected ? "Remove from Form" : "Add to Form"}
+          </button>`}
+        </div>
       </div>
       </div>
-      </div>
-      `;
+    `;
       facilityDetailModal.show();
     } catch (error) {
       console.error("Error showing facility details:", error);
@@ -990,15 +971,15 @@
     filteredItems = filteredItems.filter(facility => {
       // If subcategories are selected, match subcategory
       if (selectedSubcategories.length > 0 && facility.subcategory) {
-        if (selectedSubcategories.includes(facility.subcategory.subcategory_id.toString())) {
-          return true;
-        }
+      if (selectedSubcategories.includes(facility.subcategory.subcategory_id.toString())) {
+        return true;
+      }
       }
       // If categories are selected, match category
       if (selectedCategories.length > 0) {
-        if (selectedCategories.includes(facility.category.category_id.toString())) {
-          return true;
-        }
+      if (selectedCategories.includes(facility.category.category_id.toString())) {
+        return true;
+      }
       }
       return false;
     });

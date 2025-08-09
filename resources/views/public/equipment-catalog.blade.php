@@ -34,12 +34,17 @@
         <p class="mb-2">
         Not sure when to book?<br />View available timeslots here.
         </p>
-        <a id="requisitionFormButton" href="reservation-form"
-        class="btn btn-primary d-flex justify-content-center align-items-center position-relative mb-2">
-        <i class="bi bi-receipt me-2"></i> Your Requisition Form
-        <span id="requisitionBadge" class="badge bg-danger rounded-pill position-absolute d-none">0</span>
-        </a>
-
+        <div style="position:relative;">
+          <span id="requisitionBadge"
+            class="badge bg-danger rounded-pill position-absolute"
+            style="top:-0.7rem; right:-0.7rem; font-size:0.8em; z-index:2; display:none;">
+            0
+          </span>
+          <a id="requisitionFormButton" href="reservation-form"
+            class="btn btn-primary d-flex justify-content-center align-items-center position-relative mb-2">
+            <i class="bi bi-receipt me-2"></i> Your Requisition Form
+          </a>
+        </div>
         <button type="button" class="btn btn-outline-primary d-flex align-items-center" id="eventsCalendarBtn"
         data-bs-toggle="modal" data-bs-target="#userCalendarModal">Events Calendar</button>
       </div>
@@ -454,12 +459,16 @@
 
     // Update cart badge
     function updateCartBadge() {
-    if (selectedItems.length > 0) {
-      requisitionBadge.textContent = selectedItems.length;
-      requisitionBadge.classList.remove("d-none");
-    } else {
-      requisitionBadge.classList.add("d-none");
-    }
+      const badge = document.getElementById("requisitionBadge");
+      if (!badge) return;
+      if (selectedItems.length > 0) {
+        badge.textContent = selectedItems.length;
+        badge.style.display = "";
+        badge.classList.remove("d-none");
+      } else {
+        badge.style.display = "none";
+        badge.classList.add("d-none");
+      }
     }
 
     // Main function to refresh UI
