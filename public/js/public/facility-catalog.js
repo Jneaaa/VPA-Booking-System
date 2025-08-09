@@ -125,8 +125,8 @@ async function addToForm(id, type, quantity = 1) {
     try {
         const requestBody = {
             type: type,
-            quantity: quantity,
-            facility_id: parseInt(id)
+            facility_id: parseInt(id),
+            quantity: quantity
         };
 
         const response = await fetchData("/api/requisition/add-item", {
@@ -134,14 +134,19 @@ async function addToForm(id, type, quantity = 1) {
             body: JSON.stringify(requestBody),
         });
 
-        if (response.success) {
-            showToast(
-                `${type.charAt(0).toUpperCase() + type.slice(1)} added to form`
-            );
-            await updateAllUI(); // This will refresh the UI with updated buttons
-        } else {
+        if (!response.success) {
             throw new Error(response.message || "Failed to add item");
         }
+        
+        // Update selectedItems with the server response
+        selectedItems = response.data.selected_items || [];
+        
+        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} added to form`);
+        await updateAllUI();
+        
+        // Trigger storage event for cross-page sync
+        localStorage.setItem('formUpdated', Date.now().toString());
+        
     } catch (error) {
         console.error("Error adding item:", error);
         showToast(error.message || "Error adding item to form", "error");
@@ -160,16 +165,19 @@ async function removeFromForm(id, type) {
             body: JSON.stringify(requestBody),
         });
 
-        if (response.success) {
-            showToast(
-                `${
-                    type.charAt(0).toUpperCase() + type.slice(1)
-                } removed from form`
-            );
-            await updateAllUI(); // This will refresh the UI with updated buttons
-        } else {
+        if (!response.success) {
             throw new Error(response.message || "Failed to remove item");
         }
+
+        // Update selectedItems with the server response
+        selectedItems = response.data.selected_items || [];
+        
+        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed from form`);
+        await updateAllUI();
+        
+        // Trigger storage event for cross-page sync
+        localStorage.setItem('formUpdated', Date.now().toString());
+        
     } catch (error) {
         console.error("Error removing item:", error);
         showToast(error.message || "Error removing item from form", "error");

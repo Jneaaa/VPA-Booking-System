@@ -52,6 +52,7 @@ Route::prefix('requisition')->middleware('web')->group(function () {
     Route::post('/save-request-info', [RequisitionFormController::class, 'saveRequestInfo']);
     Route::post('/add-item', [RequisitionFormController::class, 'addToForm']);
     Route::post('/remove-item', [RequisitionFormController::class, 'removeFromForm']);
+    Route::get('/get-items', [RequisitionFormController::class, 'getSelectedItems']);
     Route::get('/calculate-fees', [RequisitionFormController::class, 'calculateFees']);
     Route::post('/check-availability', [RequisitionFormController::class, 'checkAvailability']);
     Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);

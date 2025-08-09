@@ -113,8 +113,8 @@ async function addToForm(id, type, quantity = 1) {
     try {
         const requestBody = {
             type: type,
-            quantity: quantity,
-            equipment_id: parseInt(id)
+            equipment_id: parseInt(id),
+            quantity: parseInt(quantity)
         };
 
         const response = await fetchData("/api/requisition/add-item", {
@@ -122,12 +122,19 @@ async function addToForm(id, type, quantity = 1) {
             body: JSON.stringify(requestBody),
         });
 
-        if (response.success) {
-            showToast("Equipment added to form");
-            await updateAllUI(); // This will refresh the UI with updated buttons
-        } else {
+        if (!response.success) {
             throw new Error(response.message || "Failed to add item");
         }
+        
+        // Update selectedItems with the server response
+        selectedItems = response.data.selected_items || [];
+        
+        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} added to form`);
+        await updateAllUI();
+        
+        // Trigger storage event for cross-page sync
+        localStorage.setItem('formUpdated', Date.now().toString());
+        
     } catch (error) {
         console.error("Error adding item:", error);
         showToast(error.message || "Error adding item to form", "error");
@@ -146,12 +153,19 @@ async function removeFromForm(id, type) {
             body: JSON.stringify(requestBody),
         });
 
-        if (response.success) {
-            showToast("Equipment removed from form");
-            await updateAllUI(); // This will refresh the UI with updated buttons
-        } else {
+        if (!response.success) {
             throw new Error(response.message || "Failed to remove item");
         }
+
+        // Update selectedItems with the server response
+        selectedItems = response.data.selected_items || [];
+        
+        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed from form`);
+        await updateAllUI();
+        
+        // Trigger storage event for cross-page sync
+        localStorage.setItem('formUpdated', Date.now().toString());
+        
     } catch (error) {
         console.error("Error removing item:", error);
         showToast(error.message || "Error removing item from form", "error");
@@ -467,6 +481,24 @@ function setupEventListeners() {
             }
         } catch (error) {
             console.error("Error handling form action:", error);
+        }
+    });
+    
+    // Add quantity change handler
+    catalogItemsContainer.addEventListener('change', async (e) => {
+        if (e.target.classList.contains('quantity-input')) {
+            const card = e.target.closest('.catalog-card');
+            const button = card.querySelector('.add-remove-btn');
+            const id = button.dataset.id;
+            const type = button.dataset.type;
+            const action = button.dataset.action;
+            const quantity = parseInt(e.target.value) || 1;
+            
+            if (action === 'remove') {
+                // If item is already in cart, remove and re-add with new quantity
+                await removeFromForm(id, type);
+                await addToForm(id, type, quantity);
+            }
         }
     });
 }

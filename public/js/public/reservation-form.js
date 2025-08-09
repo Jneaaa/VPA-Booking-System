@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const facilityList = document.getElementById('facilityList');
     const equipmentList = document.getElementById('equipmentList');
-    const feeDisplay = document.getElementById('feeDisplay') || createFeeDisplay();
+    const feeDisplay = document.getElementById('feeDisplay');
     const submitBtn = document.getElementById('submitFormBtn');
     const checkAvailabilityBtn = document.getElementById('checkAvailabilityBtn');
     const attachLetter = document.getElementById('attachLetter');
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetchItemDetails('equipment')
             ]);
 
-            // Then load the rest
+            // Then load everything else
             await Promise.all([
                 renderSelectedItems(),
                 renderTotalFees(),
@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Initialize date and time pickers
             initDateTimePickers();
+
+            // Start auto-refresh
+            startAutoRefresh();
 
         } catch (error) {
             console.error('Error initializing form:', error);
@@ -69,13 +72,45 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Listen for changes from catalog page
-        window.addEventListener('storage', () => {
-            setTimeout(() => {
-                renderSelectedItems();
-                renderTotalFees();
-            }, 150);
+        // Listen for changes from catalog pages
+        window.addEventListener('storage', async (e) => {
+            if (e.key === 'formUpdated') {
+                // Wait a bit for the server to process the changes
+                await new Promise(resolve => setTimeout(resolve, 150));
+                
+                // Fetch latest data and update UI
+                await Promise.all([
+                    renderSelectedItems(),
+                    renderTotalFees()
+                ]);
+            }
         });
+
+        const toggleReservationBtn = document.getElementById('toggleReservationBtn');
+        if (toggleReservationBtn) {
+            toggleReservationBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const card = document.querySelector('.form-section-card');
+                const content = document.getElementById('reservationContent');
+                const chevron = toggleReservationBtn.querySelector('.bi');
+                
+                card.classList.toggle('collapsed');
+                chevron.classList.toggle('rotated');
+                
+                // Save state to localStorage
+                const isCollapsed = card.classList.contains('collapsed');
+                localStorage.setItem('reservationSectionCollapsed', isCollapsed);
+            });
+            
+            // Restore previous state
+            const wasCollapsed = localStorage.getItem('reservationSectionCollapsed') === 'true';
+            if (wasCollapsed) {
+                const card = document.querySelector('.form-section-card');
+                const chevron = toggleReservationBtn.querySelector('.bi');
+                card.classList.add('collapsed');
+                chevron.classList.add('rotated');
+            }
+        }
     }
 
     function initDateTimePickers() {
@@ -238,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Add function to handle item removal
+    // Update removeSelectedItem function to trigger storage event
     async function removeSelectedItem(id, type) {
         try {
             const response = await fetch('/api/requisition/remove-item', {
@@ -264,6 +299,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderTotalFees()
             ]);
 
+            // Trigger storage event for cross-page sync
+            localStorage.setItem('formUpdated', Date.now().toString());
+
             showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed successfully`, 'success');
         } catch (error) {
             console.error('Error removing item:', error);
@@ -271,138 +309,120 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    async function updateQuantity(id, action, value = null) {
-        const currentItem = (await getSelectedItems())
-            .find(item => item.type === 'equipment' && item.id === id);
-        
-        if (!currentItem) return;
-
-        const equipment = equipmentCache.get(id);
-        if (!equipment) return;
-
-        let newQuantity;
-        switch (action) {
-            case 'increase':
-                newQuantity = Math.min((currentItem.quantity || 1) + 1, equipment.available_quantity);
-                break;
-            case 'decrease':
-                newQuantity = Math.max((currentItem.quantity || 1) - 1, 1);
-                break;
-            case 'set':
-                newQuantity = Math.min(Math.max(parseInt(value) || 1, 1), equipment.available_quantity);
-                break;
-            default:
-                return;
-        }
-
-        if (newQuantity === currentItem.quantity) return;
-
-        // Remove and re-add with new quantity
-        await removeFromForm(id, 'equipment');
-        await addToForm(id, 'equipment', newQuantity);
-    }
-
-    async function removeItem(id, type) {
-        try {
-            await removeFromForm(id, type);
-            showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed successfully`);
-            await renderSelectedItems();
-        } catch (error) {
-            console.error('Error removing item:', error);
-            showToast('Failed to remove item', 'error');
-        }
-    }
-
-    async function loadPurposes() {
-        try {
-            const response = await fetch('/api/requisition-purposes');
-            if (!response.ok) throw new Error('Failed to load purposes');
-            
-            const data = await response.json();
-            const purposeField = document.getElementById('activityPurposeField');
-            
-            purposeField.innerHTML = '<option selected disabled>Select Activity/Purpose</option>';
-            data.forEach(purpose => {
-                const option = document.createElement('option');
-                option.value = purpose.purpose_id;
-                option.textContent = purpose.purpose_name;
-                purposeField.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading purposes:', error);
-            document.getElementById('activityPurposeField').innerHTML = 
-                '<option disabled>Error loading purposes</option>';
-        }
-    }
-
-    async function validateForm() {
-        // Basic validation
-        const requiredFields = [
-            'applicantType', 'first_name', 'last_name', 'email',
-            'num_participants', 'purpose_id', 'start_date', 'end_date',
-            'start_time', 'end_time'
-        ];
-        
-        let isValid = true;
-        
-        requiredFields.forEach(fieldId => {
-            const field = document.getElementById(fieldId) || 
-                          document.querySelector(`[name="${fieldId}"]`);
-            if (!field || !field.value) {
-                isValid = false;
-                field.classList.add('is-invalid');
-            } else {
-                field.classList.remove('is-invalid');
+    // Add auto-refresh function to keep data in sync
+    function startAutoRefresh() {
+        setInterval(async () => {
+            try {
+                await Promise.all([
+                    renderSelectedItems(),
+                    renderTotalFees()
+                ]);
+            } catch (error) {
+                console.error('Error refreshing data:', error);
             }
-        });
-
-        // Check if any items are selected
-        const response = await fetch('/api/requisition/calculate-fees', { credentials: 'same-origin' });
-        const data = await response.json();
-        if (data.data?.selected_items?.length === 0) {
-            showToast('Please add at least one facility or equipment', 'error');
-            isValid = false;
-        }
-
-        return isValid;
-    }
-
-    async function renderSelectedItems() {
-        try {
-            const response = await fetch('/api/requisition/calculate-fees', { credentials: 'same-origin' });
-            if (!response.ok) throw new Error('Failed to fetch selected items');
-            
-            const data = await response.json();
-            const items = data.data?.selected_items || [];
-            
-            // Render facilities
-            renderItemsList(facilityList, items.filter(i => i.type === 'facility'), 'facility');
-            
-            // Render equipment
-            renderItemsList(equipmentList, items.filter(i => i.type === 'equipment'), 'equipment');
-            
-        } catch (error) {
-            console.error('Error rendering selected items:', error);
-            showToast('Failed to load selected items', 'error');
-        }
+        }, 5000); // Refresh every 5 seconds
     }
 
     async function renderTotalFees() {
+        if (!feeDisplay) return;
+        
+        // Show loading state
+        feeDisplay.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>';
+
         try {
-            const response = await fetch('/api/requisition/calculate-fees', { credentials: 'same-origin' });
-            if (!response.ok) throw new Error('Failed to fetch fees');
+            // Fetch selected items and fees
+            const [feesResponse, facilitiesResponse, equipmentResponse] = await Promise.all([
+                fetch('/api/requisition/calculate-fees', { credentials: 'same-origin' }),
+                fetch('/api/facilities'),
+                fetch('/api/equipment')
+            ]);
+
+            if (!feesResponse.ok || !facilitiesResponse.ok || !equipmentResponse.ok) {
+                throw new Error('Failed to fetch required data');
+            }
+
+            const feesData = await feesResponse.json();
+            const facilitiesData = await facilitiesResponse.json();
+            const equipmentData = await equipmentResponse.json();
+
+            // Create lookup maps
+            const facilityMap = new Map(facilitiesData.data.map(f => [f.facility_id, f]));
+            const equipmentMap = new Map(equipmentData.data.map(e => [e.equipment_id, e]));
+
+            const feeSummary = feesData.data?.fee_summary || {};
+            const items = feesData.data?.selected_items || [];
+
+            let htmlContent = '<div class="fee-items">';
+
+            // Add facilities breakdown
+            const facilities = items.filter(i => i.type === 'facility');
+            if (facilities.length > 0) {
+                htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
+                facilities.forEach(facility => {
+                    const facilityDetails = facilityMap.get(parseInt(facility.id));
+                    if (!facilityDetails) return;
+
+                    htmlContent += `
+                        <div class="fee-item d-flex justify-content-between mb-2">
+                            <span>${facilityDetails.facility_name}</span>
+                            <span>₱${parseFloat(facilityDetails.external_fee).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                        </div>
+                    `;
+                });
+                htmlContent += `
+                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                        <strong>Subtotal</strong>
+                        <strong>₱${feeSummary.facilityTotalFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong>
+                    </div>
+                </div>`;
+            }
             
-            const data = await response.json();
-            const feeSummary = data.data?.fee_summary || {};
+            // Add equipment breakdown
+            const equipment = items.filter(i => i.type === 'equipment');
+            if (equipment.length > 0) {
+                htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
+                equipment.forEach(equip => {
+                    const equipDetails = equipmentMap.get(parseInt(equip.id));
+                    if (!equipDetails) return;
+
+                    const itemTotal = parseFloat(equipDetails.external_fee) * (equip.quantity || 1);
+                    htmlContent += `
+                        <div class="fee-item d-flex justify-content-between mb-2">
+                            <span>${equipDetails.equipment_name} ${equip.quantity ? `(x${equip.quantity})` : ''}</span>
+                            <div class="text-end">
+                                <div>₱${parseFloat(equipDetails.external_fee).toLocaleString('en-US', {minimumFractionDigits: 2})} × ${equip.quantity || 1}</div>
+                                <strong>₱${itemTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong>
+                            </div>
+                        </div>
+                    `;
+                });
+                htmlContent += `
+                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                        <strong>Subtotal</strong>
+                        <strong>₱${feeSummary.equipmentTotalFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong>
+                    </div>
+                </div>`;
+            }
             
-            feeDisplay.innerHTML = `
-                <span>Facilities: ₱${(feeSummary.facilityTotalFee || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</span> |
-                <span>Equipment: ₱${(feeSummary.equipmentTotalFee || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</span> |
-                <span>Total: <strong>₱${(feeSummary.totalFee || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></span>
-            `;
+            // Add total
+            if (facilities.length > 0 || equipment.length > 0) {
+                htmlContent += `
+                    <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
+                        <h6 class="mb-0">Total Amount</h6>
+                        <h6 class="mb-0">₱${feeSummary.totalFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</h6>
+                    </div>
+                `;
+            } else {
+                htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
+            }
+
+            htmlContent += '</div>';
+            feeDisplay.innerHTML = htmlContent;
+
         } catch (error) {
             console.error('Error rendering total fees:', error);
             showToast('Failed to load fee summary', 'error');
+            feeDisplay.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
         }
     }
 
@@ -673,14 +693,6 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Submit Form';
         }
-    }
-
-    function createFeeDisplay() {
-        const display = document.createElement('div');
-        display.id = 'feeDisplay';
-        display.className = 'total-price text-end mb-2 p-3 bg-light rounded';
-        document.querySelector('.main-content').prepend(display);
-        return display;
     }
 
     function showToast(message, type = 'success') {

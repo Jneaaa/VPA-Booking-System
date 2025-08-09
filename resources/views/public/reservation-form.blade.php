@@ -373,6 +373,33 @@
     .delete-item-btn:hover {
       color: #bd2130;
     }
+
+    /* Add these new styles */
+    .form-section-card.collapsed {
+      padding: 10px 20px;
+    }
+
+    .form-section-card.collapsed #reservationContent {
+      height: 0;
+      opacity: 0;
+      margin: 0;
+      padding: 0;
+    }
+
+    #reservationContent {
+      height: auto;
+      opacity: 1;
+      transition: all 0.3s ease-in-out;
+      overflow: hidden;
+    }
+
+    .chevron-icon {
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .chevron-icon.rotated {
+      transform: rotate(180deg);
+    }
   </style>
 </head>
 
@@ -788,6 +815,18 @@
         </div>
       </div>
 
+      <!-- Fee Breakdown Section -->
+      <div class="row">
+        <div class="col-12">
+          <div class="form-section-card">
+            <h5>Fee Breakdown</h5>
+            <div id="feeDisplay" class="fee-breakdown">
+              <!-- Fee details will be dynamically added here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="d-flex justify-content-center my-4">
         <button id="submitFormBtn" class="btn btn-primary me-2">
           Submit Form
@@ -830,7 +869,309 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   {{-- Remove all inline JS related to reservation form logic --}}
   {{-- Reference reservation-form.js --}}
-  <script src="{{ asset('js/public/reservation-form.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const facilityList = document.getElementById('facilityList');
+    const equipmentList = document.getElementById('equipmentList');
+    const feeDisplay = document.getElementById('feeDisplay');
+    const submitBtn = document.getElementById('submitFormBtn');
+    
+    // Initialize the form
+    initForm();
+
+    async function initForm() {
+        try {
+            await Promise.all([
+                renderSelectedItems(),
+                calculateAndDisplayFees()
+            ]);
+            
+            setupEventListeners();
+            startAutoRefresh();
+        } catch (error) {
+            console.error('Error initializing form:', error);
+            showToast('Failed to initialize form', 'error');
+        }
+    }
+
+    // Fetch selected items and render them
+    async function renderSelectedItems() {
+        try {
+            const response = await fetchData('/api/requisition/get-items');
+            const items = response.data || [];
+            
+            // Render facilities
+            renderItemsList(facilityList, items.filter(i => i.type === 'facility'), 'facility');
+            
+            // Render equipment
+            renderItemsList(equipmentList, items.filter(i => i.type === 'equipment'), 'equipment');
+            
+        } catch (error) {
+            console.error('Error rendering selected items:', error);
+            showToast('Failed to load selected items', 'error');
+        }
+    }
+
+    // Render items list with remove functionality
+    async function renderItemsList(container, items, type) {
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (items.length === 0) {
+            container.innerHTML = `<div class="text-muted empty-message">No ${type}s added yet.</div>`;
+            return;
+        }
+
+        try {
+            // Fetch current data from API
+            const response = await fetch(`/api/${type}s`);
+            if (!response.ok) throw new Error(`Failed to fetch ${type} data`);
+            const apiData = await response.json();
+
+            // Create a map for quick lookup
+            const itemsMap = new Map(apiData.data.map(item => [
+                item[`${type}_id`], 
+                item
+            ]));
+
+            items.forEach(item => {
+                const itemDetails = itemsMap.get(parseInt(item.id));
+                if (!itemDetails) return;
+
+                const card = document.createElement('div');
+                card.className = 'selected-item-card';
+
+                card.innerHTML = `
+                    <div class="selected-item-details">
+                        <h6>${itemDetails[`${type}_name`]}</h6>
+                        <div class="fee">₱${parseFloat(itemDetails.external_fee).toLocaleString()} per ${itemDetails.rate_type || 'booking'}</div>
+                        ${type === 'equipment' ? `
+                            <div class="quantity-control">
+                                <span class="text-muted">Quantity: ${item.quantity || 1}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <button type="button" class="delete-item-btn" onclick="removeSelectedItem('${item.id}', '${type}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `;
+
+                container.appendChild(card);
+            });
+        } catch (error) {
+            console.error(`Error rendering ${type} list:`, error);
+            showToast(`Failed to load ${type} details`, 'error');
+        }
+    }
+
+    // Calculate and display fees
+    async function calculateAndDisplayFees() {
+        if (!feeDisplay) return;
+
+        try {
+            // Fetch selected items and their details
+            const [itemsResponse, facilitiesResponse, equipmentResponse] = await Promise.all([
+                fetchData('/api/requisition/get-items'),
+                fetchData('/api/facilities'),
+                fetchData('/api/equipment')
+            ]);
+
+            const items = itemsResponse.data || [];
+            const facilities = facilitiesResponse.data || [];
+            const equipment = equipmentResponse.data || [];
+
+            // Create lookup maps
+            const facilityMap = new Map(facilities.map(f => [f.facility_id, f]));
+            const equipmentMap = new Map(equipment.map(e => [e.equipment_id, e]));
+
+            let htmlContent = '<div class="fee-items">';
+            let facilityTotal = 0;
+            let equipmentTotal = 0;
+
+            // Facilities breakdown
+            const facilityItems = items.filter(i => i.type === 'facility');
+            if (facilityItems.length > 0) {
+                htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
+                
+                facilityItems.forEach(item => {
+                    const facility = facilityMap.get(parseInt(item.id));
+                    if (!facility) return;
+
+                    const fee = parseFloat(facility.external_fee);
+                    facilityTotal += fee;
+
+                    htmlContent += `
+                        <div class="fee-item d-flex justify-content-between mb-2">
+                            <span>${facility.facility_name}</span>
+                            <span>₱${fee.toLocaleString()}</span>
+                        </div>
+                    `;
+                });
+
+                htmlContent += `
+                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                        <strong>Subtotal</strong>
+                        <strong>₱${facilityTotal.toLocaleString()}</strong>
+                    </div>
+                </div>`;
+            }
+
+            // Equipment breakdown
+            const equipmentItems = items.filter(i => i.type === 'equipment');
+            if (equipmentItems.length > 0) {
+                htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
+                
+                equipmentItems.forEach(item => {
+                    const equip = equipmentMap.get(parseInt(item.id));
+                    if (!equip) return;
+
+                    const unitFee = parseFloat(equip.external_fee);
+                    const quantity = item.quantity || 1;
+                    const itemTotal = unitFee * quantity;
+                    equipmentTotal += itemTotal;
+
+                    htmlContent += `
+                        <div class="fee-item d-flex justify-content-between mb-2">
+                            <span>${equip.equipment_name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
+                            <div class="text-end">
+                                <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
+                                <strong>₱${itemTotal.toLocaleString()}</strong>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                htmlContent += `
+                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                        <strong>Subtotal</strong>
+                        <strong>₱${equipmentTotal.toLocaleString()}</strong>
+                    </div>
+                </div>`;
+            }
+
+            // Total
+            const total = facilityTotal + equipmentTotal;
+            if (total > 0) {
+                htmlContent += `
+                    <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
+                        <h6 class="mb-0">Total Amount</h6>
+                        <h6 class="mb-0">₱${total.toLocaleString()}</h6>
+                    </div>
+                `;
+            } else {
+                htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
+            }
+
+            htmlContent += '</div>';
+            feeDisplay.innerHTML = htmlContent;
+
+        } catch (error) {
+            console.error('Error calculating fees:', error);
+            feeDisplay.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
+        }
+    }
+
+    // Remove item from selection
+    async function removeSelectedItem(id, type) {
+        try {
+            const response = await fetchData('/api/requisition/remove-item', {
+                method: 'POST',
+                body: JSON.stringify({
+                    [`${type}_id`]: id,
+                    type: type
+                })
+            });
+
+            if (!response.success) {
+                throw new Error('Failed to remove item');
+            }
+
+            await Promise.all([
+                renderSelectedItems(),
+                calculateAndDisplayFees()
+            ]);
+
+            // Trigger storage event for cross-page sync
+            localStorage.setItem('formUpdated', Date.now().toString());
+
+            showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed successfully`, 'success');
+        } catch (error) {
+            console.error('Error removing item:', error);
+            showToast('Failed to remove item', 'error');
+        }
+    }
+
+    // Auto-refresh data
+    function startAutoRefresh() {
+        setInterval(async () => {
+            try {
+                await Promise.all([
+                    renderSelectedItems(),
+                    calculateAndDisplayFees()
+                ]);
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+            }
+        }, 5000); // Refresh every 5 seconds
+    }
+
+    // Listen for changes from catalog pages
+    window.addEventListener('storage', async (e) => {
+        if (e.key === 'formUpdated') {
+            await Promise.all([
+                renderSelectedItems(),
+                calculateAndDisplayFees()
+            ]);
+        }
+    });
+
+    // Utility function to fetch data
+    async function fetchData(url, options = {}) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                ...(options.headers || {}),
+            },
+            credentials: 'same-origin'
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+    }
+
+    // Show toast notifications
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed bottom-0 end-0 m-3`;
+        toast.style.zIndex = '1100';
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+
+        document.body.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+    }
+});
+</script>
 </body>
 
 </html>
