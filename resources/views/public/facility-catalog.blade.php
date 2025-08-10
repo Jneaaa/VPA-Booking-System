@@ -239,7 +239,7 @@
     toast.setAttribute("aria-atomic", "true");
 
     // Custom colors
-    const bgColor = type === "success" ? "#003366" : "#dc3545";
+    const bgColor = type === "success" ? "#004183ff" : "#dc3545";
     toast.style.backgroundColor = bgColor;
     toast.style.color = "#fff";
     toast.style.minWidth = "250px";

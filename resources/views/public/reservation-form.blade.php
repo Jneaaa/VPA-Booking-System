@@ -8,6 +8,7 @@
   <title>
     Reservation Form Submission
   </title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
@@ -250,19 +251,6 @@
       flex-wrap: wrap;
     }
 
-    #reservationContent {
-      transition: max-height 0.3s ease, opacity 0.3s ease;
-      overflow: hidden;
-    }
-
-    #toggleReservationBtn {
-      transition: transform 0.3s ease;
-    }
-
-    #toggleReservationBtn.rotate {
-      transform: rotate(180deg);
-    }
-
     .facility-card,
     .equipment-card {
       position: relative;
@@ -404,33 +392,6 @@
     .delete-item-btn:hover {
       color: #bd2130;
     }
-
-    /* Add these new styles */
-    .form-section-card.collapsed {
-      padding: 10px 20px;
-    }
-
-    .form-section-card.collapsed #reservationContent {
-      height: 0;
-      opacity: 0;
-      margin: 0;
-      padding: 0;
-    }
-
-    #reservationContent {
-      height: auto;
-      opacity: 1;
-      transition: all 0.3s ease-in-out;
-      overflow: hidden;
-    }
-
-    .chevron-icon {
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .chevron-icon.rotated {
-      transform: rotate(180deg);
-    }
   </style>
 </head>
 
@@ -537,31 +498,55 @@
       <!-- Complete Your Reservation Section -->
       <div class="row">
         <div class="col-12">
+          <style>
+            .btn-transparent {
+              background-color: transparent !important;
+              border: none !important;
+              box-shadow: none !important;
+            }
+
+            .btn-transparent i {
+              display: inline-block;
+              /* Needed for transform to work */
+              color: #6c757d;
+              transition: transform 0.25s ease-in-out;
+            }
+
+            button.btn-transparent[aria-expanded="true"] i.bi-chevron-down {
+              transform: rotate(0deg);
+            }
+
+            button.btn-transparent[aria-expanded="false"] i.bi-chevron-down {
+              transform: rotate(180deg);
+            }
+          </style>
+
           <div class="form-section-card">
             <div class="d-flex justify-content-between align-items-center">
               <h5 class="mb-0">Complete Your Reservation</h5>
-              <button id="toggleReservationBtn" class="btn btn-sm btn-outline-secondary"
-                style="height: 100%; align-self: center">
-                <i class="bi bi-chevron-up"></i>
+              <button id="toggleReservationBtn" type="button" class="btn btn-sm btn-secondary btn-transparent"
+                style="height: 100%; align-self: center" data-bs-toggle="collapse" data-bs-target="#reservationContent"
+                aria-expanded="true" aria-controls="reservationContent">
+                <i class="bi bi-chevron-down"></i>
               </button>
             </div>
-            <div id="reservationContent" style="padding-top: 10px">
+
+            <div id="reservationContent" class="collapse show" style="padding-top: 10px">
               <p class="text-muted">
-                To confirm your request, please fill out the necessary details
-                below. We need this information to process your booking
-                efficiently and provide complete details on how to proceed. A
-                confirmation email will be sent to your registered email address
-                once your submission is reviewed and approved.
+                To confirm your request, please fill out the necessary details below.
+                We need this information to process your booking efficiently and provide
+                complete details on how to proceed. A confirmation email will be sent
+                to your registered email address once your submission is reviewed and approved.
               </p>
               <div class="d-flex justify-content-start gap-2 mb-4">
-                <a href="policies.html" class="btn btn-primary">
-                  Read Policies
-                </a>
+                <a href="policies.html" class="btn btn-primary">Read Policies</a>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+
 
       <!-- Two-column grid layout -->
       <div class="row">
@@ -570,7 +555,7 @@
             <h5>Your Contact Information</h5>
             <div class="row">
               <div class="col-md-12">
-                <label class="form-label">Applicant Type</label>
+                <label class="form-label">Applicant Type <span style="color: red;">*</span></label>
                 <select id="applicantType" class="form-select mb-2" aria-label="Type of Applicant">
                   <option selected>Type of Applicant</option>
                   <option value="Internal">Internal</option>
@@ -578,28 +563,32 @@
                 </select>
               </div>
               <div class="col-md-6">
-                <label class="form-label">First Name</label>
-                <input name="first_name" type="text" class="form-control" required />
+                <label class="form-label">
+                  First Name <span style="color: red;">*</span>
+                </label>
+                <input name="first_name" type="text" class="form-control" placeholder="First Name" required />
               </div>
               <div class="col-md-6">
-                <label class="form-label">Last Name</label>
-                <input name="last_name" type="text" class="form-control" required />
+                <label class="form-label">
+                  Last Name <span style="color: red;">*</span>
+                </label>
+                <input name="last_name" type="text" class="form-control" placeholder="Last Name" required />
               </div>
               <div id="studentIdField" class="col-md-6">
                 <label class="form-label">CPU Student ID</label>
-                <input type="text" class="form-control" />
+                <input type="text" class="form-control" placeholder="Student ID" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Contact Number</label>
-                <input name="contact_number" type="text" class="form-control" />
+                <input name="contact_number" type="text" class="form-control" placeholder="Contact Number" />
               </div>
               <div class="col-md-12">
-                <label class="form-label">Email Address</label>
-                <input name="email" type="email" class="form-control mb-2" required />
+                <label class="form-label">Email Address <span style="color: red;">*</span></label>
+                <input name="email" type="email" class="form-control mb-2" placeholder="Email Address" required />
               </div>
               <div class="col-md-12">
                 <label class="form-label">Organization Name</label>
-                <input name="organization_name" type="text" class="form-control mb-2" />
+                <input name="organization_name" type="text" class="form-control mb-2" placeholder="Organization Name" />
               </div>
             </div>
           </div>
@@ -761,7 +750,7 @@
             <div class="row">
               <div class="col-md-6">
                 <label class="form-label">Number of Participants</label>
-                <input name="num_participants" type="number" class="form-control mb-2" />
+                <input name="num_participants" type="number" class="form-control mb-2" value="1" min="1" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Activity/Purpose</label>
@@ -782,7 +771,7 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label">Endorser Name</label>
-                <input name="endorser" type="text" class="form-control" />
+                <input name="endorser" type="text" class="form-control" placeholder="Endorser Name" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Date Endorsed</label>
@@ -1181,7 +1170,7 @@
         toast.setAttribute('aria-atomic', 'true');
 
         // Colors
-        const bgColor = type === 'success' ? '#003366' : '#dc3545';
+        const bgColor = type === 'success' ? '#004183ff' : '#dc3545';
         toast.style.backgroundColor = bgColor;
         toast.style.color = '#fff';
         toast.style.minWidth = '250px';

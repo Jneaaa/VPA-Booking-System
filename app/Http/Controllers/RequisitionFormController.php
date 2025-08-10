@@ -411,18 +411,6 @@ class RequisitionFormController extends Controller
             ]
         ]);
     }
-
-    // ----- Get selected items from session ----- //
-    public function getSelectedItems(Request $request)
-    {
-        $selectedItems = Session::get('selected_items', []);
-
-        return response()->json([
-            'success' => true,
-            'data' => $selectedItems
-        ]);
-    }
-
     // ----- Check for booking schedule conflicts ----- //
     public function checkAvailability(Request $request)
     {
@@ -560,6 +548,8 @@ class RequisitionFormController extends Controller
     }
 
     // ----- Temporary user uploads before submission ----- //
+
+    // This method handles temporary uploads to Cloudinary
 
     public function tempUpload(Request $request)
     {
