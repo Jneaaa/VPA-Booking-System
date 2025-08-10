@@ -15,6 +15,37 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
     rel="stylesheet" />
   <style>
+    /* Add to your existing styles */
+    .card {
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-title {
+      color: #003366;
+      font-weight: 600;
+    }
+
+    .badge {
+      font-weight: 500;
+      padding: 5px 8px;
+    }
+
+    .btn-outline-danger {
+      border: none;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .btn-outline-danger:hover {
+      background-color: rgba(220, 53, 69, 0.1);
+    }
+
     body {
       background-color: #f8f9fa;
     }
@@ -548,11 +579,11 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label">First Name</label>
-                <input type="text" class="form-control" required />
+                <input name="first_name" type="text" class="form-control" required />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Last Name</label>
-                <input type="text" class="form-control" required />
+                <input name="last_name" type="text" class="form-control" required />
               </div>
               <div id="studentIdField" class="col-md-6">
                 <label class="form-label">CPU Student ID</label>
@@ -560,15 +591,15 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label">Contact Number</label>
-                <input type="text" class="form-control" />
+                <input name="contact_number" type="text" class="form-control" />
               </div>
               <div class="col-md-12">
                 <label class="form-label">Email Address</label>
-                <input type="email" class="form-control mb-2" required />
+                <input name="email" type="email" class="form-control mb-2" required />
               </div>
               <div class="col-md-12">
                 <label class="form-label">Organization Name</label>
-                <input type="text" class="form-control mb-2" />
+                <input name="organization_name" type="text" class="form-control mb-2" />
               </div>
             </div>
           </div>
@@ -588,11 +619,11 @@
             <div class="row">
               <div class="col-md-6">
                 <label for="startDateField" class="form-label">Start Date</label>
-                <input type="date" id="startDateField" class="form-control mb-2" />
+                <input name="start_date" type="date" id="startDateField" class="form-control mb-2" />
               </div>
               <div class="col-md-6">
                 <label for="startTimeField" class="form-label">Start Time</label>
-                <select id="startTimeField" class="form-select mb-2" onchange="adjustEndTime()">
+                <select id="startTimeField" name="start_time" class="form-select mb-2" onchange="adjustEndTime()">
                   <!-- Predefined 12-hour intervals -->
                   <option value="12:00 AM">12:00 AM</option>
                   <option value="12:30 AM">12:30 AM</option>
@@ -648,11 +679,11 @@
             <div class="row">
               <div class="col-md-6">
                 <label for="endDateField" class="form-label">End Date</label>
-                <input type="date" id="endDateField" class="form-control mb-2" />
+                <input name="end_date" type="date" id="endDateField" class="form-control mb-2" />
               </div>
               <div class="col-md-6">
                 <label for="endTimeField" class="form-label">End Time</label>
-                <select id="endTimeField" class="form-select mb-3">
+                <select id="endTimeField" name="end_time" class="form-select mb-3">
                   <!-- Predefined 12-hour intervals -->
                   <option value="12:00 AM">12:00 AM</option>
                   <option value="12:30 AM">12:30 AM</option>
@@ -730,50 +761,42 @@
             <div class="row">
               <div class="col-md-6">
                 <label class="form-label">Number of Participants</label>
-                <input type="number" class="form-control mb-2" />
+                <input name="num_participants" type="number" class="form-control mb-2" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Activity/Purpose</label>
-                <select id="activityPurposeField" class="form-select mb-2" aria-label="Activity/Purpose">
-                  <option selected disabled>Loading...</option>
+                <select id="activityPurposeField" name="purpose_id" class="form-select mb-2"
+                  aria-label="Activity/Purpose" required>
+                  <option value="" selected disabled>Select Activity/Purpose</option>
+                  <option value="8">Alumni - Class Reunion</option>
+                  <option value="9">Alumni - Personal Events</option>
+                  <option value="7">Alumni-Organized Events</option>
+                  <option value="5">CPU Organization Led Activity</option>
+                  <option value="2">Equipment Rental</option>
+                  <option value="10">External Event</option>
+                  <option value="1">Facility Rental</option>
+                  <option value="6">Student-Organized Activity</option>
+                  <option value="3">Subject Requirement - Class, Seminar, Conference</option>
+                  <option value="4">University Program/Activity</option>
                 </select>
-                <script>
-                  document.addEventListener('DOMContentLoaded', async function () {
-                    const activityPurposeField = document.getElementById('activityPurposeField');
-                    try {
-                      const response = await fetch('http://127.0.0.1:8000/api/requisition-purposes');
-                      const data = await response.json();
-                      activityPurposeField.innerHTML = '<option selected disabled>Select Activity/Purpose</option>';
-                      data.forEach(purpose => {
-                        const option = document.createElement('option');
-                        option.value = purpose.id; // Assuming the API returns an 'id' field
-                        option.textContent = purpose.purpose_name;
-                        activityPurposeField.appendChild(option);
-                      });
-                    } catch (error) {
-                      console.error('Error fetching purposes:', error);
-                      activityPurposeField.innerHTML = '<option disabled>Error loading purposes</option>';
-                    }
-                  });
-                </script>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Endorser Name</label>
-                <input type="text" class="form-control" />
+                <input name="endorser" type="text" class="form-control" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Date Endorsed</label>
-                <input type="date" class="form-control mb-2" />
+                <input name="date_endorsed" type="date" class="form-control mb-2" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Additional Requests</label>
-                <textarea class="form-control mb-2" rows="3"
+                <textarea name="additional_requests" class="form-control mb-2" rows="3"
                   placeholder="Write a brief description of any additional requests you may have."></textarea>
               </div>
               <div class="col-md-6">
                 <label class="form-label mt-1">Attach Formal Letter</label>
                 <div class="position-relative">
-                  <input type="file" class="form-control mb-1" id="attachLetter"
+                  <input name="formal_letter_url" type="file" class="form-control mb-1" id="attachLetter"
                     onchange="toggleRemoveButton('attachLetter', 'removeAttachLetterBtn')" />
                   <button type="button" id="removeAttachLetterBtn"
                     class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 d-none"
@@ -874,9 +897,11 @@
       const equipmentList = document.getElementById('equipmentList');
       const feeDisplay = document.getElementById('feeDisplay');
       const submitBtn = document.getElementById('submitFormBtn');
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
       // Initialize the form
       initForm();
+
 
       async function initForm() {
         try {
@@ -884,36 +909,29 @@
             renderSelectedItems(),
             calculateAndDisplayFees()
           ]);
-
-          setupEventListeners();
-          startAutoRefresh();
         } catch (error) {
           console.error('Error initializing form:', error);
           showToast('Failed to initialize form', 'error');
         }
       }
 
-          // Setup event listeners for the form
-    function setupEventListeners() {
-        // Add any form-specific event listeners here
-        if (submitBtn) {
-            submitBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                // Handle form submission
-            });
-        }
-    }
-
-      // Fetch selected items and render them
+      // Fetch and render selected items
       async function renderSelectedItems() {
         try {
-          const response = await fetchData('/api/requisition/get-items');
-          const items = response.data || [];
+          const response = await fetch('/requisition/get-items', {
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          });
 
-          // Render facilities
+          if (!response.ok) throw new Error('Failed to fetch items');
+
+          const data = await response.json();
+          const items = data.data?.selected_items || [];
+
           renderItemsList(facilityList, items.filter(i => i.type === 'facility'), 'facility');
-
-          // Render equipment
           renderItemsList(equipmentList, items.filter(i => i.type === 'equipment'), 'equipment');
 
         } catch (error) {
@@ -922,87 +940,148 @@
         }
       }
 
-      // Render items list with remove functionality
-      async function renderItemsList(container, items, type) {
+      function pluralizeType(type) {
+        if (type.toLowerCase() === 'facility') return 'facilities';
+        if (type.toLowerCase() === 'equipment') return 'equipment'; // same plural
+        return type + 's'; // fallback
+      }
+
+      // Render items list with card layout
+      function renderItemsList(container, items, type) {
         if (!container) return;
 
         container.innerHTML = '';
 
         if (items.length === 0) {
-          container.innerHTML = `<div class="text-muted empty-message">No ${type}s added yet.</div>`;
+          container.innerHTML = `<div class="text-muted empty-message">No ${pluralizeType(type)} added yet.</div>`;
           return;
         }
 
-        try {
-          // Fetch current data from API
-          const response = await fetch(`/api/${type}s`);
-          if (!response.ok) throw new Error(`Failed to fetch ${type} data`);
-          const apiData = await response.json();
+        const cardContainer = document.createElement('div');
+        cardContainer.className = 'row row-cols-1 g-3';
 
-          // Create a map for quick lookup
-          const itemsMap = new Map(apiData.data.map(item => [
-            item[`${type}_id`],
-            item
-          ]));
-
-          items.forEach(item => {
-            const itemDetails = itemsMap.get(parseInt(item.id));
-            if (!itemDetails) return;
-
-            const card = document.createElement('div');
-            card.className = 'selected-item-card';
-
-            card.innerHTML = `
-                    <div class="selected-item-details">
-                        <h6>${itemDetails[`${type}_name`]}</h6>
-                        <div class="fee">₱${parseFloat(itemDetails.external_fee).toLocaleString()} per ${itemDetails.rate_type || 'booking'}</div>
-                        ${type === 'equipment' ? `
-                            <div class="quantity-control">
-                                <span class="text-muted">Quantity: ${item.quantity || 1}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                    <button type="button" class="delete-item-btn" onclick="removeSelectedItem('${item.id}', '${type}')">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                `;
-
-            container.appendChild(card);
-          });
-        } catch (error) {
-          console.error(`Error rendering ${type} list:`, error);
-          showToast(`Failed to load ${type} details`, 'error');
-        }
-        // Change item.id to type-specific ID
-        const idField = `${type}_id`;
         items.forEach(item => {
-          const itemDetails = itemsMap.get(parseInt(item[idField]));
+          const card = document.createElement('div');
+          card.className = 'col';
+
+          // Find primary image or first available image
+          const displayImage = item.images?.find(img => img.image_type === "Primary") || item.images?.[0];
+
+          card.innerHTML = `
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title mb-1">${item.name}</h5>
+                            <p class="card-text text-muted mb-2">
+                                <small>${item.description || 'No description available'}</small>
+                            </p>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                            onclick="removeSelectedItem(${type === 'facility' ? item.facility_id : item.equipment_id}, '${type}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-end mt-3">
+                        <div>
+                            <span class="badge bg-primary me-2">${item.rate_type || 'booking'}</span>
+                            ${type === 'equipment' ? `
+                                <span class="badge bg-secondary">Qty: ${item.quantity || 1}</span>
+                            ` : ''}
+                        </div>
+                        <div class="text-end">
+                            <div class="text-success fw-bold">
+                                ₱${parseFloat(item.external_fee * (type === 'equipment' ? (item.quantity || 1) : 1)).toLocaleString()}
+                            </div>
+                            ${type === 'equipment' ? `
+                                <small class="text-muted">${item.quantity || 1} × ₱${parseFloat(item.external_fee).toLocaleString()}</small>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                ${displayImage ? `
+                    <img src="${displayImage.image_url}" class="card-img-bottom" 
+                        alt="${item.name}" style="height: 150px; object-fit: cover;">
+                ` : ''}
+            </div>
+        `;
+          cardContainer.appendChild(card);
         });
+
+        container.appendChild(cardContainer);
+      }
+
+      // remove items from selection
+      async function removeSelectedItem(id, type) {
+        try {
+          const requestBody = {
+            type: type,
+            equipment_id: type === 'equipment' ? id : undefined,
+            facility_id: type === 'facility' ? id : undefined
+          };
+
+          // Remove undefined fields from the request body
+          const cleanedRequestBody = Object.fromEntries(
+            Object.entries(requestBody).filter(([_, v]) => v !== undefined)
+          );
+
+          const response = await fetch('/api/requisition/remove-item', { // Updated endpoint
+            method: 'POST',
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(cleanedRequestBody)
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to remove item');
+          }
+
+          const result = await response.json();
+
+          if (result.success) {
+            await Promise.all([
+              renderSelectedItems(),
+              calculateAndDisplayFees()
+            ]);
+            showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed successfully`, 'success');
+
+            // Update cart badge if exists
+            if (typeof updateCartBadge === 'function') {
+              updateCartBadge();
+            }
+          } else {
+            throw new Error(result.message || 'Failed to remove item');
+          }
+        } catch (error) {
+          console.error('Error removing item:', error);
+          showToast(error.message || 'Failed to remove item', 'error');
+        }
       }
 
       // Calculate and display fees
       async function calculateAndDisplayFees() {
-        if (!feeDisplay) return;
-
         try {
-          // Fetch selected items and their details
-          const [itemsResponse, facilitiesResponse, equipmentResponse] = await Promise.all([
-            fetchData('/api/requisition/get-items'),
-            fetchData('/api/facilities'),
-            fetchData('/api/equipment')
-          ]);
+          const response = await fetch('/api/requisition/get-items', {
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          });
 
-          const items = itemsResponse.data || [];
-          const facilities = facilitiesResponse.data || [];
-          const equipment = equipmentResponse.data || [];
+          if (!response.ok) throw new Error('Failed to fetch items');
 
-          // Create lookup maps
-          const facilityMap = new Map(facilities.map(f => [f.facility_id, f]));
-          const equipmentMap = new Map(equipment.map(e => [e.equipment_id, e]));
+          const data = await response.json();
+          const items = data.data?.selected_items || []; // Changed to access selected_items
 
-          let htmlContent = '<div class="fee-items">';
           let facilityTotal = 0;
           let equipmentTotal = 0;
+          let htmlContent = '<div class="fee-items">';
 
           // Facilities breakdown
           const facilityItems = items.filter(i => i.type === 'facility');
@@ -1010,26 +1089,23 @@
             htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
 
             facilityItems.forEach(item => {
-              const facility = facilityMap.get(parseInt(item.id));
-              if (!facility) return;
-
-              const fee = parseFloat(facility.external_fee);
+              const fee = parseFloat(item.external_fee);
               facilityTotal += fee;
 
               htmlContent += `
-                        <div class="fee-item d-flex justify-content-between mb-2">
-                            <span>${facility.facility_name}</span>
-                            <span>₱${fee.toLocaleString()}</span>
-                        </div>
-                    `;
+                    <div class="fee-item d-flex justify-content-between mb-2">
+                        <span>${item.name}</span>
+                        <span>₱${fee.toLocaleString()}</span>
+                    </div>
+                `;
             });
 
             htmlContent += `
-                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                        <strong>Subtotal</strong>
-                        <strong>₱${facilityTotal.toLocaleString()}</strong>
-                    </div>
-                </div>`;
+                <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                    <strong>Subtotal</strong>
+                    <strong>₱${facilityTotal.toLocaleString()}</strong>
+                </div>
+            </div>`;
           }
 
           // Equipment breakdown
@@ -1038,42 +1114,39 @@
             htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
 
             equipmentItems.forEach(item => {
-              const equip = equipmentMap.get(parseInt(item.id));
-              if (!equip) return;
-
-              const unitFee = parseFloat(equip.external_fee);
+              const unitFee = parseFloat(item.external_fee);
               const quantity = item.quantity || 1;
               const itemTotal = unitFee * quantity;
               equipmentTotal += itemTotal;
 
               htmlContent += `
-                        <div class="fee-item d-flex justify-content-between mb-2">
-                            <span>${equip.equipment_name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
-                            <div class="text-end">
-                                <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
-                                <strong>₱${itemTotal.toLocaleString()}</strong>
-                            </div>
+                    <div class="fee-item d-flex justify-content-between mb-2">
+                        <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
+                        <div class="text-end">
+                            <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
+                            <strong>₱${itemTotal.toLocaleString()}</strong>
                         </div>
-                    `;
+                    </div>
+                `;
             });
 
             htmlContent += `
-                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                        <strong>Subtotal</strong>
-                        <strong>₱${equipmentTotal.toLocaleString()}</strong>
-                    </div>
-                </div>`;
+                <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                    <strong>Subtotal</strong>
+                    <strong>₱${equipmentTotal.toLocaleString()}</strong>
+                </div>
+            </div>`;
           }
 
           // Total
           const total = facilityTotal + equipmentTotal;
           if (total > 0) {
             htmlContent += `
-                    <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
-                        <h6 class="mb-0">Total Amount</h6>
-                        <h6 class="mb-0">₱${total.toLocaleString()}</h6>
-                    </div>
-                `;
+                <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
+                    <h6 class="mb-0">Total Amount</h6>
+                    <h6 class="mb-0">₱${total.toLocaleString()}</h6>
+                </div>
+            `;
           } else {
             htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
           }
@@ -1083,107 +1156,83 @@
 
         } catch (error) {
           console.error('Error calculating fees:', error);
+          showToast('Failed to calculate fees', 'error');
           feeDisplay.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
         }
       }
+      // Make removeSelectedItem available globally
+      window.removeSelectedItem = removeSelectedItem;
 
-      // Remove item from selection
-      async function removeSelectedItem(id, type) {
-        try {
-          const response = await fetchData('/api/requisition/remove-item', {
-            method: 'POST',
-            body: JSON.stringify({
-              type: type,
-              [`${type}_id`]: parseInt(id) // Use type-specific field name
-            })
-          });
-
-          if (!response.success) {
-            throw new Error('Failed to remove item');
-          }
-
-          await Promise.all([
-            renderSelectedItems(),
-            calculateAndDisplayFees()
-          ]);
-
-          // Trigger storage event for cross-page sync
-          localStorage.setItem('formUpdated', Date.now().toString());
-
-          showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed successfully`, 'success');
-        } catch (error) {
-          console.error('Error removing item:', error);
-          showToast('Failed to remove item', 'error');
-        }
-      }
-
-      // Auto-refresh data
-      function startAutoRefresh() {
-        setInterval(async () => {
-          try {
-            await Promise.all([
-              renderSelectedItems(),
-              calculateAndDisplayFees()
-            ]);
-          } catch (error) {
-            console.error('Error refreshing data:', error);
-          }
-        }, 5000); // Refresh every 5 seconds
-      }
-
-      // Listen for changes from catalog pages
-      window.addEventListener('storage', async (e) => {
-        if (e.key === 'formUpdated') {
-          await Promise.all([
-            renderSelectedItems(),
-            calculateAndDisplayFees()
-          ]);
-        }
-      });
-
-      // Utility function to fetch data
-      async function fetchData(url, options = {}) {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-        const response = await fetch(url, {
-          ...options,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken,
-            ...(options.headers || {}),
-          },
-          credentials: 'same-origin'
-        });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-      }
-
-      // Show toast notifications
-      function showToast(message, type = 'success') {
+      // Helper function to show toast notifications
+      function showToast(message, type = 'success', duration = 3000) {
         const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed bottom-0 end-0 m-3`;
+
+        // Toast base styles
+        toast.className = `toast align-items-center border-0 position-fixed start-0 mb-2`;
         toast.style.zIndex = '1100';
+        toast.style.bottom = '0';
+        toast.style.left = '0';
+        toast.style.margin = '1rem';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
         toast.setAttribute('role', 'alert');
         toast.setAttribute('aria-live', 'assertive');
         toast.setAttribute('aria-atomic', 'true');
 
+        // Colors
+        const bgColor = type === 'success' ? '#003366' : '#dc3545';
+        toast.style.backgroundColor = bgColor;
+        toast.style.color = '#fff';
+        toast.style.minWidth = '250px';
+        toast.style.borderRadius = '0.3rem';
+
         toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        `;
+        <div class="d-flex align-items-center px-3 py-1"> 
+            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+            <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+            <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="loading-bar" style="
+            height: 3px;
+            background: rgba(255,255,255,0.7);
+            width: 100%;
+            transition: width ${duration}ms linear;
+        "></div>
+    `;
 
         document.body.appendChild(toast);
-        const bsToast = new bootstrap.Toast(toast);
+
+        // Bootstrap toast instance
+        const bsToast = new bootstrap.Toast(toast, { autohide: false });
         bsToast.show();
 
-        toast.addEventListener('hidden.bs.toast', () => {
-          toast.remove();
+        // Float up appear animation
+        requestAnimationFrame(() => {
+          toast.style.opacity = '1';
+          toast.style.transform = 'translateY(0)';
         });
+
+        // Start loading bar animation
+        const loadingBar = toast.querySelector('.loading-bar');
+        requestAnimationFrame(() => {
+          loadingBar.style.width = '0%';
+        });
+
+        // Remove after duration
+        setTimeout(() => {
+          // Float down disappear animation
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(20px)';
+
+          setTimeout(() => {
+            bsToast.hide();
+            toast.remove();
+          }, 400); // matches animation time
+        }, duration);
       }
+
+
     });
   </script>
 </body>

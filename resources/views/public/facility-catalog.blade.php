@@ -221,42 +221,79 @@
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     return await response.json();
     }
-
     // toast system
-    function showToast(message, type = "success") {
+    function showToast(message, type = "success", duration = 3000) {
     const toast = document.createElement("div");
-    toast.className = `toast align-items-center text-white bg-${type === "success" ? "success" : "danger"
-      } border-0 position-fixed bottom-0 end-0 m-3`;
+
+    // Toast base styles (bottom right)
+    toast.className = `toast align-items-center border-0 position-fixed end-0 mb-2`;
     toast.style.zIndex = "1100";
+    toast.style.bottom = "0";
+    toast.style.right = "0";
+    toast.style.margin = "1rem";
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(20px)";
+    toast.style.transition = "transform 0.4s ease, opacity 0.4s ease";
     toast.setAttribute("role", "alert");
     toast.setAttribute("aria-live", "assertive");
     toast.setAttribute("aria-atomic", "true");
 
+    // Custom colors
+    const bgColor = type === "success" ? "#003366" : "#dc3545";
+    toast.style.backgroundColor = bgColor;
+    toast.style.color = "#fff";
+    toast.style.minWidth = "250px";
+    toast.style.borderRadius = "0.3rem";
+
     toast.innerHTML = `
-      <div class="d-flex">
-      <div class="toast-body">
-      <i class="bi ${type === "success"
-      ? "bi-check-circle-fill"
-      : "bi-exclamation-circle-fill"
-      } me-2"></i>
-      ${message}
+      <div class="d-flex align-items-center px-3 py-1"> 
+        <i class="bi ${type === "success" ? "bi-check-circle-fill" : "bi-exclamation-circle-fill"} me-2"></i>
+        <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
+      <div class="loading-bar" style="
+        height: 3px;
+        background: rgba(255,255,255,0.7);
+        width: 100%;
+        transition: width ${duration}ms linear;
+      "></div>
     `;
 
     document.body.appendChild(toast);
-    const bsToast = new bootstrap.Toast(toast);
+
+    // Bootstrap toast instance
+    const bsToast = new bootstrap.Toast(toast, { autohide: false });
     bsToast.show();
 
-    toast.addEventListener("hidden.bs.toast", () => {
-      toast.remove();
+    // Float up appear animation
+    requestAnimationFrame(() => {
+      toast.style.opacity = "1";
+      toast.style.transform = "translateY(0)";
     });
+
+    // Start loading bar animation
+    const loadingBar = toast.querySelector(".loading-bar");
+    requestAnimationFrame(() => {
+      loadingBar.style.width = "0%";
+    });
+
+    // Remove after duration
+    setTimeout(() => {
+      // Float down disappear animation
+      toast.style.opacity = "0";
+      toast.style.transform = "translateY(20px)";
+
+      setTimeout(() => {
+      bsToast.hide();
+      toast.remove();
+      }, 400); // matches animation time
+    }, duration);
     }
 
     function showError(message) {
     showToast(message, "error");
     }
+
 
     // Get selected items from session
     async function getSelectedItems() {
@@ -283,9 +320,11 @@
     }
 
     // Main function to refresh UI
+
     async function updateAllUI() {
     try {
-      selectedItems = await getSelectedItems();
+      const response = await fetchData("/api/requisition/get-items");
+      selectedItems = response.data?.selected_items || [];
       filterAndRenderItems();
       updateCartBadge();
     } catch (error) {
@@ -356,6 +395,9 @@
 
     function getFacilityButtonHtml(facility) {
     const isUnavailable = facility.status.status_id === 2; // Status ID 2 = Unavailable
+    const isSelected = selectedItems.some(
+      item => item.type === 'facility' && parseInt(item.facility_id) === facility.facility_id
+    );
 
     if (isUnavailable) {
       return `
@@ -366,12 +408,8 @@
       style="cursor: not-allowed; opacity: 0.65;">
       Unavailable
       </button>
-    `;
+      `;
     }
-
-    const isSelected = selectedItems.some(
-      item => parseInt(item.id) === facility.facility_id && item.type === "facility"
-    );
 
     if (isSelected) {
       return `
@@ -381,7 +419,7 @@
       data-action="remove">
       Remove from form
       </button>
-    `;
+      `;
     } else {
       return `
       <button class="btn btn-primary add-remove-btn" 
@@ -390,16 +428,16 @@
       data-action="add">
       Add to form
       </button>
-    `;
+      `;
     }
     }
 
     // Event delegation for Add/Remove buttons
     function setupEventListeners() {
-    // Event delegation for Add/Remove buttons
-    catalogItemsContainer.addEventListener("click", async (e) => {
+    // Handle Add/Remove buttons
+    document.addEventListener("click", async (e) => {
       const button = e.target.closest(".add-remove-btn");
-      if (!button || button.disabled) return;  // Add check for disabled buttons
+      if (!button || button.disabled) return;
 
       const id = button.dataset.id;
       const type = button.dataset.type;
@@ -411,6 +449,8 @@
       } else if (action === "remove") {
         await removeFromForm(id, type);
       }
+      // Force a complete refresh after modification
+      await updateAllUI();
       } catch (error) {
       console.error("Error handling form action:", error);
       }
@@ -637,75 +677,75 @@
     });
     }
 
-function renderFacilitiesGrid(facilities) {
-  catalogItemsContainer.innerHTML = facilities
-    .map((facility) => {
+    function renderFacilitiesGrid(facilities) {
+    catalogItemsContainer.innerHTML = facilities
+      .map((facility) => {
       const primaryImage =
         facility.images?.find((img) => img.image_type === "Primary")
-          ?.image_url || "https://via.placeholder.com/300x200";
+        ?.image_url || "https://via.placeholder.com/300x200";
 
       return `
-        <div class="catalog-card">
-          <img src="${primaryImage}" alt="${facility.facility_name}" class="catalog-card-img">
-          <div class="catalog-card-details">
-            <h5 data-id="${facility.facility_id}">${facility.facility_name}</h5>
-            <span class="status-banner" style="background-color: ${facility.status.color_code}">
-              ${facility.status.status_name}
-            </span>
-            <div class="catalog-card-meta">
-              <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"}</span>
-              <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name || facility.category.category_name}</span>
-            </div>
-            <p class="facility-description">${facility.description?.substring(0, 100) || "No description available."}${facility.description?.length > 100 ? "..." : ""}</p>
-            <div class="catalog-card-fee">
-              <i class="bi bi-cash-stack"></i> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})
-            </div>
-          </div>
-          <div class="catalog-card-actions">
-            ${getFacilityButtonHtml(facility)}
-            <button class="btn btn-outline-secondary">View Calendar</button>
-          </div>
-        </div>
+      <div class="catalog-card">
+      <img src="${primaryImage}" alt="${facility.facility_name}" class="catalog-card-img">
+      <div class="catalog-card-details">
+      <h5 data-id="${facility.facility_id}">${facility.facility_name}</h5>
+      <span class="status-banner" style="background-color: ${facility.status.color_code}">
+      ${facility.status.status_name}
+      </span>
+      <div class="catalog-card-meta">
+      <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"}</span>
+      <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name || facility.category.category_name}</span>
+      </div>
+      <p class="facility-description">${facility.description?.substring(0, 100) || "No description available."}${facility.description?.length > 100 ? "..." : ""}</p>
+      <div class="catalog-card-fee">
+      <i class="bi bi-cash-stack"></i> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})
+      </div>
+      </div>
+      <div class="catalog-card-actions">
+      ${getFacilityButtonHtml(facility)}
+      <button class="btn btn-outline-secondary">View Calendar</button>
+      </div>
+      </div>
       `;
-    })
-    .join("");
-}
+      })
+      .join("");
+    }
 
-function renderFacilitiesList(facilities) {
-  catalogItemsContainer.innerHTML = facilities
-    .map((facility) => {
+    function renderFacilitiesList(facilities) {
+    catalogItemsContainer.innerHTML = facilities
+      .map((facility) => {
       const primaryImage =
         facility.images?.find((img) => img.image_type === "Primary")
-          ?.image_url || "https://via.placeholder.com/300x200";
+        ?.image_url || "https://via.placeholder.com/300x200";
 
       return `
-        <div class="catalog-card">
-          <img src="${primaryImage}" alt="${facility.facility_name}" class="catalog-card-img">
-          <div class="catalog-card-details">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 data-id="${facility.facility_id}">${facility.facility_name}</h5>
-              <span class="status-banner" style="background-color: ${facility.status.color_code}">
-                ${facility.status.status_name}
-              </span>
-            </div>
-            <div class="catalog-card-meta">
-              <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"}</span>
-              <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name || facility.category.category_name}</span>
-            </div>
-            <p class="facility-description">${facility.description || "No description available."}</p>
-            <div class="catalog-card-fee">
-              <i class="bi bi-cash-stack"></i> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})
-            </div>
-          </div>
-          <div class="catalog-card-actions">
-            ${getFacilityButtonHtml(facility)}
-            <button class="btn btn-outline-secondary">View Calendar</button>
-          </div>
-        </div>
+      <div class="catalog-card">
+      <img src="${primaryImage}" alt="${facility.facility_name}" class="catalog-card-img">
+      <div class="catalog-card-details">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 data-id="${facility.facility_id}">${facility.facility_name}</h5>
+      <span class="status-banner" style="background-color: ${facility.status.color_code}">
+      ${facility.status.status_name}
+      </span>
+      </div>
+      <div class="catalog-card-meta">
+      <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"}</span>
+      <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name || facility.category.category_name}</span>
+      </div>
+      <p class="facility-description">${facility.description || "No description available."}</p>
+      <div class="catalog-card-fee">
+      <i class="bi bi-cash-stack"></i> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})
+      </div>
+      </div>
+      <div class="catalog-card-actions">
+      ${getFacilityButtonHtml(facility)}
+      <button class="btn btn-outline-secondary">View Calendar</button>
+      </div>
+      </div>
       `;
-    })
-    .join("");
-}
+      })
+      .join("");
+    }
 
     function renderPagination(totalItems) {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -873,28 +913,28 @@ function renderFacilitiesList(facilities) {
       document.getElementById("facilityDetailContent").innerHTML = `
       <div class="row">
       <div class="col-md-6">
-        <img src="${primaryImage}" alt="${facility.facility_name}" class="facility-image img-fluid">
+      <img src="${primaryImage}" alt="${facility.facility_name}" class="facility-image img-fluid">
       </div>
       <div class="col-md-6">
-        <div class="facility-details">
-        <p><strong>Status:</strong> <span class="badge" style="background-color: ${facility.status.color_code}">${facility.status.status_name}</span></p>
-        <p><strong>Category:</strong> ${facility.category.category_name}</p>
-        <p><strong>Subcategory:</strong> ${facility.subcategory?.subcategory_name || "N/A"}</p>
-        <p><strong>Capacity:</strong> ${facility.capacity}</p>
-        <p><strong>Rate:</strong> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})</p>
-        <p><strong>Description:</strong></p>
-        <p>${facility.description || "No description available."}</p>
-        </div>
-        <div class="mt-3">
-        ${isUnavailable
+      <div class="facility-details">
+      <p><strong>Status:</strong> <span class="badge" style="background-color: ${facility.status.color_code}">${facility.status.status_name}</span></p>
+      <p><strong>Category:</strong> ${facility.category.category_name}</p>
+      <p><strong>Subcategory:</strong> ${facility.subcategory?.subcategory_name || "N/A"}</p>
+      <p><strong>Capacity:</strong> ${facility.capacity}</p>
+      <p><strong>Rate:</strong> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})</p>
+      <p><strong>Description:</strong></p>
+      <p>${facility.description || "No description available."}</p>
+      </div>
+      <div class="mt-3">
+      ${isUnavailable
         ? `<button class="btn btn-secondary" disabled style="cursor: not-allowed; opacity: 0.65;">Unavailable</button>`
         : `<button class="btn ${isSelected ? "btn-danger" : "btn-primary"} add-remove-btn" 
-            data-id="${facility.facility_id}" 
-            data-type="facility" 
-            data-action="${isSelected ? "remove" : "add"}">
-            ${isSelected ? "Remove from Form" : "Add to Form"}
-          </button>`}
-        </div>
+      data-id="${facility.facility_id}" 
+      data-type="facility" 
+      data-action="${isSelected ? "remove" : "add"}">
+      ${isSelected ? "Remove from Form" : "Add to Form"}
+      </button>`}
+      </div>
       </div>
       </div>
     `;
@@ -908,33 +948,26 @@ function renderFacilitiesList(facilities) {
     // Main Initialization
     async function init() {
     try {
-      // Fetch allowed statuses (future-proof, but hardcoded for now)
-      // const statuses = await fetchData("/api/availability-statuses");
-      // allowedStatusIds = statuses.filter(s => s.status_id === 1 || s.status_id === 2).map(s => s.status_id);
-
-      const [
-      facilitiesData,
-      facilityCategoriesData,
-      ] = await Promise.all([
-      fetchData("/api/facilities"),
-      fetchData("/api/facility-categories/index"),
+      const [facilitiesData, facilityCategoriesData, selectedItemsResponse] = await Promise.all([
+      fetchData('/api/facilities'),
+      fetchData('/api/facility-categories/index'),
+      fetchData('/api/requisition/get-items')
       ]);
-
-      // Fetch selected items separately and wait for it
-      selectedItems = await getSelectedItems();
 
       // Only keep facilities with status_id 1 or 2
       allFacilities = (facilitiesData.data || []).filter(f => allowedStatusIds.includes(f.status.status_id));
       facilityCategories = facilityCategoriesData || [];
+      selectedItems = selectedItemsResponse.data?.selected_items || []; // Updated to match new response structure
 
       renderCategoryFilters();
       filterAndRenderItems();
       setupEventListeners();
       updateCartBadge();
+
       catalogItemsContainer.classList.remove("d-none");
     } catch (error) {
       console.error("Error initializing page:", error);
-      showError("Failed to initialize the page. Please try again.");
+      showToast("Failed to initialize the page. Please try again.", "error");
     } finally {
       loadingIndicator.style.display = "none";
     }

@@ -21,6 +21,36 @@ use Illuminate\Support\Facades\Log;
 
 /* CONTROLLER DOCUMENTATION (expand to view):
 
+--> COMPLETE CONTROLLER USE CASE: 
+
+- to be able to fill up a requisition form using laravel cookies in the user's session, add items to the cart, check availability to avoid booking conflicts (important), and submit the form.
+
+- This controller handles the requisition form process:
+
+    first, everything is saved in the user's session, 
+    then it checks for conflicts with existing bookings. data that is saved in the session includes:
+
+    - saving user info, including booking schedule, even if the user leaves the page and comes back later or leaving the website entirely.
+    - Set a start_date, start_time, end_date, end_time schedule combo and press a 'Check availability' button that checks it's availability against other existing schedules (loops through schedules of selected items in the user's session via the checkAvailability method in a single call and displays a UI modal of the facility/equipment_id that's conflicting). The time fields in the frontend have a dropdown of a fixed, 12-hour format with am and pm options for consistency in 30 minute intervals (e.g., 1:00 PM, 1:30 PM, 2:00 PM...). In the backend, this should convert the time to a 24-hour format for consistency (H:i: only, no seconds). Seconds are not needed for this use case.
+    - adding/removing facility/equipment items to their form
+    - uploading temp files to Cloudinary, such as formal letter and facility layout
+
+- after the user has filled up the form, they can submit it. 
+in the frontend, clicking on the Submit button will call the submitForm method, which will:
+
+    - in the frontend, display a disclaimer of terms and conditions, and a confirmation dialog to the user. it is required to tick the terms and conditions checkbox before submitting. If checkbox is not ticked, the modal's submit button will be disabled.
+    - after accepting the terms and conditions, change submit form button to -> "[loading icon] Processing...]" as post-checks are made:
+
+        - validate the form data
+        - check for conflicts once again with existing bookings via the checkAvailability method  (request_id and their requested_facilities_id and requested_equipment_id via eloquent relationships), looping through the selected items' existing booking schedules in the session and the form-level date and time fields. if there are any conflicts, it will return an error message to the frontend and prevent submission.
+        - create a new requisition form in the database marked as 'Pending Approval' (status_id = 1). 
+        - save the selected items in the requested_facilities (requested_facilities_id) and requested_equipment tables (requested_equipment_id).
+        - clear the session data
+
+    - Once validation is complete, update the terms and conditions modal into a success message modal with the following:
+        - a success message that the requisition form has been submitted successfully
+        - return a success response with the requisition form's randomly generated access_code (10 digits) and request ID (request_id).
+
 Lookup Tables:
 
     AvailabilityStatus Model (status_id in availability_statuses table):
@@ -249,13 +279,14 @@ class RequisitionFormController extends Controller
 
         try {
             $selectedItems = Session::get('selected_items', []);
-            $id = $request->input($request->type . '_id');
             $type = $request->type;
+            $idField = $type . '_id';
+            $id = $request->input($idField);
             $quantity = $request->quantity ?? 1;
 
             // Check for duplicate item
-            $existingIndex = collect($selectedItems)->search(function ($item) use ($id, $type) {
-                return $item['id'] == $id && $item['type'] === $type;
+            $existingIndex = collect($selectedItems)->search(function ($item) use ($id, $type, $idField) {
+                return isset($item[$idField]) && $item[$idField] == $id && $item['type'] === $type;
             });
 
             if ($existingIndex !== false) {
@@ -267,28 +298,33 @@ class RequisitionFormController extends Controller
                         'cart_count' => count($selectedItems)
                     ]);
                 }
-                return $this->jsonResponse(false, 'This facility is already in your requisition.', [], 422);
+                return $this->jsonResponse(false, 'This item is already in your requisition.', [], 422);
             }
 
             if (count($selectedItems) >= 10) {
                 return $this->jsonResponse(false, 'Maximum item limit (10) reached.', [], 422);
             }
 
-            // Get item details with proper model relationships
-            $itemDetails = $this->getItemDetails($type, $id);
+            // Get item details
+            if ($type === 'facility') {
+                $item = Facility::with(['images', 'category', 'status'])->find($id);
+            } else {
+                $item = Equipment::with(['images', 'category', 'status'])->find($id);
+            }
 
-            if (!$itemDetails) {
+            if (!$item) {
                 return $this->jsonResponse(false, 'Item not found.', [], 404);
             }
 
             $newItem = [
-                'id' => $id,
                 'type' => $type,
+                $idField => $id,
                 'quantity' => $quantity,
-                'name' => $itemDetails['name'],
-                'fee' => $itemDetails['fee'],
-                'rate_type' => $itemDetails['rate_type'],
-                'image' => $itemDetails['image'] ?? null,
+                'name' => $type === 'facility' ? $item->facility_name : $item->equipment_name,
+                'description' => $item->description,
+                'external_fee' => $item->external_fee,
+                'rate_type' => $item->rate_type,
+                'images' => $item->images->toArray(),
                 'added_at' => now()->toDateTimeString()
             ];
 
@@ -300,14 +336,11 @@ class RequisitionFormController extends Controller
                 'cart_count' => count($selectedItems)
             ]);
 
-
-
         } catch (\Exception $e) {
-            Log::error('Cart error: ' . $e->getMessage());
+            Log::error('Add to form error: ' . $e->getMessage());
             return $this->jsonResponse(false, 'An error occurred.', [], 500);
         }
     }
-
     // ----- Remove items from session ----- //
     public function removeFromForm(Request $request)
     {
@@ -323,12 +356,13 @@ class RequisitionFormController extends Controller
 
         try {
             $selectedItems = Session::get('selected_items', []);
-            $id = $request->input($request->type . '_id');
             $type = $request->type;
+            $idField = $type . '_id'; // Create the correct field name
+            $id = $request->input($idField);
 
             $updatedItems = array_values(array_filter(
                 $selectedItems,
-                fn($item) => !($item['id'] == $id && $item['type'] === $type)
+                fn($item) => !(isset($item[$idField]) && $item[$idField] == $id && $item['type'] === $type)
             ));
 
             Session::put('selected_items', $updatedItems);
@@ -344,31 +378,40 @@ class RequisitionFormController extends Controller
         }
     }
 
-    private function getItemDetails($type, $id)
+    // Updated getItems method
+    public function getItems(Request $request)
     {
-        if ($type === 'facility') {
-            $item = Facility::with(['images', 'category', 'status'])
-                ->find($id);
+        $selectedItems = Session::get('selected_items', []);
 
-            return [
-                'name' => $item->facility_name,
-                'fee' => $item->external_fee, // or external_fee based on user type
-                'rate_type' => $item->rate_type,
-                'image' => optional($item->images->first())->image_url
+        // Ensure consistent data structure
+        $formattedItems = array_map(function ($item) {
+            $base = [
+                'type' => $item['type'],
+                'name' => $item['name'],
+                'description' => $item['description'],
+                'external_fee' => $item['external_fee'],
+                'rate_type' => $item['rate_type'],
+                'images' => $item['images'],
             ];
-        } else {
-            $item = Equipment::with(['images', 'category', 'status'])
-                ->find($id);
 
-            return [
-                'name' => $item->equipment_name,
-                'fee' => $item->external_fee, // or external_fee based on user type
-                'rate_type' => $item->rate_type,
-                'image' => optional($item->images->first())->image_url
-            ];
-        }
+            if ($item['type'] === 'facility') {
+                $base['facility_id'] = $item['facility_id'];
+            } else {
+                $base['equipment_id'] = $item['equipment_id'];
+                $base['quantity'] = $item['quantity'] ?? 1;
+            }
+
+            return $base;
+        }, $selectedItems);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'selected_items' => $formattedItems
+            ]
+        ]);
     }
-    
+
     // ----- Get selected items from session ----- //
     public function getSelectedItems(Request $request)
     {
@@ -446,49 +489,62 @@ class RequisitionFormController extends Controller
 
             $conflicts = $query->exists();
             if ($conflicts) {
+                $type = $request->filled('facility_id') ? 'facility' : 'equipment';
+                $idField = $type . '_id';
                 $conflictItems[] = [
-                    'type' => $request->filled('facility_id') ? 'facility' : 'equipment',
-                    'id' => $request->facility_id ?? $request->equipment_id
+                    'type' => $type,
+                    $idField => $request->input($idField),
+                    // Optionally fetch the name from the database for frontend display
+                    'name' => $type === 'facility'
+                        ? optional(Facility::find($request->input($idField)))->facility_name
+                        : optional(Equipment::find($request->input($idField)))->equipment_name
                 ];
             }
         } else {
             // Check all items in the cart/session
             $selectedItems = session('selected_items', []);
-            foreach ($selectedItems as $item) {
-                $query = RequisitionForm::where(function ($query) use ($requestStart, $requestEnd, $conflictStatusIds) {
-                    $query->where(function ($q) use ($requestStart, $requestEnd) {
-                        $q->where(function ($dateQ) use ($requestStart, $requestEnd) {
-                            $dateQ->where('start_date', '<=', $requestEnd->format('Y-m-d'))
-                                ->where('end_date', '>=', $requestStart->format('Y-m-d'));
-                        });
+            $baseQuery = RequisitionForm::where(function ($query) use ($requestStart, $requestEnd, $conflictStatusIds) {
+                $query->where(function ($q) use ($requestStart, $requestEnd) {
+                    $q->where('start_date', '<=', $requestEnd->format('Y-m-d'))
+                        ->where('end_date', '>=', $requestStart->format('Y-m-d'));
+                })
+                    ->where(function ($q) use ($requestStart, $requestEnd) {
+                        $q->where('start_time', '<', $requestEnd->format('H:i'))
+                            ->where('end_time', '>', $requestStart->format('H:i'));
                     })
-                        ->where(function ($q) use ($requestStart, $requestEnd) {
-                            $q->where(function ($inner) use ($requestStart, $requestEnd) {
-                                // Allow partial overlaps and edge cases
-                                $inner->where('start_time', '<', $requestEnd->format('H:i'))
-                                    ->where('end_time', '>', $requestStart->format('H:i'));
-                            });
-                        })
-                        ->whereIn('status_id', $conflictStatusIds);
-                });
+                    ->whereIn('status_id', $conflictStatusIds);
+            });
 
-                if ($request->has('request_id')) {
-                    $query->where('request_id', '!=', $request->request_id);
-                }
+            if ($request->has('request_id')) {
+                $baseQuery->where('request_id', '!=', $request->request_id);
+            }
+
+            foreach ($selectedItems as $item) {
+                $query = clone $baseQuery;
+                $idField = $item['type'] . '_id';
+
                 if ($item['type'] === 'facility') {
-                    $query->whereHas('requestedFacilities', function ($q) use ($item) {
-                        $q->where('facility_id', $item['id']);
-                    });
-                }
-                if ($item['type'] === 'equipment') {
-                    $query->whereHas('requestedEquipment', function ($q) use ($item) {
-                        $q->where('equipment_id', $item['id']);
-                    });
+                    $query->whereHas(
+                        'requestedFacilities',
+                        fn($q) =>
+                        $q->where('facility_id', $item['facility_id'])
+                    );
+                } else {
+                    $query->whereHas(
+                        'requestedEquipment',
+                        fn($q) =>
+                        $q->where('equipment_id', $item['equipment_id'])
+                    );
                 }
 
                 if ($query->exists()) {
                     $conflicts = true;
-                    $conflictItems[] = $item;
+                    $conflictItems[] = [
+                        'type' => $item['type'],
+                        $idField => $item[$idField],
+                        'name' => $item['name'],
+                        'quantity' => $item['quantity'] ?? null
+                    ];
                 }
             }
         }

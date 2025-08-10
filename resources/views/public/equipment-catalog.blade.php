@@ -35,15 +35,14 @@
         Not sure when to book?<br />View available timeslots here.
         </p>
         <div style="position:relative;">
-          <span id="requisitionBadge"
-            class="badge bg-danger rounded-pill position-absolute"
-            style="top:-0.7rem; right:-0.7rem; font-size:0.8em; z-index:2; display:none;">
-            0
-          </span>
-          <a id="requisitionFormButton" href="reservation-form"
-            class="btn btn-primary d-flex justify-content-center align-items-center position-relative mb-2">
-            <i class="bi bi-receipt me-2"></i> Your Requisition Form
-          </a>
+        <span id="requisitionBadge" class="badge bg-danger rounded-pill position-absolute"
+          style="top:-0.7rem; right:-0.7rem; font-size:0.8em; z-index:2; display:none;">
+          0
+        </span>
+        <a id="requisitionFormButton" href="reservation-form"
+          class="btn btn-primary d-flex justify-content-center align-items-center position-relative mb-2">
+          <i class="bi bi-receipt me-2"></i> Your Requisition Form
+        </a>
         </div>
         <button type="button" class="btn btn-outline-primary d-flex align-items-center" id="eventsCalendarBtn"
         data-bs-toggle="modal" data-bs-target="#userCalendarModal">Events Calendar</button>
@@ -208,241 +207,283 @@
     return await response.json();
     }
 
-    function showToast(message, type = "success") {
+    function showToast(message, type = "success", duration = 3000) {
     const toast = document.createElement("div");
-    toast.className = `toast align-items-center text-white bg-${type === "success" ? "success" : "danger"} border-0 position-fixed bottom-0 end-0 m-3`;
-    toast.style.zIndex = "1100";
-    toast.setAttribute("role", "alert");
-    toast.setAttribute("aria-live", "assertive");
-    toast.setAttribute("aria-atomic", "true");
+
+    // Toast base styles (bottom right)
+    toast.className = `toast align-items-center border-0 position-fixed end-0 mb-2`;
+    toast.style.zIndex = '1100';
+    toast.style.bottom = '0';
+    toast.style.right = '0';
+    toast.style.margin = '1rem';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(20px)';
+    toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+
+    // Custom colors
+    const bgColor = type === 'success' ? '#003366' : '#dc3545';
+    toast.style.backgroundColor = bgColor;
+    toast.style.color = '#fff';
+    toast.style.minWidth = '250px';
+    toast.style.borderRadius = '0.3rem';
 
     toast.innerHTML = `
-      <div class="d-flex">
-      <div class="toast-body">
-      <i class="bi ${type === "success" ? "bi-check-circle-fill" : "bi-exclamation-circle-fill"} me-2"></i>
-      ${message}
+      <div class="d-flex align-items-center px-3 py-1"> 
+        <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+        <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
+      <div class="loading-bar" style="
+        height: 3px;
+        background: rgba(255,255,255,0.7);
+        width: 100%;
+        transition: width ${duration}ms linear;
+      "></div>
     `;
 
     document.body.appendChild(toast);
-    const bsToast = new bootstrap.Toast(toast);
+
+    // Bootstrap toast instance
+    const bsToast = new bootstrap.Toast(toast, { autohide: false });
     bsToast.show();
 
-    toast.addEventListener("hidden.bs.toast", () => {
-      toast.remove();
+    // Float up appear animation
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
     });
+
+    // Start loading bar animation
+    const loadingBar = toast.querySelector('.loading-bar');
+    requestAnimationFrame(() => {
+      loadingBar.style.width = '0%';
+    });
+
+    // Remove after duration
+    setTimeout(() => {
+      // Float down disappear animation
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(20px)';
+
+      setTimeout(() => {
+      bsToast.hide();
+      toast.remove();
+      }, 400); // matches animation time
+    }, duration);
     }
+
 
     // Render category filters (overhauled)
     function renderCategoryFilters() {
-      categoryFilterList.innerHTML = "";
+    categoryFilterList.innerHTML = "";
 
-      // "All Categories" option
-      const allCategoriesItem = document.createElement("div");
-      allCategoriesItem.className = "category-item";
-      allCategoriesItem.innerHTML = `
-        <div class="form-check">
-          <input class="form-check-input category-filter" type="checkbox" id="allCategories" value="All" checked disabled>
-          <label class="form-check-label" for="allCategories">All Categories</label>
-        </div>
+    // "All Categories" option
+    const allCategoriesItem = document.createElement("div");
+    allCategoriesItem.className = "category-item";
+    allCategoriesItem.innerHTML = `
+      <div class="form-check">
+      <input class="form-check-input category-filter" type="checkbox" id="allCategories" value="All" checked disabled>
+      <label class="form-check-label" for="allCategories">All Categories</label>
+      </div>
       `;
-      categoryFilterList.appendChild(allCategoriesItem);
+    categoryFilterList.appendChild(allCategoriesItem);
 
-      // Render equipment categories
-      equipmentCategories.forEach((category) => {
-        const categoryItem = document.createElement("div");
-        categoryItem.className = "category-item";
-        categoryItem.innerHTML = `
-          <div class="form-check">
-            <input class="form-check-input category-filter" type="checkbox" id="category${category.category_id}" value="${category.category_id}">
-            <label class="form-check-label" for="category${category.category_id}">${category.category_name}</label>
-          </div>
-        `;
-        categoryFilterList.appendChild(categoryItem);
+    // Render equipment categories
+    equipmentCategories.forEach((category) => {
+      const categoryItem = document.createElement("div");
+      categoryItem.className = "category-item";
+      categoryItem.innerHTML = `
+      <div class="form-check">
+      <input class="form-check-input category-filter" type="checkbox" id="category${category.category_id}" value="${category.category_id}">
+      <label class="form-check-label" for="category${category.category_id}">${category.category_name}</label>
+      </div>
+      `;
+      categoryFilterList.appendChild(categoryItem);
+    });
+
+    // Event listeners for category filters
+    const allCategoriesCheckbox = document.getElementById("allCategories");
+    const categoryCheckboxes = Array.from(document.querySelectorAll('.category-filter')).filter(cb => cb.id !== "allCategories");
+
+    // When any category is checked/unchecked
+    categoryCheckboxes.forEach(cb => {
+      cb.addEventListener('change', function () {
+      const anyChecked = categoryCheckboxes.some(c => c.checked);
+      if (anyChecked) {
+        allCategoriesCheckbox.checked = false;
+        allCategoriesCheckbox.disabled = false;
+      } else {
+        allCategoriesCheckbox.checked = true;
+        allCategoriesCheckbox.disabled = true;
+      }
+      filterAndRenderItems();
       });
+    });
 
-      // Event listeners for category filters
-      const allCategoriesCheckbox = document.getElementById("allCategories");
-      const categoryCheckboxes = Array.from(document.querySelectorAll('.category-filter')).filter(cb => cb.id !== "allCategories");
-
-      // When any category is checked/unchecked
+    // When "All Categories" is checked
+    allCategoriesCheckbox.addEventListener('change', function () {
+      if (this.checked) {
       categoryCheckboxes.forEach(cb => {
-        cb.addEventListener('change', function () {
-          const anyChecked = categoryCheckboxes.some(c => c.checked);
-          if (anyChecked) {
-            allCategoriesCheckbox.checked = false;
-            allCategoriesCheckbox.disabled = false;
-          } else {
-            allCategoriesCheckbox.checked = true;
-            allCategoriesCheckbox.disabled = true;
-          }
-          filterAndRenderItems();
-        });
+        cb.checked = false;
       });
-
-      // When "All Categories" is checked
-      allCategoriesCheckbox.addEventListener('change', function () {
-        if (this.checked) {
-          categoryCheckboxes.forEach(cb => {
-            cb.checked = false;
-          });
-          allCategoriesCheckbox.disabled = true;
-          filterAndRenderItems();
-        }
-      });
-
-      // Initial state: only "All Categories" checked and disabled
-      allCategoriesCheckbox.checked = true;
       allCategoriesCheckbox.disabled = true;
-      categoryCheckboxes.forEach(cb => cb.checked = false);
+      filterAndRenderItems();
+      }
+    });
+
+    // Initial state: only "All Categories" checked and disabled
+    allCategoriesCheckbox.checked = true;
+    allCategoriesCheckbox.disabled = true;
+    categoryCheckboxes.forEach(cb => cb.checked = false);
     }
 
     // Filter items based on selected categories (overhauled)
     function filterItems() {
-      const allCategoriesCheckbox = document.getElementById('allCategories');
-      const categoryCheckboxes = Array.from(document.querySelectorAll('.category-filter')).filter(cb => cb.id !== "allCategories");
+    const allCategoriesCheckbox = document.getElementById('allCategories');
+    const categoryCheckboxes = Array.from(document.querySelectorAll('.category-filter')).filter(cb => cb.id !== "allCategories");
 
-      // Only keep allowed status
-      filteredItems = [...allEquipment].filter(e => allowedStatusIds.includes(e.status.status_id));
+    // Only keep allowed status
+    filteredItems = [...allEquipment].filter(e => allowedStatusIds.includes(e.status.status_id));
 
-      // Filter by status dropdown
-      if (statusFilter === "Available") {
-        filteredItems = filteredItems.filter(e => e.status.status_id === 1);
-      } else if (statusFilter === "Unavailable") {
-        filteredItems = filteredItems.filter(e => e.status.status_id === 2);
-      }
+    // Filter by status dropdown
+    if (statusFilter === "Available") {
+      filteredItems = filteredItems.filter(e => e.status.status_id === 1);
+    } else if (statusFilter === "Unavailable") {
+      filteredItems = filteredItems.filter(e => e.status.status_id === 2);
+    }
 
-      // Category filtering
-      if (allCategoriesCheckbox.checked) {
-        // All categories selected, show all
-        return;
-      }
+    // Category filtering
+    if (allCategoriesCheckbox.checked) {
+      // All categories selected, show all
+      return;
+    }
 
-      // Otherwise, filter by selected categories
-      const selectedCategories = categoryCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
-      if (selectedCategories.length === 0) {
-        filteredItems = [];
-        return;
-      }
-      filteredItems = filteredItems.filter(equipment =>
-        selectedCategories.includes(equipment.category.category_id.toString())
-      );
+    // Otherwise, filter by selected categories
+    const selectedCategories = categoryCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
+    if (selectedCategories.length === 0) {
+      filteredItems = [];
+      return;
+    }
+    filteredItems = filteredItems.filter(equipment =>
+      selectedCategories.includes(equipment.category.category_id.toString())
+    );
     }
 
     // Render items based on current layout
     function renderItems(items) {
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
 
-      catalogItemsContainer.classList.remove("grid-layout", "list-layout");
-      catalogItemsContainer.classList.add(`${currentLayout}-layout`);
+    catalogItemsContainer.classList.remove("grid-layout", "list-layout");
+    catalogItemsContainer.classList.add(`${currentLayout}-layout`);
 
-      if (paginatedItems.length === 0) {
-        catalogItemsContainer.innerHTML = `
-          <div class="col-12 text-center py-5">
-            <i class="bi bi-box-seam fs-1 text-muted"></i>
-            <h4>No equipment found</h4>
-          </div>
-        `;
-        return;
-      }
+    if (paginatedItems.length === 0) {
+      catalogItemsContainer.innerHTML = `
+      <div class="col-12 text-center py-5">
+      <i class="bi bi-box-seam fs-1 text-muted"></i>
+      <h4>No equipment found</h4>
+      </div>
+      `;
+      return;
+    }
 
-      if (currentLayout === "grid") {
-        renderEquipmentGrid(paginatedItems);
-      } else {
-        renderEquipmentList(paginatedItems);
-      }
+    if (currentLayout === "grid") {
+      renderEquipmentGrid(paginatedItems);
+    } else {
+      renderEquipmentList(paginatedItems);
+    }
     }
 
     // Grid layout for equipment (same as before)
     function renderEquipmentGrid(equipmentList) {
-      catalogItemsContainer.innerHTML = equipmentList.map(item => `
-        <div class="catalog-card">
-          <img src="${item.images?.find(i => i.image_type === 'Primary')?.image_url || 'https://via.placeholder.com/300x200'}" 
-           alt="${item.equipment_name}" class="catalog-card-img">
-          <div class="catalog-card-details">
-            <h5>${item.equipment_name}</h5>
-            <span class="status-banner" style="background-color: ${item.status.color_code}">
-              ${item.status.status_name}
-            </span>
-            <div class="catalog-card-meta">
-              <span><i class="bi bi-tags-fill"></i> ${item.category.category_name}</span>
-              <span><i class="bi bi-box-seam"></i> ${item.available_quantity}/${item.total_quantity} available</span>
-            </div>
-            <p class="facility-description">${item.description?.substring(0, 100) || 'No description available'}${item.description?.length > 100 ? '...' : ''}</p>
-            <div class="catalog-card-fee">
-              <i class="bi bi-cash-stack"></i> ₱${parseFloat(item.external_fee).toLocaleString()} (${item.rate_type})
-            </div>
-          </div>
-          <div class="catalog-card-actions">
-            ${getEquipmentButtonHtml(item)}
-          </div>
-        </div>
+    catalogItemsContainer.innerHTML = equipmentList.map(item => `
+      <div class="catalog-card">
+      <img src="${item.images?.find(i => i.image_type === 'Primary')?.image_url || 'https://via.placeholder.com/300x200'}" 
+       alt="${item.equipment_name}" class="catalog-card-img">
+      <div class="catalog-card-details">
+      <h5>${item.equipment_name}</h5>
+      <span class="status-banner" style="background-color: ${item.status.color_code}">
+      ${item.status.status_name}
+      </span>
+      <div class="catalog-card-meta">
+      <span><i class="bi bi-tags-fill"></i> ${item.category.category_name}</span>
+      <span><i class="bi bi-box-seam"></i> ${item.available_quantity}/${item.total_quantity} available</span>
+      </div>
+      <p class="facility-description">${item.description?.substring(0, 100) || 'No description available'}${item.description?.length > 100 ? '...' : ''}</p>
+      <div class="catalog-card-fee">
+      <i class="bi bi-cash-stack"></i> ₱${parseFloat(item.external_fee).toLocaleString()} (${item.rate_type})
+      </div>
+      </div>
+      <div class="catalog-card-actions">
+      ${getEquipmentButtonHtml(item)}
+      </div>
+      </div>
       `).join('');
     }
 
     // List layout for equipment (similar to facility list layout)
     function renderEquipmentList(equipmentList) {
-      catalogItemsContainer.innerHTML = equipmentList.map(item => {
-        const primaryImage = item.images?.find(i => i.image_type === 'Primary')?.image_url || 'https://via.placeholder.com/300x200';
-        return `
-          <div class="catalog-card">
-            <img src="${primaryImage}" alt="${item.equipment_name}" class="catalog-card-img">
-            <div class="catalog-card-details">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5>${item.equipment_name}</h5>
-                <span class="status-banner" style="background-color: ${item.status.color_code}">
-                  ${item.status.status_name}
-                </span>
-              </div>
-              <div class="catalog-card-meta">
-                <span><i class="bi bi-tags-fill"></i> ${item.category.category_name}</span>
-                <span><i class="bi bi-box-seam"></i> ${item.available_quantity}/${item.total_quantity} available</span>
-              </div>
-              <p class="facility-description">${item.description || 'No description available'}</p>
-              <div class="catalog-card-fee">
-                <i class="bi bi-cash-stack"></i> ₱${parseFloat(item.external_fee).toLocaleString()} (${item.rate_type})
-              </div>
-            </div>
-            <div class="catalog-card-actions">
-              ${getEquipmentButtonHtml(item)}
-            </div>
-          </div>
-        `;
-      }).join('');
+    catalogItemsContainer.innerHTML = equipmentList.map(item => {
+      const primaryImage = item.images?.find(i => i.image_type === 'Primary')?.image_url || 'https://via.placeholder.com/300x200';
+      return `
+      <div class="catalog-card">
+      <img src="${primaryImage}" alt="${item.equipment_name}" class="catalog-card-img">
+      <div class="catalog-card-details">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5>${item.equipment_name}</h5>
+      <span class="status-banner" style="background-color: ${item.status.color_code}">
+      ${item.status.status_name}
+      </span>
+      </div>
+      <div class="catalog-card-meta">
+      <span><i class="bi bi-tags-fill"></i> ${item.category.category_name}</span>
+      <span><i class="bi bi-box-seam"></i> ${item.available_quantity}/${item.total_quantity} available</span>
+      </div>
+      <p class="facility-description">${item.description || 'No description available'}</p>
+      <div class="catalog-card-fee">
+      <i class="bi bi-cash-stack"></i> ₱${parseFloat(item.external_fee).toLocaleString()} (${item.rate_type})
+      </div>
+      </div>
+      <div class="catalog-card-actions">
+      ${getEquipmentButtonHtml(item)}
+      </div>
+      </div>
+      `;
+    }).join('');
     }
 
     // Pagination copied from facility catalog
     function renderPagination(totalItems) {
-      const totalPages = Math.ceil(totalItems / itemsPerPage);
-      pagination.innerHTML = "";
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    pagination.innerHTML = "";
 
-      if (totalPages <= 1) return;
+    if (totalPages <= 1) return;
 
-      for (let i = 1; i <= totalPages; i++) {
-        const pageItem = document.createElement("li");
-        pageItem.className = `page-item ${i === currentPage ? "active" : ""}`;
-        pageItem.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-        pageItem.addEventListener("click", (e) => {
-          e.preventDefault();
-          currentPage = i;
-          filterAndRenderItems();
-          window.scrollTo({
-            top: catalogItemsContainer.offsetTop - 100,
-            behavior: "smooth",
-          });
-        });
-        pagination.appendChild(pageItem);
-      }
+    for (let i = 1; i <= totalPages; i++) {
+      const pageItem = document.createElement("li");
+      pageItem.className = `page-item ${i === currentPage ? "active" : ""}`;
+      pageItem.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+      pageItem.addEventListener("click", (e) => {
+      e.preventDefault();
+      currentPage = i;
+      filterAndRenderItems();
+      window.scrollTo({
+        top: catalogItemsContainer.offsetTop - 100,
+        behavior: "smooth",
+      });
+      });
+      pagination.appendChild(pageItem);
+    }
     }
 
     // Main function to filter and render items
     function filterAndRenderItems() {
-      filterItems();
-      renderItems(filteredItems);
-      renderPagination(filteredItems.length);
+    filterItems();
+    renderItems(filteredItems);
+    renderPagination(filteredItems.length);
     }
 
 
@@ -459,22 +500,24 @@
 
     // Update cart badge
     function updateCartBadge() {
-      const badge = document.getElementById("requisitionBadge");
-      if (!badge) return;
-      if (selectedItems.length > 0) {
-        badge.textContent = selectedItems.length;
-        badge.style.display = "";
-        badge.classList.remove("d-none");
-      } else {
-        badge.style.display = "none";
-        badge.classList.add("d-none");
-      }
+    const badge = document.getElementById("requisitionBadge");
+    if (!badge) return;
+    if (selectedItems.length > 0) {
+      badge.textContent = selectedItems.length;
+      badge.style.display = "";
+      badge.classList.remove("d-none");
+    } else {
+      badge.style.display = "none";
+      badge.classList.add("d-none");
+    }
     }
 
     // Main function to refresh UI
+
     async function updateAllUI() {
     try {
-      selectedItems = await getSelectedItems();
+      const response = await fetchData("/api/requisition/get-items");
+      selectedItems = response.data?.selected_items || [];
       filterAndRenderItems();
       updateCartBadge();
     } catch (error) {
@@ -546,34 +589,34 @@
     // Generate button HTML based on selection state
     function getEquipmentButtonHtml(equipment) {
     const isSelected = selectedItems.some(
-      item => parseInt(item.id) === equipment.equipment_id && item.type === "equipment"
+      item => item.type === 'equipment' && parseInt(item.equipment_id) === equipment.equipment_id
     );
 
     const selectedItem = isSelected ? selectedItems.find(
-      item => parseInt(item.id) === equipment.equipment_id
+      item => item.type === 'equipment' && parseInt(item.equipment_id) === equipment.equipment_id
     ) : null;
 
     const currentQty = selectedItem ? selectedItem.quantity : 1;
     const maxQty = equipment.total_quantity || 1;
-    const isUnavailable = equipment.status.status_id === 2; // Status ID 2 = Unavailable
+    const isUnavailable = equipment.status.status_id === 2;
 
     if (isUnavailable) {
       return `
       <div class="d-flex gap-2 align-items-center">
-        <input type="number" 
-           class="form-control quantity-input" 
-           value="${currentQty}" 
-           min="1" 
-           max="${maxQty}"
-           style="width: 70px;"
-           disabled>
-        <button class="btn btn-secondary add-remove-btn" 
-          data-id="${equipment.equipment_id}" 
-          data-type="equipment" 
-          disabled
-          style="cursor: not-allowed; opacity: 0.65;">
-          Unavailable
-        </button>
+      <input type="number" 
+       class="form-control quantity-input" 
+       value="${currentQty}" 
+       min="1" 
+       max="${maxQty}"
+       style="width: 70px;"
+       disabled>
+      <button class="btn btn-secondary add-remove-btn" 
+      data-id="${equipment.equipment_id}" 
+      data-type="equipment" 
+      disabled
+      style="cursor: not-allowed; opacity: 0.65;">
+      Unavailable
+      </button>
       </div>
       `;
     }
@@ -581,41 +624,41 @@
     if (isSelected) {
       return `
       <div class="d-flex gap-2 align-items-center">
-        <input type="number" 
-           class="form-control quantity-input" 
-           value="${currentQty}" 
-           min="1" 
-           max="${maxQty}"
-           style="width: 70px;">
-        <button class="btn btn-danger add-remove-btn" 
-          data-id="${equipment.equipment_id}" 
-          data-type="equipment" 
-          data-action="remove">
-          Remove
-        </button>
+      <input type="number" 
+       class="form-control quantity-input" 
+       value="${currentQty}" 
+       min="1" 
+       max="${maxQty}"
+       style="width: 70px;">
+      <button class="btn btn-danger add-remove-btn" 
+      data-id="${equipment.equipment_id}" 
+      data-type="equipment" 
+      data-action="remove">
+      Remove
+      </button>
       </div>
       `;
     } else {
       return `
       <div class="d-flex gap-2 align-items-center">
-        <input type="number" 
-           class="form-control quantity-input" 
-           value="1" 
-           min="1" 
-           max="${maxQty}"
-           style="width: 70px;">
-        <button class="btn btn-primary add-remove-btn" 
-          data-id="${equipment.equipment_id}" 
-          data-type="equipment" 
-          data-action="add">
-          Add
-        </button>
+      <input type="number" 
+       class="form-control quantity-input" 
+       value="1" 
+       min="1" 
+       max="${maxQty}"
+       style="width: 70px;">
+      <button class="btn btn-primary add-remove-btn" 
+      data-id="${equipment.equipment_id}" 
+      data-type="equipment" 
+      data-action="add">
+      Add
+      </button>
       </div>
       `;
     }
     }
-
     // Event delegation for Add/Remove buttons
+    // Update the setupEventListeners function
     function setupEventListeners() {
     catalogItemsContainer.addEventListener("click", async (e) => {
       const button = e.target.closest(".add-remove-btn");
@@ -638,6 +681,8 @@
       } else if (action === "remove") {
         await removeFromForm(id, type);
       }
+      // Force complete refresh
+      await updateAllUI();
       } catch (error) {
       console.error("Error handling form action:", error);
       }
@@ -654,9 +699,9 @@
       const quantity = parseInt(e.target.value) || 1;
 
       if (action === 'remove') {
-        // If already in cart, update quantity
         await removeFromForm(id, type);
         await addToForm(id, type, quantity);
+        await updateAllUI();
       }
       }
     });
@@ -665,8 +710,7 @@
     // Main Initialization
     async function init() {
     try {
-      // Fetch initial data
-      const [equipmentData, categoriesData, selectedItemsData] = await Promise.all([
+      const [equipmentData, categoriesData, selectedItemsResponse] = await Promise.all([
       fetchData('/api/equipment'),
       fetchData('/api/equipment-categories'),
       fetchData('/api/requisition/get-items')
@@ -675,7 +719,7 @@
       // Only keep equipment with status_id 1 or 2
       allEquipment = (equipmentData.data || []).filter(e => allowedStatusIds.includes(e.status.status_id));
       equipmentCategories = categoriesData || [];
-      selectedItems = selectedItemsData.data || [];
+      selectedItems = selectedItemsResponse.data?.selected_items || []; // Updated to match new response structure
 
       renderCategoryFilters();
       filterAndRenderItems();
@@ -696,41 +740,41 @@
 
     // Layout toggle
     document.querySelectorAll(".layout-option").forEach((option) => {
-      option.addEventListener("click", (e) => {
-        e.preventDefault();
-        currentLayout = option.dataset.layout;
-        // Set active class and update layoutDropdown button text
-        document.querySelectorAll(".layout-option").forEach((opt) => opt.classList.remove("active"));
-        option.classList.add("active");
-        const layoutDropdownBtn = document.getElementById("layoutDropdown");
-        if (currentLayout === "grid") {
-          layoutDropdownBtn.textContent = "Grid Layout";
-        } else {
-          layoutDropdownBtn.textContent = "List Layout";
-        }
-        filterAndRenderItems();
-      });
+    option.addEventListener("click", (e) => {
+      e.preventDefault();
+      currentLayout = option.dataset.layout;
+      // Set active class and update layoutDropdown button text
+      document.querySelectorAll(".layout-option").forEach((opt) => opt.classList.remove("active"));
+      option.classList.add("active");
+      const layoutDropdownBtn = document.getElementById("layoutDropdown");
+      if (currentLayout === "grid") {
+      layoutDropdownBtn.textContent = "Grid Layout";
+      } else {
+      layoutDropdownBtn.textContent = "List Layout";
+      }
+      filterAndRenderItems();
+    });
     });
 
     // Set initial layoutDropdown button text and active class on DOMContentLoaded
     document.addEventListener("DOMContentLoaded", function () {
-      // ...existing code...
-      // Set initial layoutDropdown button text and active class
-      const layoutDropdownBtn = document.getElementById("layoutDropdown");
-      if (currentLayout === "grid") {
-        layoutDropdownBtn.textContent = "Grid Layout";
-        document.querySelectorAll(".layout-option").forEach(opt => {
-          if (opt.dataset.layout === "grid") opt.classList.add("active");
-          else opt.classList.remove("active");
-        });
-      } else {
-        layoutDropdownBtn.textContent = "List Layout";
-        document.querySelectorAll(".layout-option").forEach(opt => {
-          if (opt.dataset.layout === "list") opt.classList.add("active");
-          else opt.classList.remove("active");
-        });
-      }
-      // ...existing code...
+    // ...existing code...
+    // Set initial layoutDropdown button text and active class
+    const layoutDropdownBtn = document.getElementById("layoutDropdown");
+    if (currentLayout === "grid") {
+      layoutDropdownBtn.textContent = "Grid Layout";
+      document.querySelectorAll(".layout-option").forEach(opt => {
+      if (opt.dataset.layout === "grid") opt.classList.add("active");
+      else opt.classList.remove("active");
+      });
+    } else {
+      layoutDropdownBtn.textContent = "List Layout";
+      document.querySelectorAll(".layout-option").forEach(opt => {
+      if (opt.dataset.layout === "list") opt.classList.add("active");
+      else opt.classList.remove("active");
+      });
+    }
+    // ...existing code...
     });
 
     // Status dropdown filter
