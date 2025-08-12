@@ -14,63 +14,47 @@ class EquipmentController extends Controller
 
     // ----- Indexes ----- //
 
-    public function index(): JsonResponse
-    {
-        try {
-            $user = auth()->user();
-
-            // Head admins can view all equipment
-            if ($user->role?->role_name === 'Head Admin') {
-                $equipment = Equipment::with(['category', 'status', 'department', 'items.condition', 'images'])
-                    ->orderBy('equipment_name')
-                    ->get();
-            } else {
-                // Users can only see equipment in their departments
-                $equipment = Equipment::whereIn('department_id', $user->departments->pluck('department_id'))
-                    ->with(['category', 'status', 'department', 'items.condition', 'images'])
-                    ->orderBy('equipment_name')
-                    ->get();
-            }
-
-            $formatted = $equipment->map(fn ($item) => array_merge(
-                $this->formatEquipment($item),
-                [
-                    'images' => $item->images, // Include EquipmentImages
-                    'available_quantity' => $this->calculateAvailableQuantity($item)->getData(true)['available_quantity'],
-                    'total_quantity' => $this->calculateTotalQuantity($item)->getData(true)['total_quantity']
-                ]
-            ));
-
-            return response()->json(['data' => $formatted]);
-        } catch (\Exception $e) {
-            \Log::error('Error fetching equipment data', ['error' => $e->getMessage()]);
-            return response()->json([
-                'message' => 'Failed to fetch equipment data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-    
-
     public function publicIndex(): JsonResponse
     {
         try {
-            $equipment = Equipment::with(['category', 'status', 'department', 'items.condition', 'images'])
-                ->orderBy('equipment_name')
-                ->get();
-    
-            $formatted = $equipment->map(fn ($item) => array_merge(
-                $this->formatPublicEquipment($item),
-                [
-                    'images' => $item->images, // Include EquipmentImages
-                    'available_quantity' => $this->calculateAvailableQuantity($item)->getData(true)['available_quantity'],
-                    'total_quantity' => $this->calculateTotalQuantity($item)->getData(true)['total_quantity']
-                ]
-            ));
-    
+            $equipment = Equipment::with([
+                'category',
+                'status',
+                'department',
+                'items' => function ($query) {
+                    $query->where('status_id', '!=', 5); // Exclude hidden items
+                },
+                'items.condition',
+                'images'
+            ])->orderBy('equipment_name')->get();
+
+            $formatted = $equipment->map(function ($item) {
+                // Calculate available quantity (status=1 AND condition in [1,2,3])
+                $availableCount = $item->items
+                    ->filter(function ($item) {
+                        return $item->status_id == 1 && in_array($item->condition_id, [1, 2, 3]);
+                    })
+                    ->count();
+
+                // Calculate total quantity (all non-hidden items)
+                $totalCount = $item->items->count();
+
+                return array_merge(
+                    $this->formatPublicEquipment($item),
+                    [
+                        'images' => $item->images,
+                        'available_quantity' => $availableCount,
+                        'total_quantity' => $totalCount
+                    ]
+                );
+            });
+
             return response()->json(['data' => $formatted]);
         } catch (\Exception $e) {
-            \Log::error('Error fetching public equipment', ['error' => $e->getMessage()]);
+            \Log::error('Error fetching public equipment', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'message' => 'Failed to fetch equipment data',
                 'error' => $e->getMessage()
@@ -78,46 +62,18 @@ class EquipmentController extends Controller
         }
     }
 
-    public function calculateAvailableQuantity(Equipment $equipment): JsonResponse
-    {
-        try {
-            $availableCount = $equipment->items()
-                ->where('status_id', 1) // available status only
-                ->whereIn('condition_id', [1, 2, 3]) // new, good, fair
-                ->count();
 
-            return response()->json([
-                'equipment_id' => $equipment->equipment_id,
-                'available_quantity' => $availableCount
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Error calculating available quantity', ['error' => $e->getMessage()]);
-            return response()->json([
-                'message' => 'Failed to calculate available quantity',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
 
-    public function calculateTotalQuantity(Equipment $equipment): JsonResponse
-    {
-        try {
-            $totalCount = $equipment->items()
-                ->where('status_id', '!=', 5) // Exclude Hidden status
-                ->count();
 
-            return response()->json([
-                'equipment_id' => $equipment->equipment_id,
-                'total_quantity' => $totalCount
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Error calculating total quantity', ['error' => $e->getMessage()]);
-            return response()->json([
-                'message' => 'Failed to calculate total quantity',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+
+
+
+    // ----- EQUIPMENT MANAGEMENT SECTION ----- //
+
+
+
+
+
 
 
     // ----- Store Equipment ----- //
@@ -192,7 +148,7 @@ class EquipmentController extends Controller
         ], 201);
     }
 
-   
+
     // ----- Display Equipment ----- //
 
     public function show(Equipment $equipment): JsonResponse
@@ -326,7 +282,7 @@ class EquipmentController extends Controller
     }
 
 
-   // ----- Upload Images In Bulk ----- //
+    // ----- Upload Images In Bulk ----- //
     public function uploadMultipleImages(Request $request, $equipmentId): JsonResponse
     {
         // Validate the images and optional type_id
@@ -450,7 +406,7 @@ class EquipmentController extends Controller
     private function formatEquipment($equipment): array
     {
         $equipment->load(['category', 'status', 'department', 'items', 'images']);
-    
+
         return [
             'equipment_id' => $equipment->equipment_id,
             'equipment_name' => $equipment->equipment_name,
