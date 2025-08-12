@@ -539,14 +539,12 @@
                 to your registered email address once your submission is reviewed and approved.
               </p>
               <div class="d-flex justify-content-start gap-2 mb-4">
-                <a href="policies.html" class="btn btn-primary">Read Policies</a>
+                <a href="policies" class="btn btn-primary">Read Policies</a>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-
 
       <!-- Two-column grid layout -->
       <div class="row">
@@ -729,7 +727,7 @@
               <button id="clearSelectionBtn" class="btn btn-outline-secondary">
                 Clear Selection
               </button>
-              <button id="checkAvailabilityBtn" class="btn btn-primary">
+              <button id="checkAvailabilityBtn" type="button" class="btn btn-primary" onclick="checkAvailability()">
                 Check Availability
               </button>
               <span id="availabilityResult" style="margin-left: 1px; font-weight: bold;"></span>
@@ -785,8 +783,10 @@
               <div class="col-md-6">
                 <label class="form-label mt-1">Attach Formal Letter</label>
                 <div class="position-relative">
-                  <input name="formal_letter_url" type="file" class="form-control mb-1" id="attachLetter"
-                    onchange="toggleRemoveButton('attachLetter', 'removeAttachLetterBtn')" />
+                  <input type="file" class="form-control mb-1" id="attachLetter" onchange="uploadToCloudinary(this)"
+                    required />
+                  <input type="hidden" name="formal_letter_url" id="formal_letter_url">
+                  <input type="hidden" name="formal_letter_public_id" id="formal_letter_public_id">
                   <button type="button" id="removeAttachLetterBtn"
                     class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 d-none"
                     style="color: black; background: none; border: none"
@@ -798,6 +798,9 @@
                   This file is required to explain the requisition's intent and serves as a formal request to the Vice
                   President of Administration.
                 </small>
+                <div id="uploadProgress" class="progress mt-2 d-none">
+                  <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -840,7 +843,7 @@
       </div>
 
       <div class="d-flex justify-content-center my-4">
-        <button id="submitFormBtn" class="btn btn-primary me-2">
+        <button id="submitFormBtn" type="submit" class="btn btn-primary me-2" onclick="openTermsModal()">
           Submit Form
         </button>
         <button type="reset" class="btn btn-secondary">Cancel</button>
@@ -880,6 +883,444 @@
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Cloudinary direct upload implementation
+    async function uploadToCloudinary(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const progressBar = document.getElementById('progressBar');
+      const uploadProgress = document.getElementById('uploadProgress');
+      uploadProgress.classList.remove('d-none');
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'formal-letters'); // Your unsigned upload preset
+      formData.append('folder', 'user-uploads/user-letters'); // Optional folder organization
+
+      try {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/dn98ntlkd/auto/upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Upload failed with status: ' + response.status);
+        }
+
+        const data = await response.json();
+        console.log('Upload successful:', data);
+
+        // Store the Cloudinary response in hidden fields
+        document.getElementById('formal_letter_url').value = data.secure_url;
+        document.getElementById('formal_letter_public_id').value = data.public_id;
+
+        // Show success message
+        showToast('File uploaded successfully!', 'success');
+
+        // Show remove button
+        document.getElementById('removeAttachLetterBtn').classList.remove('d-none');
+
+      } catch (error) {
+        console.error('Upload error:', error);
+        showToast('File upload failed: ' + error.message, 'error');
+        input.value = ''; // Clear the file input
+      } finally {
+        uploadProgress.classList.add('d-none');
+        progressBar.style.width = '0%';
+      }
+    }
+    
+    function removeFile(inputId, buttonId) {
+      const input = document.getElementById(inputId);
+      const button = document.getElementById(buttonId);
+
+      input.value = '';
+      document.getElementById('formal_letter_url').value = '';
+      document.getElementById('formal_letter_public_id').value = '';
+      button.classList.add('d-none');
+
+      showToast('File removed', 'info');
+    }
+
+    // Global helper function for toast notifications
+    window.showToast = function (message, type = 'success', duration = 3000) {
+      const toast = document.createElement('div');
+
+      // Toast base styles
+      toast.className = `toast align-items-center border-0 position-fixed start-0 mb-2`;
+      toast.style.zIndex = '1100';
+      toast.style.bottom = '0';
+      toast.style.left = '0';
+      toast.style.margin = '1rem';
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(20px)';
+      toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'assertive');
+      toast.setAttribute('aria-atomic', 'true');
+
+      // Colors
+      const bgColor = type === 'success' ? '#004183ff' : '#dc3545';
+      toast.style.backgroundColor = bgColor;
+      toast.style.color = '#fff';
+      toast.style.minWidth = '250px';
+      toast.style.borderRadius = '0.3rem';
+
+      toast.innerHTML = `
+      <div class="d-flex align-items-center px-3 py-1"> 
+          <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+          <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+          <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="loading-bar" style="
+          height: 3px;
+          background: rgba(255,255,255,0.7);
+          width: 100%;
+          transition: width ${duration}ms linear;
+      "></div>
+  `;
+
+      document.body.appendChild(toast);
+
+      // Bootstrap toast instance
+      const bsToast = new bootstrap.Toast(toast, { autohide: false });
+      bsToast.show();
+
+      // Float up appear animation
+      requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+      });
+
+      // Start loading bar animation
+      const loadingBar = toast.querySelector('.loading-bar');
+      requestAnimationFrame(() => {
+        loadingBar.style.width = '0%';
+      });
+
+      // Remove after duration
+      setTimeout(() => {
+        // Float down disappear animation
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+          bsToast.hide();
+          toast.remove();
+        }, 400);
+      }, duration);
+    }
+
+    window.checkAvailability = async function () {
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const startDate = document.getElementById('startDateField').value;
+        const endDate = document.getElementById('endDateField').value;
+        const startTime = convertTo24Hour(document.getElementById('startTimeField').value);
+        const endTime = convertTo24Hour(document.getElementById('endTimeField').value);
+
+        if (!startDate || !endDate || !startTime || !endTime) {
+          showToast('Please select all date and time fields', 'error');
+          return;
+        }
+
+        // Check if end_date is before start_date
+        if (endDate < startDate) {
+          showToast('End date cannot be before start date.', 'error');
+          return;
+        }
+
+        // Get selected items from session
+        const response = await fetch('/requisition/get-items', {
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch items');
+        const data = await response.json();
+        const items = data.data?.selected_items || [];
+
+        if (items.length === 0) {
+          showToast('Please add items to check availability', 'error');
+          return;
+        }
+
+        // Show loading state
+        const checkBtn = document.getElementById('checkAvailabilityBtn');
+        const originalText = checkBtn.innerHTML;
+        checkBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Checking...';
+        checkBtn.disabled = true;
+
+        // Prepare request data - modified to match controller expectations
+        const requestData = {
+          start_date: startDate,
+          end_date: endDate,
+          start_time: startTime,
+          end_time: endTime,
+          items: items.map(item => {
+            const itemData = {
+              type: item.type
+            };
+            // Add the correct ID field based on type
+            if (item.type === 'facility') {
+              itemData.facility_id = item.facility_id;
+            } else {
+              itemData.equipment_id = item.equipment_id;
+            }
+            return itemData;
+          })
+        };
+
+        // Call API
+        const checkResponse = await fetch('/requisition/check-availability', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData)
+        });
+
+        // Handle non-200 responses
+        if (!checkResponse.ok) {
+          let errorData;
+          try {
+            errorData = await checkResponse.json();
+          } catch {
+            errorData = {};
+          }
+          // Show all validation errors if present
+          if (errorData.errors) {
+            Object.values(errorData.errors).flat().forEach(msg => showToast(msg, 'error'));
+          } else if (errorData.message) {
+            showToast(errorData.message, 'error');
+          } else {
+            showToast('Availability check failed', 'error');
+          }
+          checkBtn.innerHTML = originalText;
+          checkBtn.disabled = false;
+          return;
+        }
+
+        const result = await checkResponse.json();
+
+        // Update button state
+        checkBtn.innerHTML = originalText;
+        checkBtn.disabled = false;
+
+        if (!result.success) {
+          showToast(result.message || 'Availability check failed', 'error');
+          return;
+        }
+
+        const availabilityResult = document.getElementById('availabilityResult');
+        if (result.data.available) {
+          availabilityResult.innerHTML = `
+<span class="text-success">
+  <i class="bi bi-check-circle-fill" style="margin-right:5px;"></i>
+  Available
+</span>
+`;
+          showToast('Time slot is available!', 'success');
+        } else {
+          availabilityResult.textContent = 'Conflict found!';
+          availabilityResult.style.color = 'red';
+
+          const conflictItems = result.data.conflict_items.map(item =>
+            `${item.type}: ${item.name}`
+          ).join(', ');
+
+          showToast(`Conflict with: ${conflictItems}`, 'error');
+        }
+
+      } catch (error) {
+        console.error('Error checking availability:', error);
+        showToast(error.message || 'Failed to check availability', 'error');
+        const checkBtn = document.getElementById('checkAvailabilityBtn');
+        if (checkBtn) {
+          checkBtn.innerHTML = 'Check Availability';
+          checkBtn.disabled = false;
+        }
+      }
+    };
+
+    window.openTermsModal = function (event) {
+      // Prevent default form submission if called from form
+      if (event) event.preventDefault();
+
+      // Create modal if it doesn't exist
+      if (!document.getElementById('termsModal')) {
+        const modalHTML = `
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="terms-content mb-4" style="max-height: 50vh; overflow-y: auto;">
+              <h6>Booking Terms and Conditions</h6>
+              <ol>
+                <li>All bookings are subject to approval by CPU Administration.</li>
+                <li>Payment must be made within 3 business days after approval.</li>
+                <li>Cancellations must be made at least 5 days before the event.</li>
+                <li>Damage to facilities/equipment will incur additional charges.</li>
+                <li>Alcohol and smoking are strictly prohibited on campus.</li>
+                <li>External users must provide valid identification.</li>
+                <li>CPU reserves the right to cancel bookings for violations.</li>
+              </ol>
+              <div class="form-check mt-3">
+                <input class="form-check-input" type="checkbox" id="agreeTerms">
+                <label class="form-check-label" for="agreeTerms">
+                  I agree to the terms and conditions
+                </label>
+              </div>
+            </div>
+            <div id="submitStatus" class="d-none">
+              <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              <p class="text-center mt-2">Processing your request...</p>
+            </div>
+            <div id="successStatus" class="d-none text-center">
+              <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+              <h5 class="mt-3">Request Submitted Successfully!</h5>
+              <p id="successDetails" class="text-muted"></p>
+              <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" id="confirmSubmitBtn" class="btn btn-primary" disabled>Submit Request</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Add event listener for terms checkbox
+        document.getElementById('agreeTerms')?.addEventListener('change', function () {
+          document.getElementById('confirmSubmitBtn').disabled = !this.checked;
+        });
+
+        // Add click handler for confirm button
+        document.getElementById('confirmSubmitBtn')?.addEventListener('click', async function () {
+          await submitForm();
+        });
+      }
+
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('termsModal'));
+      modal.show();
+    };
+
+    // Attach form submission handler
+    document.getElementById('reservationForm')?.addEventListener('submit', function (e) {
+      e.preventDefault();
+      openTermsModal(e);
+    });
+
+    window.submitForm = async function () {
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const modal = document.getElementById('termsModal');
+        const submitStatus = document.getElementById('submitStatus');
+        const confirmBtn = document.getElementById('confirmSubmitBtn');
+
+        // Show loading state
+        submitStatus.classList.remove('d-none');
+        confirmBtn.disabled = true;
+
+        // Get form data
+        const formData = {
+          start_date: document.getElementById('startDateField').value,
+          end_date: document.getElementById('endDateField').value,
+          start_time: convertTo24Hour(document.getElementById('startTimeField').value),
+          end_time: convertTo24Hour(document.getElementById('endTimeField').value),
+          purpose_id: document.getElementById('activityPurposeField').value,
+          num_participants: document.querySelector('input[name="num_participants"]').value,
+          additional_requests: document.querySelector('textarea[name="additional_requests"]').value,
+          formal_letter_url: document.getElementById('formal_letter_url').value,
+          formal_letter_public_id: document.getElementById('formal_letter_public_id').value,
+        };
+
+        // Validate file upload
+        if (!formData.formal_letter_url) {
+          throw new Error('Formal letter is required');
+        }
+
+        // Submit form with proper error handling
+        const submitResponse = await fetch('/requisition/submit', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+          credentials: 'include'
+        });
+
+        if (!submitResponse.ok) {
+          const errorData = await submitResponse.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Submission failed');
+        }
+
+        const result = await submitResponse.json();
+
+        if (!result.success) {
+          throw new Error(result.message || 'Submission failed');
+        }
+
+        // Show success state
+        submitStatus.classList.add('d-none');
+        document.getElementById('successStatus').classList.remove('d-none');
+        document.getElementById('successDetails').textContent =
+          `Your request ID: ${result.data.request_id}\nAccess Code: ${result.data.access_code}`;
+
+        // Reset form
+        document.getElementById('reservationForm').reset();
+
+        // Clear selected items
+        await renderSelectedItems();
+        await calculateAndDisplayFees();
+
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        showToast(error.message || 'Failed to submit form', 'error');
+
+        // Reset modal state
+        const submitStatus = document.getElementById('submitStatus');
+        if (submitStatus) submitStatus.classList.add('d-none');
+        const confirmBtn = document.getElementById('confirmSubmitBtn');
+        if (confirmBtn) confirmBtn.disabled = false;
+      }
+    };
+
+    window.convertTo24Hour = function (time12h) {
+      if (!time12h) return '';
+      const [time, modifier] = time12h.split(' ');
+      let [hours, minutes] = time.split(':');
+
+      if (hours === '12') {
+        hours = '00';
+      }
+
+      if (modifier === 'PM') {
+        hours = parseInt(hours, 10) + 12;
+      }
+
+      // Ensure two-digit format and remove seconds
+      hours = hours.toString().padStart(2, '0');
+      return `${hours}:${minutes}`; // Remove seconds
+    };
+
     document.addEventListener('DOMContentLoaded', function () {
       // DOM Elements
       const facilityList = document.getElementById('facilityList');
@@ -890,7 +1331,6 @@
 
       // Initialize the form
       initForm();
-
 
       async function initForm() {
         try {
@@ -903,7 +1343,6 @@
           showToast('Failed to initialize form', 'error');
         }
       }
-
       // Fetch and render selected items
       async function renderSelectedItems() {
         try {
@@ -931,8 +1370,8 @@
 
       function pluralizeType(type) {
         if (type.toLowerCase() === 'facility') return 'facilities';
-        if (type.toLowerCase() === 'equipment') return 'equipment'; // same plural
-        return type + 's'; // fallback
+        if (type.toLowerCase() === 'equipment') return 'equipment';
+        return type + 's';
       }
 
       // Render items list with card layout
@@ -953,48 +1392,47 @@
           const card = document.createElement('div');
           card.className = 'col';
 
-          // Find primary image or first available image
           const displayImage = item.images?.find(img => img.image_type === "Primary") || item.images?.[0];
 
           card.innerHTML = `
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h5 class="card-title mb-1">${item.name}</h5>
-                            <p class="card-text text-muted mb-2">
-                                <small>${item.description || 'No description available'}</small>
-                            </p>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-danger" 
-                            onclick="removeSelectedItem(${type === 'facility' ? item.facility_id : item.equipment_id}, '${type}')">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-end mt-3">
-                        <div>
-                            <span class="badge bg-primary me-2">${item.rate_type || 'booking'}</span>
-                            ${type === 'equipment' ? `
-                                <span class="badge bg-secondary">Qty: ${item.quantity || 1}</span>
-                            ` : ''}
-                        </div>
-                        <div class="text-end">
-                            <div class="text-success fw-bold">
-                                ₱${parseFloat(item.external_fee * (type === 'equipment' ? (item.quantity || 1) : 1)).toLocaleString()}
-                            </div>
-                            ${type === 'equipment' ? `
-                                <small class="text-muted">${item.quantity || 1} × ₱${parseFloat(item.external_fee).toLocaleString()}</small>
-                            ` : ''}
-                        </div>
-                    </div>
-                </div>
-                ${displayImage ? `
-                    <img src="${displayImage.image_url}" class="card-img-bottom" 
-                        alt="${item.name}" style="height: 150px; object-fit: cover;">
-                ` : ''}
-            </div>
-        `;
+          <div class="card h-100">
+              <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                          <h5 class="card-title mb-1">${item.name}</h5>
+                          <p class="card-text text-muted mb-2">
+                              <small>${item.description || 'No description available'}</small>
+                          </p>
+                      </div>
+                      <button type="button" class="btn btn-sm btn-outline-danger" 
+                          onclick="removeSelectedItem(${type === 'facility' ? item.facility_id : item.equipment_id}, '${type}')">
+                          <i class="bi bi-trash"></i>
+                      </button>
+                  </div>
+                  
+                  <div class="d-flex justify-content-between align-items-end mt-3">
+                      <div>
+                          <span class="badge bg-primary me-2">${item.rate_type || 'booking'}</span>
+                          ${type === 'equipment' ? `
+                              <span class="badge bg-secondary">Qty: ${item.quantity || 1}</span>
+                          ` : ''}
+                      </div>
+                      <div class="text-end">
+                          <div class="text-success fw-bold">
+                              ₱${parseFloat(item.external_fee * (type === 'equipment' ? (item.quantity || 1) : 1)).toLocaleString()}
+                          </div>
+                          ${type === 'equipment' ? `
+                              <small class="text-muted">${item.quantity || 1} × ₱${parseFloat(item.external_fee).toLocaleString()}</small>
+                          ` : ''}
+                      </div>
+                  </div>
+              </div>
+              ${displayImage ? `
+                  <img src="${displayImage.image_url}" class="card-img-bottom" 
+                      alt="${item.name}" style="height: 150px; object-fit: cover;">
+              ` : ''}
+          </div>
+      `;
           cardContainer.appendChild(card);
         });
 
@@ -1002,7 +1440,7 @@
       }
 
       // remove items from selection
-      async function removeSelectedItem(id, type) {
+      window.removeSelectedItem = async function (id, type) {
         try {
           const requestBody = {
             type: type,
@@ -1010,12 +1448,11 @@
             facility_id: type === 'facility' ? id : undefined
           };
 
-          // Remove undefined fields from the request body
           const cleanedRequestBody = Object.fromEntries(
             Object.entries(requestBody).filter(([_, v]) => v !== undefined)
           );
 
-          const response = await fetch('/api/requisition/remove-item', { // Updated endpoint
+          const response = await fetch('/api/requisition/remove-item', {
             method: 'POST',
             headers: {
               'X-CSRF-TOKEN': csrfToken,
@@ -1039,7 +1476,6 @@
             ]);
             showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed successfully`, 'success');
 
-            // Update cart badge if exists
             if (typeof updateCartBadge === 'function') {
               updateCartBadge();
             }
@@ -1066,7 +1502,7 @@
           if (!response.ok) throw new Error('Failed to fetch items');
 
           const data = await response.json();
-          const items = data.data?.selected_items || []; // Changed to access selected_items
+          const items = data.data?.selected_items || [];
 
           let facilityTotal = 0;
           let equipmentTotal = 0;
@@ -1082,19 +1518,19 @@
               facilityTotal += fee;
 
               htmlContent += `
-                    <div class="fee-item d-flex justify-content-between mb-2">
-                        <span>${item.name}</span>
-                        <span>₱${fee.toLocaleString()}</span>
-                    </div>
-                `;
+                  <div class="fee-item d-flex justify-content-between mb-2">
+                      <span>${item.name}</span>
+                      <span>₱${fee.toLocaleString()}</span>
+                  </div>
+              `;
             });
 
             htmlContent += `
-                <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                    <strong>Subtotal</strong>
-                    <strong>₱${facilityTotal.toLocaleString()}</strong>
-                </div>
-            </div>`;
+              <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                  <strong>Subtotal</strong>
+                  <strong>₱${facilityTotal.toLocaleString()}</strong>
+              </div>
+          </div>`;
           }
 
           // Equipment breakdown
@@ -1109,33 +1545,33 @@
               equipmentTotal += itemTotal;
 
               htmlContent += `
-                    <div class="fee-item d-flex justify-content-between mb-2">
-                        <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
-                        <div class="text-end">
-                            <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
-                            <strong>₱${itemTotal.toLocaleString()}</strong>
-                        </div>
-                    </div>
-                `;
+                  <div class="fee-item d-flex justify-content-between mb-2">
+                      <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
+                      <div class="text-end">
+                          <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
+                          <strong>₱${itemTotal.toLocaleString()}</strong>
+                      </div>
+                  </div>
+              `;
             });
 
             htmlContent += `
-                <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                    <strong>Subtotal</strong>
-                    <strong>₱${equipmentTotal.toLocaleString()}</strong>
-                </div>
-            </div>`;
+              <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                  <strong>Subtotal</strong>
+                  <strong>₱${equipmentTotal.toLocaleString()}</strong>
+              </div>
+          </div>`;
           }
 
           // Total
           const total = facilityTotal + equipmentTotal;
           if (total > 0) {
             htmlContent += `
-                <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
-                    <h6 class="mb-0">Total Amount</h6>
-                    <h6 class="mb-0">₱${total.toLocaleString()}</h6>
-                </div>
-            `;
+              <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
+                  <h6 class="mb-0">Total Amount</h6>
+                  <h6 class="mb-0">₱${total.toLocaleString()}</h6>
+              </div>
+          `;
           } else {
             htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
           }
@@ -1149,79 +1585,6 @@
           feeDisplay.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
         }
       }
-      // Make removeSelectedItem available globally
-      window.removeSelectedItem = removeSelectedItem;
-
-      // Helper function to show toast notifications
-      function showToast(message, type = 'success', duration = 3000) {
-        const toast = document.createElement('div');
-
-        // Toast base styles
-        toast.className = `toast align-items-center border-0 position-fixed start-0 mb-2`;
-        toast.style.zIndex = '1100';
-        toast.style.bottom = '0';
-        toast.style.left = '0';
-        toast.style.margin = '1rem';
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
-        toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'assertive');
-        toast.setAttribute('aria-atomic', 'true');
-
-        // Colors
-        const bgColor = type === 'success' ? '#004183ff' : '#dc3545';
-        toast.style.backgroundColor = bgColor;
-        toast.style.color = '#fff';
-        toast.style.minWidth = '250px';
-        toast.style.borderRadius = '0.3rem';
-
-        toast.innerHTML = `
-        <div class="d-flex align-items-center px-3 py-1"> 
-            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-            <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-            <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="loading-bar" style="
-            height: 3px;
-            background: rgba(255,255,255,0.7);
-            width: 100%;
-            transition: width ${duration}ms linear;
-        "></div>
-    `;
-
-        document.body.appendChild(toast);
-
-        // Bootstrap toast instance
-        const bsToast = new bootstrap.Toast(toast, { autohide: false });
-        bsToast.show();
-
-        // Float up appear animation
-        requestAnimationFrame(() => {
-          toast.style.opacity = '1';
-          toast.style.transform = 'translateY(0)';
-        });
-
-        // Start loading bar animation
-        const loadingBar = toast.querySelector('.loading-bar');
-        requestAnimationFrame(() => {
-          loadingBar.style.width = '0%';
-        });
-
-        // Remove after duration
-        setTimeout(() => {
-          // Float down disappear animation
-          toast.style.opacity = '0';
-          toast.style.transform = 'translateY(20px)';
-
-          setTimeout(() => {
-            bsToast.hide();
-            toast.remove();
-          }, 400); // matches animation time
-        }, duration);
-      }
-
-
     });
   </script>
 </body>

@@ -232,15 +232,15 @@
 
     toast.innerHTML = `
       <div class="d-flex align-items-center px-3 py-1"> 
-        <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-        <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+      <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+      <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+      <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
       <div class="loading-bar" style="
-        height: 3px;
-        background: rgba(255,255,255,0.7);
-        width: 100%;
-        transition: width ${duration}ms linear;
+      height: 3px;
+      background: rgba(255,255,255,0.7);
+      width: 100%;
+      transition: width ${duration}ms linear;
       "></div>
     `;
 
@@ -597,8 +597,8 @@
     ) : null;
 
     const currentQty = selectedItem ? selectedItem.quantity : 1;
-    const maxQty = equipment.total_quantity || 1;
-    const isUnavailable = equipment.status.status_id === 2;
+    const maxQty = equipment.available_quantity || 0;
+    const isUnavailable = equipment.status.status_id !== 1 || maxQty === 0;
 
     if (isUnavailable) {
       return `
@@ -615,7 +615,7 @@
       data-type="equipment" 
       disabled
       style="cursor: not-allowed; opacity: 0.65;">
-      Unavailable
+      ${maxQty === 0 ? 'Out of Stock' : 'Unavailable'}
       </button>
       </div>
       `;
@@ -657,8 +657,9 @@
       `;
     }
     }
+
     // Event delegation for Add/Remove buttons
-    // Update the setupEventListeners function
+
     function setupEventListeners() {
     catalogItemsContainer.addEventListener("click", async (e) => {
       const button = e.target.closest(".add-remove-btn");
@@ -708,6 +709,7 @@
     }
 
     // Main Initialization
+    // In your init() function:
     async function init() {
     try {
       const [equipmentData, categoriesData, selectedItemsResponse] = await Promise.all([
@@ -716,10 +718,11 @@
       fetchData('/api/requisition/get-items')
       ]);
 
-      // Only keep equipment with status_id 1 or 2
-      allEquipment = (equipmentData.data || []).filter(e => allowedStatusIds.includes(e.status.status_id));
+      // Only keep equipment with status_id 1 (Available) and available_quantity > 0
+      allEquipment = equipmentData.data || [];
+
       equipmentCategories = categoriesData || [];
-      selectedItems = selectedItemsResponse.data?.selected_items || []; // Updated to match new response structure
+      selectedItems = selectedItemsResponse.data?.selected_items || [];
 
       renderCategoryFilters();
       filterAndRenderItems();

@@ -498,6 +498,12 @@
       // Toggle subcategory list
       const toggleArrow = categoryItem.querySelector(".toggle-arrow");
       const subcategoryList = categoryItem.querySelector(".subcategory-list");
+      // --- Make subcategory list expanded by default ---
+      subcategoryList.style.maxHeight = `${subcategoryList.scrollHeight}px`;
+      // Also ensure the arrow is "up" (expanded)
+      toggleArrow.classList.remove("bi-chevron-up");
+      toggleArrow.classList.add("bi-chevron-down");
+
       toggleArrow.addEventListener("click", function () {
       const isExpanded = subcategoryList.style.maxHeight !== "0px";
       if (isExpanded) {
