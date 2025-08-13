@@ -490,6 +490,12 @@
         new bootstrap.Dropdown(dropdown);
       });
     });
+
+    // Fix 1: Define adjustEndTime to prevent ReferenceError
+    function adjustEndTime() {
+      // Optionally, implement logic to auto-adjust end time based on start time
+      // For now, just a stub to prevent JS error
+    }
   </script>
 
   <div class="container main-content">
@@ -554,8 +560,8 @@
             <div class="row">
               <div class="col-md-12">
                 <label class="form-label">Applicant Type <span style="color: red;">*</span></label>
-                <select id="applicantType" class="form-select mb-2" aria-label="Type of Applicant">
-                  <option selected>Type of Applicant</option>
+                <select id="applicantType" name="user_type" class="form-select mb-2" aria-label="Type of Applicant" required>
+                  <option value="" selected disabled>Type of Applicant</option>
                   <option value="Internal">Internal</option>
                   <option value="External">External</option>
                 </select>
@@ -564,29 +570,32 @@
                 <label class="form-label">
                   First Name <span style="color: red;">*</span>
                 </label>
-                <input name="first_name" type="text" class="form-control" placeholder="First Name" required />
+                <input name="first_name" type="text" class="form-control" placeholder="First Name" required maxlength="50" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">
                   Last Name <span style="color: red;">*</span>
                 </label>
-                <input name="last_name" type="text" class="form-control" placeholder="Last Name" required />
+                <input name="last_name" type="text" class="form-control" placeholder="Last Name" required maxlength="50" />
               </div>
               <div id="studentIdField" class="col-md-6">
-                <label class="form-label">CPU Student ID</label>
-                <input type="text" class="form-control" placeholder="Student ID" />
+                <label class="form-label">CPU Student ID <span id="schoolIdRequired" style="color:red;display:none">*</span></label>
+                <input name="school_id" id="school_id" type="text" class="form-control" placeholder="Student ID" maxlength="20" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Contact Number</label>
-                <input name="contact_number" type="text" class="form-control" placeholder="Contact Number" />
+                <input name="contact_number" type="text" class="form-control" placeholder="Contact Number"
+                  maxlength="15" pattern="\d{1,15}" inputmode="numeric" id="contactNumberField" autocomplete="off" />
               </div>
               <div class="col-md-12">
                 <label class="form-label">Email Address <span style="color: red;">*</span></label>
-                <input name="email" type="email" class="form-control mb-2" placeholder="Email Address" required />
+                <input name="email" type="email" class="form-control mb-2" placeholder="Email Address"
+                  required maxlength="100" />
               </div>
               <div class="col-md-12">
                 <label class="form-label">Organization Name</label>
-                <input name="organization_name" type="text" class="form-control mb-2" placeholder="Organization Name" />
+                <input name="organization_name" type="text" class="form-control mb-2" placeholder="Organization Name"
+                  maxlength="100" />
               </div>
             </div>
           </div>
@@ -748,7 +757,7 @@
             <div class="row">
               <div class="col-md-6">
                 <label class="form-label">Number of Participants</label>
-                <input name="num_participants" type="number" class="form-control mb-2" value="1" min="1" />
+                <input name="num_participants" type="number" class="form-control mb-2" value="1" min="1" required />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Activity/Purpose</label>
@@ -769,7 +778,7 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label">Endorser Name</label>
-                <input name="endorser" type="text" class="form-control" placeholder="Endorser Name" />
+                <input name="endorser" type="text" class="form-control" placeholder="Endorser Name" maxlength="50" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Date Endorsed</label>
@@ -778,6 +787,7 @@
               <div class="col-md-6">
                 <label class="form-label">Additional Requests</label>
                 <textarea name="additional_requests" class="form-control mb-2" rows="3"
+                  maxlength="250"
                   placeholder="Write a brief description of any additional requests you may have."></textarea>
               </div>
               <div class="col-md-6">
@@ -842,8 +852,9 @@
         </div>
       </div>
 
+      <!-- Change the submit button to remove onclick and type="submit" -->
       <div class="d-flex justify-content-center my-4">
-        <button id="submitFormBtn" type="submit" class="btn btn-primary me-2" onclick="openTermsModal()">
+        <button id="submitFormBtn" type="button" class="btn btn-primary me-2">
           Submit Form
         </button>
         <button type="reset" class="btn btn-secondary">Cancel</button>
@@ -929,7 +940,7 @@
         progressBar.style.width = '0%';
       }
     }
-    
+
     function removeFile(inputId, buttonId) {
       const input = document.getElementById(inputId);
       const button = document.getElementById(buttonId);
@@ -1148,11 +1159,14 @@
     };
 
     window.openTermsModal = function (event) {
-      // Prevent default form submission if called from form
       if (event) event.preventDefault();
 
-      // Create modal if it doesn't exist
-      if (!document.getElementById('termsModal')) {
+      // Check if modal already exists
+      let modalEl = document.getElementById('termsModal');
+      let modalInstance = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+
+      if (!modalEl) {
+        // Create modal HTML (same as before)
         const modalHTML = `
     <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
@@ -1204,21 +1218,33 @@
     </div>
     `;
         document.body.insertAdjacentHTML('beforeend', modalHTML);
+        modalEl = document.getElementById('termsModal');
 
-        // Add event listener for terms checkbox
+        // Initialize new modal instance
+        modalInstance = new bootstrap.Modal(modalEl, {
+          backdrop: true, // Ensure backdrop works
+          keyboard: true, // Allow ESC key to close
+          focus: true    // Focus on modal when shown
+        });
+
+        // Add event listeners
+        modalEl.addEventListener('hidden.bs.modal', function () {
+          // Clean up when modal is closed
+          modalInstance.dispose();
+          modalEl.remove();
+        });
+
         document.getElementById('agreeTerms')?.addEventListener('change', function () {
           document.getElementById('confirmSubmitBtn').disabled = !this.checked;
         });
 
-        // Add click handler for confirm button
         document.getElementById('confirmSubmitBtn')?.addEventListener('click', async function () {
           await submitForm();
         });
       }
 
-      // Show modal
-      const modal = new bootstrap.Modal(document.getElementById('termsModal'));
-      modal.show();
+      // Show the modal
+      modalInstance.show();
     };
 
     // Attach form submission handler
@@ -1238,17 +1264,44 @@
         submitStatus.classList.remove('d-none');
         confirmBtn.disabled = true;
 
-        // Get form data
+        // Fix 2: Defensive checks for optional fields
+        const schoolIdInput = document.querySelector('input[name="school_id"]');
+        const numParticipantsInput = document.querySelector('input[name="num_participants"]');
+        const additionalRequestsInput = document.querySelector('textarea[name="additional_requests"]');
+
+        // Required fields
+        const firstNameInput = document.querySelector('input[name="first_name"]');
+        const lastNameInput = document.querySelector('input[name="last_name"]');
+        const emailInput = document.querySelector('input[name="email"]');
+
+        if (!firstNameInput || !lastNameInput || !emailInput) {
+          throw new Error('Required contact fields are missing in the form.');
+        }
+
         const formData = {
           start_date: document.getElementById('startDateField').value,
           end_date: document.getElementById('endDateField').value,
           start_time: convertTo24Hour(document.getElementById('startTimeField').value),
           end_time: convertTo24Hour(document.getElementById('endTimeField').value),
           purpose_id: document.getElementById('activityPurposeField').value,
-          num_participants: document.querySelector('input[name="num_participants"]').value,
-          additional_requests: document.querySelector('textarea[name="additional_requests"]').value,
+          num_participants: numParticipantsInput ? numParticipantsInput.value : 1,
+          additional_requests: additionalRequestsInput ? additionalRequestsInput.value : '',
+          // Add these hidden fields to the submission
           formal_letter_url: document.getElementById('formal_letter_url').value,
           formal_letter_public_id: document.getElementById('formal_letter_public_id').value,
+          // Optional upload fields - explicitly set to null if not provided
+          facility_layout_url: document.getElementById('facility_layout_url')?.value || null,
+          facility_layout_public_id: document.getElementById('facility_layout_public_id')?.value || null,
+          // Include user info that was previously in session
+          first_name: firstNameInput.value,
+          last_name: lastNameInput.value,
+          email: emailInput.value,
+          contact_number: document.querySelector('input[name="contact_number"]')?.value || null,
+          organization_name: document.querySelector('input[name="organization_name"]')?.value || null,
+          user_type: document.getElementById('applicantType').value, // Use dropdown value directly
+          school_id: document.getElementById('applicantType').value === 'Internal'
+            ? (schoolIdInput ? schoolIdInput.value : null)
+            : null
         };
 
         // Validate file upload
@@ -1256,11 +1309,13 @@
           throw new Error('Formal letter is required');
         }
 
+        console.log('Submitting form data:', formData);
+
         // Submit form with proper error handling
         const submitResponse = await fetch('/requisition/submit', {
           method: 'POST',
           headers: {
-            'X-CSRF-TOKEN': csrfToken,
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
@@ -1283,6 +1338,14 @@
         document.getElementById('successStatus').classList.remove('d-none');
         document.getElementById('successDetails').textContent =
           `Your request ID: ${result.data.request_id}\nAccess Code: ${result.data.access_code}`;
+
+        // Clear session data
+        await fetch('/requisition/clear-session', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken
+          }
+        });
 
         // Reset form
         document.getElementById('reservationForm').reset();
@@ -1329,22 +1392,80 @@
       const submitBtn = document.getElementById('submitFormBtn');
       const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-      // Initialize the form
-      initForm();
-
-      async function initForm() {
-        try {
-          await Promise.all([
-            renderSelectedItems(),
-            calculateAndDisplayFees()
-          ]);
-        } catch (error) {
-          console.error('Error initializing form:', error);
-          showToast('Failed to initialize form', 'error');
-        }
+      // --- Helper function: pluralizeType ---
+      function pluralizeType(type) {
+        if (type.toLowerCase() === 'facility') return 'facilities';
+        if (type.toLowerCase() === 'equipment') return 'equipment';
+        return type + 's';
       }
-      // Fetch and render selected items
-      async function renderSelectedItems() {
+
+      // --- Helper function: renderItemsList ---
+      function renderItemsList(container, items, type) {
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (items.length === 0) {
+          container.innerHTML = `<div class="text-muted empty-message">No ${pluralizeType(type)} added yet.</div>`;
+          return;
+        }
+
+        const cardContainer = document.createElement('div');
+        cardContainer.className = 'row row-cols-1 g-3';
+
+        items.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'col';
+
+          const displayImage = item.images?.find(img => img.image_type === "Primary") || item.images?.[0];
+
+          card.innerHTML = `
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="card-title mb-1">${item.name}</h5>
+                        <p class="card-text text-muted mb-2">
+                            <small>${item.description || 'No description available'}</small>
+                        </p>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                        onclick="removeSelectedItem(${type === 'facility' ? item.facility_id : item.equipment_id}, '${type}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-end mt-3">
+                    <div>
+                        <span class="badge bg-primary me-2">${item.rate_type || 'booking'}</span>
+                        ${type === 'equipment' ? `
+                            <span class="badge bg-secondary">Qty: ${item.quantity || 1}</span>
+                        ` : ''}
+                    </div>
+                    <div class="text-end">
+                        <div class="text-success fw-bold">
+                            ₱${parseFloat(item.external_fee * (type === 'equipment' ? (item.quantity || 1) : 1)).toLocaleString()}
+                        </div>
+                        ${type === 'equipment' ? `
+                            <small class="text-muted">${item.quantity || 1} × ₱${parseFloat(item.external_fee).toLocaleString()}</small>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+            ${displayImage ? `
+                <img src="${displayImage.image_url}" class="card-img-bottom" 
+                    alt="${item.name}" style="height: 150px; object-fit: cover;">
+            ` : ''}
+        </div>
+      `;
+          cardContainer.appendChild(card);
+        });
+
+        container.appendChild(cardContainer);
+      }
+
+      // --- Global functions ---
+      window.renderSelectedItems = async function () {
         try {
           const response = await fetch('/requisition/get-items', {
             headers: {
@@ -1366,130 +1487,9 @@
           console.error('Error rendering selected items:', error);
           showToast('Failed to load selected items', 'error');
         }
-      }
+      };
 
-      function pluralizeType(type) {
-        if (type.toLowerCase() === 'facility') return 'facilities';
-        if (type.toLowerCase() === 'equipment') return 'equipment';
-        return type + 's';
-      }
-
-      // Render items list with card layout
-      function renderItemsList(container, items, type) {
-        if (!container) return;
-
-        container.innerHTML = '';
-
-        if (items.length === 0) {
-          container.innerHTML = `<div class="text-muted empty-message">No ${pluralizeType(type)} added yet.</div>`;
-          return;
-        }
-
-        const cardContainer = document.createElement('div');
-        cardContainer.className = 'row row-cols-1 g-3';
-
-        items.forEach(item => {
-          const card = document.createElement('div');
-          card.className = 'col';
-
-          const displayImage = item.images?.find(img => img.image_type === "Primary") || item.images?.[0];
-
-          card.innerHTML = `
-          <div class="card h-100">
-              <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-start">
-                      <div>
-                          <h5 class="card-title mb-1">${item.name}</h5>
-                          <p class="card-text text-muted mb-2">
-                              <small>${item.description || 'No description available'}</small>
-                          </p>
-                      </div>
-                      <button type="button" class="btn btn-sm btn-outline-danger" 
-                          onclick="removeSelectedItem(${type === 'facility' ? item.facility_id : item.equipment_id}, '${type}')">
-                          <i class="bi bi-trash"></i>
-                      </button>
-                  </div>
-                  
-                  <div class="d-flex justify-content-between align-items-end mt-3">
-                      <div>
-                          <span class="badge bg-primary me-2">${item.rate_type || 'booking'}</span>
-                          ${type === 'equipment' ? `
-                              <span class="badge bg-secondary">Qty: ${item.quantity || 1}</span>
-                          ` : ''}
-                      </div>
-                      <div class="text-end">
-                          <div class="text-success fw-bold">
-                              ₱${parseFloat(item.external_fee * (type === 'equipment' ? (item.quantity || 1) : 1)).toLocaleString()}
-                          </div>
-                          ${type === 'equipment' ? `
-                              <small class="text-muted">${item.quantity || 1} × ₱${parseFloat(item.external_fee).toLocaleString()}</small>
-                          ` : ''}
-                      </div>
-                  </div>
-              </div>
-              ${displayImage ? `
-                  <img src="${displayImage.image_url}" class="card-img-bottom" 
-                      alt="${item.name}" style="height: 150px; object-fit: cover;">
-              ` : ''}
-          </div>
-      `;
-          cardContainer.appendChild(card);
-        });
-
-        container.appendChild(cardContainer);
-      }
-
-      // remove items from selection
-      window.removeSelectedItem = async function (id, type) {
-        try {
-          const requestBody = {
-            type: type,
-            equipment_id: type === 'equipment' ? id : undefined,
-            facility_id: type === 'facility' ? id : undefined
-          };
-
-          const cleanedRequestBody = Object.fromEntries(
-            Object.entries(requestBody).filter(([_, v]) => v !== undefined)
-          );
-
-          const response = await fetch('/api/requisition/remove-item', {
-            method: 'POST',
-            headers: {
-              'X-CSRF-TOKEN': csrfToken,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify(cleanedRequestBody)
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to remove item');
-          }
-
-          const result = await response.json();
-
-          if (result.success) {
-            await Promise.all([
-              renderSelectedItems(),
-              calculateAndDisplayFees()
-            ]);
-            showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed successfully`, 'success');
-
-            if (typeof updateCartBadge === 'function') {
-              updateCartBadge();
-            }
-          } else {
-            throw new Error(result.message || 'Failed to remove item');
-          }
-        } catch (error) {
-          console.error('Error removing item:', error);
-          showToast(error.message || 'Failed to remove item', 'error');
-        }
-      }
-
-      // Calculate and display fees
-      async function calculateAndDisplayFees() {
+      window.calculateAndDisplayFees = async function () {
         try {
           const response = await fetch('/api/requisition/get-items', {
             headers: {
@@ -1584,8 +1584,235 @@
           showToast('Failed to calculate fees', 'error');
           feeDisplay.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
         }
+      };
+
+      // --- Remove items from selection ---
+      window.removeSelectedItem = async function (id, type) {
+        try {
+          const requestBody = {
+            type: type,
+            equipment_id: type === 'equipment' ? id : undefined,
+            facility_id: type === 'facility' ? id : undefined
+          };
+
+          const cleanedRequestBody = Object.fromEntries(
+            Object.entries(requestBody).filter(([_, v]) => v !== undefined)
+          );
+
+          const response = await fetch('/api/requisition/remove-item', {
+            method: 'POST',
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(cleanedRequestBody)
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to remove item');
+          }
+
+          const result = await response.json();
+
+          if (result.success) {
+            await Promise.all([
+              window.renderSelectedItems(),
+              window.calculateAndDisplayFees()
+            ]);
+            showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed successfully`, 'success');
+
+            if (typeof updateCartBadge === 'function') {
+              updateCartBadge();
+            }
+          } else {
+            throw new Error(result.message || 'Failed to remove item');
+          }
+        } catch (error) {
+          console.error('Error removing item:', error);
+          showToast(error.message || 'Failed to remove item', 'error');
+        }
+      }
+
+      // --- School ID required logic ---
+      const applicantType = document.getElementById('applicantType');
+      const schoolIdInput = document.getElementById('school_id');
+      const schoolIdRequired = document.getElementById('schoolIdRequired');
+      applicantType.addEventListener('change', function () {
+        if (this.value === 'Internal') {
+          schoolIdInput.required = true;
+          schoolIdRequired.style.display = '';
+        } else {
+          schoolIdInput.required = false;
+          schoolIdRequired.style.display = 'none';
+          schoolIdInput.value = '';
+        }
+      });
+
+      // --- Now call initForm after all functions are defined ---
+      initForm();
+
+      async function initForm() {
+        try {
+          await Promise.all([
+            window.renderSelectedItems(),
+            window.calculateAndDisplayFees()
+          ]);
+        } catch (error) {
+          console.error('Error initializing form:', error);
+          showToast('Failed to initialize form', 'error');
+        }
       }
     });
+  </script>
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Prevent non-numeric input in contact number field
+  const contactNumberField = document.getElementById('contactNumberField');
+  contactNumberField.addEventListener('input', function (e) {
+    this.value = this.value.replace(/\D/g, '');
+  });
+
+  const reservationForm = document.getElementById('reservationForm');
+  const submitFormBtn = document.getElementById('submitFormBtn');
+
+  function showFieldError(input, message) {
+    input.classList.add('is-invalid');
+    input.setAttribute('title', message);
+    input.setAttribute('data-bs-toggle', 'tooltip');
+    input.setAttribute('data-bs-placement', 'top');
+    if (window.bootstrap) {
+      new bootstrap.Tooltip(input);
+      input.addEventListener('focus', function () {
+        bootstrap.Tooltip.getInstance(input)?.show();
+      });
+    }
+  }
+
+  function clearFieldError(input) {
+    input.classList.remove('is-invalid');
+    input.removeAttribute('title');
+    input.removeAttribute('data-bs-toggle');
+    input.removeAttribute('data-bs-placement');
+    if (window.bootstrap) {
+      const tooltip = bootstrap.Tooltip.getInstance(input);
+      if (tooltip) tooltip.dispose();
+    }
+  }
+
+  function validateFormFields() {
+    let valid = true;
+    let firstInvalid = null;
+    const requiredFields = [
+      'user_type', 'first_name', 'last_name', 'email', 'num_participants', 'purpose_id'
+    ];
+
+    // Clear any existing tooltips first
+    reservationForm.querySelectorAll('.is-invalid').forEach(input => clearFieldError(input));
+
+    // Check formal letter first, before any other validation
+    if (!document.getElementById('formal_letter_url').value) {
+      showToast('Formal Letter Required.', 'error');
+      return { valid: false, firstInvalid: null, isMissingLetter: true };
+    }
+
+    requiredFields.forEach(name => {
+      const input = reservationForm.querySelector(`[name="${name}"]`);
+      if (input) {
+        if (
+          !input.value ||
+          (name === 'user_type' && input.value === '') ||
+          (name === 'purpose_id' && (input.value === '' || input.value === null))
+        ) {
+          showFieldError(input, 'Please fill in this field.');
+          valid = false;
+          if (!firstInvalid) firstInvalid = input;
+        }
+      }
+    });
+
+    // School ID required for Internal
+    const applicantType = document.getElementById('applicantType');
+    const schoolIdInput = document.getElementById('school_id');
+    if (applicantType.value === 'Internal') {
+      clearFieldError(schoolIdInput);
+      if (!schoolIdInput.value) {
+        showFieldError(schoolIdInput, 'Please fill in this field.');
+        valid = false;
+        if (!firstInvalid) firstInvalid = schoolIdInput;
+      }
+    } else {
+      clearFieldError(schoolIdInput);
+    }
+
+    // Email format
+    const emailInput = reservationForm.querySelector('[name="email"]');
+    if (emailInput && emailInput.value) {
+      clearFieldError(emailInput);
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(emailInput.value)) {
+        showFieldError(emailInput, 'Please enter a valid email address.');
+        valid = false;
+        if (!firstInvalid) firstInvalid = emailInput;
+      }
+    }
+
+    // Contact number format (only digits, max 15)
+    if (contactNumberField && contactNumberField.value) {
+      clearFieldError(contactNumberField);
+      if (!/^\d{1,15}$/.test(contactNumberField.value)) {
+        showFieldError(contactNumberField, 'Contact number must be numbers only (max 15 digits).');
+        valid = false;
+        if (!firstInvalid) firstInvalid = contactNumberField;
+      }
+    } else {
+      clearFieldError(contactNumberField);
+    }
+
+    return { valid, firstInvalid, isMissingLetter: false };
+  }
+
+  // Single click handler for submit button
+  submitFormBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const { valid, firstInvalid, isMissingLetter } = validateFormFields();
+    
+    if (!valid) {
+      if (!isMissingLetter) {
+        showToast('Please fill in all required fields correctly.', 'error');
+        if (firstInvalid) {
+          firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            firstInvalid.focus();
+            if (window.bootstrap) {
+              bootstrap.Tooltip.getInstance(firstInvalid)?.show();
+            }
+          }, 400);
+        }
+      }
+      return false;
+    }
+
+    // Only open modal if validation passes
+    openTermsModal(e);
+  });
+
+  // Remove the form submit handler since we're handling everything in the button click
+  // Keep the input/change handlers for clearing errors
+  reservationForm.querySelectorAll('input, select, textarea').forEach(input => {
+    input.addEventListener('input', function () {
+      clearFieldError(this);
+    });
+    input.addEventListener('change', function () {
+      clearFieldError(this);
+    });
+  });
+
+  // ...existing code...
+});
   </script>
 </body>
 

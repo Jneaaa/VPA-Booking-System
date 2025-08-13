@@ -57,6 +57,7 @@ Route::prefix('requisition')->middleware('web')->group(function () {
     Route::post('/check-availability', [RequisitionFormController::class, 'checkAvailability']);
     Route::post('/temp-upload', [RequisitionFormController::class, 'tempUpload']);
     Route::post('/submit', [RequisitionFormController::class, 'submitForm']);
+    Route::post('/clear-session', [RequisitionFormController::class, 'clearSession']);
 });
 
 // ---------------- Admin Authentication ---------------- //

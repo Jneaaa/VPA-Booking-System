@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class AdminApproval extends Controller
+class AdminApprovalController extends Controller
 {
     /* Controller Documentation:
         * This controller handles the admin approval process for requisition forms.
@@ -130,3 +130,109 @@ class AdminApproval extends Controller
 
 
 }
+
+
+/* 
+
+How to Access Cloudinary Files Using the Token:
+
+Database Structure:
+
+    Store the token along with the Cloudinary public ID and URL in your requisition form record
+
+    The key fields you need are:
+'formal_letter_url' => 'https://res.cloudinary.com/.../formal_letter.pdf',
+'formal_letter_public_id' => 'user-uploads/user-letters/xyz123',
+'upload_token' => '40charrandomstring'
+
+Admin View Implementation:
+// In your admin controller
+public function showRequisition($token) 
+{
+    $requisition = RequisitionForm::where('upload_token', $token)->firstOrFail();
+    
+    return view('admin.requisition.view', [
+        'formal_letter_url' => $requisition->formal_letter_url,
+        'facility_layout_url' => $requisition->facility_layout_url
+        // ... other data
+    ]);
+}
+
+Displaying Files in Admin View:
+<!-- Blade template -->
+@if($formal_letter_url)
+    @if(Str::endsWith($formal_letter_url, ['.jpg', '.jpeg', '.png', '.gif']))
+        <img src="{{ $formal_letter_url }}" class="img-fluid">
+    @elseif(Str::endsWith($formal_letter_url, '.pdf'))
+        <iframe src="{{ $formal_letter_url }}" width="100%" height="600px"></iframe>
+    @else
+        <a href="{{ $formal_letter_url }}" target="_blank" class="btn btn-primary">
+            Download Formal Letter
+        </a>
+    @endif
+@endif
+
+Important Security Considerations:
+
+Access Control:
+
+    Always verify admin permissions before showing files
+
+    Example middleware:
+    Route::get('/admin/requisitions/{token}', [RequisitionController::class, 'show'])
+    ->middleware('can:view-requisition');
+
+    Cloudinary Security:
+Use signed URLs if containing sensitive data:
+$secureUrl = cloudinary()->getSignedUrl($requisition->formal_letter_public_id, [
+    'expires_at' => now()->addHours(2)
+]);
+Set appropriate access controls in Cloudinary dashboard
+
+File Type Handling:
+
+    For non-image PDFs, use Cloudinary's PDF viewer:
+    <iframe src="https://res.cloudinary.com/demo/image/upload/{{ $public_id }}.pdf" 
+        width="100%" height="600px"></iframe>
+
+                width="100%" height="600px"></iframe>
+
+Alternative Approach Using API:
+
+If you need more control, create an API endpoint:
+// routes/api.php
+Route::middleware('auth:sanctum')->get('/requisition-files/{token}', function ($token) {
+    $requisition = RequisitionForm::where('upload_token', $token)->firstOrFail();
+    
+    return response()->json([
+        'formal_letter' => [
+            'url' => $requisition->formal_letter_url,
+            'type' => pathinfo($requisition->formal_letter_url, PATHINFO_EXTENSION)
+        ],
+        // ... other files
+    ]);
+});
+
+Key Points:
+
+    The token is just a database reference - the actual file access uses the stored Cloudinary URL
+
+    No need for Cloudinary API calls just to view files (unless you need transformations)
+
+    For sensitive documents, consider:
+
+        Temporary signed URLs
+
+        Download counters
+
+        Access logging
+
+The token system works perfectly for admin review purposes while maintaining security through:
+
+    Database-level association
+
+    Laravel's auth system
+
+    Cloudinary's existing URL security
+
+*/

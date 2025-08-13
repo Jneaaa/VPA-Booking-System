@@ -92,7 +92,7 @@ class EquipmentController extends Controller
             'rate_type' => 'required|in:Per Hour,Per Event',
             'status_id' => 'required|exists:availability_statuses,status_id',
             'department_id' => 'required|exists:departments,department_id',
-            'maximum_rental_hour' => 'required|integer|min:1',
+            'maximum_rental_hour' => 'nullable|integer',
 
             'items' => 'sometimes|array',
             'items.*.item_name' => 'sometimes|string|max:100',
@@ -177,7 +177,7 @@ class EquipmentController extends Controller
             'rate_type' => 'sometimes|in:Per Hour,Per Event',
             'status_id' => 'sometimes|exists:availability_statuses,status_id',
             'department_id' => 'sometimes|exists:departments,department_id',
-            'maximum_rental_hour' => 'sometimes|integer|min:1',
+            'maximum_rental_hour' => 'nullable|integer',
         ]);
 
         $user = auth()->user();
