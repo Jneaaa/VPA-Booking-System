@@ -70,6 +70,12 @@ class Equipment extends Model
         return $this->belongsTo(Admin::class, 'deleted_by', 'admin_id');
     }
 
+    public function systemLogs()
+    {
+        return $this->hasMany(\App\Models\SystemLog::class, 'equipment_id');
+    }
+
+
     // Scopes
     public function scopeByDepartment($query, $departmentId)
     {

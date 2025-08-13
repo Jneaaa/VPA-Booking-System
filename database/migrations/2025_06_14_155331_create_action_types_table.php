@@ -15,7 +15,6 @@ return new class extends Migration
             $table->tinyIncrements('action_id'); // PK, auto increment
             $table->string('action_name', 50);   // Not null by default
             $table->string('description', 80)->nullable();
-            $table->timestamps();
         });
     }
 

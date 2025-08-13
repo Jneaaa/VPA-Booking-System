@@ -25,11 +25,17 @@ return new class extends Migration
             $table->integer('num_participants');
             $table->unsignedTinyInteger('purpose_id')->index();
             $table->string('additional_requests', 250)->nullable();
+
+            // User uploads
             $table->string('formal_letter_url');
             $table->string('formal_letter_public_id');
             $table->string('facility_layout_url')->nullable();
             $table->string('facility_layout_public_id')->nullable();
+            $table->string('proof_of_payment_url')->nullable();
+            $table->string('proof_of_payment_public_id')->nullable();
             $table->string('upload_token', 100)->nullable();
+
+            // request status
             $table->unsignedTinyInteger('status_id')->index();
 
             // booking schedule 

@@ -15,48 +15,12 @@ class DepartmentSeeder extends Seeder
     {
         DB::table('departments')->insert([
             [
-                'department_name' => 'College of Agriculture',
-                'department_code' => 'COA',
+                'department_name' => 'Vice President of Administration',
+                'department_code' => 'VPA',
             ],
             [
-                'department_name' => 'College of Arts & Sciences',
-                'department_code' => 'CAS',
-            ],
-            [
-                'department_name' => 'College of Business & Accountancy',
-                'department_code' => 'CBA',
-            ],
-            [
-                'department_name' => 'College of Computer Studies',
-                'department_code' => 'CCS',
-            ],
-            [
-                'department_name' => 'College of Education',
-                'department_code' => 'COED',
-            ],
-            [
-                'department_name' => 'College of Engineering',
-                'department_code' => 'COE',
-            ],
-            [
-                'department_name' => 'College of Hospitality Management',
-                'department_code' => 'CHM',
-            ],
-            [
-                'department_name' => 'College of Medical Laboratory Science',
-                'department_code' => 'CMLS',
-            ],
-            [
-                'department_name' => 'College of Nursing',
-                'department_code' => 'CON',
-            ],
-            [
-                'department_name' => 'College of Pharmacy',
-                'department_code' => 'COP',
-            ],
-            [
-                'department_name' => 'College of Theology',
-                'department_code' => 'COT',
+                'department_name' => 'Educational Media Center',
+                'department_code' => 'EMC',
             ]
          ]);
     }
