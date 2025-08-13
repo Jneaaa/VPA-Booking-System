@@ -44,7 +44,12 @@ class RequisitionForm extends Model
         'official_receipt_url', 
         'official_receipt_public_id',
         'calendar_title',
-        'calendar_description'
+        'calendar_description',
+        'access_code',
+        'formal_letter_url',
+        'formal_letter_public_id',
+        'facility_layout_url',
+        'facility_layout_public_id'
     ];
 
     protected $casts = [

@@ -564,7 +564,7 @@ class RequisitionFormController extends Controller
                      'public_id' => $upload->getPublicId(),
                      'upload_token' => $uploadToken,
                  ],
-             ]);
+             );
          } catch (\Exception $e) {
              return response()->json([
                  'success' => false,
@@ -649,23 +649,43 @@ class RequisitionFormController extends Controller
     public function submitForm(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'start_time' => 'required|date_format:H:i:s',
-            'end_time' => 'required|date_format:H:i:s|after:start_time',
-            'purpose_id' => 'required|exists:requisition_purposes,purpose_id',
+            'user_type' => 'required|in:Internal,External',
+            'school_id' => 'required_if:user_type,Internal|nullable|string|max:20',
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'email' => 'required|email|max:100',
+            'contact_number' => ['nullable', 'regex:/^\d{1,15}$/', 'max:15'],
+            'organization_name' => 'nullable|string|max:100',
             'num_participants' => 'required|integer|min:1',
-            'additional_requests' => 'nullable|string',
+            'purpose_id' => 'required|exists:requisition_purposes,purpose_id',
+            'additional_requests' => 'nullable|string|max:250',
+            'endorser' => 'nullable|string|max:50',
+            'date_endorsed' => 'nullable|date_format:Y-m-d',
+            'formal_letter_url' => 'required|url',
+            'formal_letter_public_id' => 'required|string|max:255',
+            'facility_layout_url' => 'nullable|string|max:255',
+            'facility_layout_public_id' => 'nullable|string|max:255',
+            // ...other fields as needed...
         ]);
 
         if ($validator->fails()) {
-            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()->toArray() // Return full error details
+            ], 422);
         }
-
 
         DB::beginTransaction();
 
         try {
+
+            // Get selected items from session (still needed)
+            $selectedItems = session('selected_items', []);
+            if (empty($selectedItems)) {
+                throw new \Exception('Your booking cart is empty. Add items before submitting.');
+            }
+
             // Debug session data
             \Log::debug('Submission session data', [
                 'request_info' => session('request_info'),
@@ -678,44 +698,60 @@ class RequisitionFormController extends Controller
             $selectedItems = session('selected_items', []);
             $tempUploads = session('temp_uploads', []);
 
-            if (!$requestInfo) {
+            if (!$request->first_name || !$request->last_name || !$request->email) {
                 throw new \Exception('User information not found. Please fill in all required fields.');
             }
 
-            if (empty($selectedItems)) {
-                throw new \Exception('Your booking cart is empty. Add items before submitting.');
-            }
+            $conflictCheck = $this->checkAvailability(new Request([
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'items' => array_map(function ($item) {
+                    return [
+                        'type' => $item['type'],
+                        $item['type'] . '_id' => $item[$item['type'] . '_id']
+                    ];
+                }, $selectedItems)
+            ]));
 
-            $conflictCheck = $this->checkAvailability($request);
-            if (!$conflictCheck->getData()->available) {
-                throw new \Exception('Time slot no longer available. Please choose another.');
+            $conflictData = $conflictCheck->getData();
+            if (!$conflictData->success || !$conflictData->data->available) {
+                throw new \Exception($conflictData->message ?? 'Time slot no longer available. Please choose another.');
             }
 
             // Get uploads - handle null case explicitly
-            $letterUpload = $tempUploads['formal_letter_url'] ?? null;
-            $setupUpload = $tempUploads['facility_layout_url'] ?? null;
-
-            if (!$letterUpload) {
+            if (!$request->formal_letter_url) {
                 throw new \Exception('A formal letter must be uploaded.');
             }
+
+            $accessCode = Str::upper(Str::random(10));
+            \Log::debug('Generated access code', ['code' => $accessCode]);
+            \Log::debug('Submitting form data', [
+                'facility_layout_url' => $request->facility_layout_url,
+                'facility_layout_public_id' => $request->facility_layout_public_id,
+                'all_data' => $request->all()
+            ]);
+            
+
             // Create requisition form
             $requisitionForm = RequisitionForm::create([
-                'user_type' => $requestInfo['user_type'],
-                'first_name' => $requestInfo['first_name'],
-                'last_name' => $requestInfo['last_name'],
-                'email' => $requestInfo['email'],
-                'contact_number' => $requestInfo['contact_number'] ?? null,
-                'organization_name' => $requestInfo['organization_name'] ?? null,
-                'school_id' => $requestInfo['school_id'] ?? null,
+                'user_type' => $request->user_type, // Use submitted value
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'contact_number' => $request->contact_number,
+                'organization_name' => $request->organization_name,
+                'school_id' => $request->school_id,
                 'access_code' => Str::upper(Str::random(10)),
                 'purpose_id' => $request->purpose_id,
                 'num_participants' => $request->num_participants,
                 'additional_requests' => $request->additional_requests,
-                'formal_letter_url' => $letterUpload['url'],
-                'formal_letter_public_id' => $letterUpload['public_id'],
-                'facility_layout_url' => $setupUpload['url'],
-                'facility_layout_public_id' => $setupUpload['public_id'],
-                'upload_token' => $letterUpload['token'], // assume same token used for both
+                'formal_letter_url' => $request->formal_letter_url,
+                'formal_letter_public_id' => $request->formal_letter_public_id,
+                'facility_layout_url' => $request->facility_layout_url ?? null,
+                'facility_layout_public_id' => $request->facility_layout_public_id ?? null,
+                'upload_token' => Str::random(40), // assume same token used for both
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
                 'start_time' => $request->start_time,
@@ -729,11 +765,11 @@ class RequisitionFormController extends Controller
                 if ($item['type'] === 'facility') {
                     RequestedFacility::create([
                         'request_id' => $requisitionForm->request_id,
-                        'facility_id' => $item['id'],
+                        'facility_id' => $item['facility_id'] ?? $item['id'], // Handle both formats
                         'is_waived' => false,
                     ]);
                 } elseif ($item['type'] === 'equipment') {
-                    $equipmentItems = \App\Models\EquipmentItem::where('equipment_id', $item['id'])
+                    $equipmentItems = \App\Models\EquipmentItem::where('equipment_id', $item['equipment_id'] ?? $item['id'])
                         ->whereIn('condition_id', [1, 2, 3])
                         ->whereNull('deleted_at')
                         ->limit($item['quantity'] ?? 1)
@@ -774,4 +810,11 @@ class RequisitionFormController extends Controller
             return $this->jsonResponse(false, 'Submission failed: ' . $e->getMessage(), [], 500);
         }
     }
+
+    public function clearSession()
+    {
+        session()->forget(['request_info', 'selected_items', 'fee_summary', 'temp_uploads']);
+        return response()->json(['success' => true]);
+    }
+
 }

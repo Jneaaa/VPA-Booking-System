@@ -24,7 +24,7 @@ return new class extends Migration
             $table->enum('rate_type', ['Per Hour', 'Per Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');
             $table->unsignedTinyInteger('department_id');
-            $table->unsignedInteger('maximum_rental_hour')->default(1);
+            $table->unsignedInteger('maximum_rental_hour')->nullable();
             $table->timestamps();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();
