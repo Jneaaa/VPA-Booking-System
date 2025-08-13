@@ -113,6 +113,17 @@ class Admin extends Authenticatable
         return $this->hasMany(Facility::class, 'deleted_by', 'admin_id');
     }
 
+    public function systemLogs()
+    {
+        return $this->hasMany(SystemLog::class, 'admin_id', 'admin_id');
+    }
+
+    public function actionTypes()
+    {
+        return $this->hasMany(ActionType::class, 'admin_id', 'admin_id');
+    }
+    
+
 
 
 

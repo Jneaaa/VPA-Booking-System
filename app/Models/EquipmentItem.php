@@ -34,5 +34,11 @@ class EquipmentItem extends Model
     {
         return $this->belongsTo(LookupTables\Condition::class, 'condition_id', 'condition_id');
     }
+
+    public function systemLogs()
+    {
+        return $this->hasMany(\App\Models\SystemLog::class, 'item_id');
+    }
+
 }
 

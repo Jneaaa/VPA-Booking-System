@@ -33,7 +33,7 @@ class AdminDepartmentSeeder extends Seeder
             ],
             [
                 'admin_id' => 2,
-                'department_id' => 3,
+                'department_id' => 1,
                 'is_primary' => false,
                 'created_at' => now(),
                 'updated_at' => now(),

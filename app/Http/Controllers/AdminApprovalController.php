@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\ActionType;
+use App\Models\Admin;
+use App\Models\SystemLog;
+use App\Models\RequisitionForm;
 
 class AdminApprovalController extends Controller
 {
@@ -19,11 +22,13 @@ class AdminApprovalController extends Controller
         */
 
     // make a function to view pending requisition forms
-    public function index()
+    public function viewForms()
     {
 
+
+
         // Logic to retrieve and display pending requisition forms
-        // This function queries the RequisitionForm model for forms with status 'Pending Approval' (1). 
+        // This function queries the RequisitionForm model for forms with status 'Pending Approval' (1) and 'Awaiting Payment' (3). 
          // admins can only view forms that are under their departments (e.g., a form has a requested facility or requipment that belongs to the admin's department)
 
         /* 

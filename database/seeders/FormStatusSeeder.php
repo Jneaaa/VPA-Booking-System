@@ -11,8 +11,7 @@ class FormStatusSeeder extends Seeder
     {
         $statuses = [
             ['status_name' => 'Pending Approval',   'color_code' => '#FFA500'], // Orange
-            ['status_name' => 'In Review',          'color_code' => '#00BFFF'], // Deep Sky Blue
-            ['status_name' => 'Awaiting Payment',   'color_code' => '#FF69B4'], // Hot Pink
+            ['status_name' => 'Awaiting Payment',   'color_code' => '#00BFFF'], // Deep Sky Blue
             ['status_name' => 'Scheduled',          'color_code' => '#9370DB'], // Medium Purple
             ['status_name' => 'Ongoing',            'color_code' => '#1E90FF'], // Dodger Blue
             ['status_name' => 'Returned',           'color_code' => '#20B2AA'], // Light Sea Green
