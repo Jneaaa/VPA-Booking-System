@@ -15,7 +15,7 @@ class AdminRole extends Model
     protected $primaryKey = 'role_id';
 
     protected $fillable = [
-        'role_name',
+        'role_title',
         'role_description'
     ];
 

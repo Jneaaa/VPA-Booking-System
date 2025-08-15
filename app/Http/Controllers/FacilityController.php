@@ -18,7 +18,7 @@ class FacilityController extends Controller
             $user = auth()->user();
 
             // Head admins can view all facilities
-            if ($user->role?->role_name === 'Head Admin') {
+            if ($user->role?->role_title === 'Head Admin') {
                 $facilities = Facility::with(['category', 'subcategory', 'status', 'department', 'images'])
                     ->orderBy('facility_name')
                     ->get();

@@ -28,6 +28,9 @@ Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']);
 
 // ---------------- Admin Management ---------------- //
 Route::post('/admins', [AdminController::class, 'store']);
+Route::delete('/admins/{admin}', [AdminController::class, 'deleteAdmin']);
+Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']);
+Route::put('/admins/{admin}', [AdminController::class, 'update']);
 
 // ---------------- Lookup Tables ---------------- //
 
