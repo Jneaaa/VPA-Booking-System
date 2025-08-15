@@ -1,6 +1,6 @@
   <header id="topbar" class="d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center">
-      <img src="../cpu-logo.png" alt="CPU Logo" class="me-2" style="height: 40px;">
+      <img src="{{ asset('assets/cpu-logo.png') }}" alt="CPU Logo" class="me-2" style="height: 40px;">
       <span class="fw-bold">CPU Facilities and Equipment Management</span>
     </div>
     <div class="d-flex align-items-center">
