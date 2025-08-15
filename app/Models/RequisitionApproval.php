@@ -9,9 +9,9 @@ class RequisitionApproval extends Model
     protected $table = "requisition_approvals";
 
     protected $fillable = [
-        'status',
         'request_id',
-        'admin_id',
+        'approved_by',
+        'rejected_by',
         'date_approved',
     ];
 
@@ -26,9 +26,13 @@ class RequisitionApproval extends Model
         return $this->belongsTo(RequisitionForm::class, 'request_id', 'request_id');
     }
 
-    // One approval is given by a single admin
-    public function admin()
+    public function approvedBy()
     {
-        return $this->belongsTo(Admin::class, 'admin_id', 'admin_id');
+        return $this->belongsTo(Admin::class, 'approved_by', 'admin_id');
+    }
+    
+        public function rejectedBy()
+    {
+        return $this->belongsTo(Admin::class, 'rejected_by', 'admin_id');
     }
 }

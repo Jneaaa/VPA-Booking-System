@@ -75,6 +75,11 @@ class RequisitionForm extends Model
         return $this->belongsTo(RequisitionPurpose::class, 'purpose_id', 'purpose_id');
     }
 
+    public function requisitionApprovals()
+    {
+         return $this->belongsTo(\App\Models\RequisitionApproval::class, 'request_id', 'request_id');
+    }
+
     public function status()
     {
         return $this->belongsTo(FormStatus::class, 'status_id', 'status_id');
@@ -99,10 +104,4 @@ class RequisitionForm extends Model
     {
         return $this->hasMany(RequestedEquipment::class, 'request_id', 'request_id');
     }
-
-    public function calendarEvents()
-    {
-        return $this->belongsTo(CalendarEvent::class, 'event_id', 'event_id');
-    }
-
 }

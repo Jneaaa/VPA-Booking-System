@@ -30,4 +30,9 @@ class RequestedEquipment extends Model
     {
         return $this->belongsTo(Equipment::class, 'equipment_id', 'equipment_id');
     }
+
+    public function isWaived()
+    {
+        return $this->hasMany(RequisitionFee::class, 'waived_equipment', 'requested_equipment_id');
+    }
 }
