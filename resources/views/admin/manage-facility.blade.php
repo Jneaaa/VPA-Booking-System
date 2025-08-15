@@ -77,7 +77,7 @@
           <li>
             <hr class="dropdown-divider">
           </li>
-          <li><a class="dropdown-item" href="adminlogin.html"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+          <li><a class="dropdown-item" href="{{ url('/admin/admin-login') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
         </ul>
       </div>
     </div>

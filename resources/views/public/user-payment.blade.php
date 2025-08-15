@@ -249,7 +249,7 @@
                 </div>
             </div>
             <div class="admin-login">
-                <span>Are you an Admin? <a href="admin pages/adminlogin.html">Login here.</a></span>
+                <span>Are you an Admin? <a href="{{ url('/admin/admin-login') }}">Login here.</a></span>
             </div>
         </div>
     </header>
