@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RequisitionFormController;
+use App\Http\Controllers\AdminController;
 
 Route::middleware('web')->group(function () {
     Route::get('/', function () {
@@ -55,4 +56,6 @@ Route::middleware('web')->group(function () {
         Route::post('/submit', [RequisitionFormController::class, 'submitForm']);
         Route::post('/clear-session', [RequisitionFormController::class, 'clearSession']);
     });
+
+    Route::get('/admin-roles', [AdminController::class, 'adminRoles'])->name('admin.roles');
 });

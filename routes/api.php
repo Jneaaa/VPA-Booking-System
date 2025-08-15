@@ -26,6 +26,9 @@ use App\Http\Controllers\Dropdowns\RequisitionPurposeController;
 Route::get('/admins', [AdminController::class, 'getAllAdmins']);
 Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']);
 
+// ---------------- Admin Management ---------------- //
+Route::post('/admins', [AdminController::class, 'store']);
+
 // ---------------- Lookup Tables ---------------- //
 
 Route::get('/departments', [DepartmentController::class, 'index']);
@@ -39,6 +42,7 @@ Route::get('/facility-categories/index', [FacilityCategoryController::class, 'in
 Route::get('/facility-subcategories/{category}', [FacilitySubcategoryController::class, 'index']);
 Route::get('/requisition-purposes', [RequisitionPurposeController::class, 'index']);
 Route::get('/active-schedules', [RequisitionFormController::class, 'activeSchedules']);
+Route::get('/admin-role', [AdminController::class, 'adminRoles']);
 
 // ---------------- Public Catalog Routes ---------------- //
 
@@ -91,11 +95,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/admin/profile', function (Request $request) {
         $user = $request->user();
-        $user->load('departments');
+        $user->load(['role', 'departments']);
         return response()->json($user);
     });
 
     Route::prefix('admin')->middleware(['check.admin.role'])->group(function () {
+
 
         // Equipment
         Route::apiResource('equipment', EquipmentController::class);

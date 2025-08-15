@@ -50,46 +50,47 @@
     <section class="form-section">
       <h3 class="mb-4">Add New Admin</h3>
       <form id="addAdminForm">
-      <div class="row g-3">
-        <div class="col-md-4">
-        <label for="firstName" class="form-label">First Name</label>
-        <input type="text" class="form-control" id="firstName" name="firstName" required>
+        @csrf
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="first_name" class="form-label">First Name</span></label>
+            <input type="text" class="form-control" id="first_name" name="first_name" required>
+          </div>
+          <div class="col-md-4">
+            <label for="middle_name" class="form-label">Middle Name</label>
+            <input type="text" class="form-control" id="middle_name" name="middle_name">
+          </div>
+          <div class="col-md-4">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" required>
+          </div>
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+          <div class="col-md-6">
+            <label for="contact_number" class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" id="contact_number" name="contact_number">
+          </div>
+          <div class="col-md-6">
+            <label for="role_id" class="form-label">Role</label>
+            <select class="form-select" id="role_id" name="role_id" required>
+              <option value="">Loading roles...</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="school_id" class="form-label">School ID</label>
+            <input type="text" class="form-control" id="school_id" name="school_id">
+          </div>
+          <div class="col-12">
+            <label for="password" class="form-label">Temporary Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+            <div class="form-text">Admin will be prompted to change this upon first login.</div>
+          </div>
+          <div class="col-12 mt-4">
+            <button type="submit" class="btn btn-primary">Add Admin</button>
+          </div>
         </div>
-        <div class="col-md-4">
-        <label for="middleName" class="form-label">Middle Name</label>
-        <input type="text" class="form-control" id="middleName" name="middleName">
-        </div>
-        <div class="col-md-4">
-        <label for="lastName" class="form-label">Last Name</label>
-        <input type="text" class="form-control" id="lastName" name="lastName" required>
-        </div>
-        <div class="col-md-6">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" required>
-        </div>
-        <div class="col-md-6">
-        <label for="contactNumber" class="form-label">Phone Number</label>
-        <input type="tel" class="form-control" id="contactNumber" name="contactNumber">
-        </div>
-        <div class="col-md-6">
-        <label for="role" class="form-label">Role</label>
-        <select class="form-select" id="role" name="role" required>
-          <option value="">Select a role</option>
-          <option value="Admin">Admin</option>
-          <option value="Signatories">Signatories</option>
-          <option value="Inventory Manager">Inventory Manager</option>
-          <option value="President">President</option>
-        </select>
-        </div>
-        <div class="col-12">
-        <label for="hashedPassword" class="form-label">Temporary Password</label>
-        <input type="password" class="form-control" id="hashedPassword" name="hashedPassword" required>
-        <div class="form-text">Admin will be prompted to change this upon first login.</div>
-        </div>
-        <div class="col-12 mt-4">
-        <button type="submit" class="btn btn-primary">Add Admin</button>
-        </div>
-      </div>
       </form>
     </section>
 
@@ -171,109 +172,83 @@
 @section('scripts')
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-    const addAdminForm = document.getElementById('addAdminForm');
-    const adminListBody = document.getElementById('adminListBody');
+      const addAdminForm = document.getElementById('addAdminForm');
+      const roleSelect = document.getElementById('role_id');
 
-    addAdminForm.addEventListener('submit', function (event) {
-      event.preventDefault(); // Prevent default form submission
+      // Fetch roles and populate dropdown
+      async function loadRoles() {
+        try {
+          const response = await fetch('/admin-roles', {
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const roles = await response.json();
+          console.log('Fetched roles:', roles); // Debug log
 
-      // Get form data
-      const firstName = document.getElementById('firstName').value;
-      const middleName = document.getElementById('middleName').value;
-      const lastName = document.getElementById('lastName').value;
-      const email = document.getElementById('email').value;
-      const contactNumber = document.getElementById('contactNumber').value;
-      const role = document.getElementById('role').value;
-      const hashedPassword = document.getElementById('hashedPassword').value;
+          // Clear loading option
+          roleSelect.innerHTML = '<option value="">Select a role</option>';
 
+          if (roles && roles.length > 0) {
+            roles.forEach(role => {
+              const option = new Option(role.role_name, role.role_id);
+              roleSelect.add(option);
+            });
+          } else {
+            console.warn('No roles returned from API');
+            roleSelect.innerHTML = '<option value="">No roles available</option>';
+          }
+        } catch (error) {
+          console.error('Error loading roles:', error);
+          roleSelect.innerHTML = '<option value="">Error loading roles</option>';
+        }
+      }
 
-      const fullName = `${firstName} ${middleName ? middleName + ' ' : ''}${lastName}`;
+      // Load roles immediately
+      loadRoles();
 
-      // In a real application, you would send this data to your backend
-      // using fetch() or XMLHttpRequest. For this example, we'll just
-      // add it to the table directly.
+      addAdminForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
 
-      // Example of how you would send data to the backend:
-      /*
-      fetch('/api/add-admin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        firstName,
-        middleName,
-        lastName,
-        email,
-        contactNumber,
-        role,
-        hashedPassword // In a real app, this should be securely hashed on the server
-      }),
-      })
-      .then(response => response.json())
-      .then(data => {
-      console.log('Success:', data);
-      // If successful, you'd then add the new admin to the table
-      // Or ideally, re-fetch the list of admins from the server
-      addNewAdminRow(data); // Assuming data includes the new admin's details including adminID
-      addAdminForm.reset(); // Clear the form
-      })
-      .catch((error) => {
-      console.error('Error:', error);
-      alert('Failed to add admin.');
+        const formData = {
+          first_name: document.getElementById('first_name').value,
+          middle_name: document.getElementById('middle_name').value,
+          last_name: document.getElementById('last_name').value,
+          email: document.getElementById('email').value,
+          contact_number: document.getElementById('contact_number').value,
+          role_id: document.getElementById('role_id').value,
+          school_id: document.getElementById('school_id').value,
+          password: document.getElementById('password').value,
+        };
+
+        try {
+          const response = await fetch('/admins', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            },
+            body: JSON.stringify(formData)
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            alert('Admin added successfully!');
+            addAdminForm.reset();
+            // Optionally refresh the admin list
+            location.reload();
+          } else {
+            alert(data.message || 'Failed to add admin');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Failed to add admin');
+        }
       });
-      */
-
-      // For demonstration purposes, we'll add a dummy admin ID and add to table
-      const dummyAdminID = Math.floor(Math.random() * 1000) + 200; // Generate a dummy ID
-      addNewAdminRow({
-      adminID: dummyAdminID,
-      firstName,
-      middleName,
-      lastName,
-      email,
-      contactNumber,
-      role
-      });
-
-      addAdminForm.reset();
-      alert('Admin added successfully (demonstration only)!');
-    });
-
-    function addNewAdminRow(admin) {
-      const newRow = adminListBody.insertRow();
-
-      const adminIDCell = newRow.insertCell();
-      adminIDCell.textContent = admin.adminID;
-
-      const fullNameCell = newRow.insertCell();
-      fullNameCell.textContent = `${admin.firstName} ${admin.middleName ? admin.middleName + ' ' : ''}${admin.lastName}`;
-
-      const emailCell = newRow.insertCell();
-      emailCell.textContent = admin.email;
-
-      const contactNumberCell = newRow.insertCell();
-      contactNumberCell.textContent = admin.contactNumber || 'N/A';
-      const roleCell = newRow.insertCell();
-      roleCell.textContent = admin.role;
-
-      const actionsCell = newRow.insertCell();
-      actionsCell.innerHTML = `
-        <button class="btn btn-sm btn-info me-2"><i class="bi bi-pencil"></i> Edit</button>
-        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Delete</button>
-      `;
-    }
-
-    // You would typically fetch existing admins from your backend here
-    // Example:
-    /*
-    fetch('/api/get-admins')
-      .then(response => response.json())
-      .then(admins => {
-      admins.forEach(admin => addNewAdminRow(admin));
-      })
-      .catch(error => console.error('Error fetching admins:', error));
-    */
     });
   </script>
 @endsection

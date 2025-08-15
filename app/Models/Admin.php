@@ -30,8 +30,11 @@ class Admin extends Authenticatable
     ];
 
     protected $hidden = [
-        'hashed_password'
+        'hashed_password',
+        'role_id'  // Hide role_id since it will be included in the role object
     ];
+
+    protected $with = ['role'];  // Always load the role relationship
 
     // ----- Role Assignment ----- //
     public function role()
