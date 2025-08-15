@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\ActionType;
 use App\Models\Admin;
+use App\Model\AdminDepartment;
 use App\Models\SystemLog;
 use App\Models\RequisitionForm;
 
@@ -15,10 +16,63 @@ class AdminApprovalController extends Controller
         * It includes methods for viewing pending approvals, approving or rejecting requests,
         * and managing the status of requisition forms.
         *
+        * Each action is logged in the system_logs (log_id) table.
+        
         * Methods:
-        * - index: Display a list of pending requisition forms for admin approval.
-        * - approve: Approve a requisition form and update its status.
-        * - reject: Reject a requisition form and update its status.
+
+        - index(): Get all pending requests from the requisition_forms table (PK: request_id) for admin approval
+            - only show forms with a status_id (from FormStatus model) of 1 (Pending approval) and 2 (Awaiting payment).
+            - Admins can only view forms that are under their departments (e.g., a form has a requested facility or equipment that belongs to the admin's department) with the use of the AdminDepartment eloquent model relationship.
+
+        - approveRequest(): an admin approves a requisition form
+            - If an admin approves a form, add to approval count in the requisition_approvals table, getting the admin_id and the request_id and committing it to this table:
+
+                approved_by = admin_id
+                request_id = request_id
+
+        - rejectRequest(): an admin rejects a requisition form 
+            - If an admin rejects a form, add to rejection count in the requisition_approvals table, getting the admin_id and the request_id and committing it to this table:
+
+                rejected_by = admin_id
+                request_id = request_id
+
+        - addFee() 
+
+            - Add a fee to a requisition form by creating a new record in the requisition_fees table with the following fields:
+                - request_id (FK: request_id from requisition_forms table)
+                - added_by (FK: admin_id from admins table)
+                - label (e.g., "Facility Fee", "Equipment Fee")
+                - fee_amount (decimal value for the fee)
+                - discount_amount (decimal value for any discount applied)
+                - waived_facility (FK: requested_facility_id from requested_facilities table, nullable)
+                - waived_equipment (FK: requested_equipment_id from requested_equipment table, nullable)
+                - waived_form (boolean, default false)
+
+        - addDiscount()
+            - Add a discount to a requisition form by creating a new record in the requisition_fees table with the following fields:
+                - request_id (FK: request_id from requisition_forms table)
+                - added_by (FK: admin_id from admins table)
+                - label (e.g., "Early Bird Discount", "Member Discount")
+                - fee_amount (decimal value for the discount, usually negative)
+                - discount_amount (decimal value for any additional discount applied)
+                - waived_facility (FK: requested_facility_id from requested_facilities table, nullable)
+                - waived_equipment (FK: requested_equipment_id from requested_equipment table, nullable)
+                - waived_form (boolean, default false)
+
+        - waiveItem()
+            - Waive a specific facility or equipment fee by updating the 'is_waived' field in either requested_facilities or requested_equipment table to true.
+            - This could involve updating the corresponding record in the requisition_fees table to indicate that the fee has been waived.
+            - Ensure that the requestId corresponds to a valid requisition form and that the admin has the necessary permissions to waive fees.
+
+        - waiveForm()
+            - Waive all fees for a requisition form by updating the 'is_waived' field in the requisition_forms table to true.
+            - This could involve updating the corresponding record in the requisition_fees table to indicate that all fees have been waived.
+            - Ensure that the requestId corresponds to a valid requisition form and that the admin has the necessary permissions to waive all fees.
+
+        - rejectRequest()
+            - Add a new record in the requisition_approvals table with the following fields:
+                - rejected_by (FK: admin_id from admins table)
+                - request_id (FK: request_id from requisition_forms table)
         */
 
     // make a function to view pending requisition forms

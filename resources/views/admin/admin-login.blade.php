@@ -265,7 +265,7 @@
         <a href="#" class="forgot-password">Forgot your password?</a>
 
         <button type="submit" id="loginBtn" class="login-button">Login</button>
-        <a href="../index.html" class="home-button">Return to Homepage</a>
+        <a href="{{ url('/index') }}" class="home-button">Return to Homepage</a>
       </form>
     </div>
     <script>
@@ -306,7 +306,7 @@
         
                 // Successful login
                 localStorage.setItem('adminToken', data.token);
-                window.location.href = 'dashboard.html';
+                window.location.href = 'dashboard';
         
             } catch (error) {
                 errorBox.textContent = error.message;

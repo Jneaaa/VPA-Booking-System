@@ -54,21 +54,24 @@ class Admin extends Authenticatable
 
     // ----- Requisition Management ----- //
 
-    public function approvals()
-    {
-        return $this->hasMany(RequisitionApproval::class, 'admin_id', 'admin_id');
-    } 
     public function finalizedByAdmin()
     {
         return $this->hasMany(RequisitionForm::class, 'finalized_by', 'admin_id');
     }
-    public function addEvent()
-    {
-        return $this->hasMany(CalendarEvent::class,'admin_id', 'admin_id');
-    }
+
     public function closedByAdmin()
     {
         return $this->hasMany(RequisitionForm::class, 'closed_by', 'admin_id');
+    }
+    
+        public function adminApprovals()
+    {
+        return $this->hasMany(RequisitionApproval::class, 'approved_by', 'admin_id');
+    }
+
+    public function adminRejections()
+    {
+        return $this->hasMany(RequisitionApproval::class, 'rejected_by', 'admin_id');
     }
 
     // ----- Equipment Management ----- //
@@ -117,15 +120,6 @@ class Admin extends Authenticatable
     {
         return $this->hasMany(SystemLog::class, 'admin_id', 'admin_id');
     }
-
-    public function actionTypes()
-    {
-        return $this->hasMany(ActionType::class, 'admin_id', 'admin_id');
-    }
-    
-
-
-
 
 
 }

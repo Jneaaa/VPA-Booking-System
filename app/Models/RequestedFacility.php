@@ -29,4 +29,10 @@ class RequestedFacility extends Model
     {
         return $this->belongsTo(Facility::class, 'facility_id', 'facility_id');
     }
+
+        public function isWaived()
+    {
+        return $this->hasMany(RequisitionFee::class, 'waived_facility', 'requested_facility_id');
+    }
 }
+

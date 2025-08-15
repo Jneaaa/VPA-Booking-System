@@ -15,15 +15,15 @@ return new class extends Migration
         Schema::create('requisition_approvals', function (Blueprint $table) {
 
             $table->id('approval_id');
-            $table->enum('status', ['Pending', 'Approved', 'Rejected'])->default('Pending');
             $table->unsignedBigInteger('request_id');
-            $table->unsignedBigInteger('admin_id');
+            $table->unsignedBigInteger('approved_by')->nullable();
+            $table->unsignedBigInteger('rejected_by')->nullable();
             $table->dateTime('date_approved');
-            $table->timestamps();
 
             // Foreign Keys
             $table->foreign('request_id')->references('request_id')->on('requisition_forms')->onDelete('cascade');
-            $table->foreign('admin_id')->references('admin_id')->on('admins')->onDelete('cascade');
+            $table->foreign('approved_by')->references('admin_id')->on('admins')->onDelete('cascade');
+            $table->foreign('rejected_by')->references('admin_id')->on('admins')->onDelete('cascade');
 
         });
     }
