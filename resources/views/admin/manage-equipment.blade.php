@@ -203,7 +203,7 @@
       }
 
       if (userData.role) {
-      adminRole.textContent = userData.role.role_name || "Admin";
+      adminRole.textContent = userData.role.role_title || "Admin";
       }
     }
 
