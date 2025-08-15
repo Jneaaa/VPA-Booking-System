@@ -48,7 +48,7 @@ class AdminAuthController extends Controller
     public function profile(Request $request)
     {
         return response()->json([
-            'admin' => $request->user()
+            'admin' => $request->user()->load('role')
         ]);
     }
 

@@ -96,7 +96,6 @@
 
 @section('scripts')
   <!-- Combined JS resources -->
-  <script src="js/global.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
     // Authentication check

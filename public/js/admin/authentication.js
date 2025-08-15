@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return response.json();
     })
     .then(data => {
-        console.log('Authenticated as', data.admin?.email);
+        console.log('Authenticated as', data.email);  // Changed from data.admin?.email
     })
     .catch(error => {
         console.error('Authentication error:', error);

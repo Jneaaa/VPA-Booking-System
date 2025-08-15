@@ -33,7 +33,7 @@
 
       body {
         font-family: "Arial", sans-serif;
-        background-image: url("../cpu-pic1.jpg");
+        background-image: url("{{ asset('assets/cpu-pic1.jpg') }}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -229,7 +229,7 @@
   <body>
     <div class="login-container">
       <div class="title-container">
-        <img src="../cpu-logo.png" alt="CPU Logo" />
+        <img src="{{ asset('assets/cpu-logo.png') }}" alt="CPU Logo" />
         <h1>
           Central Philippine University<br />Facility and Equipment
           <br />Booking Services
