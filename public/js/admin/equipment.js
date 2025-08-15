@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Authentication and authorization check
     const token = localStorage.getItem('adminToken');
     if (!token) {
-        window.location.href = 'adminlogin.html';
+        window.location.href = '/admin/admin-login';
         return;
     }
 

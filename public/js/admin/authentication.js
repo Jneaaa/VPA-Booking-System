@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Token exists:', !!token);
     
     if (!token) {
-        window.location.href = 'adminlogin.html';
+        window.location.href = '/admin/admin-login';
         return;
     }
 
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .catch(error => {
         console.error('Authentication error:', error);
         localStorage.removeItem('adminToken');
-        window.location.href = 'adminlogin.html';
+        window.location.href = '/admin/admin-login';
     });
 });
 
@@ -41,7 +41,7 @@ document.getElementById('logoutLink')?.addEventListener('click', async (e) => {
     
     const token = localStorage.getItem('adminToken');
     if (!token) {
-        window.location.href = 'adminlogin.html';
+        window.location.href = '/admin/admin-login';
         return;
     }
 
@@ -58,6 +58,6 @@ document.getElementById('logoutLink')?.addEventListener('click', async (e) => {
         console.error('Logout error:', error);
     } finally {
         localStorage.removeItem('adminToken');
-        window.location.href = 'adminlogin.html';
+        window.location.href = '/admin/admin-login';
     }
 });
