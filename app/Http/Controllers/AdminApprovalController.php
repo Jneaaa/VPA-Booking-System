@@ -3,38 +3,53 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\RequisitionApproval;
+use App\Models\FormStatus;
 use App\Models\ActionType;
 use App\Models\Admin;
 use App\Model\AdminDepartment;
 use App\Models\SystemLog;
 use App\Models\RequisitionForm;
+use Illuminate\Http\Request;
 
 class AdminApprovalController extends Controller
 {
     /* Controller Documentation:
+
         * This controller handles the admin approval process for requisition forms.
         * It includes methods for viewing pending approvals, approving or rejecting requests,
         * and managing the status of requisition forms.
         *
-        * Each action is logged in the system_logs (log_id) table.
+        * Each action is logged in the system_logs (log_id) table (future implementation).
+
         
         * Methods:
 
-        - index(): Get all pending requests from the requisition_forms table (PK: request_id) for admin approval
-            - only show forms with a status_id (from FormStatus model) of 1 (Pending approval) and 2 (Awaiting payment).
-            - Admins can only view forms that are under their departments (e.g., a form has a requested facility or equipment that belongs to the admin's department) with the use of the AdminDepartment eloquent model relationship.
+        - index(): Get all records from the requisition_forms table (PK: request_id) for admin approval
+            - Excluded status_name: Returned, Late Return, Completed, Rejected, and Cancelled. Pluck the status_id based on these status_names. Eloquent model relationship: FormStatus.
+            - Add the total number of approvals and rejections made by admins for a requisition form in the json response.
+        
+        - completedTransactions(): Get all records from the requisition_forms table (PK: request_id) with status_name: Completed, Rejected, and Cancelled. Pluck the status_id based on these status_names. Eloquent model relationship: FormStatus.
 
         - approveRequest(): an admin approves a requisition form
-            - If an admin approves a form, add to approval count in the requisition_approvals table, getting the admin_id and the request_id and committing it to this table:
+            - adds a new record in the requisition_approvals table by getting the admin_id and the request_id and committing it to this table:
 
-                approved_by = admin_id
+                approved_by = admin_id 
+                rejected_by = null
+                remarks = remarks (nullable)
                 request_id = request_id
+                date_approved = isCurrentDateTime()
 
-        - rejectRequest(): an admin rejects a requisition form 
-            - If an admin rejects a form, add to rejection count in the requisition_approvals table, getting the admin_id and the request_id and committing it to this table:
+        - rejectRequest(): an admin rejects a requisition form
+            - adds a new record in the requisition_approvals table by getting the admin_id and the request_id and committing it to this table:
 
-                rejected_by = admin_id
+                approved_by = null
+                rejected_by = admin_id 
+                remarks = remarks (nullable)
                 request_id = request_id
+                date_approved = isCurrentDateTime()
+
+        Note: For approveRequest() and rejectRequest(), validate that the admin has the necessary permissions to approve the request. Only admins with this role_name: 'Head Admin', 'Vice President of Administration', or 'Approving Officer' can approve requests. Pluck the admin_id based on these role_names. Eloquent model relationship: AdminRole.
 
         - addFee() 
 
@@ -183,6 +198,239 @@ class AdminApprovalController extends Controller
         // A form's status_id will be set to 'Awaiting Payment' (3) if the required number of approvals has been reached, allowing an admin to manually set the 'is_finalized' field in the requisition_forms table to true, with the 'finalized_by' field set to the admin's ID.
 
 
+    }
+
+    public function index()
+    {
+        // Get status IDs to exclude
+        $excludedStatuses = FormStatus::whereIn('status_name', [
+            'Returned', 'Late Return', 'Completed', 'Rejected', 'Cancelled'
+        ])->pluck('status_id');
+
+        // Get pending forms with relationships
+        $forms = RequisitionForm::whereNotIn('status_id', $excludedStatuses)
+            ->with([
+                'formStatus',
+                'requestedFacilities.facility',
+                'requestedEquipment.equipment',
+                'requisitionApprovals',
+                'purpose',
+                'finalizedBy',
+                'closedBy'
+            ])
+            ->get()
+            ->map(function ($form) {
+                // Calculate tentative fee from facilities and equipment
+                $facilityFees = $form->requestedFacilities->sum(function ($facility) {
+                    return $facility->is_waived ? 0 : $facility->facility->external_fee;
+                });
+                
+                $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
+                    return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
+                });
+
+                $totalTentativeFee = $facilityFees + $equipmentFees;
+                if ($form->is_late) {
+                    $totalTentativeFee += $form->late_penalty_fee;
+                }
+
+                return [
+                    'request_id' => $form->request_id,
+                    'user_details' => [
+                        'user_type' => $form->user_type,
+                        'first_name' => $form->first_name,
+                        'last_name' => $form->last_name,
+                        'email' => $form->email,
+                        'school_id' => $form->school_id,
+                        'organization_name' => $form->organization_name,
+                        'contact_number' => $form->contact_number
+                    ],
+                    'form_details' => [
+                        'num_participants' => $form->num_participants,
+                        'purpose' => $form->purpose->purpose_name,
+                        'additional_requests' => $form->additional_requests,
+                        'status' => [
+                            'name' => $form->formStatus->status_name,
+                            'color' => $form->formStatus->color
+                        ],
+                        'calendar_info' => [
+                            'title' => $form->calendar_title,
+                            'description' => $form->calendar_description
+                        ]
+                    ],
+                    'schedule' => [
+                        'start_date' => $form->start_date,
+                        'end_date' => $form->end_date,
+                        'start_time' => $form->start_time,
+                        'end_time' => $form->end_time
+                    ],
+                    'requested_items' => [
+                        'facilities' => $form->requestedFacilities->map(function ($facility) {
+                            return [
+                                'name' => $facility->facility->facility_name,
+                                'fee' => $facility->facility->external_fee,
+                                'is_waived' => $facility->is_waived
+                            ];
+                        }),
+                        'equipment' => $form->requestedEquipment->map(function ($equipment) {
+                            return [
+                                'name' => $equipment->equipment->equipment_name,
+                                'quantity' => $equipment->quantity,
+                                'fee' => $equipment->equipment->external_fee,
+                                'is_waived' => $equipment->is_waived
+                            ];
+                        })
+                    ],
+                    'fees' => [
+                        'tentative_fee' => $totalTentativeFee,
+                        'approved_fee' => $form->approved_fee,
+                        'late_penalty_fee' => $form->late_penalty_fee,
+                        'is_late' => $form->is_late
+                    ],
+                    'status_tracking' => [
+                        'is_finalized' => $form->is_finalized,
+                        'finalized_at' => $form->finalized_at,
+                        'finalized_by' => $form->finalizedBy ? [
+                            'id' => $form->finalizedBy->admin_id,
+                            'name' => $form->finalizedBy->first_name . ' ' . $form->finalizedBy->last_name
+                        ] : null,
+                        'is_closed' => $form->is_closed,
+                        'closed_at' => $form->closed_at,
+                        'closed_by' => $form->closedBy ? [
+                            'id' => $form->closedBy->admin_id,
+                            'name' => $form->closedBy->first_name . ' ' . $form->closedBy->last_name
+                        ] : null,
+                        'returned_at' => $form->returned_at
+                    ],
+                    'documents' => [
+                        'endorser' => $form->endorser,
+                        'date_endorsed' => $form->date_endorsed,
+                        'formal_letter' => [
+                            'url' => $form->formal_letter_url,
+                            'public_id' => $form->formal_letter_public_id
+                        ],
+                        'facility_layout' => [
+                            'url' => $form->facility_layout_url,
+                            'public_id' => $form->facility_layout_public_id
+                        ],
+                        'official_receipt' => [
+                            'number' => $form->official_receipt_no,
+                            'url' => $form->official_receipt_url,
+                            'public_id' => $form->official_receipt_public_id
+                        ]
+                    ],
+                    'approvals' => [
+                        'count' => $form->requisitionApprovals()->whereNotNull('approved_by')->count(),
+                        'rejections' => $form->requisitionApprovals()->whereNotNull('rejected_by')->count(),
+                        'latest_action' => $form->requisitionApprovals()->latest('date_approved')->first()
+                    ],
+                    'access_code' => $form->access_code
+                ];
+            });
+
+        return response()->json($forms);
+    }
+
+    public function approveRequest(Request $request, $requestId)
+    {
+        // Validate admin permissions
+        $allowedRoles = ['Head Admin', 'Vice President of Administration', 'Approving Officer'];
+        $admin = Admin::with('roles')->find(auth()->id());
+        
+        if (!$admin->roles->whereIn('role_name', $allowedRoles)->count()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Create approval record
+        $approval = new RequisitionApproval([
+            'approved_by' => $admin->admin_id,
+            'rejected_by' => null,
+            'remarks' => $request->remarks,
+            'request_id' => $requestId,
+            'date_approved' => now()
+        ]);
+
+        $approval->save();
+
+        return response()->json(['message' => 'Request approved successfully']);
+    }
+
+    public function rejectRequest(Request $request, $requestId)
+    {
+        // Validate admin permissions
+        $allowedRoles = ['Head Admin', 'Vice President of Administration', 'Approving Officer'];
+        $admin = Admin::with('roles')->find(auth()->id());
+        
+        if (!$admin->roles->whereIn('role_name', $allowedRoles)->count()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Create rejection record
+        $rejection = new RequisitionApproval([
+            'approved_by' => null,
+            'rejected_by' => $admin->admin_id,
+            'remarks' => $request->remarks,
+            'request_id' => $requestId,
+            'date_approved' => now()
+        ]);
+
+        $rejection->save();
+
+        return response()->json(['message' => 'Request rejected successfully']);
+    }
+
+    public function getSimplifiedForms()
+    {
+        // Get status IDs to exclude (same as index)
+        $excludedStatuses = FormStatus::whereIn('status_name', [
+            'Returned', 'Late Return', 'Completed', 'Rejected', 'Cancelled'
+        ])->pluck('status_id');
+
+        // Get pending forms with necessary relationships
+        $forms = RequisitionForm::whereNotIn('status_id', $excludedStatuses)
+            ->with([
+                'purpose',
+                'formStatus',
+                'requestedFacilities.facility',
+                'requestedEquipment.equipment',
+                'requisitionApprovals'
+            ])
+            ->get()
+            ->map(function ($form) {
+                // Calculate tentative fee
+                $facilityFees = $form->requestedFacilities->sum(function ($facility) {
+                    return $facility->is_waived ? 0 : $facility->facility->external_fee;
+                });
+                
+                $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
+                    return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
+                });
+
+                $totalTentativeFee = $facilityFees + $equipmentFees + ($form->is_late ? $form->late_penalty_fee : 0);
+
+                // Format schedule
+                $startDateTime = date('F j, Y g:i A', strtotime($form->start_date . ' ' . $form->start_time));
+                $endDateTime = date('F j, Y g:i A', strtotime($form->end_date . ' ' . $form->end_time));
+                
+                // Format requested items
+                $requestedItems = collect([
+                    ...$form->requestedFacilities->map(fn($rf) => $rf->facility->facility_name),
+                    ...$form->requestedEquipment->map(fn($re) => $re->equipment->equipment_name . ' (×' . $re->quantity . ')')
+                ])->join(', ');
+
+                return [
+                    'request_id' => $form->request_id,
+                    'purpose' => $form->purpose->purpose_name,
+                    'schedule' => $startDateTime . ' to ' . $endDateTime,
+                    'requester' => $form->first_name . ' ' . $form->last_name,
+                    'status_id' => $form->status_id,
+                    'requested_items' => $requestedItems,
+                    'tentative_fee' => number_format($totalTentativeFee, 2),
+                    'approvals' => $form->requisitionApprovals()->whereNotNull('approved_by')->count() . '/3 approved'
+                ];
+            });
+
+        return response()->json($forms);
     }
 
 

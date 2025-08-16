@@ -75,14 +75,24 @@ class RequisitionForm extends Model
         return $this->belongsTo(RequisitionPurpose::class, 'purpose_id', 'purpose_id');
     }
 
-    public function requisitionApprovals()
+    public function formStatus()
     {
-         return $this->belongsTo(\App\Models\RequisitionApproval::class, 'request_id', 'request_id');
+        return $this->belongsTo(FormStatus::class, 'status_id');
     }
 
-    public function status()
+    public function requestedFacilities()
     {
-        return $this->belongsTo(FormStatus::class, 'status_id', 'status_id');
+        return $this->hasMany(RequestedFacility::class, 'request_id');
+    }
+
+    public function requestedEquipment()
+    {
+        return $this->hasMany(RequestedEquipment::class, 'request_id');
+    }
+
+    public function requisitionApprovals()
+    {
+        return $this->hasMany(RequisitionApproval::class, 'request_id');
     }
 
     public function finalizedBy()
@@ -93,15 +103,5 @@ class RequisitionForm extends Model
     public function closedBy()
     {
         return $this->belongsTo(Admin::class, 'closed_by', 'admin_id');
-    }
-
-    public function requestedFacilities()
-    {
-        return $this->hasMany(RequestedFacility::class, 'request_id', 'request_id');
-    }
-
-    public function requestedEquipment()
-    {
-        return $this->hasMany(RequestedEquipment::class, 'request_id', 'request_id');
     }
 }
