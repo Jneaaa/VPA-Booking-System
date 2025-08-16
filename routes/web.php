@@ -37,6 +37,10 @@ Route::middleware('web')->group(function () {
     Route::view('/admin/manage-facilities', 'admin.manage-facilities');
     Route::view('/admin/manage-facility', 'admin.manage-facility');
     Route::view('/admin/manage-requests', 'admin.manage-requests');
+    Route::get('/admin/requisition/{requestId}', function($requestId) {
+        return view('admin.request-view', ['requestId' => $requestId]);
+    }); 
+    
     // ----- Auth Routes ----- //
     Route::get('/login', function () {
         return view('auth.login');
