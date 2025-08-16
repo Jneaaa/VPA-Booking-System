@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\AdminApprovalController;
 use App\Http\Controllers\RequisitionFormController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\EquipmentController;
@@ -27,6 +28,7 @@ Route::get('/admins', [AdminController::class, 'getAllAdmins']);
 Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']);
 
 // ---------------- Admin Management ---------------- //
+
 Route::post('/admins', [AdminController::class, 'store']);
 Route::delete('/admins/{admin}', [AdminController::class, 'deleteAdmin']);
 Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']);
@@ -95,6 +97,14 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware
 // ---------------- Protected Admin Routes ---------------- //
 
 Route::middleware('auth:sanctum')->group(function () {
+
+    // ---- Admin Approval Routes ---- //
+    Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'index']);
+      Route::get('/admin/simplified-forms', [AdminApprovalController::class, 'getSimplifiedForms']);
+    Route::post('/admin/approve-request', [AdminApprovalController::class, 'approveRequest']);
+    Route::post('/admin/reject-request', [AdminApprovalController::class, 'rejectRequest']);
+
+
 
     Route::get('/admin/profile', function (Request $request) {
         $user = $request->user();

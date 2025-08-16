@@ -18,7 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('request_id');
             $table->unsignedBigInteger('approved_by')->nullable();
             $table->unsignedBigInteger('rejected_by')->nullable();
-            $table->dateTime('date_approved');
+            $table->string('remarks', 255)->nullable();
+            $table->dateTime('date_posted')->useCurrent();
 
             // Foreign Keys
             $table->foreign('request_id')->references('request_id')->on('requisition_forms')->onDelete('cascade');
