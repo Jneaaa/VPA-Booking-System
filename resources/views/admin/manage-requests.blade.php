@@ -193,6 +193,15 @@
 
 @section('scripts')
 <script>
+  // Define handleManage globally so it can be accessed by onclick
+  function handleManage(requestId) {
+    if (!requestId) {
+      console.error('No request ID provided');
+      return;
+    }
+    window.location.href = `/admin/requisition/${requestId}`;
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     const requisitionContainer = document.getElementById('requisitionContainer');
 
