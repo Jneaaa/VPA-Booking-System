@@ -99,10 +99,14 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware
 Route::middleware('auth:sanctum')->group(function () {
 
     // ---- Admin Approval Routes ---- //
-    Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'index']);
-      Route::get('/admin/simplified-forms', [AdminApprovalController::class, 'getSimplifiedForms']);
+    Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'pendingRequests']);
+    Route::get('/admin/simplified-forms', [AdminApprovalController::class, 'getSimplifiedForms']);
+    Route::get('/admin/completed-requests', [AdminApprovalController::class, 'completedRequests']);
     Route::post('/admin/approve-request', [AdminApprovalController::class, 'approveRequest']);
     Route::post('/admin/reject-request', [AdminApprovalController::class, 'rejectRequest']);
+    Route::put('/admin/manage-waivers/{requestId}', [AdminApprovalController::class, 'manageWaivers'])
+    ->middleware('auth:sanctum');
+
 
 
 
@@ -111,6 +115,8 @@ Route::middleware('auth:sanctum')->group(function () {
         $user->load(['role', 'departments']);
         return response()->json($user);
     });
+
+    Route::post('/admin/update-photo', [AdminController::class, 'updatePhoto']);
 
     Route::prefix('admin')->middleware(['check.admin.role'])->group(function () {
 
@@ -136,7 +142,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/{imageId}', [FacilityController::class, 'deleteImage']);
             Route::post('/reorder', [FacilityController::class, 'reorderImages']);
         });
-
     });
 
 });

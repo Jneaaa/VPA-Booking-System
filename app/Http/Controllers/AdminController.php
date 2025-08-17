@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Department;
 use App\Models\Admin;
 use App\Models\LookupTables\AdminRole;
+use Illuminate\Support\Facades\Storage;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class AdminController extends Controller
 {
@@ -162,5 +164,79 @@ class AdminController extends Controller
         'admin' => $admin
     ]);
 }
+
+    public function updatePhoto(Request $request)
+    {
+        try {
+            $request->validate([
+                'photo' => 'required_without:wallpaper|image|max:2048',
+                'wallpaper' => 'required_without:photo|image|max:5120',
+                'type' => 'required|in:photo,wallpaper'
+            ]);
+
+            $admin = $request->user();
+            $type = $request->type;
+            $file = $request->file($type); // Either 'photo' or 'wallpaper' file
+
+            if (!$file) {
+                throw new \Exception('No file provided');
+            }
+
+            // Define config based on type
+            $config = [
+                'photo' => [
+                    'folder' => 'admin-photos',
+                    'transformation' => ['width' => 400, 'height' => 400, 'crop' => 'fill', 'gravity' => 'face'],
+                    'url_field' => 'photo_url',
+                    'public_id_field' => 'photo_public_id'
+                ],
+                'wallpaper' => [
+                    'folder' => 'admin-wallpapers',
+                    'transformation' => ['width' => 1920, 'height' => 400, 'crop' => 'fill'],
+                    'url_field' => 'wallpaper_url',
+                    'public_id_field' => 'wallpaper_public_id'
+                ]
+            ][$type];
+
+            // Delete old image if exists and not default
+            $oldPublicId = $admin->{$config['public_id_field']};
+            $defaultIds = ['ksdmh4mmpxdtjogdgjmm', 'verzp7lqedwsfn3hz8xf'];
+            
+            if ($oldPublicId && !in_array($oldPublicId, $defaultIds)) {
+                try {
+                    Cloudinary::destroy($oldPublicId);
+                } catch (\Exception $e) {
+                    \Log::warning("Failed to delete old image: {$oldPublicId}");
+                }
+            }
+
+            // Upload new image
+            $result = Cloudinary::upload($file->getRealPath(), [
+                'folder' => $config['folder'],
+                'transformation' => $config['transformation']
+            ]);
+
+            // Update admin record with new image info
+            $updateData = [
+                $config['url_field'] => $result->getSecurePath(),
+                $config['public_id_field'] => $result->getPublicId()
+            ];
+
+            $admin->update($updateData);
+
+            return response()->json([
+                'message' => ucfirst($type) . ' updated successfully',
+                $type . '_url' => $result->getSecurePath(),
+                $type . '_public_id' => $result->getPublicId()
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Photo upload error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to update ' . ($request->type ?? 'image'),
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
