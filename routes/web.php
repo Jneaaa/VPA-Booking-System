@@ -25,6 +25,9 @@ Route::middleware('web')->group(function () {
     Route::view('/policies', 'public.policies');
 
     // ----- Admin Views ----- //
+    Route::get('/admin/profile/{adminId}', function($adminId) {
+        return view('admin.admin-profile', ['adminId' => $adminId]);
+    }); 
     Route::view('/admin/add-equipment', 'admin.add-equipment');
     Route::view('/admin/add-facility', 'admin.add-facility');
     Route::view('/admin/admin-page-template', 'admin.admin-page-template');

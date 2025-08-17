@@ -7,6 +7,12 @@
     body {
         background-color: #f8f9fa !important;
     }
+
+    .fc-header-toolbar {
+        background-color: #ffffff;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 10px;
+    }
 </style>
 <div class="container-fluid" style="max-width: calc(100vw - 280px); margin-right: 10px; margin-top: 50px;">
     <div class="card" style="border-radius: 8px; border: none; box-shadow: none; background: #f8f9fa;">
@@ -125,6 +131,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Schedule Visualization</h5>
+                                <hr style="border: 1px solid black;">
                                 <div id="calendar" style="overflow: hidden;"></div>
                             </div>
                         </div>
@@ -135,6 +142,7 @@
                         <div class="card h-100">
                             <div class="card-body">
                                 <h5 class="card-title">Requested Items</h5>
+                                <hr style="border: 1px solid black;">
                                 <div id="requestedItems"></div>
                             </div>
                         </div>
@@ -144,7 +152,8 @@
                     <div class="col-md-6">
                         <div class="card h-100">
                             <div class="card-body">
-                                <h5 class="card-title">Additional Fees</h5>
+                                <h5 class="card-title">Form Actions</h5>
+                                <hr style="border: 1px solid black;">
                                 <div id="additionalFees"></div>
                             </div>
                         </div>
@@ -164,10 +173,15 @@
                 <div class="row mt-4">
                     <div class="col-12">
                         <div class="d-flex gap-2">
-                            <button class="btn btn-success" id="approveBtn">Approve Request</button>
-                            <button class="btn btn-danger" id="rejectBtn">Reject Request</button>
-                            <button class="btn btn-secondary" onclick="window.history.back()">Back</button>
+                            <button class="btn btn-primary" id="approveBtn">Commit Changes</button>
+                            <button class="btn btn-secondary" id="rejectBtn">Cancel</button>
                         </div>
+                        <style>
+                            .btn-secondary {
+                                background-color: #6c757d;
+                                border-color: #6c757d;
+                            }
+                            </style>
                     </div>
                 </div>
             </div>
@@ -391,26 +405,55 @@
                             'Not uploaded'}</p>
                         `;
 
-                    // Update requested items with fee breakdown
+                    // Update requested items with fee breakdown and waiver checkboxes
                     document.getElementById('requestedItems').innerHTML = `
                         <div class="mb-3">
                             <h6>Facilities:</h6>
                             ${request.requested_items.facilities.length > 0 ?
-                            request.requested_items.facilities.map(f =>
-                                `<div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span>• ${f.name} ${f.is_waived ? '(Waived)' : ''}</span>
-                                    <span class="ms-3">₱${f.fee}</span>
-                                </div>`
-                            ).join('') : '<p>No facilities requested</p>'}
+                                request.requested_items.facilities.map(f =>
+                                    `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${f.is_waived ? 'waived' : ''}">
+                                        <div class="d-flex align-items-center">
+                                            <div class="form-check me-2">
+                                                <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                    data-type="facility" 
+                                                    data-id="${f.id}"
+                                                    ${f.is_waived ? 'checked' : ''}
+                                                    onchange="handleWaiverChange(this)">
+                                            </div>
+                                            <span class="item-name" style="${f.is_waived ? 'text-decoration: line-through; color: #999;' : ''}">• ${f.name}</span>
+                                        </div>
+                                        <span class="item-price" style="${f.is_waived ? 'text-decoration: line-through; color: #999;' : ''}">₱${f.fee}</span>
+                                    </div>`
+                                ).join('') : '<p>No facilities requested</p>'}
 
                             <h6 class="mt-3">Equipment:</h6>
                             ${request.requested_items.equipment.length > 0 ?
-                            request.requested_items.equipment.map(e =>
-                                `<div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span>• ${e.name} ${e.is_waived ? '(Waived)' : ''}</span>
-                                    <span class="ms-3">₱${e.fee}</span>
-                                </div>`
-                            ).join('') : '<p>No equipment requested</p>'}
+                                request.requested_items.equipment.map(e =>
+                                    `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${e.is_waived ? 'waived' : ''}">
+                                        <div class="d-flex align-items-center">
+                                            <div class="form-check me-2">
+                                                <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                    data-type="equipment" 
+                                                    data-id="${e.id}"
+                                                    ${e.is_waived ? 'checked' : ''}
+                                                    onchange="handleWaiverChange(this)">
+                                            </div>
+                                            <span class="item-name" style="${e.is_waived ? 'text-decoration: line-through; color: #999;' : ''}">• ${e.name}</span>
+                                        </div>
+                                        <span class="item-price" style="${e.is_waived ? 'text-decoration: line-through; color: #999;' : ''}">₱${e.fee}</span>
+                                    </div>`
+                                ).join('') : '<p>No equipment requested</p>'}
+                        </div>
+                        <div class="d-flex justify-content-end mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="waiveAllCheckbox" 
+                                    ${request.requested_items.facilities.every(f => f.is_waived) && 
+                                      request.requested_items.equipment.every(e => e.is_waived) ? 'checked' : ''}
+                                    onchange="handleWaiveAll(this)">
+                                <label class="form-check-label" for="waiveAllCheckbox">
+                                    Waive All Fees
+                                </label>
+                            </div>
                         </div>
                         <hr style="border: 1px solid #dee2e6;">
                         <div class="d-flex justify-content-between align-items-center mt-3">
@@ -483,51 +526,7 @@
                 return colors[status] || 'secondary';
             }
 
-            async function approveRequest(requestId) {
-                try {
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/approve-request`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${adminToken}`,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ request_id: requestId })
-                    });
 
-                    if (!response.ok) throw new Error('Failed to approve request');
-
-                    const result = await response.json();
-                    alert(result.message || 'Request approved successfully');
-                    fetchRequestDetails(); // Refresh the data
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Failed to approve request');
-                }
-            }
-
-            async function rejectRequest(requestId) {
-                try {
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/reject-request`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${adminToken}`,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ request_id: requestId })
-                    });
-
-                    if (!response.ok) throw new Error('Failed to reject request');
-
-                    const result = await response.json();
-                    alert(result.message || 'Request rejected successfully');
-                    fetchRequestDetails(); // Refresh the data
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Failed to reject request');
-                }
-            }
 
             fetchRequestDetails();
         });

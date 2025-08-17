@@ -11,6 +11,9 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/admin/admin-styles.css') }}" />
     <style>
+        .text-primary {
+            color: var(--cpu-primary) !important;
+        }
 
         .p {
             color: #333333;
@@ -41,8 +44,8 @@
         /* FullCalendar Styles */
 
         #calendar {
-            background: #eee;
-        } 
+            background: #ffffff;
+        }
 
         .fc-daygrid-body {
             background: #f8f9fa;
@@ -77,13 +80,18 @@
             background-size: 200% 100%;
             animation: 1.5s shine linear infinite;
         }
-        
+
         @keyframes shine {
-            to { background-position-x: -200%; }
+            to {
+                background-position-x: -200%;
+            }
         }
-        
-        .skeleton-circle { border-radius: 50%; }
-        .skeleton-text { 
+
+        .skeleton-circle {
+            border-radius: 50%;
+        }
+
+        .skeleton-text {
             height: 1em;
             border-radius: 4px;
         }
@@ -102,7 +110,7 @@
         /* Base Layout */
         body {
             display: flex;
-            background: #ffffffff;
+            background: #f8f8f8ff;
             flex-direction: column;
             min-height: 100vh;
             margin: 0;
@@ -119,45 +127,48 @@
             bottom: 0;
             width: 250px;
             background: #fafafaff;
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
             padding: 1rem;
             overflow-y: auto;
             transition: transform 0.3s ease;
             z-index: 1030;
             /* Box shadow for depth */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02);
         }
 
         #sidebar .nav-link {
-            color: rgb(82, 82, 82);
+            color: #5b6a7aff;
             margin-bottom: -1px;
             transition: all 0.2s ease;
-            
+            font-weight: 500 !important;
+
         }
 
         #sidebar .nav-link:hover {
-            background-color: rgba(0, 0, 0, 0.1);
+            background-color: rgba(80, 128, 206, 0.1);
         }
 
         #sidebar .nav-link.active {
-            color: #346391;
+            background-color: rgba(80, 128, 206, 0.1);
         }
+
 
         /* Topbar Styles */
         #topbar {
-            background: var(--cpu-primary);
-            border-bottom: 3px solid var(--cpu-secondary);
-            color: var(--light-gray);
-            font-style: italic;
+            background-color: #f6f6f7a8 !important;
+            backdrop-filter: blur(8px);
+            color: var(--cpu-text-dark);
+            font-weight: 600;
             padding: 0.75rem 1rem;
-            height: 45px;
+            height: 64px;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             margin-left: 250px;
             width: calc(100% - 250px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            z-index: 1020;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1030;
         }
 
         /* Profile Image */
@@ -215,24 +226,35 @@
         }
 
         .sidebar-toggle:hover {
-            background: rgba(0,0,0,0.1);
+            background: rgba(0, 0, 0, 0.1);
         }
 
         /* Layout Responsiveness */
         @media (max-width: 991.98px) {
-            #sidebar { transform: translateX(-100%); }
-            #sidebar.active { transform: translateX(0); }
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+            #sidebar.active {
+                transform: translateX(0);
+            }
+
             #topbar {
                 margin-left: 0;
                 width: 100%;
             }
-            .sidebar-toggle { 
-                display: block; 
+
+            .sidebar-toggle {
+                display: block;
             }
         }
 
         @media (max-width: 575.98px) {
-            #sidebar { width: 100%; max-width: 280px; }
+            #sidebar {
+                width: 100%;
+                max-width: 280px;
+            }
+
             .profile-img {
                 width: 80px !important;
                 height: 80px !important;
@@ -252,6 +274,22 @@
             width: 100%;
             margin-top: 10px;
         }
+
+        /* Smooth transitions for topbar */
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Hide the topbar when scrolled down */
+        .topbar-hidden {
+            transform: translateY(-100%);
+        }
+
+        /* Adjust main content padding when topbar is fixed */
+        main {
+            padding-top: 70px;
+            /* Match topbar height + some spacing */
+        }
     </style>
 </head>
 
@@ -260,153 +298,220 @@
         <i class="bi bi-list"></i>
     </button>
     {{-- Header --}}
-    <header id="topbar" class="d-flex justify-content-between align-items-center">
+    <header id="topbar" class="d-flex justify-content-between align-items-center fixed-top transition-all">
         <!-- Display the current page title in the header -->
         <div class="d-flex align-items-center">
             <span class="fw brand-text"">
             @yield('title', 'CPU Facilities and Equipment Management')
             </span>
         </div>
-    <div class="d-flex align-items-center">
-      <!-- Dropdown Menu -->
-      <div class="dropdown">
-        <button class="btn btn-link p-0 text-white" id="dropdownMenuButton" data-bs-toggle="dropdown"
-          aria-expanded="false">
-          <i class="bi bi-three-dots fs-4"></i>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Account Settings</a></li>
-          <li>
-            <hr class="dropdown-divider">
-          </li>
-          <li><a class="dropdown-item" href="{{ url('/admin/admin-login') }}" id="logoutLink"><i
-                class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-        </ul>
-      </div>
-    </div>
-  </header>
+    <div class=" d-flex align-items-center">
+                <!-- Dropdown Menu -->
+                <div class="dropdown">
+                    <button class="btn btn-link p-0 text-white" id="dropdownMenuButton" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        <i class="bi bi-three-dots three-dots-icon"></i>
+
+                        <style>
+                            .three-dots-icon {
+                                background: rgba(255, 255, 255, 0);
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+
+                                border-radius: 50%;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                color: #6e6e6e !important;
+
+                                font-size: 1.5rem;
+                                /* adjust size so dots are sharp */
+                                line-height: 1;
+                                /* prevent ghost line below */
+                                display: inline-flex;
+                                /* fixes rendering artifacts */
+                            }
+
+                            .three-dots-icon:hover {
+                                background: rgba(99, 99, 99, 0.3);
+                                transform: scale(1.05);
+                            }
+
+                            .three-dots-icon:active {
+                                transform: scale(0.95);
+                                /* press-down effect */
+                                background: rgba(99, 99, 99, 0.5);
+                            }
+                        </style>
+
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Account Settings</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="{{ url('/admin/admin-login') }}" id="logoutLink"><i
+                                    class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+        </div>
+    </header>
 
     {{-- Sidebar + Main Content --}}
 
-    
 
-<nav id="sidebar">
 
-    <div class="text-center mb-4">
-        <div class="position-relative d-inline-block">
-            <div id="profile-img-container">
-                <div id="profile-skeleton" class="skeleton skeleton-circle" 
-                     style="width: 100px; height: 100px; display: block;"></div>
-                <img id="admin-profile-img" src="{{ asset('images/default-admin.png') }}" 
-                     alt="Admin Profile" 
-                     class="profile-img rounded-circle"
-                     style="width: 100px; height: 100px; object-fit: cover; display: none;">
+    <nav id="sidebar" class="d-flex flex-column">
+        <!-- Profile Section -->
+        <div class="text-center mb-4 px-3 pt-4">
+            <div class="position-relative d-inline-block mb-3">
+                <div id="profile-img-container" class="position-relative">
+                    <div id="profile-skeleton" class="skeleton skeleton-circle" style="width: 80px; height: 80px;">
+                    </div>
+                    <img id="admin-profile-img" src="{{ asset('images/default-admin.png') }}"
+                        class="rounded-circle border border-3 border-white shadow-sm"
+                        style="width: 80px; height: 80px; object-fit: cover; display: none;">
+                    <div class="status-indicator bg-success"></div>
+                </div>
             </div>
+            <div id="name-skeleton" class="skeleton skeleton-text mx-auto mb-2" style="width: 120px;"></div>
+            <h5 class="mb-1 fw-semibold" id="admin-name" style="display: none">
+                <a href="#" class="text-decoration-none text-dark admin-profile-link">Loading...</a>
+            </h5>
+            <div id="role-skeleton" class="skeleton skeleton-text mx-auto mb-3" style="width: 80px;"></div>
+            <p class="text-muted small mb-0" id="admin-role" style="display: none">Loading...</p>
         </div>
-        <div id="name-skeleton" class="skeleton skeleton-text mx-auto mt-3 mb-1" 
-             style="width: 150px; display: block;"></div>
-        <h5 class="mt-3 mb-1" id="admin-name" style="display: none">Loading...</h5>
-        
-        <div id="role-skeleton" class="skeleton skeleton-text mx-auto" 
-             style="width: 100px; display: block;"></div>
-        <p class="text-muted mb-0" id="admin-role" style="display: none">Loading...</p>
-    </div>
 
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link {{ Request::is('admin/dashboard*') ? 'active' : '' }}" href="{{ url('/admin/dashboard') }}">
-                <i class="bi bi-speedometer2 me-2"></i>
-                Dashboard
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ Request::is('admin/calendar*') ? 'active' : '' }}" href="{{ url('/admin/calendar') }}">
-                <i class="bi bi-calendar-event me-2"></i>
-                Calendar
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ Request::is('admin/manage-requests*') ? 'active' : '' }}" href="{{ url('/admin/manage-requests') }}">
-                <i class="bi bi-file-earmark-text me-2"></i>
-                Requisitions
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ Request::is('admin/manage-facilities*') ? 'active' : '' }}" href="{{ url('/admin/manage-facilities') }}">
-                <i class="bi bi-building me-2"></i>
-                Facilities
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ Request::is('admin/manage-equipment*') ? 'active' : '' }}" href="{{ url('/admin/manage-equipment') }}">
-                <i class="bi bi-tools me-2"></i>
-                Equipment
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ Request::is('admin/admin-roles*') ? 'active' : '' }}" href="{{ url('/admin/admin-roles') }}">
-                <i class="bi bi-people me-2"></i>
-                Admin Roles
-            </a>
-        </li>
-    </ul>
-    <div class="mt-auto w-100 text-center" style="position: absolute; bottom: 10px; left: 0; padding: 0.5rem;">
-        <small class="text-muted">&copy; {{ date('Y') }} CPU Facilities and Equipment Management</small>
-    </div>
-</nav>
+        <ul class="nav flex-column px-2 flex-grow-1">
+            <li class="nav-item mb-1">
+                <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/dashboard*') ? 'active' : '' }}"
+                    href="{{ url('/admin/dashboard') }}">
+                    <div class="d-flex align-items-center">
+                        <div class="nav-icon p-1 rounded me-2">
+                            <i class="bi bi-speedometer2 me-2"></i>
+                        </div>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/calendar*') ? 'active' : '' }}"
+                    href="{{ url('/admin/calendar') }}">
+                    <div class="d-flex align-items-center">
+                        <div class="nav-icon p-1 rounded me-2">
+                            <i class="bi bi-calendar-event me-1"></i>
+                        </div>
+                        <span>Calendar</span>
+                    </div>
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/manage-requests*') ? 'active' : '' }}"
+                    href="{{ url('/admin/manage-requests') }}">
+                    <div class="d-flex align-items-center">
+                        <div class="nav-icon p-1 rounded me-2">
+                            <i class="bi bi-file-earmark-text me-2"></i>
+                        </div>
+                        <span>Requisitions</span>
+                    </div>
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/manage-facilities*') ? 'active' : '' }}"
+                    href="{{ url('/admin/manage-facilities') }}">
+                    <div class="d-flex align-items-center">
+                        <div class="nav-icon p-1 rounded me-2">
+                            <i class="bi bi-building me-2"></i>
+                        </div>
+                        <span>Facilities</span>
+                    </div>
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/manage-equipment*') ? 'active' : '' }}"
+                    href="{{ url('/admin/manage-equipment') }}">
+                    <div class="d-flex align-items-center">
+                        <div class="nav-icon p-1 rounded me-2">
+                            <i class="bi bi-tools me-2"></i>
+                        </div>
+                        <span>Equipment</span>
+                    </div>
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/admin-roles*') ? 'active' : '' }}"
+                    href="{{ url('/admin/admin-roles') }}">
+                    <div class="d-flex align-items-center">
+                        <div class="nav-icon p-1 rounded me-2">
+                            <i class="bi bi-people me-2"></i>
+                        </div>
+                        <span>Administrators</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) return;
+        <!-- Footer -->
+        <div class="mt-auto p-3 text-center border-top">
+            <small class="text-muted">&copy; {{ date('Y') }} Central Philippine University</small>
+        </div>
+    </nav>
 
-    fetch('http://127.0.0.1:8000/api/admin/profile', {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
-        },
-        credentials: 'include'
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Preload the image
-        if (data.photo_url) {
-            const img = new Image();
-            img.onload = () => {
-                document.getElementById('profile-skeleton').style.display = 'none';
-                document.getElementById('admin-profile-img').src = data.photo_url;
-                document.getElementById('admin-profile-img').style.display = 'block';
-            };
-            img.src = data.photo_url;
-        } else {
-            document.getElementById('profile-skeleton').style.display = 'none';
-            document.getElementById('admin-profile-img').style.display = 'block';
-        }
-        
-        // Update name
-        document.getElementById('name-skeleton').style.display = 'none';
-        const nameElement = document.getElementById('admin-name');
-        nameElement.textContent = `${data.first_name} ${data.last_name}`;
-        nameElement.style.display = 'block';
-        
-        // Update role
-        document.getElementById('role-skeleton').style.display = 'none';
-        const roleElement = document.getElementById('admin-role');
-        roleElement.textContent = data.role ? data.role.role_title : 'Admin';
-        roleElement.style.display = 'block';
-    })
-    .catch(error => {
-        console.error('Error fetching profile:', error);
-        // Show error state or fallback content
-        document.getElementById('profile-skeleton').style.display = 'none';
-        document.getElementById('name-skeleton').style.display = 'none';
-        document.getElementById('role-skeleton').style.display = 'none';
-        document.getElementById('admin-profile-img').style.display = 'block';
-        document.getElementById('admin-name').style.display = 'block';
-        document.getElementById('admin-role').style.display = 'block';
-    });
-});
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('adminToken');
+            if (!token) return;
+
+            fetch('http://127.0.0.1:8000/api/admin/profile', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                credentials: 'include'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Preload the image
+                    if (data.photo_url) {
+                        const img = new Image();
+                        img.onload = () => {
+                            document.getElementById('profile-skeleton').style.display = 'none';
+                            document.getElementById('admin-profile-img').src = data.photo_url;
+                            document.getElementById('admin-profile-img').style.display = 'block';
+                        };
+                        img.src = data.photo_url;
+                    } else {
+                        document.getElementById('profile-skeleton').style.display = 'none';
+                        document.getElementById('admin-profile-img').style.display = 'block';
+                    }
+
+                    // Update name
+                    document.getElementById('name-skeleton').style.display = 'none';
+                    const nameElement = document.querySelector('#admin-name a');
+                    nameElement.textContent = `${data.first_name} ${data.last_name}`;
+                    nameElement.href = `/admin/profile/${data.admin_id}`;
+                    document.getElementById('admin-name').style.display = 'block';
+
+                    // Update role
+                    document.getElementById('role-skeleton').style.display = 'none';
+                    const roleElement = document.getElementById('admin-role');
+                    roleElement.textContent = data.role ? data.role.role_title : 'Admin';
+                    roleElement.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching profile:', error);
+                    // Show error state or fallback content
+                    document.getElementById('profile-skeleton').style.display = 'none';
+                    document.getElementById('name-skeleton').style.display = 'none';
+                    document.getElementById('role-skeleton').style.display = 'none';
+                    document.getElementById('admin-profile-img').style.display = 'block';
+                    document.getElementById('admin-name').style.display = 'block';
+                    document.getElementById('admin-role').style.display = 'block';
+                });
+        });
+    </script>
 
     <main style="margin-left: 250px; padding: 20px; width: calc(100% - 250px);">
         @yield('content')
@@ -435,7 +540,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const topbar = document.getElementById('topbar');
+            let lastScroll = 0;
 
+            window.addEventListener('scroll', () => {
+                const currentScroll = window.scrollY;
+
+                // Hide on scroll down, show on scroll up
+                if (currentScroll > 100 && currentScroll > lastScroll) {
+                    topbar.classList.add('topbar-hidden');
+                } else if (currentScroll < lastScroll) {
+                    topbar.classList.remove('topbar-hidden');
+                }
+
+                lastScroll = currentScroll;
+            });
+
+            // Show on hover
+            topbar.addEventListener('mouseenter', () => {
+                topbar.classList.remove('topbar-hidden');
+            });
+        });
+    </script>
 </body>
 
 </html>
