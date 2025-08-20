@@ -4,19 +4,15 @@
 
 @section('content')
   <style>
-    /* Add sharp edges to all elements */
-    * {
-    border-radius: 0 !important;
+
+    /* fix main layout not aligning to the center */
+    #layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    margin-top: -20px;
     }
 
-    /* Exclude admin photo container and status circle */
-    .profile-img {
-    border-radius: 50% !important;
-    }
-
-    .status-indicator {
-    border-radius: 50% !important;
-    }
 
     /* Custom styles for the Admin Roles page */
     .form-section {
@@ -43,12 +39,9 @@
   </style>
   <div id="layout">
     <main id="main">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="fw-bold">Manage Admin Roles</h2>
-    </div>
 
     <section class="form-section">
-      <h3 class="mb-4">Add New Admin</h3>
+      <h3 class="mb-4 fw-bold">Add New Admin</h3>
       <form id="addAdminForm">
       @csrf
       <div class="row g-3">
@@ -95,7 +88,7 @@
     </section>
 
     <section class="table-section">
-      <h3 class="mb-4">Existing Admins</h3>
+      <h3 class="mb-4 fw-bold">Existing Admins</h3>
       <div class="table-responsive">
       <table class="table table-hover align-middle">
         <thead>
