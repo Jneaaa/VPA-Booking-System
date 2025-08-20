@@ -53,9 +53,6 @@ return new class extends Migration
             $table->boolean('is_finalized')->default(false);
             $table->dateTime('finalized_at')->nullable();
             $table->unsignedBigInteger('finalized_by')->nullable();
-            $table->string('official_receipt_no', 50)->nullable();
-            $table->string('official_receipt_url')->nullable();
-            $table->string('official_receipt_public_id')->nullable();
 
             // fees set by admins
             $table->decimal('tentative_fee', 10, 2)->nullable();

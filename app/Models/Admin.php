@@ -124,5 +124,9 @@ class Admin extends Authenticatable
         return $this->hasMany(SystemLog::class, 'admin_id', 'admin_id');
     }
 
-
+    // relationship with RequisitionComment
+    public function comments()
+    {
+        return $this->hasMany(RequisitionComment::class, 'admin_id', 'admin_id');
+    }
 }

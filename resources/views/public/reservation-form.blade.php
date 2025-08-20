@@ -560,7 +560,8 @@
             <div class="row">
               <div class="col-md-12">
                 <label class="form-label">Applicant Type <span style="color: red;">*</span></label>
-                <select id="applicantType" name="user_type" class="form-select mb-2" aria-label="Type of Applicant" required>
+                <select id="applicantType" name="user_type" class="form-select mb-2" aria-label="Type of Applicant"
+                  required>
                   <option value="" selected disabled>Type of Applicant</option>
                   <option value="Internal">Internal</option>
                   <option value="External">External</option>
@@ -570,17 +571,21 @@
                 <label class="form-label">
                   First Name <span style="color: red;">*</span>
                 </label>
-                <input name="first_name" type="text" class="form-control" placeholder="First Name" required maxlength="50" />
+                <input name="first_name" type="text" class="form-control" placeholder="First Name" required
+                  maxlength="50" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">
                   Last Name <span style="color: red;">*</span>
                 </label>
-                <input name="last_name" type="text" class="form-control" placeholder="Last Name" required maxlength="50" />
+                <input name="last_name" type="text" class="form-control" placeholder="Last Name" required
+                  maxlength="50" />
               </div>
               <div id="studentIdField" class="col-md-6">
-                <label class="form-label">CPU Student ID <span id="schoolIdRequired" style="color:red;display:none">*</span></label>
-                <input name="school_id" id="school_id" type="text" class="form-control" placeholder="Student ID" maxlength="20" />
+                <label class="form-label">CPU Student ID <span id="schoolIdRequired"
+                    style="color:red;display:none">*</span></label>
+                <input name="school_id" id="school_id" type="text" class="form-control" placeholder="Student ID"
+                  maxlength="20" />
               </div>
               <div class="col-md-6">
                 <label class="form-label">Contact Number</label>
@@ -589,8 +594,8 @@
               </div>
               <div class="col-md-12">
                 <label class="form-label">Email Address <span style="color: red;">*</span></label>
-                <input name="email" type="email" class="form-control mb-2" placeholder="Email Address"
-                  required maxlength="100" />
+                <input name="email" type="email" class="form-control mb-2" placeholder="Email Address" required
+                  maxlength="100" />
               </div>
               <div class="col-md-12">
                 <label class="form-label">Organization Name</label>
@@ -786,8 +791,7 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label">Additional Requests</label>
-                <textarea name="additional_requests" class="form-control mb-2" rows="3"
-                  maxlength="250"
+                <textarea name="additional_requests" class="form-control mb-2" rows="3" maxlength="250"
                   placeholder="Write a brief description of any additional requests you may have."></textarea>
               </div>
               <div class="col-md-6">
@@ -907,6 +911,13 @@
       formData.append('file', file);
       formData.append('upload_preset', 'formal-letters'); // Your unsigned upload preset
       formData.append('folder', 'user-uploads/user-letters'); // Optional folder organization
+
+      // ADD THIS LINE FOR PDF FILES - explicitly set resource type
+      if (file.type === 'application/pdf') {
+        formData.append('resource_type', 'raw');
+      } else {
+        formData.append('resource_type', 'auto');
+      }
 
       try {
         const response = await fetch(`https://api.cloudinary.com/v1_1/dn98ntlkd/auto/upload`, {
@@ -1667,152 +1678,152 @@
     });
   </script>
   <script>
-document.addEventListener('DOMContentLoaded', function () {
-  // Prevent non-numeric input in contact number field
-  const contactNumberField = document.getElementById('contactNumberField');
-  contactNumberField.addEventListener('input', function (e) {
-    this.value = this.value.replace(/\D/g, '');
-  });
-
-  const reservationForm = document.getElementById('reservationForm');
-  const submitFormBtn = document.getElementById('submitFormBtn');
-
-  function showFieldError(input, message) {
-    input.classList.add('is-invalid');
-    input.setAttribute('title', message);
-    input.setAttribute('data-bs-toggle', 'tooltip');
-    input.setAttribute('data-bs-placement', 'top');
-    if (window.bootstrap) {
-      new bootstrap.Tooltip(input);
-      input.addEventListener('focus', function () {
-        bootstrap.Tooltip.getInstance(input)?.show();
+    document.addEventListener('DOMContentLoaded', function () {
+      // Prevent non-numeric input in contact number field
+      const contactNumberField = document.getElementById('contactNumberField');
+      contactNumberField.addEventListener('input', function (e) {
+        this.value = this.value.replace(/\D/g, '');
       });
-    }
-  }
 
-  function clearFieldError(input) {
-    input.classList.remove('is-invalid');
-    input.removeAttribute('title');
-    input.removeAttribute('data-bs-toggle');
-    input.removeAttribute('data-bs-placement');
-    if (window.bootstrap) {
-      const tooltip = bootstrap.Tooltip.getInstance(input);
-      if (tooltip) tooltip.dispose();
-    }
-  }
+      const reservationForm = document.getElementById('reservationForm');
+      const submitFormBtn = document.getElementById('submitFormBtn');
 
-  function validateFormFields() {
-    let valid = true;
-    let firstInvalid = null;
-    const requiredFields = [
-      'user_type', 'first_name', 'last_name', 'email', 'num_participants', 'purpose_id'
-    ];
-
-    // Clear any existing tooltips first
-    reservationForm.querySelectorAll('.is-invalid').forEach(input => clearFieldError(input));
-
-    // Check formal letter first, before any other validation
-    if (!document.getElementById('formal_letter_url').value) {
-      showToast('Formal Letter Required.', 'error');
-      return { valid: false, firstInvalid: null, isMissingLetter: true };
-    }
-
-    requiredFields.forEach(name => {
-      const input = reservationForm.querySelector(`[name="${name}"]`);
-      if (input) {
-        if (
-          !input.value ||
-          (name === 'user_type' && input.value === '') ||
-          (name === 'purpose_id' && (input.value === '' || input.value === null))
-        ) {
-          showFieldError(input, 'Please fill in this field.');
-          valid = false;
-          if (!firstInvalid) firstInvalid = input;
+      function showFieldError(input, message) {
+        input.classList.add('is-invalid');
+        input.setAttribute('title', message);
+        input.setAttribute('data-bs-toggle', 'tooltip');
+        input.setAttribute('data-bs-placement', 'top');
+        if (window.bootstrap) {
+          new bootstrap.Tooltip(input);
+          input.addEventListener('focus', function () {
+            bootstrap.Tooltip.getInstance(input)?.show();
+          });
         }
       }
-    });
 
-    // School ID required for Internal
-    const applicantType = document.getElementById('applicantType');
-    const schoolIdInput = document.getElementById('school_id');
-    if (applicantType.value === 'Internal') {
-      clearFieldError(schoolIdInput);
-      if (!schoolIdInput.value) {
-        showFieldError(schoolIdInput, 'Please fill in this field.');
-        valid = false;
-        if (!firstInvalid) firstInvalid = schoolIdInput;
+      function clearFieldError(input) {
+        input.classList.remove('is-invalid');
+        input.removeAttribute('title');
+        input.removeAttribute('data-bs-toggle');
+        input.removeAttribute('data-bs-placement');
+        if (window.bootstrap) {
+          const tooltip = bootstrap.Tooltip.getInstance(input);
+          if (tooltip) tooltip.dispose();
+        }
       }
-    } else {
-      clearFieldError(schoolIdInput);
-    }
 
-    // Email format
-    const emailInput = reservationForm.querySelector('[name="email"]');
-    if (emailInput && emailInput.value) {
-      clearFieldError(emailInput);
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailPattern.test(emailInput.value)) {
-        showFieldError(emailInput, 'Please enter a valid email address.');
-        valid = false;
-        if (!firstInvalid) firstInvalid = emailInput;
-      }
-    }
+      function validateFormFields() {
+        let valid = true;
+        let firstInvalid = null;
+        const requiredFields = [
+          'user_type', 'first_name', 'last_name', 'email', 'num_participants', 'purpose_id'
+        ];
 
-    // Contact number format (only digits, max 15)
-    if (contactNumberField && contactNumberField.value) {
-      clearFieldError(contactNumberField);
-      if (!/^\d{1,15}$/.test(contactNumberField.value)) {
-        showFieldError(contactNumberField, 'Contact number must be numbers only (max 15 digits).');
-        valid = false;
-        if (!firstInvalid) firstInvalid = contactNumberField;
-      }
-    } else {
-      clearFieldError(contactNumberField);
-    }
+        // Clear any existing tooltips first
+        reservationForm.querySelectorAll('.is-invalid').forEach(input => clearFieldError(input));
 
-    return { valid, firstInvalid, isMissingLetter: false };
-  }
+        // Check formal letter first, before any other validation
+        if (!document.getElementById('formal_letter_url').value) {
+          showToast('Formal Letter Required.', 'error');
+          return { valid: false, firstInvalid: null, isMissingLetter: true };
+        }
 
-  // Single click handler for submit button
-  submitFormBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const { valid, firstInvalid, isMissingLetter } = validateFormFields();
-    
-    if (!valid) {
-      if (!isMissingLetter) {
-        showToast('Please fill in all required fields correctly.', 'error');
-        if (firstInvalid) {
-          firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setTimeout(() => {
-            firstInvalid.focus();
-            if (window.bootstrap) {
-              bootstrap.Tooltip.getInstance(firstInvalid)?.show();
+        requiredFields.forEach(name => {
+          const input = reservationForm.querySelector(`[name="${name}"]`);
+          if (input) {
+            if (
+              !input.value ||
+              (name === 'user_type' && input.value === '') ||
+              (name === 'purpose_id' && (input.value === '' || input.value === null))
+            ) {
+              showFieldError(input, 'Please fill in this field.');
+              valid = false;
+              if (!firstInvalid) firstInvalid = input;
             }
-          }, 400);
+          }
+        });
+
+        // School ID required for Internal
+        const applicantType = document.getElementById('applicantType');
+        const schoolIdInput = document.getElementById('school_id');
+        if (applicantType.value === 'Internal') {
+          clearFieldError(schoolIdInput);
+          if (!schoolIdInput.value) {
+            showFieldError(schoolIdInput, 'Please fill in this field.');
+            valid = false;
+            if (!firstInvalid) firstInvalid = schoolIdInput;
+          }
+        } else {
+          clearFieldError(schoolIdInput);
         }
+
+        // Email format
+        const emailInput = reservationForm.querySelector('[name="email"]');
+        if (emailInput && emailInput.value) {
+          clearFieldError(emailInput);
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailPattern.test(emailInput.value)) {
+            showFieldError(emailInput, 'Please enter a valid email address.');
+            valid = false;
+            if (!firstInvalid) firstInvalid = emailInput;
+          }
+        }
+
+        // Contact number format (only digits, max 15)
+        if (contactNumberField && contactNumberField.value) {
+          clearFieldError(contactNumberField);
+          if (!/^\d{1,15}$/.test(contactNumberField.value)) {
+            showFieldError(contactNumberField, 'Contact number must be numbers only (max 15 digits).');
+            valid = false;
+            if (!firstInvalid) firstInvalid = contactNumberField;
+          }
+        } else {
+          clearFieldError(contactNumberField);
+        }
+
+        return { valid, firstInvalid, isMissingLetter: false };
       }
-      return false;
-    }
 
-    // Only open modal if validation passes
-    openTermsModal(e);
-  });
+      // Single click handler for submit button
+      submitFormBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-  // Remove the form submit handler since we're handling everything in the button click
-  // Keep the input/change handlers for clearing errors
-  reservationForm.querySelectorAll('input, select, textarea').forEach(input => {
-    input.addEventListener('input', function () {
-      clearFieldError(this);
+        const { valid, firstInvalid, isMissingLetter } = validateFormFields();
+
+        if (!valid) {
+          if (!isMissingLetter) {
+            showToast('Please fill in all required fields correctly.', 'error');
+            if (firstInvalid) {
+              firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              setTimeout(() => {
+                firstInvalid.focus();
+                if (window.bootstrap) {
+                  bootstrap.Tooltip.getInstance(firstInvalid)?.show();
+                }
+              }, 400);
+            }
+          }
+          return false;
+        }
+
+        // Only open modal if validation passes
+        openTermsModal(e);
+      });
+
+      // Remove the form submit handler since we're handling everything in the button click
+      // Keep the input/change handlers for clearing errors
+      reservationForm.querySelectorAll('input, select, textarea').forEach(input => {
+        input.addEventListener('input', function () {
+          clearFieldError(this);
+        });
+        input.addEventListener('change', function () {
+          clearFieldError(this);
+        });
+      });
+
+      // ...existing code...
     });
-    input.addEventListener('change', function () {
-      clearFieldError(this);
-    });
-  });
-
-  // ...existing code...
-});
   </script>
 </body>
 
