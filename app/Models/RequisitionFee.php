@@ -15,6 +15,7 @@ class RequisitionFee extends Model
         'label',
         'fee_amount',
         'discount_amount',
+        'discount_type',
         'waived_facility',
         'waived_equipment',
         'waived_form'

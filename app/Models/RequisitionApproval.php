@@ -12,11 +12,11 @@ class RequisitionApproval extends Model
         'request_id',
         'approved_by',
         'rejected_by',
-        'date_approved',
+        'date_updated',
     ];
 
     protected $casts = [
-        'date_approved' => 'datetime',
+        'date_updated' => 'datetime',
     ];
     
 

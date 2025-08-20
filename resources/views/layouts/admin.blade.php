@@ -110,7 +110,7 @@
         /* Base Layout */
         body {
             display: flex;
-            background: #f8f8f8ff;
+            background: linear-gradient(180deg, #eceef3ff 0%, #f8f8f8 50%, #f1f1f1 100%);
             flex-direction: column;
             min-height: 100vh;
             margin: 0;
@@ -155,9 +155,9 @@
 
         /* Topbar Styles */
         #topbar {
-            background-color: #f6f6f7a8 !important;
+            background-color: rgba(30, 83, 153, 0.94) !important;
             backdrop-filter: blur(8px);
-            color: var(--cpu-text-dark);
+            color: white;
             font-weight: 600;
             padding: 0.75rem 1rem;
             height: 64px;
@@ -324,7 +324,7 @@
                                 border-radius: 50%;
                                 cursor: pointer;
                                 transition: all 0.2s ease;
-                                color: #6e6e6e !important;
+                                color: #ffffffff !important;
 
                                 font-size: 1.5rem;
                                 /* adjust size so dots are sharp */
@@ -335,24 +335,24 @@
                             }
 
                             .three-dots-icon:hover {
-                                background: rgba(99, 99, 99, 0.3);
+                                background: rgba(190, 201, 211, 0.3);
                                 transform: scale(1.05);
                             }
 
                             .three-dots-icon:active {
                                 transform: scale(0.95);
                                 /* press-down effect */
-                                background: rgba(99, 99, 99, 0.5);
+                                background: rgba(190, 201, 211, 0.5);
                             }
                         </style>
 
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Account Settings</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" href="{{ url('/admin/admin-login') }}" id="logoutLink"><i
+                        <li><a class="dropdown-item" style='color: darkred' href="{{ url('/admin/admin-login') }}" id="logoutLink"><i
                                     class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                     </ul>
                 </div>

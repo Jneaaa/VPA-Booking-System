@@ -70,6 +70,12 @@ class RequisitionForm extends Model
 
     // Relationships
 
+    // relationship with RequisitionComment:
+    public function comments()
+    {
+        return $this->hasMany(RequisitionComment::class, 'request_id', 'request_id');
+    }
+    
     public function purpose()
     {
         return $this->belongsTo(RequisitionPurpose::class, 'purpose_id', 'purpose_id');

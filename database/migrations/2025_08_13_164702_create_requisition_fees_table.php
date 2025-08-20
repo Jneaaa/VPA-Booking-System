@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('label', 50);
             $table->decimal('fee_amount', 10, 2)->default(0.00);
             $table->decimal('discount_amount', 10, 2)->default(0.00);
+            $table->enum('discount_type', ['Fixed', 'Percentage'])->nullable();
 
             // waive facility, equipment, or entire form
             $table->unsignedBigInteger('waived_facility')->nullable();
