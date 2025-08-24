@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('school_id', 20)->nullable();
             $table->string('organization_name', 100)->nullable();
             $table->string('contact_number', 15)->nullable();
+
+
             ///////
             $table->string('access_code', 10);
             $table->integer('num_participants');
@@ -69,8 +71,8 @@ return new class extends Migration
             $table->timestamps();
 
             // calendar event details
-            $table->string('calendar_title', 50)->default('Rental Request');
-            $table->string('calendar_description', 100)->default('Rental request for facility usage');
+            $table->string('calendar_title', 50)->nullable();
+            $table->string('calendar_description', 100)->nullable();
 
             // Foreign Keys
             $table->foreign('purpose_id')->references('purpose_id')->on('requisition_purposes')->onDelete('restrict');

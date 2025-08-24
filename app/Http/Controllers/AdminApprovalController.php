@@ -150,14 +150,14 @@ class AdminApprovalController extends Controller
         // Get pending forms with relationships
         $forms = RequisitionForm::whereNotIn('status_id', $excludedStatuses)
             ->with([
-                    'formStatus',
-                    'requestedFacilities.facility',
-                    'requestedEquipment.equipment',
-                    'requisitionApprovals',
-                    'purpose',
-                    'finalizedBy',
-                    'closedBy'
-                ])
+                'formStatus',
+                'requestedFacilities.facility',
+                'requestedEquipment.equipment',
+                'requisitionApprovals',
+                'purpose',
+                'finalizedBy',
+                'closedBy'
+            ])
             ->get()
             ->map(function ($form) {
                 // Reuse the same mapping logic as in pendingRequests()
@@ -179,22 +179,22 @@ class AdminApprovalController extends Controller
                 return [
                     'request_id' => $form->request_id,
                     'user_details' => [
-                            'user_type' => $form->user_type,
-                            'first_name' => $form->first_name,
-                            'last_name' => $form->last_name,
-                            'email' => $form->email,
-                            'school_id' => $form->school_id,
-                            'organization_name' => $form->organization_name,
-                            'contact_number' => $form->contact_number
-                        ],
+                        'user_type' => $form->user_type,
+                        'first_name' => $form->first_name,
+                        'last_name' => $form->last_name,
+                        'email' => $form->email,
+                        'school_id' => $form->school_id,
+                        'organization_name' => $form->organization_name,
+                        'contact_number' => $form->contact_number
+                    ],
                     'form_details' => [
                         'num_participants' => $form->num_participants,
                         'purpose' => $form->purpose->purpose_name,
                         'additional_requests' => $form->additional_requests,
                         'status' => [
-                                'name' => $form->formStatus->status_name,
-                                'color' => $form->formStatus->color
-                            ],
+                            'name' => $form->formStatus->status_name,
+                            'color' => $form->formStatus->color
+                        ],
                         'calendar_info' => [
                             'title' => $form->calendar_title,
                             'description' => $form->calendar_description
@@ -208,20 +208,20 @@ class AdminApprovalController extends Controller
                     ],
                     'requested_items' => [
                         'facilities' => $form->requestedFacilities->map(function ($facility) {
-                            return [
-                                'name' => $facility->facility->facility_name,
-                                'fee' => $facility->facility->external_fee,
-                                'is_waived' => $facility->is_waived
-                            ];
-                        }),
+                        return [
+                            'name' => $facility->facility->facility_name,
+                            'fee' => $facility->facility->external_fee,
+                            'is_waived' => $facility->is_waived
+                        ];
+                    }),
                         'equipment' => $form->requestedEquipment->map(function ($equipment) {
-                            return [
-                                'name' => $equipment->equipment->equipment_name,
-                                'quantity' => $equipment->quantity,
-                                'fee' => $equipment->equipment->external_fee,
-                                'is_waived' => $equipment->is_waived
-                            ];
-                        })
+                        return [
+                            'name' => $equipment->equipment->equipment_name,
+                            'quantity' => $equipment->quantity,
+                            'fee' => $equipment->equipment->external_fee,
+                            'is_waived' => $equipment->is_waived
+                        ];
+                    })
                     ],
                     'fees' => [
                         'tentative_fee' => $totalTentativeFee,
@@ -248,9 +248,9 @@ class AdminApprovalController extends Controller
                         'endorser' => $form->endorser,
                         'date_endorsed' => $form->date_endorsed,
                         'formal_letter' => [
-                                'url' => $form->formal_letter_url,
-                                'public_id' => $form->formal_letter_public_id
-                            ],
+                            'url' => $form->formal_letter_url,
+                            'public_id' => $form->formal_letter_public_id
+                        ],
                         'facility_layout' => [
                             'url' => $form->facility_layout_url,
                             'public_id' => $form->facility_layout_public_id
@@ -271,7 +271,7 @@ class AdminApprovalController extends Controller
             });
 
         return response()->json($forms);
-    } 
+    }
 
     public function approveRequest(Request $request, $requestId)
     {
@@ -335,12 +335,12 @@ class AdminApprovalController extends Controller
         // Get pending forms with necessary relationships
         $forms = RequisitionForm::whereNotIn('status_id', $excludedStatuses)
             ->with([
-                    'purpose',
-                    'formStatus',
-                    'requestedFacilities.facility',
-                    'requestedEquipment.equipment',
-                    'requisitionApprovals'
-                ])
+                'purpose',
+                'formStatus',
+                'requestedFacilities.facility',
+                'requestedEquipment.equipment',
+                'requisitionApprovals'
+            ])
             ->get()
             ->map(function ($form) {
                 // Calculate tentative fee
@@ -386,7 +386,7 @@ class AdminApprovalController extends Controller
         try {
             $validatedData = $request->validate([
                 'label' => 'required|string|max:50',
-                'fee_amount' => 'required|numeric|min:1',
+                'fee_amount' => 'required|numeric|min:0.01',
             ]);
 
             $admin = auth()->user();
@@ -396,6 +396,7 @@ class AdminApprovalController extends Controller
                 'added_by' => $admin->admin_id,
                 'label' => $validatedData['label'],
                 'fee_amount' => $validatedData['fee_amount'],
+                'discount_amount' => 0,
             ]);
 
             // Recalculate approved fee
@@ -425,7 +426,7 @@ class AdminApprovalController extends Controller
         try {
             $validatedData = $request->validate([
                 'label' => 'required|string|max:50',
-                'discount_amount' => 'required|numeric|min:1',
+                'discount_amount' => 'required|numeric|min:0.01',
                 'discount_type' => 'required|in:Fixed,Percentage',
             ]);
 
@@ -435,6 +436,7 @@ class AdminApprovalController extends Controller
                 'request_id' => $requestId,
                 'added_by' => $admin->admin_id,
                 'label' => $validatedData['label'],
+                'fee_amount' => 0,
                 'discount_amount' => $validatedData['discount_amount'],
                 'discount_type' => $validatedData['discount_type'],
             ]);
@@ -462,11 +464,12 @@ class AdminApprovalController extends Controller
         }
     }
 
+
     public function addLatePenalty(Request $request, $requestId)
     {
         try {
             $validatedData = $request->validate([
-                'penalty_amount' => 'required|numeric|min:0'
+                'penalty_amount' => 'required|numeric|min:0.01'
             ]);
 
             $form = RequisitionForm::findOrFail($requestId);
@@ -561,7 +564,7 @@ class AdminApprovalController extends Controller
 
             if ($approvalCount < 3) {
                 return response()->json([
-                    'error' => 'At least 3 approvals are required to finalize'
+                    'error' => 'At least 3 approvals are required to finalize a form'
                 ], 400);
             }
 
@@ -586,6 +589,8 @@ class AdminApprovalController extends Controller
             ], 500);
         }
     }
+
+
     public function closeForm($requestId)
     {
         try {
@@ -611,6 +616,7 @@ class AdminApprovalController extends Controller
             ], 500);
         }
     }
+
     public function markReturned(Request $request, $requestId)
     {
         try {
@@ -658,7 +664,7 @@ class AdminApprovalController extends Controller
 
     // Calculate & Finalize fees //
 
-        private function calculateBaseFees($form)
+    private function calculateBaseFees($form)
     {
         $facilityFees = $form->requestedFacilities->sum(function ($facility) {
             return $facility->is_waived ? 0 : $facility->facility->external_fee;
@@ -691,15 +697,15 @@ class AdminApprovalController extends Controller
         });
 
         return $facilityFees + $equipmentFees + ($form->is_late ? $form->late_penalty_fee : 0);
-    } 
-        private function calculateApprovedFee($form)
+    }
+    private function calculateApprovedFee($form)
     {
         $baseFees = $this->calculateBaseFees($form);
         $additionalFees = $form->requisitionFees->sum('fee_amount');
         $discounts = $form->requisitionFees->sum('discount_amount');
-        
+
         $approvedFee = $baseFees + $additionalFees - $discounts;
-        
+
         if ($form->is_late) {
             $approvedFee += $form->late_penalty_fee;
         }
@@ -709,8 +715,9 @@ class AdminApprovalController extends Controller
 
     // Completed Transactions // 
 
-        public function completedRequests() {
-       
+    public function completedRequests()
+    {
+
         /* Documentation:
 
             - this method gets all completed requisition forms based on these form_statuses (PK: status_id, Model: FormStatus): 'Returned' (5), 'Late Return' (6), 'Completed' (7), 'Rejected' (9), and 'Cancelled' (10). Use the status_name to pluck the status_id.
@@ -719,8 +726,8 @@ class AdminApprovalController extends Controller
         */
 
         // Get status IDs for completed requests
-        
-        
+
+
         $includedStatuses = FormStatus::whereIn('status_name', [
             'Returned',
             'Late Return',
@@ -853,7 +860,7 @@ class AdminApprovalController extends Controller
             });
 
         return response()->json($forms);
-    } 
+    }
 
     // Get form by access code (Requester side)
     public function getFormByAccessCode($accessCode)
@@ -879,7 +886,11 @@ class AdminApprovalController extends Controller
     }
 
 
-    
+
+
+
+
+
     // Old code
     public function manageRequestApproval(Request $request, $requestId)
     {
@@ -1032,9 +1043,9 @@ class AdminApprovalController extends Controller
                 'approval_count' => $form->requisitionApprovals()->whereNotNull('approved_by')->count(),
                 'can_finalize' => $form->requisitionApprovals()->whereNotNull('approved_by')->count() >= 3 && !$form->is_finalized,
                 'calendar_details' => [
-                        'title' => $form->calendar_title,
-                        'description' => $form->calendar_description
-                    ],
+                    'title' => $form->calendar_title,
+                    'description' => $form->calendar_description
+                ],
                 'updated_items' => [
                     'facilities' => $form->requestedFacilities->map(function ($facility) {
                         return [
@@ -1066,7 +1077,7 @@ class AdminApprovalController extends Controller
                 'details' => $e->getMessage()
             ], 500);
         }
-    } 
+    }
 
 
 }

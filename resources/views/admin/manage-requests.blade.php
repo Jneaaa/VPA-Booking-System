@@ -162,7 +162,7 @@
       <!-- Main Content Area -->
       <div class="col-lg-9">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h4 class="mb-0">Manage Requisitions</h4>
+          <h4 class="mb-0 fw-bold">Manage Requisitions</h4>
           <div class="d-flex gap-2">
             <input type="search" class="form-control form-control-sm" placeholder="Search requisitions..." style="width: 200px;">
             <button class="btn btn-primary btn-sm">Search</button>

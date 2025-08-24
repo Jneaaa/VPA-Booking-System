@@ -69,12 +69,6 @@ class RequisitionForm extends Model
     ];  
 
     // Relationships
-
-    // relationship with RequisitionComment:
-    public function comments()
-    {
-        return $this->hasMany(RequisitionComment::class, 'request_id', 'request_id');
-    }
     
     public function purpose()
     {
@@ -99,6 +93,14 @@ class RequisitionForm extends Model
     public function requisitionApprovals()
     {
         return $this->hasMany(RequisitionApproval::class, 'request_id');
+    }
+        public function requisitionComments()
+    {
+        return $this->hasMany(RequisitionComment::class, 'request_id', 'request_id');
+    }
+        public function requisitionFees()
+    {
+        return $this->hasMany(RequisitionComment::class, 'request_id', 'request_id');
     }
 
     public function finalizedBy()
