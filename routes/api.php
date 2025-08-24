@@ -49,11 +49,19 @@ Route::get('/requisition-purposes', [RequisitionPurposeController::class, 'index
 Route::get('/active-schedules', [RequisitionFormController::class, 'activeSchedules']);
 Route::get('/admin-role', [AdminController::class, 'adminRoles']);
 
-// ---------------- Public Catalog Routes ---------------- //
+// ---------------- Public Routes ---------------- //
 
 Route::get('/equipment', [EquipmentController::class, 'publicIndex']);
 Route::get('/facilities', [FacilityController::class, 'publicIndex']);
 Route::get('/facilities/{facility}', [FacilityController::class, 'show']);
+
+// ---------------- Requester Routes ---------------- //
+
+Route::prefix('requester')->group(function () {
+    Route::get('/form/{accessCode}', [AdminApprovalController::class, 'getFormByAccessCode']);
+    Route::post('/{requestId}/proof-of-payment', [AdminApprovalController::class, 'uploadProofOfPayment']);
+    Route::get('/{requestId}/receipt', [AdminApprovalController::class, 'getOfficialReceipt']);
+});
 
 // ---------------- Requisition Form Routes ---------------- //
 
@@ -104,22 +112,40 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/completed-requests', [AdminApprovalController::class, 'completedRequests']);
     Route::post('/admin/approve-request', [AdminApprovalController::class, 'approveRequest']);
     Route::post('/admin/reject-request', [AdminApprovalController::class, 'rejectRequest']);
-    Route::put('/admin/manage-waivers/{requestId}', [AdminApprovalController::class, 'manageWaivers'])
-    ->middleware('auth:sanctum');
-
-
-
-
     Route::get('/admin/profile', function (Request $request) {
         $user = $request->user();
         $user->load(['role', 'departments']);
         return response()->json($user);
     });
-
     Route::post('/admin/update-photo', [AdminController::class, 'updatePhoto']);
 
+     // --- Form Management Routes --- //
+     Route::prefix('admin/requisition')->group(function () {
+
+    // Add fees, waivers, and discounts
+    Route::post('/{requestId}/fee', [AdminApprovalController::class, 'addFee']);
+    Route::post('/{requestId}/discount', [AdminApprovalController::class, 'addDiscount']);
+    Route::post('/{requestId}/late-penalty', [AdminApprovalController::class, 'addLatePenalty']);
+      Route::post('/{requestId}/waive', [AdminApprovalController::class, 'waiveItems']);
+
+    // Add and get comments
+    Route::post('/{requestId}/comment', [AdminApprovalController::class, 'addComment']);
+    Route::get('/{requestId}/comments', [AdminApprovalController::class, 'getComments']);
+
+    // Closing and finalizing forms
+    Route::post('/{requestId}/finalize', [AdminApprovalController::class, 'finalizeForm']);
+    Route::post('/{requestId}/close', [AdminApprovalController::class, 'closeForm']);
+    Route::post('/{requestId}/mark-returned', [AdminApprovalController::class, 'markReturned']);
+
+    // Get form details
+    Route::get('/{requestId}/receipt', [AdminApprovalController::class, 'getOfficialReceipt']);
+    
+     });
+    
+    // --- Needs fixing --- //
     Route::prefix('admin')->middleware(['check.admin.role'])->group(function () {
 
+    // --- Equipment and Facility Management Routes --- //
 
         // Equipment
         Route::apiResource('equipment', EquipmentController::class);
@@ -143,7 +169,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/reorder', [FacilityController::class, 'reorderImages']);
         });
     });
+    
+
 
 });
-
-// All RequisitionFormController API routes are already present.
