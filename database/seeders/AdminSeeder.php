@@ -23,7 +23,7 @@ class AdminSeeder extends Seeder
                 'first_name' => 'Hannah',
                 'last_name' => 'Escosar',
                 'middle_name' => 'O.',
-                'role_id' => '3',
+                'role_id' => '1',
                 'school_id' => '2289-09',
                 'email' => 'hannahescosar@gmail.com',
                 'contact_number' => '77777777',

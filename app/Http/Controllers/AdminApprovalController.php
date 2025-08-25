@@ -137,141 +137,170 @@ class AdminApprovalController extends Controller
        */
 
         // Get status IDs to exclude
-        $excludedStatuses = FormStatus::whereIn('status_name', [
-            // Expand to read
+    $excludedStatuses = FormStatus::whereIn('status_name', [
+        'Returned',
+        'Late Return',
+        'Completed',
+        'Rejected',
+        'Cancelled'
+    ])->pluck('status_id');
 
-            'Returned',
-            'Late Return',
-            'Completed',
-            'Rejected',
-            'Cancelled'
-        ])->pluck('status_id');
+    // Get pending forms with relationships - ADD requisitionFees relationship
+    $forms = RequisitionForm::whereNotIn('status_id', $excludedStatuses)
+        ->with([
+            'formStatus',
+            'requestedFacilities.facility',
+            'requestedEquipment.equipment',
+            'requisitionApprovals',
+            'requisitionFees.addedBy', // ADDED: Include requisition fees with addedBy relationship
+            'purpose',
+            'finalizedBy',
+            'closedBy'
+        ])
+        ->get()
+        ->map(function ($form) {
+            // Calculate tentative fee from facilities and equipment
+            $facilityFees = $form->requestedFacilities->sum(function ($facility) {
+                return $facility->is_waived ? 0 : $facility->facility->external_fee;
+            });
 
-        // Get pending forms with relationships
-        $forms = RequisitionForm::whereNotIn('status_id', $excludedStatuses)
-            ->with([
-                'formStatus',
-                'requestedFacilities.facility',
-                'requestedEquipment.equipment',
-                'requisitionApprovals',
-                'purpose',
-                'finalizedBy',
-                'closedBy'
-            ])
-            ->get()
-            ->map(function ($form) {
-                // Reuse the same mapping logic as in pendingRequests()
-                // Calculate tentative fee from facilities and equipment
-                $facilityFees = $form->requestedFacilities->sum(function ($facility) {
-                    return $facility->is_waived ? 0 : $facility->facility->external_fee;
-                });
+            $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
+                return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
+            });
 
-                $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
-                    return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
-                });
+            $totalTentativeFee = $facilityFees + $equipmentFees;
+            if ($form->is_late) {
+                $totalTentativeFee += $form->late_penalty_fee;
+            }
 
-                $totalTentativeFee = $facilityFees + $equipmentFees;
-                if ($form->is_late) {
-                    $totalTentativeFee += $form->late_penalty_fee;
-                }
+            // Calculate approved fee including requisition fees
+            $approvedFee = $this->calculateApprovedFee($form);
 
-                // Return the same structure as pendingRequests()
+            // Format requisition fees for response
+            $requisitionFees = $form->requisitionFees->map(function ($fee) {
                 return [
-                    'request_id' => $form->request_id,
-                    'user_details' => [
-                        'user_type' => $form->user_type,
-                        'first_name' => $form->first_name,
-                        'last_name' => $form->last_name,
-                        'email' => $form->email,
-                        'school_id' => $form->school_id,
-                        'organization_name' => $form->organization_name,
-                        'contact_number' => $form->contact_number
-                    ],
-                    'form_details' => [
-                        'num_participants' => $form->num_participants,
-                        'purpose' => $form->purpose->purpose_name,
-                        'additional_requests' => $form->additional_requests,
-                        'status' => [
-                            'name' => $form->formStatus->status_name,
-                            'color' => $form->formStatus->color
-                        ],
-                        'calendar_info' => [
-                            'title' => $form->calendar_title,
-                            'description' => $form->calendar_description
-                        ]
-                    ],
-                    'schedule' => [
-                        'start_date' => $form->start_date,
-                        'end_date' => $form->end_date,
-                        'start_time' => $form->start_time,
-                        'end_time' => $form->end_time
-                    ],
-                    'requested_items' => [
-                        'facilities' => $form->requestedFacilities->map(function ($facility) {
-                        return [
-                            'name' => $facility->facility->facility_name,
-                            'fee' => $facility->facility->external_fee,
-                            'is_waived' => $facility->is_waived
-                        ];
-                    }),
-                        'equipment' => $form->requestedEquipment->map(function ($equipment) {
-                        return [
-                            'name' => $equipment->equipment->equipment_name,
-                            'quantity' => $equipment->quantity,
-                            'fee' => $equipment->equipment->external_fee,
-                            'is_waived' => $equipment->is_waived
-                        ];
-                    })
-                    ],
-                    'fees' => [
-                        'tentative_fee' => $totalTentativeFee,
-                        'approved_fee' => $form->approved_fee,
-                        'late_penalty_fee' => $form->late_penalty_fee,
-                        'is_late' => $form->is_late
-                    ],
-                    'status_tracking' => [
-                        'is_finalized' => $form->is_finalized,
-                        'finalized_at' => $form->finalized_at,
-                        'finalized_by' => $form->finalizedBy ? [
-                            'id' => $form->finalizedBy->admin_id,
-                            'name' => $form->finalizedBy->first_name . ' ' . $form->finalizedBy->last_name
-                        ] : null,
-                        'is_closed' => $form->is_closed,
-                        'closed_at' => $form->closed_at,
-                        'closed_by' => $form->closedBy ? [
-                            'id' => $form->closedBy->admin_id,
-                            'name' => $form->closedBy->first_name . ' ' . $form->closedBy->last_name
-                        ] : null,
-                        'returned_at' => $form->returned_at
-                    ],
-                    'documents' => [
-                        'endorser' => $form->endorser,
-                        'date_endorsed' => $form->date_endorsed,
-                        'formal_letter' => [
-                            'url' => $form->formal_letter_url,
-                            'public_id' => $form->formal_letter_public_id
-                        ],
-                        'facility_layout' => [
-                            'url' => $form->facility_layout_url,
-                            'public_id' => $form->facility_layout_public_id
-                        ],
-                        'official_receipt' => [
-                            'number' => $form->official_receipt_no,
-                            'url' => $form->official_receipt_url,
-                            'public_id' => $form->official_receipt_public_id
-                        ]
-                    ],
-                    'approvals' => [
-                        'count' => $form->requisitionApprovals()->whereNotNull('approved_by')->count(),
-                        'rejections' => $form->requisitionApprovals()->whereNotNull('rejected_by')->count(),
-                        'latest_action' => $form->requisitionApprovals()->latest('date_updated')->first()
-                    ],
-                    'access_code' => $form->access_code
+                    'fee_id' => $fee->fee_id,
+                    'label' => $fee->label,
+                    'fee_amount' => (float) $fee->fee_amount,
+                    'discount_amount' => (float) $fee->discount_amount,
+                    'discount_type' => $fee->discount_type,
+                    'type' => $fee->fee_amount > 0 ? 
+                        ($fee->fee_amount > 0 && $fee->discount_amount > 0 ? 'mixed' : 'fee') : 
+                        'discount',
+                    'added_by' => $fee->addedBy ? [
+                        'admin_id' => $fee->addedBy->admin_id,
+                        'name' => $fee->addedBy->first_name . ' ' . $fee->addedBy->last_name
+                    ] : null,
+                    'created_at' => $fee->created_at,
+                    'updated_at' => $fee->updated_at
                 ];
             });
 
-        return response()->json($forms);
-    }
+            // Return the same structure as pendingRequests() with enhanced fees section
+            return [
+                'request_id' => $form->request_id,
+                'user_details' => [
+                    'user_type' => $form->user_type,
+                    'first_name' => $form->first_name,
+                    'last_name' => $form->last_name,
+                    'email' => $form->email,
+                    'school_id' => $form->school_id,
+                    'organization_name' => $form->organization_name,
+                    'contact_number' => $form->contact_number
+                ],
+                'form_details' => [
+                    'num_participants' => $form->num_participants,
+                    'purpose' => $form->purpose->purpose_name,
+                    'additional_requests' => $form->additional_requests,
+                    'status' => [
+                        'name' => $form->formStatus->status_name,
+                        'color' => $form->formStatus->color
+                    ],
+                    'calendar_info' => [
+                        'title' => $form->calendar_title,
+                        'description' => $form->calendar_description
+                    ]
+                ],
+                'schedule' => [
+                    'start_date' => $form->start_date,
+                    'end_date' => $form->end_date,
+                    'start_time' => $form->start_time,
+                    'end_time' => $form->end_time
+                ],
+                'requested_items' => [
+                    'facilities' => $form->requestedFacilities->map(function ($facility) {
+                    return [
+                        'name' => $facility->facility->facility_name,
+                        'fee' => $facility->facility->external_fee,
+                        'is_waived' => $facility->is_waived
+                    ];
+                }),
+                    'equipment' => $form->requestedEquipment->map(function ($equipment) {
+                    return [
+                        'name' => $equipment->equipment->equipment_name,
+                        'quantity' => $equipment->quantity,
+                        'fee' => $equipment->equipment->external_fee,
+                        'is_waived' => $equipment->is_waived
+                    ];
+                })
+                ],
+                'fees' => [
+                    'tentative_fee' => $totalTentativeFee,
+                    'approved_fee' => $approvedFee, // Use calculated approved fee
+                    'late_penalty_fee' => $form->late_penalty_fee,
+                    'is_late' => $form->is_late,
+                    'breakdown' => [ // ADDED: Detailed fee breakdown
+                        'base_fees' => $facilityFees + $equipmentFees,
+                        'additional_fees' => $form->requisitionFees->sum('fee_amount'),
+                        'discounts' => $form->requisitionFees->sum('discount_amount'),
+                        'late_penalty' => $form->is_late ? $form->late_penalty_fee : 0
+                    ],
+                    'requisition_fees' => $requisitionFees // ADDED: All requisition fee records
+                ],
+                'status_tracking' => [
+                    'is_late' => $form->is_late,
+                    'is_finalized' => $form->is_finalized,
+                    'finalized_at' => $form->finalized_at,
+                    'finalized_by' => $form->finalizedBy ? [
+                        'id' => $form->finalizedBy->admin_id,
+                        'name' => $form->finalizedBy->first_name . ' ' . $form->finalizedBy->last_name
+                    ] : null,
+                    'is_closed' => $form->is_closed,
+                    'closed_at' => $form->closed_at,
+                    'closed_by' => $form->closedBy ? [
+                        'id' => $form->closedBy->admin_id,
+                        'name' => $form->closedBy->first_name . ' ' . $form->closedBy->last_name
+                    ] : null,
+                    'returned_at' => $form->returned_at
+                ],
+                'documents' => [
+                    'endorser' => $form->endorser,
+                    'date_endorsed' => $form->date_endorsed,
+                    'formal_letter' => [
+                        'url' => $form->formal_letter_url,
+                        'public_id' => $form->formal_letter_public_id
+                    ],
+                    'facility_layout' => [
+                        'url' => $form->facility_layout_url,
+                        'public_id' => $form->facility_layout_public_id
+                    ],
+                    'official_receipt' => [
+                        'number' => $form->official_receipt_no,
+                        'url' => $form->official_receipt_url,
+                        'public_id' => $form->official_receipt_public_id
+                    ]
+                ],
+                'approvals' => [
+                    'count' => $form->requisitionApprovals()->whereNotNull('approved_by')->count(),
+                    'rejections' => $form->requisitionApprovals()->whereNotNull('rejected_by')->count(),
+                    'latest_action' => $form->requisitionApprovals()->latest('date_updated')->first()
+                ],
+                'access_code' => $form->access_code
+            ];
+        });
+
+    return response()->json($forms);
+}
 
     public function approveRequest(Request $request, $requestId)
     {
@@ -379,6 +408,40 @@ class AdminApprovalController extends Controller
         return response()->json($forms);
     }
 
+    public function getRequisitionFees($requestId)
+    {
+        try {
+            $fees = RequisitionFee::with('addedBy')
+                ->where('request_id', $requestId)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($fee) {
+                    return [
+                        'fee_id' => $fee->fee_id,
+                        'label' => $fee->label,
+                        'fee_amount' => $fee->fee_amount,
+                        'discount_amount' => $fee->discount_amount,
+                        'discount_type' => $fee->discount_type,
+                        'type' => $fee->fee_amount > 0 ? ($fee->fee_amount > 0 && $fee->discount_amount > 0 ? 'mixed' : 'fee') : 'discount',
+                        'added_by' => $fee->addedBy ? [
+                            'admin_id' => $fee->addedBy->admin_id,
+                            'name' => $fee->addedBy->first_name . ' ' . $fee->addedBy->last_name
+                        ] : null,
+                        'created_at' => $fee->created_at,
+                        'updated_at' => $fee->updated_at
+                    ];
+                });
+
+            return response()->json($fees);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch fees',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     // --- NEW FUNCTIONS IN NEED OF TESTING -- //
 
     public function addFee(Request $request, $requestId)
@@ -416,6 +479,36 @@ class AdminApprovalController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to add fee',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function removeFee($requestId, $feeId)
+    {
+        try {
+            $fee = RequisitionFee::where('request_id', $requestId)
+                ->where('fee_id', $feeId)
+                ->firstOrFail();
+
+            $fee->delete();
+
+            // Recalculate approved fee
+            $form = RequisitionForm::with(['requestedFacilities', 'requestedEquipment', 'requisitionFees'])
+                ->findOrFail($requestId);
+
+            $approvedFee = $this->calculateApprovedFee($form);
+            $form->approved_fee = $approvedFee;
+            $form->save();
+
+            return response()->json([
+                'message' => 'Fee removed successfully',
+                'updated_approved_fee' => $approvedFee
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to remove fee',
                 'details' => $e->getMessage()
             ], 500);
         }
@@ -466,37 +559,74 @@ class AdminApprovalController extends Controller
 
 
     public function addLatePenalty(Request $request, $requestId)
-    {
-        try {
-            $validatedData = $request->validate([
-                'penalty_amount' => 'required|numeric|min:0.01'
-            ]);
+{
+    try {
+        $validatedData = $request->validate([
+            'penalty_amount' => 'required|numeric|min:0.01'
+        ]);
 
-            $form = RequisitionForm::findOrFail($requestId);
-            $form->late_penalty_fee = $validatedData['penalty_amount'];
-            $form->is_late = true;
-            $form->save();
-
-            // Recalculate approved fee
-            $form->load(['requestedFacilities', 'requestedEquipment', 'requisitionFees']);
-            $approvedFee = $this->calculateApprovedFee($form);
-            $form->approved_fee = $approvedFee;
-            $form->save();
-
+        $form = RequisitionForm::findOrFail($requestId);
+        
+        // Check if the requisition is marked as late by the system
+        if (!$form->is_late) {
             return response()->json([
-                'message' => 'Late penalty added successfully',
-                'penalty_amount' => $form->late_penalty_fee,
-                'updated_approved_fee' => $approvedFee
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Failed to add late penalty',
-                'details' => $e->getMessage()
-            ], 500);
+                'error' => 'Cannot add late penalty',
+                'details' => 'This requisition is not marked as late by the system'
+            ], 422);
         }
-    }
 
+        $form->late_penalty_fee = $validatedData['penalty_amount'];
+        $form->save();
+
+        // Recalculate approved fee
+        $form->load(['requestedFacilities', 'requestedEquipment', 'requisitionFees']);
+        $approvedFee = $this->calculateApprovedFee($form);
+        $form->approved_fee = $approvedFee;
+        $form->save();
+
+        return response()->json([
+            'message' => 'Late penalty added successfully',
+            'penalty_amount' => $form->late_penalty_fee,
+            'updated_approved_fee' => $approvedFee
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Failed to add late penalty',
+            'details' => $e->getMessage()
+        ], 500);
+    }
+}
+
+    public function removeLatePenalty(Request $request, $requestId)
+{
+    try {
+        $form = RequisitionForm::findOrFail($requestId);
+
+        // Only reset the penalty fee, leave is_late status as determined by the system
+        $form->late_penalty_fee = 0;
+        $form->save();
+
+        // Recalculate approved fee without penalty
+        $form->load(['requestedFacilities', 'requestedEquipment', 'requisitionFees']);
+        $approvedFee = $this->calculateApprovedFee($form);
+        $form->approved_fee = $approvedFee;
+        $form->save();
+
+        return response()->json([
+            'message' => 'Late penalty removed successfully',
+            'penalty_amount' => $form->late_penalty_fee,
+            'updated_approved_fee' => $approvedFee,
+            'is_late' => $form->is_late // Include current late status in response
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Failed to remove late penalty',
+            'details' => $e->getMessage()
+        ], 500);
+    }
+}
 
     public function addComment(Request $request, $requestId)
     {
@@ -665,17 +795,17 @@ class AdminApprovalController extends Controller
     // Calculate & Finalize fees //
 
     private function calculateBaseFees($form)
-    {
-        $facilityFees = $form->requestedFacilities->sum(function ($facility) {
-            return $facility->is_waived ? 0 : $facility->facility->external_fee;
-        });
+{
+    $facilityFees = $form->requestedFacilities->sum(function ($facility) {
+        return $facility->is_waived ? 0 : $facility->facility->external_fee;
+    });
 
-        $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
-            return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
-        });
+    $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
+        return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
+    });
 
-        return $facilityFees + $equipmentFees;
-    }
+    return $facilityFees + $equipmentFees;
+}
 
     private function calculateTentativeFee($requestId)
     {
@@ -700,18 +830,51 @@ class AdminApprovalController extends Controller
     }
     private function calculateApprovedFee($form)
     {
-        $baseFees = $this->calculateBaseFees($form);
-        $additionalFees = $form->requisitionFees->sum('fee_amount');
-        $discounts = $form->requisitionFees->sum('discount_amount');
+         $baseFees = $this->calculateBaseFees($form);
+          $additionalFees = $this->calculateAdditionalFees($form);
+        $discounts = $this->calculateTotalDiscounts($form, $baseFees + $additionalFees);
 
-        $approvedFee = $baseFees + $additionalFees - $discounts;
+         $approvedFee = $baseFees + $additionalFees - $discounts;
 
-        if ($form->is_late) {
-            $approvedFee += $form->late_penalty_fee;
-        }
-
-        return $approvedFee;
+         if ($form->is_late) {
+        $approvedFee += $form->late_penalty_fee;
     }
+
+        // Ensure fee doesn't go negative
+    return max(0, $approvedFee);
+}
+
+private function calculateAdditionalFees($form)
+{
+    // Sum only positive fee amounts (additional fees)
+    return $form->requisitionFees->sum(function ($fee) {
+        return max(0, (float) $fee->fee_amount);
+    });
+}
+
+private function calculateTotalDiscounts($form, $subtotal)
+{
+    $totalDiscount = 0;
+
+    foreach ($form->requisitionFees as $fee) {
+        $discountAmount = (float) $fee->discount_amount;
+        
+        if ($discountAmount > 0) {
+            if ($fee->discount_type === 'Percentage') {
+                // Calculate percentage discount based on subtotal
+                $percentageDiscount = ($discountAmount / 100) * $subtotal;
+                $totalDiscount += $percentageDiscount;
+            } else {
+                // Fixed discount
+                $totalDiscount += $discountAmount;
+            }
+        }
+    }
+
+    return $totalDiscount;
+}
+
+
 
     // Completed Transactions // 
 

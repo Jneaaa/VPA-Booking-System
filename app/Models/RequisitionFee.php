@@ -16,15 +16,11 @@ class RequisitionFee extends Model
         'fee_amount',
         'discount_amount',
         'discount_type',
-        'waived_facility',
-        'waived_equipment',
-        'waived_form'
     ];
 
     protected $casts = [
         'fee_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
-        'waived_form' => 'boolean'
     ];
 
     // Eloquent Relationships
@@ -38,16 +34,4 @@ class RequisitionFee extends Model
     {
         return $this->belongsTo(Admin::class, 'added_by', 'admin_id');
     }
-
-    public function waivedEquipment()
-    {
-        return $this->belongsTo(RequestedEquipment::class, 'waived_equipment', 'requested_equipment_id');
-    }
-
-        public function waivedFacility()
-    {
-        return $this->belongsTo(RequestedFacility::class, 'waived_facility', 'requested_facility_id');
-    }
-
-
 }

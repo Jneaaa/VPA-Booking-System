@@ -120,13 +120,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/update-photo', [AdminController::class, 'updatePhoto']);
 
      // --- Form Management Routes --- //
-     Route::prefix('admin/requisition')->group(function () {
+    Route::prefix('admin/requisition')->group(function () {
 
     // Add fees, waivers, and discounts
     Route::post('/{requestId}/fee', [AdminApprovalController::class, 'addFee']);
     Route::post('/{requestId}/discount', [AdminApprovalController::class, 'addDiscount']);
     Route::post('/{requestId}/late-penalty', [AdminApprovalController::class, 'addLatePenalty']);
-      Route::post('/{requestId}/waive', [AdminApprovalController::class, 'waiveItems']);
+    Route::post('/{requestId}/remove-late-penalty', [AdminApprovalController::class, 'removeLatePenalty']);
+    Route::delete('/{requestId}/fee/{feeId}', [AdminApprovalController::class, 'removeFee']);
+    Route::get('/{requestId}/fees', [AdminApprovalController::class, 'getRequisitionFees']);
+    Route::post('/{requestId}/waive', [AdminApprovalController::class, 'waiveItems']);
 
     // Add and get comments
     Route::post('/{requestId}/comment', [AdminApprovalController::class, 'addComment']);

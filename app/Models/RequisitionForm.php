@@ -100,7 +100,7 @@ class RequisitionForm extends Model
     }
         public function requisitionFees()
     {
-        return $this->hasMany(RequisitionComment::class, 'request_id', 'request_id');
+        return $this->hasMany(RequisitionFee::class, 'request_id', 'request_id');
     }
 
     public function finalizedBy()
