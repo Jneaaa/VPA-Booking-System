@@ -241,6 +241,23 @@
         background-color: #f8d7da;
         color: #dc3545;
     }
+
+    .spinner-border {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        vertical-align: text-bottom;
+        border: 0.25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border .75s linear infinite;
+    }
+
+    @keyframes spinner-border {
+        to {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 <div class="container-fluid admin-container">
     <div class="card bg-transparent shadow-none pt-0" style="border: none !important;">
@@ -710,6 +727,7 @@
                         });
 
                         // Document preview functionality - clean overlay for PDFs and images
+                        // Document preview functionality - clean overlay for PDFs and images
                         document.addEventListener('click', function (event) {
                             // Check if the click is on a button that has data-bs-target="#documentModal" 
                             // and data-document-url attributes
@@ -785,6 +803,73 @@
                                     document.body.style.height = originalBodyStyles.height || '';
                                 }
 
+                                // Create close button (positioned absolutely in the top right corner)
+                                const closeButton = document.createElement('button');
+                                closeButton.innerHTML = '&times;';
+                                closeButton.style.position = 'absolute';
+                                closeButton.style.top = '20px';
+                                closeButton.style.right = '20px';
+                                closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+                                closeButton.style.color = 'white';
+                                closeButton.style.border = 'none';
+                                closeButton.style.borderRadius = '50%';
+                                closeButton.style.width = '40px';
+                                closeButton.style.height = '40px';
+                                closeButton.style.fontSize = '24px';
+                                closeButton.style.cursor = 'pointer';
+                                closeButton.style.transition = 'background 0.2s';
+                                closeButton.style.zIndex = '10000';
+                                closeButton.onmouseover = function () {
+                                    this.style.background = 'rgba(255, 255, 255, 0.3)';
+                                };
+                                closeButton.onmouseout = function () {
+                                    this.style.background = 'rgba(255, 255, 255, 0.2)';
+                                };
+                                closeButton.onclick = function (e) {
+                                    e.stopPropagation();
+                                    closeOverlay();
+                                };
+                                overlay.appendChild(closeButton);
+
+                                // Create loading indicator container
+                                const loadingContainer = document.createElement('div');
+                                loadingContainer.style.display = 'flex';
+                                loadingContainer.style.flexDirection = 'column';
+                                loadingContainer.style.alignItems = 'center';
+                                loadingContainer.style.justifyContent = 'center';
+                                loadingContainer.style.position = 'absolute';
+                                loadingContainer.style.zIndex = '1000';
+
+                                // Create loading indicator
+                                const loadingIndicator = document.createElement('div');
+                                loadingIndicator.className = 'spinner-border text-light';
+                                loadingIndicator.style.width = '3rem';
+                                loadingIndicator.style.height = '3rem';
+                                loadingContainer.appendChild(loadingIndicator);
+
+                                // Create loading text
+                                const loadingText = document.createElement('div');
+                                loadingText.textContent = 'Loading document...';
+                                loadingText.style.color = 'white';
+                                loadingText.style.marginTop = '1.5rem';
+                                loadingText.style.fontSize = '1.1rem';
+                                loadingContainer.appendChild(loadingText);
+
+                                // Create troubleshooting text (only shown during loading)
+                                const troubleText = document.createElement('div');
+                                troubleText.innerHTML = '<p class="text-light text-center mt-2" style="font-size: 0.9rem;">If the document doesn\'t load, try <a href="' + documentUrl + '" target="_blank" style="color: #328bffff; text-decoration: underline;">opening in a new tab</a> or refreshing the page.</p>';
+                                troubleText.style.color = 'white';
+                                troubleText.style.marginTop = '0.5rem';
+                                troubleText.style.textAlign = 'center';
+                                loadingContainer.appendChild(troubleText);
+
+                                overlay.appendChild(loadingContainer);
+
+                                // Function to remove loading elements
+                                function removeLoadingElements() {
+                                    loadingContainer.remove();
+                                }
+
                                 if (isPDF) {
                                     // For PDF files - Google Docs viewer in full overlay
                                     const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(documentUrl)}&embedded=true`;
@@ -796,6 +881,14 @@
                                     iframe.style.border = 'none';
                                     iframe.style.borderRadius = '8px';
                                     iframe.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
+                                    iframe.style.opacity = '0';
+                                    iframe.style.transition = 'opacity 0.3s ease-in-out';
+
+                                    iframe.onload = function () {
+                                        // Hide loading elements when iframe loads
+                                        removeLoadingElements();
+                                        iframe.style.opacity = '1';
+                                    };
 
                                     overlay.appendChild(iframe);
 
@@ -814,38 +907,30 @@
                                     img.style.borderRadius = '8px';
                                     img.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
                                     img.style.objectFit = 'contain';
+                                    img.style.opacity = '0';
+                                    img.style.transition = 'opacity 0.3s ease-in-out';
 
-                                    // Close button for images
-                                    const closeButton = document.createElement('button');
-                                    closeButton.innerHTML = '&times;';
-                                    closeButton.style.position = 'absolute';
-                                    closeButton.style.top = '-20px';
-                                    closeButton.style.right = '-43px';
-                                    closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
-                                    closeButton.style.color = 'white';
-                                    closeButton.style.border = 'none';
-                                    closeButton.style.borderRadius = '50%';
-                                    closeButton.style.width = '40px';
-                                    closeButton.style.height = '40px';
-                                    closeButton.style.fontSize = '24px';
-                                    closeButton.style.cursor = 'pointer';
-                                    closeButton.style.transition = 'background 0.2s';
-                                    closeButton.onmouseover = function () {
-                                        this.style.background = 'rgba(255, 255, 255, 0.3)';
+                                    img.onload = function () {
+                                        // Hide loading elements when image loads
+                                        removeLoadingElements();
+                                        img.style.opacity = '1';
                                     };
-                                    closeButton.onmouseout = function () {
-                                        this.style.background = 'rgba(255, 255, 255, 0.2)';
-                                    };
-                                    closeButton.onclick = function () {
-                                        closeOverlay();
+
+                                    img.onerror = function () {
+                                        // If image fails to load, show error message
+                                        loadingIndicator.style.display = 'none';
+                                        loadingText.textContent = 'Failed to load image. Please try opening in a new tab.';
+                                        loadingText.style.color = '#ff6b6b';
+                                        // Keep the troubleshooting text visible for errors
                                     };
 
                                     imageContainer.appendChild(img);
-                                    imageContainer.appendChild(closeButton);
                                     overlay.appendChild(imageContainer);
 
                                 } else {
                                     // For other file types - download link
+                                    removeLoadingElements();
+
                                     const downloadContainer = document.createElement('div');
                                     downloadContainer.style.background = 'white';
                                     downloadContainer.style.padding = '2rem';
@@ -865,24 +950,6 @@
                                         closeOverlay();
                                     };
 
-                                    const closeButton = document.createElement('button');
-                                    closeButton.innerHTML = '&times;';
-                                    closeButton.style.position = 'absolute';
-                                    closeButton.style.top = '10px';
-                                    closeButton.style.right = '10px';
-                                    closeButton.style.background = 'rgba(0, 0, 0, 0.2)';
-                                    closeButton.style.color = 'black';
-                                    closeButton.style.border = 'none';
-                                    closeButton.style.borderRadius = '50%';
-                                    closeButton.style.width = '30px';
-                                    closeButton.style.height = '30px';
-                                    closeButton.style.fontSize = '18px';
-                                    closeButton.style.cursor = 'pointer';
-                                    closeButton.onclick = function () {
-                                        closeOverlay();
-                                    };
-
-                                    downloadContainer.appendChild(closeButton);
                                     downloadContainer.appendChild(message);
                                     downloadContainer.appendChild(downloadLink);
                                     overlay.appendChild(downloadContainer);
@@ -1022,9 +1089,9 @@
                                     }
 
                                     feeElement.innerHTML = `
-                                        <span class="item-name">${fee.label}</span>
-                                        <span class="item-price">${amountText}</span>
-                                    `;
+                                                <span class="item-name">${fee.label}</span>
+                                                <span class="item-price">${amountText}</span>
+                                            `;
                                     additionalFeesContainer.appendChild(feeElement);
                                 });
                             } else {
@@ -1098,76 +1165,76 @@
 
                                 // Update user details
                                 document.getElementById('userDetails').innerHTML = `
-                                                                                                                                <p><strong>Name:</strong> ${request.user_details.first_name} ${request.user_details.last_name}</p>
-                                                                                                                                <p><strong>Email:</strong> ${request.user_details.email}</p>
-                                                                                                                                <p><strong>User Type:</strong> ${request.user_details.user_type}</p>
-                                                                                                                                <p><strong>School ID:</strong> ${request.user_details.school_id || 'N/A'}</p>
-                                                                                                                                <p><strong>Organization:</strong> ${request.user_details.organization_name || 'N/A'}</p>
-                                                                                                                                <p><strong>Contact:</strong> ${request.user_details.contact_number || 'N/A'}</p>
-                                                                                                                            `;
+                                                                                                                                        <p><strong>Name:</strong> ${request.user_details.first_name} ${request.user_details.last_name}</p>
+                                                                                                                                        <p><strong>Email:</strong> ${request.user_details.email}</p>
+                                                                                                                                        <p><strong>User Type:</strong> ${request.user_details.user_type}</p>
+                                                                                                                                        <p><strong>School ID:</strong> ${request.user_details.school_id || 'N/A'}</p>
+                                                                                                                                        <p><strong>Organization:</strong> ${request.user_details.organization_name || 'N/A'}</p>
+                                                                                                                                        <p><strong>Contact:</strong> ${request.user_details.contact_number || 'N/A'}</p>
+                                                                                                                                    `;
 
                                 // Update form details
                                 document.getElementById('formDetails').innerHTML = `
-                                                                                                                                <p><strong>Purpose:</strong> ${request.form_details.purpose}</p>
-                                                                                                                                <p><strong>Participants:</strong> ${request.form_details.num_participants}</p>
-                                                                                                                                <p><strong>Schedule:</strong> ${formatDateTime(request.schedule)}</p>
-                                                                                                                                <p><strong>Additional Requests:</strong> ${request.form_details.additional_requests || 'None'}</p>
-                                                                                                                                <p><strong>Formal Letter:</strong> ${request.documents.formal_letter.url ?
+                                                                                                                                        <p><strong>Purpose:</strong> ${request.form_details.purpose}</p>
+                                                                                                                                        <p><strong>Participants:</strong> ${request.form_details.num_participants}</p>
+                                                                                                                                        <p><strong>Schedule:</strong> ${formatDateTime(request.schedule)}</p>
+                                                                                                                                        <p><strong>Additional Requests:</strong> ${request.form_details.additional_requests || 'None'}</p>
+                                                                                                                                        <p><strong>Formal Letter:</strong> ${request.documents.formal_letter.url ?
                                         `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                                                                                                                                        data-document-url="${request.documents.formal_letter.url}" data-document-title="Formal Letter">
-                                                                                                                                        View Document
-                                                                                                                                    </button>` :
+                                                                                                                                                data-document-url="${request.documents.formal_letter.url}" data-document-title="Formal Letter">
+                                                                                                                                                View Document
+                                                                                                                                            </button>` :
                                         'Not uploaded'}</p>
-                                                                                                                                <p><strong>Facility Setup:</strong> ${request.documents.facility_layout.url ?
+                                                                                                                                        <p><strong>Facility Setup:</strong> ${request.documents.facility_layout.url ?
                                         `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                                                                                                                                        data-document-url="${request.documents.facility_layout.url}" data-document-title="Facility Setup">
-                                                                                                                                        View Document
-                                                                                                                                    </button>` :
+                                                                                                                                                data-document-url="${request.documents.facility_layout.url}" data-document-title="Facility Setup">
+                                                                                                                                                View Document
+                                                                                                                                            </button>` :
                                         'Not uploaded'}</p>
-                                                                                                                            `;
+                                                                                                                                    `;
                                 // Update requested items with fee breakdown and waiver checkboxes
                                 document.getElementById('requestedItems').innerHTML = `
-                                                                                    <div class="mb-3">
-                                                                                        <h6>Facilities:</h6>
-                                                                                        ${request.requested_items.facilities.length > 0 ?
+                                                                                            <div class="mb-3">
+                                                                                                <h6>Facilities:</h6>
+                                                                                                ${request.requested_items.facilities.length > 0 ?
                                         request.requested_items.facilities.map(f =>
                                             `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${f.is_waived ? 'waived' : ''}">
-                                                                                                    <div class="d-flex align-items-center">
-                                                                                                        <div class="form-check me-2">
-                                                                                                            <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                                                                                data-type="facility" 
-                                                                                                                data-id="${f.id}"
-                                                                                                                ${f.is_waived ? 'checked' : ''}
-                                                                                                                onchange="handleWaiverChange(this)">
-                                                                                                        </div>
-                                                                                                        <span class="item-name">${f.name}</span>
-                                                                                                    </div>
-                                                                                                    <span class="item-price">₱${f.fee}</span>
-                                                                                                </div>`
+                                                                                                            <div class="d-flex align-items-center">
+                                                                                                                <div class="form-check me-2">
+                                                                                                                    <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                                                                                        data-type="facility" 
+                                                                                                                        data-id="${f.id}"
+                                                                                                                        ${f.is_waived ? 'checked' : ''}
+                                                                                                                        onchange="handleWaiverChange(this)">
+                                                                                                                </div>
+                                                                                                                <span class="item-name">${f.name}</span>
+                                                                                                            </div>
+                                                                                                            <span class="item-price">₱${f.fee}</span>
+                                                                                                        </div>`
                                         ).join('') : '<p>No facilities requested</p>'}
 
-                                                                                        <h6 class="mt-3">Equipment:</h6>
-                                                                                        ${request.requested_items.equipment.length > 0 ?
+                                                                                                <h6 class="mt-3">Equipment:</h6>
+                                                                                                ${request.requested_items.equipment.length > 0 ?
                                         request.requested_items.equipment.map(e =>
                                             `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${e.is_waived ? 'waived' : ''}">
-                                                                                                    <div class="d-flex align-items-center">
-                                                                                                        <div class="form-check me-2">
-                                                                                                            <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                                                                                data-type="equipment" 
-                                                                                                                data-id="${e.id}"
-                                                                                                                ${e.is_waived ? 'checked' : ''}
-                                                                                                                onchange="handleWaiverChange(this)">
-                                                                                                        </div>
-                                                                                                        <span class="item-name">• ${e.name}</span>
-                                                                                                    </div>
-                                                                                                    <span class="item-price">₱${e.fee}</span>
-                                                                                                </div>`
+                                                                                                            <div class="d-flex align-items-center">
+                                                                                                                <div class="form-check me-2">
+                                                                                                                    <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                                                                                        data-type="equipment" 
+                                                                                                                        data-id="${e.id}"
+                                                                                                                        ${e.is_waived ? 'checked' : ''}
+                                                                                                                        onchange="handleWaiverChange(this)">
+                                                                                                                </div>
+                                                                                                                <span class="item-name">• ${e.name}</span>
+                                                                                                            </div>
+                                                                                                            <span class="item-price">₱${e.fee}</span>
+                                                                                                        </div>`
                                         ).join('') : '<p>No equipment requested</p>'}
-                                                                                    </div>
-                                                                                    <div class="d-flex justify-content-end mb-2">
-                                                                                        
-                                                                                    </div>
-                                                                                `;
+                                                                                            </div>
+                                                                                            <div class="d-flex justify-content-end mb-2">
+
+                                                                                            </div>
+                                                                                        `;
 
                                 // Update footer fee dynamically
                                 document.getElementById('tentativeFee').textContent = `₱${request.fees.tentative_fee}`;
@@ -1175,21 +1242,21 @@
 
                                 // Update form status
                                 document.getElementById('formStatus').innerHTML = `
-                                                                                                                <div class="row"> <!-- optional min-height for visual spacing -->
-                                                                                                                    <div class="col-md-3 d-flex align-items-center justify-content-center">
-                                                                                                                        <p class="mb-0"><strong>Approved Fee:</strong> ${request.fees.approved_fee ? `₱${request.fees.approved_fee}` : 'Pending'}</p>
-                                                                                                                    </div>
-                                                                                                                    <div class="col-md-3 d-flex align-items-center justify-content-center">
-                                                                                                                        <p class="mb-0"><strong>Approvals:</strong> ${request.approvals.count}/3</p>
-                                                                                                                    </div>
-                                                                                                                    <div class="col-md-3 d-flex align-items-center justify-content-center">
-                                                                                                                        <p class="mb-0"><strong>Late Penalty:</strong> ${request.fees.late_penalty_fee ? `₱${request.fees.late_penalty_fee}` : 'N/A'}</p>
-                                                                                                                    </div>
-                                                                                                                    <div class="col-md-3 d-flex align-items-center justify-content-center">
-                                                                                                                        <p class="mb-0"><strong>Is Late:</strong> ${is_late ? 'Yes' : 'No'}</p>
-                                                                                                                    </div>
-                                                                                                                </div>
-                                                                                                            `;
+                                                                                                                        <div class="row"> <!-- optional min-height for visual spacing -->
+                                                                                                                            <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                                                                                                                <p class="mb-0"><strong>Approved Fee:</strong> ${request.fees.approved_fee ? `₱${request.fees.approved_fee}` : 'Pending'}</p>
+                                                                                                                            </div>
+                                                                                                                            <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                                                                                                                <p class="mb-0"><strong>Approvals:</strong> ${request.approvals.count}/3</p>
+                                                                                                                            </div>
+                                                                                                                            <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                                                                                                                <p class="mb-0"><strong>Late Penalty:</strong> ${request.fees.late_penalty_fee ? `₱${request.fees.late_penalty_fee}` : 'N/A'}</p>
+                                                                                                                            </div>
+                                                                                                                            <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                                                                                                                <p class="mb-0"><strong>Is Late:</strong> ${is_late ? 'Yes' : 'No'}</p>
+                                                                                                                            </div>
+                                                                                                                        </div>
+                                                                                                                    `;
 
 
                                 // Set up approve/reject buttons
@@ -1211,10 +1278,10 @@
                                 // Show error state
                                 document.getElementById('loadingState').style.display = 'none';
                                 document.getElementById('contentState').innerHTML = `
-                                                                                                                                <div class="alert alert-danger">
-                                                                                                                                    Failed to load request details. Please try refreshing the page.
-                                                                                                                                </div>
-                                                                                                                            `;
+                                                                                                                                        <div class="alert alert-danger">
+                                                                                                                                            Failed to load request details. Please try refreshing the page.
+                                                                                                                                        </div>
+                                                                                                                                    `;
                                 document.getElementById('contentState').style.display = 'block';
                             }
                         }
@@ -1234,13 +1301,13 @@
                                     const facilityElement = document.createElement('div');
                                     facilityElement.className = 'd-flex justify-content-between align-items-center mb-1';
                                     facilityElement.innerHTML = `
-                                                                            <span class="item-name ${facility.is_waived ? 'waived' : ''}">
-                                                                                ${facility.name}${facility.is_waived ? ' (Waived)' : ''}
-                                                                            </span>
-                                                                            <span class="item-price ${facility.is_waived ? 'waived' : ''}">
-                                                                                ₱${facility.fee}
-                                                                            </span>
-                                                                        `;
+                                                                                    <span class="item-name ${facility.is_waived ? 'waived' : ''}">
+                                                                                        ${facility.name}${facility.is_waived ? ' (Waived)' : ''}
+                                                                                    </span>
+                                                                                    <span class="item-price ${facility.is_waived ? 'waived' : ''}">
+                                                                                        ₱${facility.fee}
+                                                                                    </span>
+                                                                                `;
                                     facilitiesContainer.appendChild(facilityElement);
                                 });
                             } else {
@@ -1253,13 +1320,13 @@
                                     const equipmentElement = document.createElement('div');
                                     equipmentElement.className = 'd-flex justify-content-between align-items-center mb-1';
                                     equipmentElement.innerHTML = `
-                                                                            <span class="item-name ${equipment.is_waived ? 'waived' : ''}">
-                                                                                ${equipment.name}${equipment.is_waived ? ' (Waived)' : ''}
-                                                                            </span>
-                                                                            <span class="item-price ${equipment.is_waived ? 'waived' : ''}">
-                                                                                ₱${equipment.fee} × ${equipment.quantity}
-                                                                            </span>
-                                                                        `;
+                                                                                    <span class="item-name ${equipment.is_waived ? 'waived' : ''}">
+                                                                                        ${equipment.name}${equipment.is_waived ? ' (Waived)' : ''}
+                                                                                    </span>
+                                                                                    <span class="item-price ${equipment.is_waived ? 'waived' : ''}">
+                                                                                        ₱${equipment.fee} × ${equipment.quantity}
+                                                                                    </span>
+                                                                                `;
                                     equipmentContainer.appendChild(equipmentElement);
                                 });
                             } else {
@@ -1363,24 +1430,24 @@
                             }
 
                             feeItem.innerHTML = `
-                                                                                        ${adminPhoto ?
+                                                                                                ${adminPhoto ?
                                     `<img src="${adminPhoto}" class="rounded-circle me-3" width="32" height="32" alt="Admin Photo">` :
                                     `<i class="bi bi-person-circle fs-5 me-3 text-secondary"></i>`
                                 }
-                                                                                        <div class="flex-grow-1">
-                                                                                            <div class="d-flex justify-content-between align-items-center">
-                                                                                                <div>
-                                                                                                    <small class="text-muted fst-italic">
-                                                                                                        ${fee.label} (${typeName}) of ₱${amount.toFixed(2)} added by <strong>${adminName}</strong>
-                                                                                                    </small>
+                                                                                                <div class="flex-grow-1">
+                                                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                                                        <div>
+                                                                                                            <small class="text-muted fst-italic">
+                                                                                                                ${fee.label} (${typeName}) of ₱${amount.toFixed(2)} added by <strong>${adminName}</strong>
+                                                                                                            </small>
+                                                                                                        </div>
+                                                                                                        <button class="btn btn-sm btn-icon btn-light-danger remove-btn">
+                                                                                                            <i class="bi bi-x-lg"></i>
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                    <small class="text-muted fst-italic">${timestamp}</small>
                                                                                                 </div>
-                                                                                                <button class="btn btn-sm btn-icon btn-light-danger remove-btn">
-                                                                                                    <i class="bi bi-x-lg"></i>
-                                                                                                </button>
-                                                                                            </div>
-                                                                                            <small class="text-muted fst-italic">${timestamp}</small>
-                                                                                        </div>
-                                                                                    `;
+                                                                                            `;
 
                             // Add remove functionality for regular fees
                             feeItem.querySelector(".remove-btn").addEventListener("click", async function () {
