@@ -394,7 +394,7 @@
                                 <div class="form-check form-switch m-0">
                                     <input class="form-check-input" type="checkbox" id="waiveAllSwitch"
                                         onchange="handleWaiveAll(this)">
-                                    <label class="form-check-label ms-2" for="waiveAllSwitch">
+                                    <label class="form-check-label" for="waiveAllSwitch">
                                         Waive All Fees
                                     </label>
                                 </div>
@@ -498,52 +498,54 @@
                         </div>
                     </div>
 
-<div class="row g-2">
-    <div class="col-12">
-        <div class="card">
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <div class="card">
 
-            <!-- Fee Breakdown Header -->
-            <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Fee Breakdown</h5>
-            </div>
+                                <!-- Fee Breakdown Header -->
+                                <div
+                                    class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">Fee Breakdown</h5>
+                                </div>
 
-            <div class="card-body">
-                <!-- Base Fees -->
-                <div class="mb-3">
-                    <h6 class="fw-bold mb-2">Base Fees</h6>
-                    <div id="baseFeesContainer">
-                        <!-- Facilities -->
-                        <div id="facilitiesFees">
-                            <!-- Populated by JS -->
-                        </div>
+                                <div class="card-body">
+                                    <!-- Base Fees -->
+                                    <div class="mb-3">
+                                        <h6 class="fw-bold mb-2">Base Fees</h6>
+                                        <div id="baseFeesContainer">
+                                            <!-- Facilities -->
+                                            <div id="facilitiesFees">
+                                                <!-- Populated by JS -->
+                                            </div>
 
-                        <!-- Equipment -->
-                        <div id="equipmentFees">
-                            <!-- Populated by JS -->
+                                            <!-- Equipment -->
+                                            <div id="equipmentFees">
+                                                <!-- Populated by JS -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Additional Fees -->
+                                    <div class="mb-3">
+                                        <h6 class="fw-bold mb-2">Additional Fees & Discounts</h6>
+                                        <div id="additionalFeesContainer">
+                                            <!-- Will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Total -->
+                                    <div
+                                        class="d-flex justify-content-between align-items-center fw-bold mt-3 border-top pt-2">
+                                        <span>Total Approved Fee:</span>
+                                        <span id="totalApprovedFee">₱0.00</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Additional Fees -->
-                <div class="mb-3">
-                    <h6 class="fw-bold mb-2">Additional Fees & Discounts</h6>
-                    <div id="additionalFeesContainer">
-                        <!-- Will be populated by JavaScript -->
-                    </div>
-                </div>
-
-                <!-- Total -->
-                <div class="d-flex justify-content-between align-items-center fw-bold mt-3 border-top pt-2">
-                    <span>Total Approved Fee:</span>
-                    <span id="totalApprovedFee">₱0.00</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 
-                    
+
 
                     <div class="row mt-4">
                         <div class="col-12">
@@ -995,40 +997,40 @@
                         }
 
                         // Function to update additional fees display
-function updateAdditionalFees(requisitionFees) {
-    const additionalFeesContainer = document.getElementById('additionalFeesContainer');
-    
-    // Clear existing content
-    additionalFeesContainer.innerHTML = '';
-    
-    if (requisitionFees && requisitionFees.length > 0) {
-        requisitionFees.forEach(fee => {
-            const feeElement = document.createElement('div');
-            feeElement.className = 'd-flex justify-content-between align-items-center mb-1';
-            
-            let amountText = '';
-            if (fee.type === 'fee') {
-                amountText = `₱${fee.fee_amount}`;
-            } else if (fee.type === 'discount') {
-                if (fee.discount_type === 'Percentage') {
-                    amountText = `${fee.discount_amount}%`;
-                } else {
-                    amountText = `-₱${fee.discount_amount}`;
-                }
-            } else if (fee.type === 'mixed') {
-                amountText = `₱${fee.fee_amount} - ${fee.discount_amount}${fee.discount_type === 'Percentage' ? '%' : '₱'}`;
-            }
-            
-            feeElement.innerHTML = `
-                <span class="item-name">${fee.label}</span>
-                <span class="item-price">${amountText}</span>
-            `;
-            additionalFeesContainer.appendChild(feeElement);
-        });
-    } else {
-        additionalFeesContainer.innerHTML = '<p class="text-muted">No additional fees have been added yet.</p>';
-    }
-}
+                        function updateAdditionalFees(requisitionFees) {
+                            const additionalFeesContainer = document.getElementById('additionalFeesContainer');
+
+                            // Clear existing content
+                            additionalFeesContainer.innerHTML = '';
+
+                            if (requisitionFees && requisitionFees.length > 0) {
+                                requisitionFees.forEach(fee => {
+                                    const feeElement = document.createElement('div');
+                                    feeElement.className = 'd-flex justify-content-between align-items-center mb-1';
+
+                                    let amountText = '';
+                                    if (fee.type === 'fee') {
+                                        amountText = `₱${parseFloat(fee.fee_amount).toFixed(2)}`;
+                                    } else if (fee.type === 'discount') {
+                                        if (fee.discount_type === 'Percentage') {
+                                            amountText = `${parseFloat(fee.discount_amount).toFixed(2)}%`;
+                                        } else {
+                                            amountText = `-₱${parseFloat(fee.discount_amount).toFixed(2)}`;
+                                        }
+                                    } else if (fee.type === 'mixed') {
+                                        amountText = `₱${parseFloat(fee.fee_amount).toFixed(2)} - ${parseFloat(fee.discount_amount).toFixed(2)}${fee.discount_type === 'Percentage' ? '%' : '₱'}`;
+                                    }
+
+                                    feeElement.innerHTML = `
+                                        <span class="item-name">${fee.label}</span>
+                                        <span class="item-price">${amountText}</span>
+                                    `;
+                                    additionalFeesContainer.appendChild(feeElement);
+                                });
+                            } else {
+                                additionalFeesContainer.innerHTML = '<p class="text-muted">No additional fees or discounts</p>';
+                            }
+                        }
 
                         // Update the fetchRequestDetails function to initialize calendar after content is visible
                         async function fetchRequestDetails() {
@@ -1056,6 +1058,7 @@ function updateAdditionalFees(requisitionFees) {
                                 // After successful data fetch and updates, show content and hide loading state
                                 document.getElementById('loadingState').style.display = 'none';
                                 document.getElementById('contentState').style.display = 'block';
+                                document.getElementById('totalApprovedFee').textContent = `₱${parseFloat(request.fees.approved_fee).toFixed(2)}`;
 
                                 // Initialize calendar AFTER content is visible
                                 setTimeout(() => {
@@ -1095,84 +1098,76 @@ function updateAdditionalFees(requisitionFees) {
 
                                 // Update user details
                                 document.getElementById('userDetails').innerHTML = `
-                                                                            <p><strong>Name:</strong> ${request.user_details.first_name} ${request.user_details.last_name}</p>
-                                                                            <p><strong>Email:</strong> ${request.user_details.email}</p>
-                                                                            <p><strong>User Type:</strong> ${request.user_details.user_type}</p>
-                                                                            <p><strong>School ID:</strong> ${request.user_details.school_id || 'N/A'}</p>
-                                                                            <p><strong>Organization:</strong> ${request.user_details.organization_name || 'N/A'}</p>
-                                                                            <p><strong>Contact:</strong> ${request.user_details.contact_number || 'N/A'}</p>
-                                                                        `;
+                                                                                                                                <p><strong>Name:</strong> ${request.user_details.first_name} ${request.user_details.last_name}</p>
+                                                                                                                                <p><strong>Email:</strong> ${request.user_details.email}</p>
+                                                                                                                                <p><strong>User Type:</strong> ${request.user_details.user_type}</p>
+                                                                                                                                <p><strong>School ID:</strong> ${request.user_details.school_id || 'N/A'}</p>
+                                                                                                                                <p><strong>Organization:</strong> ${request.user_details.organization_name || 'N/A'}</p>
+                                                                                                                                <p><strong>Contact:</strong> ${request.user_details.contact_number || 'N/A'}</p>
+                                                                                                                            `;
 
                                 // Update form details
                                 document.getElementById('formDetails').innerHTML = `
-                                                                            <p><strong>Purpose:</strong> ${request.form_details.purpose}</p>
-                                                                            <p><strong>Participants:</strong> ${request.form_details.num_participants}</p>
-                                                                            <p><strong>Schedule:</strong> ${formatDateTime(request.schedule)}</p>
-                                                                            <p><strong>Additional Requests:</strong> ${request.form_details.additional_requests || 'None'}</p>
-                                                                            <p><strong>Formal Letter:</strong> ${request.documents.formal_letter.url ?
+                                                                                                                                <p><strong>Purpose:</strong> ${request.form_details.purpose}</p>
+                                                                                                                                <p><strong>Participants:</strong> ${request.form_details.num_participants}</p>
+                                                                                                                                <p><strong>Schedule:</strong> ${formatDateTime(request.schedule)}</p>
+                                                                                                                                <p><strong>Additional Requests:</strong> ${request.form_details.additional_requests || 'None'}</p>
+                                                                                                                                <p><strong>Formal Letter:</strong> ${request.documents.formal_letter.url ?
                                         `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                                                                                    data-document-url="${request.documents.formal_letter.url}" data-document-title="Formal Letter">
-                                                                                    View Document
-                                                                                </button>` :
+                                                                                                                                        data-document-url="${request.documents.formal_letter.url}" data-document-title="Formal Letter">
+                                                                                                                                        View Document
+                                                                                                                                    </button>` :
                                         'Not uploaded'}</p>
-                                                                            <p><strong>Facility Setup:</strong> ${request.documents.facility_layout.url ?
+                                                                                                                                <p><strong>Facility Setup:</strong> ${request.documents.facility_layout.url ?
                                         `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                                                                                    data-document-url="${request.documents.facility_layout.url}" data-document-title="Facility Setup">
-                                                                                    View Document
-                                                                                </button>` :
+                                                                                                                                        data-document-url="${request.documents.facility_layout.url}" data-document-title="Facility Setup">
+                                                                                                                                        View Document
+                                                                                                                                    </button>` :
                                         'Not uploaded'}</p>
-                                                                        `;
+                                                                                                                            `;
                                 // Update requested items with fee breakdown and waiver checkboxes
                                 document.getElementById('requestedItems').innerHTML = `
-                                <div class="mb-3">
-                                    <h6>Facilities:</h6>
-                                    ${request.requested_items.facilities.length > 0 ?
+                                                                                    <div class="mb-3">
+                                                                                        <h6>Facilities:</h6>
+                                                                                        ${request.requested_items.facilities.length > 0 ?
                                         request.requested_items.facilities.map(f =>
                                             `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${f.is_waived ? 'waived' : ''}">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="form-check me-2">
-                                                        <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                            data-type="facility" 
-                                                            data-id="${f.id}"
-                                                            ${f.is_waived ? 'checked' : ''}
-                                                            onchange="handleWaiverChange(this)">
-                                                    </div>
-                                                    <span class="item-name">${f.name}</span>
-                                                </div>
-                                                <span class="item-price">₱${f.fee}</span>
-                                            </div>`
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <div class="form-check me-2">
+                                                                                                            <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                                                                                data-type="facility" 
+                                                                                                                data-id="${f.id}"
+                                                                                                                ${f.is_waived ? 'checked' : ''}
+                                                                                                                onchange="handleWaiverChange(this)">
+                                                                                                        </div>
+                                                                                                        <span class="item-name">${f.name}</span>
+                                                                                                    </div>
+                                                                                                    <span class="item-price">₱${f.fee}</span>
+                                                                                                </div>`
                                         ).join('') : '<p>No facilities requested</p>'}
 
-                                    <h6 class="mt-3">Equipment:</h6>
-                                    ${request.requested_items.equipment.length > 0 ?
+                                                                                        <h6 class="mt-3">Equipment:</h6>
+                                                                                        ${request.requested_items.equipment.length > 0 ?
                                         request.requested_items.equipment.map(e =>
                                             `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${e.is_waived ? 'waived' : ''}">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="form-check me-2">
-                                                        <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                            data-type="equipment" 
-                                                            data-id="${e.id}"
-                                                            ${e.is_waived ? 'checked' : ''}
-                                                            onchange="handleWaiverChange(this)">
-                                                    </div>
-                                                    <span class="item-name">• ${e.name}</span>
-                                                </div>
-                                                <span class="item-price">₱${e.fee}</span>
-                                            </div>`
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <div class="form-check me-2">
+                                                                                                            <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                                                                                data-type="equipment" 
+                                                                                                                data-id="${e.id}"
+                                                                                                                ${e.is_waived ? 'checked' : ''}
+                                                                                                                onchange="handleWaiverChange(this)">
+                                                                                                        </div>
+                                                                                                        <span class="item-name">• ${e.name}</span>
+                                                                                                    </div>
+                                                                                                    <span class="item-price">₱${e.fee}</span>
+                                                                                                </div>`
                                         ).join('') : '<p>No equipment requested</p>'}
-                                </div>
-                                <div class="d-flex justify-content-end mb-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="waiveAllCheckbox" 
-                                            ${request.requested_items.facilities.every(f => f.is_waived) &&
-                                        request.requested_items.equipment.every(e => e.is_waived) ? 'checked' : ''}
-                                            onchange="handleWaiveAll(this)">
-                                        <label class="form-check-label" for="waiveAllCheckbox">
-                                            Waive All Fees
-                                        </label>
-                                    </div>
-                                </div>
-                            `;
+                                                                                    </div>
+                                                                                    <div class="d-flex justify-content-end mb-2">
+                                                                                        
+                                                                                    </div>
+                                                                                `;
 
                                 // Update footer fee dynamically
                                 document.getElementById('tentativeFee').textContent = `₱${request.fees.tentative_fee}`;
@@ -1180,21 +1175,21 @@ function updateAdditionalFees(requisitionFees) {
 
                                 // Update form status
                                 document.getElementById('formStatus').innerHTML = `
-                                                            <div class="row"> <!-- optional min-height for visual spacing -->
-                                                                <div class="col-md-3 d-flex align-items-center justify-content-center">
-                                                                    <p class="mb-0"><strong>Approved Fee:</strong> ${request.fees.approved_fee ? `₱${request.fees.approved_fee}` : 'Pending'}</p>
-                                                                </div>
-                                                                <div class="col-md-3 d-flex align-items-center justify-content-center">
-                                                                    <p class="mb-0"><strong>Approvals:</strong> ${request.approvals.count}/3</p>
-                                                                </div>
-                                                                <div class="col-md-3 d-flex align-items-center justify-content-center">
-                                                                    <p class="mb-0"><strong>Late Penalty:</strong> ${request.fees.late_penalty_fee ? `₱${request.fees.late_penalty_fee}` : 'N/A'}</p>
-                                                                </div>
-                                                                <div class="col-md-3 d-flex align-items-center justify-content-center">
-                                                                    <p class="mb-0"><strong>Is Late:</strong> ${is_late ? 'Yes' : 'No'}</p>
-                                                                </div>
-                                                            </div>
-                                                        `;
+                                                                                                                <div class="row"> <!-- optional min-height for visual spacing -->
+                                                                                                                    <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                                                                                                        <p class="mb-0"><strong>Approved Fee:</strong> ${request.fees.approved_fee ? `₱${request.fees.approved_fee}` : 'Pending'}</p>
+                                                                                                                    </div>
+                                                                                                                    <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                                                                                                        <p class="mb-0"><strong>Approvals:</strong> ${request.approvals.count}/3</p>
+                                                                                                                    </div>
+                                                                                                                    <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                                                                                                        <p class="mb-0"><strong>Late Penalty:</strong> ${request.fees.late_penalty_fee ? `₱${request.fees.late_penalty_fee}` : 'N/A'}</p>
+                                                                                                                    </div>
+                                                                                                                    <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                                                                                                        <p class="mb-0"><strong>Is Late:</strong> ${is_late ? 'Yes' : 'No'}</p>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            `;
 
 
                                 // Set up approve/reject buttons
@@ -1216,10 +1211,10 @@ function updateAdditionalFees(requisitionFees) {
                                 // Show error state
                                 document.getElementById('loadingState').style.display = 'none';
                                 document.getElementById('contentState').innerHTML = `
-                                                                            <div class="alert alert-danger">
-                                                                                Failed to load request details. Please try refreshing the page.
-                                                                            </div>
-                                                                        `;
+                                                                                                                                <div class="alert alert-danger">
+                                                                                                                                    Failed to load request details. Please try refreshing the page.
+                                                                                                                                </div>
+                                                                                                                            `;
                                 document.getElementById('contentState').style.display = 'block';
                             }
                         }
@@ -1239,13 +1234,13 @@ function updateAdditionalFees(requisitionFees) {
                                     const facilityElement = document.createElement('div');
                                     facilityElement.className = 'd-flex justify-content-between align-items-center mb-1';
                                     facilityElement.innerHTML = `
-                        <span class="item-name ${facility.is_waived ? 'waived' : ''}">
-                            ${facility.name}${facility.is_waived ? ' (Waived)' : ''}
-                        </span>
-                        <span class="item-price ${facility.is_waived ? 'waived' : ''}">
-                            ₱${facility.fee}
-                        </span>
-                    `;
+                                                                            <span class="item-name ${facility.is_waived ? 'waived' : ''}">
+                                                                                ${facility.name}${facility.is_waived ? ' (Waived)' : ''}
+                                                                            </span>
+                                                                            <span class="item-price ${facility.is_waived ? 'waived' : ''}">
+                                                                                ₱${facility.fee}
+                                                                            </span>
+                                                                        `;
                                     facilitiesContainer.appendChild(facilityElement);
                                 });
                             } else {
@@ -1258,13 +1253,13 @@ function updateAdditionalFees(requisitionFees) {
                                     const equipmentElement = document.createElement('div');
                                     equipmentElement.className = 'd-flex justify-content-between align-items-center mb-1';
                                     equipmentElement.innerHTML = `
-                        <span class="item-name ${equipment.is_waived ? 'waived' : ''}">
-                            ${equipment.name}${equipment.is_waived ? ' (Waived)' : ''}
-                        </span>
-                        <span class="item-price ${equipment.is_waived ? 'waived' : ''}">
-                            ₱${equipment.fee} × ${equipment.quantity}
-                        </span>
-                    `;
+                                                                            <span class="item-name ${equipment.is_waived ? 'waived' : ''}">
+                                                                                ${equipment.name}${equipment.is_waived ? ' (Waived)' : ''}
+                                                                            </span>
+                                                                            <span class="item-price ${equipment.is_waived ? 'waived' : ''}">
+                                                                                ₱${equipment.fee} × ${equipment.quantity}
+                                                                            </span>
+                                                                        `;
                                     equipmentContainer.appendChild(equipmentElement);
                                 });
                             } else {
@@ -1368,24 +1363,24 @@ function updateAdditionalFees(requisitionFees) {
                             }
 
                             feeItem.innerHTML = `
-                                    ${adminPhoto ?
+                                                                                        ${adminPhoto ?
                                     `<img src="${adminPhoto}" class="rounded-circle me-3" width="32" height="32" alt="Admin Photo">` :
                                     `<i class="bi bi-person-circle fs-5 me-3 text-secondary"></i>`
                                 }
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <small class="text-muted fst-italic">
-                                                    ${fee.label} (${typeName}) of ₱${amount.toFixed(2)} added by <strong>${adminName}</strong>
-                                                </small>
-                                            </div>
-                                            <button class="btn btn-sm btn-icon btn-light-danger remove-btn">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                        </div>
-                                        <small class="text-muted fst-italic">${timestamp}</small>
-                                    </div>
-                                `;
+                                                                                        <div class="flex-grow-1">
+                                                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                                                <div>
+                                                                                                    <small class="text-muted fst-italic">
+                                                                                                        ${fee.label} (${typeName}) of ₱${amount.toFixed(2)} added by <strong>${adminName}</strong>
+                                                                                                    </small>
+                                                                                                </div>
+                                                                                                <button class="btn btn-sm btn-icon btn-light-danger remove-btn">
+                                                                                                    <i class="bi bi-x-lg"></i>
+                                                                                                </button>
+                                                                                            </div>
+                                                                                            <small class="text-muted fst-italic">${timestamp}</small>
+                                                                                        </div>
+                                                                                    `;
 
                             // Add remove functionality for regular fees
                             feeItem.querySelector(".remove-btn").addEventListener("click", async function () {
