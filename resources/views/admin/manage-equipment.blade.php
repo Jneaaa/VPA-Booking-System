@@ -3,7 +3,7 @@
 @section('title', 'Equipment Management')
 
 @section('content')
-  <link rel="stylesheet" href="{{ asset('admin/css/equipment.css') }}">
+  <link rel="stylesheet" href="{{ asset('css\admin\equipment.css') }}">
   <div id="layout">
     <!-- Main Content -->
     <main id="main">
