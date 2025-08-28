@@ -11,13 +11,13 @@
       <div class="container-fluid">
       <!-- Header & Controls -->
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Manage Equipment</h2>
-        <div>
-        <a href="{{  url('/admin/add-equipment') }}" class="btn btn-primary">
-          <i class="bi bi-plus-circle-fill me-2"></i>Add New Equipment
-        </a>
-        </div>
-      </div>
+                <h2>Manage Equipment</h2>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
+                        <i class="bi bi-plus-circle-fill me-2"></i>Add New Equipment
+                    </button>
+                </div>
+            </div>
 
       <!-- Filters & Search Bar -->
       <div class="row mb-3 g-2">
@@ -114,16 +114,17 @@
     const categoryFilter = document.getElementById("categoryFilter");
     const loadingIndicator = document.getElementById("loadingIndicator");
     const noResultsMessage = document.getElementById("noResultsMessage");
-    const paginationContainer = document.getElementById(
-      "paginationContainer"
-    );
+    const paginationContainer = document.getElementById("paginationContainer");
+    const addEquipmentBtn = document.getElementById("addEquipmentBtn");
 
     // State variables
     let allEquipment = [];
+    let filteredEquipment = [];
     let userDepartments = [];
     let categories = [];
     let itemsPerPage = 9;
     let currentPage = 1;
+    let totalPages = 1;
 
     // Initialize the page
     async function init() {
@@ -244,6 +245,7 @@
 
       const data = await response.json();
       allEquipment = data.data || [];
+      filteredEquipment = [...allEquipment];
 
       // Render equipment dynamically
       renderEquipment(allEquipment);
@@ -271,9 +273,11 @@
         console.error("Unauthorized: Invalid or expired token.");
         localStorage.removeItem("adminToken");
         alert("Your session has expired. Please log in again.");
-        window.location.href = "/admin/admin-login";
-        return;
-      }
+        setTimeout(() => {
+          window.location.href = "/admin/admin-login";
+        }, 2000);
+        return; }
+        
 
       if (!response.ok) {
         throw new Error(
@@ -304,7 +308,9 @@
         console.error("Unauthorized: Invalid or expired token.");
         localStorage.removeItem("adminToken");
         alert("Your session has expired. Please log in again.");
-        window.location.href = "/admin/admin-login";
+        setTimeout(() => {
+        window.location.href = "/admin/admin-login";}
+        , 2000);
         return;
       }
 
