@@ -2,67 +2,104 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Facility;
-use Illuminate\Http\JsonResponse;
+use App\Models\Category;
+use App\Models\Department;
+use App\Models\Status;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
+
 class FacilityController extends Controller
 {
-    // ----- Indexes ----- //
-
-    public function index(): JsonResponse
-    {
-        try {
-            $user = auth()->user();
-
-            // Head admins can view all facilities
-            if ($user->role?->role_title === 'Head Admin') {
-                $facilities = Facility::with(['category', 'subcategory', 'status', 'department', 'images'])
-                    ->orderBy('facility_name')
-                    ->get();
+    // ----- Index - Show all facilities ----- //
+public function index(Request $request) // Add Request parameter
+{
+    \Log::info('FacilityController index method called'); 
+    try {
+        $user = auth()->user();
+        
+        // Get filter parameters
+        $status = $request->input('status', 'all');
+        $department = $request->input('department', 'all');
+        $category = $request->input('category', 'all');
+        $search = $request->input('search', '');
+        
+        // Base query
+        $query = Facility::with(['category', 'subcategory', 'status', 'department', 'images']);
+        
+        // Apply filters based on user role
+        if ($user->role?->role_title !== 'Head Admin') {
+            $userDepartments = $user->departments->pluck('department_id');
+            if ($userDepartments->isNotEmpty()) {
+                $query->whereIn('department_id', $userDepartments);
             } else {
-                $facilities = Facility::whereIn('department_id', $user->departments->pluck('department_id'))
-                    ->with(['category', 'subcategory', 'status', 'department', 'images'])
-                    ->orderBy('facility_name')
-                    ->get();
+                // If user has no departments, return empty results
+                $query->where('department_id', 0); // Force no results
             }
-
-            $formatted = $facilities->map(fn ($item) => $this->formatFacility($item));
-
-            return response()->json(['data' => $formatted]);
-        } catch (\Exception $e) {
-            \Log::error('Error fetching facilities data', ['error' => $e->getMessage()]);
-            return response()->json([
-                'message' => 'Failed to fetch facilities data',
-                'error' => $e->getMessage()
-            ], 500);
         }
+        
+        // Apply filters
+        if ($status !== 'all') {
+            $query->where('status_id', $status);
+        }
+        
+        if ($department !== 'all') {
+            $query->where('department_id', $department);
+        }
+        
+        if ($category !== 'all') {
+            $query->where('category_id', $category);
+        }
+        
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('facility_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('location_note', 'like', "%{$search}%");
+            });
+        }
+        
+        // Get the facilities - THIS WAS MISSING
+        $facilities = $query->paginate(10); // or ->get() if you don't want pagination
+        
+        // Get filter options - Use correct model classes
+        $statuses = Status::all(); // Changed from AvailabilityStatus
+        $departments = Department::all();
+        $categories = Category::all(); // Changed from FacilityCategory
+        
+        // Debug: Check if variables are set
+         \Log::debug('Variables being passed to view:');
+        \Log::debug('Facilities count: ' . $facilities->count());
+        \Log::debug('Statuses count: ' . $statuses->count());
+        \Log::debug('Departments count: ' . $departments->count());
+        \Log::debug('Categories count: ' . $categories->count());
+        
+         return view('admin.manage-facilities', compact('facilities', 'statuses', 'departments', 'categories'));
+        
+    } catch (\Exception $e) {
+        \Log::error('Error loading manage facilities page: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+        return redirect()->route('admin.dashboard')->with('error', 'Failed to load facilities management page');
     }
+}
 
-    public function publicIndex(): JsonResponse
+    // ----- Create - Show add facility form ----- //
+    public function create()
     {
-        try {
-            $facilities = Facility::with(['category', 'subcategory', 'status', 'department', 'images'])
-                ->orderBy('facility_name')
-                ->get();
+        $categories = Category::all();
+        $subcategories = Subcategory::all();
+        $departments = Department::all();
+        $statuses = Status::all();
 
-            $formatted = $facilities->map(fn ($item) => $this->formatPublicFacility($item));
-
-            return response()->json(['data' => $formatted]);
-        } catch (\Exception $e) {
-            \Log::error('Error fetching public facilities', ['error' => $e->getMessage()]);
-            return response()->json([
-                'message' => 'Failed to fetch facilities data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return view('admin.add-facility', compact('categories', 'subcategories', 'departments', 'statuses'));
     }
 
-    // ----- Store Facility ----- //
-
-    public function store(Request $request): JsonResponse
+    // ----- Store - Save new facility ----- //
+    public function store(Request $request)
     {
         $data = $request->validate([
             'facility_name' => 'required|string|max:50',
@@ -84,20 +121,15 @@ class FacilityController extends Controller
             'building_code' => 'nullable|string|max:20',
             'total_levels' => 'nullable|integer|min:1',
             'total_rooms' => 'nullable|integer|min:1',
-            'images' => 'sometimes|array',
-            'images.*.image_url' => 'required|url|max:500',
-            'images.*.description' => 'nullable|string',
-            'images.*.sort_order' => 'sometimes|integer',
-            'images.*.type_id' => 'required|exists:image_types,type_id',
         ]);
 
         $user = auth()->user();
 
         if (!$user->departments->pluck('department_id')->contains($data['department_id'])) {
-            return response()->json(['message' => 'You do not manage this department.'], 403);
+            return redirect()->back()->with('error', 'You do not manage this department.');
         }
 
-        $facility = Facility::create([
+        Facility::create([
             'facility_name' => $data['facility_name'],
             'description' => $data['description'] ?? null,
             'location_note' => $data['location_note'],
@@ -120,47 +152,43 @@ class FacilityController extends Controller
             'created_by' => $user->admin_id
         ]);
 
-        // Optional: Handle images if provided
-        if (!empty($data['images'])) {
-            foreach ($data['images'] as $image) {
-                $facility->images()->create($image);
-            }
-        }
-
-        return response()->json([
-            'message' => 'Facility created successfully',
-            'data' => $this->formatFacility($facility->fresh())
-        ], 201);
+        return redirect()->route('admin.manage-facilities')
+            ->with('success', 'Facility created successfully!');
     }
 
-    // ----- Display Facility ----- //
-
-    public function show(Facility $facility): JsonResponse
+    
+    // ----- Edit - Show edit form ----- //
+    public function edit($id)
     {
-        $facility->load(['category', 'subcategory', 'status', 'department', 'images']);
+        $facility = Facility::with(['category', 'subcategory', 'status', 'department', 'images'])
+            ->findOrFail($id);
+            
+        $categories = Category::all();
+        $subcategories = Subcategory::all();
+        $departments = Department::all();
+        $statuses = Status::all();
 
-        return response()->json([
-            'data' => $this->formatFacility($facility),
-        ]);
+        return view('admin.edit-facility', compact('facility', 'categories', 'subcategories', 'departments', 'statuses'));
     }
 
-    // ----- Update Facility ----- //
-
-    public function update(Request $request, Facility $facility): JsonResponse
+    // ----- Update - Save facility changes ----- //
+    public function update(Request $request, $id)
     {
+        $facility = Facility::findOrFail($id);
+        
         $data = $request->validate([
-            'facility_name' => 'sometimes|string|max:50',
+            'facility_name' => 'required|string|max:50',
             'description' => 'nullable|string|max:250',
-            'location_note' => 'sometimes|string|max:200',
-            'capacity' => 'sometimes|integer|min:1',
-            'category_id' => 'sometimes|exists:facility_categories,category_id',
+            'location_note' => 'required|string|max:200',
+            'capacity' => 'required|integer|min:1',
+            'category_id' => 'required|exists:facility_categories,category_id',
             'subcategory_id' => 'nullable|exists:facility_subcategories,subcategory_id',
-            'department_id' => 'sometimes|exists:departments,department_id',
-            'location_type' => 'sometimes|in:Indoors,Outdoors',
-            'internal_fee' => 'sometimes|numeric|min:0',
-            'external_fee' => 'sometimes|numeric|min:0',
-            'rate_type' => 'sometimes|in:Per Hour,Per Event',
-            'status_id' => 'sometimes|exists:availability_statuses,status_id',
+            'department_id' => 'required|exists:departments,department_id',
+            'location_type' => 'required|in:Indoors,Outdoors',
+            'internal_fee' => 'required|numeric|min:0',
+            'external_fee' => 'required|numeric|min:0',
+            'rate_type' => 'required|in:Per Hour,Per Event',
+            'status_id' => 'required|exists:availability_statuses,status_id',
             'maximum_rental_hour' => 'nullable|integer',
             'parent_facility_id' => 'nullable|exists:facilities,facility_id',
             'room_code' => 'nullable|string|max:50',
@@ -173,46 +201,44 @@ class FacilityController extends Controller
         $user = auth()->user();
 
         if (!$user->departments->pluck('department_id')->contains($facility->department_id)) {
-            return response()->json(['message' => 'You do not manage this facility.'], 403);
+            return redirect()->back()->with('error', 'You do not manage this facility.');
         }
 
         $facility->update([
-            'facility_name' => $data['facility_name'] ?? $facility->facility_name,
-            'description' => $data['description'] ?? $facility->description,
-            'location_note' => $data['location_note'] ?? $facility->location_note,
-            'capacity' => $data['capacity'] ?? $facility->capacity,
-            'category_id' => $data['category_id'] ?? $facility->category_id,
-            'subcategory_id' => $data['subcategory_id'] ?? $facility->subcategory_id,
-            'department_id' => $data['department_id'] ?? $facility->department_id,
-            'location_type' => $data['location_type'] ?? $facility->location_type,
-            'internal_fee' => $data['internal_fee'] ?? $facility->internal_fee,
-            'external_fee' => $data['external_fee'] ?? $facility->external_fee,
-            'rate_type' => $data['rate_type'] ?? $facility->rate_type,
-            'status_id' => $data['status_id'] ?? $facility->status_id,
-            'maximum_rental_hour' => $data['maximum_rental_hour'] ?? $facility->maximum_rental_hour,
-            'parent_facility_id' => $data['parent_facility_id'] ?? $facility->parent_facility_id,
-            'room_code' => $data['room_code'] ?? $facility->room_code,
-            'floor_level' => $data['floor_level'] ?? $facility->floor_level,
-            'building_code' => $data['building_code'] ?? $facility->building_code,
-            'total_levels' => $data['total_levels'] ?? $facility->total_levels,
-            'total_rooms' => $data['total_rooms'] ?? $facility->total_rooms,
+            'facility_name' => $data['facility_name'],
+            'description' => $data['description'] ?? null,
+            'location_note' => $data['location_note'],
+            'capacity' => $data['capacity'],
+            'category_id' => $data['category_id'],
+            'subcategory_id' => $data['subcategory_id'] ?? null,
+            'department_id' => $data['department_id'],
+            'location_type' => $data['location_type'],
+            'internal_fee' => $data['internal_fee'],
+            'external_fee' => $data['external_fee'],
+            'rate_type' => $data['rate_type'],
+            'status_id' => $data['status_id'],
+            'maximum_rental_hour' => $data['maximum_rental_hour'],
+            'parent_facility_id' => $data['parent_facility_id'] ?? null,
+            'room_code' => $data['room_code'] ?? null,
+            'floor_level' => $data['floor_level'] ?? null,
+            'building_code' => $data['building_code'] ?? null,
+            'total_levels' => $data['total_levels'] ?? null,
+            'total_rooms' => $data['total_rooms'] ?? null,
             'updated_by' => $user->admin_id,
         ]);
 
-        return response()->json([
-            'message' => 'Facility updated successfully',
-            'data' => $this->formatFacility($facility->fresh()),
-        ]);
+        return redirect()->route('admin.manage-facilities')
+            ->with('success', 'Facility updated successfully!');
     }
 
-    // ----- Remove Facility ----- //
-
-    public function destroy(Facility $facility): JsonResponse
+    // ----- Destroy - Delete facility ----- //
+    public function destroy($id)
     {
+        $facility = Facility::findOrFail($id);
         $user = auth()->user();
 
         if (!$user->departments->pluck('department_id')->contains($facility->department_id)) {
-            return response()->json(['message' => 'You do not manage this facility.'], 403);
+            return redirect()->back()->with('error', 'You do not manage this facility.');
         }
 
         // Soft delete tracking
@@ -226,12 +252,21 @@ class FacilityController extends Controller
         // Delete facility record
         $facility->delete();
 
-        return response()->json(['message' => 'Facility deleted successfully']);
+        return redirect()->route('admin.manage-facilities')
+            ->with('success', 'Facility deleted successfully!');
     }
 
-    // ----- Upload Facility Images ----- //
+    // ----- Show - View single facility (optional) ----- //
+    public function show($id)
+    {
+        $facility = Facility::with(['category', 'subcategory', 'status', 'department', 'images'])
+            ->findOrFail($id);
 
-    public function uploadImage(Request $request, $facilityId): JsonResponse
+        return view('admin.view-facility', compact('facility'));
+    }
+
+    // ----- Upload Facility Image ----- //
+    public function uploadImage(Request $request, $facilityId)
     {
         $validated = $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -243,7 +278,7 @@ class FacilityController extends Controller
         $user = auth()->user();
 
         if (!$user->departments->pluck('department_id')->contains($facility->department_id)) {
-            return response()->json(['message' => 'You do not manage this facility.'], 403);
+            return redirect()->back()->with('error', 'You do not manage this facility.');
         }
 
         $uploaded = Cloudinary::upload(
@@ -254,8 +289,7 @@ class FacilityController extends Controller
         $imageUrl = $uploaded->getSecurePath();
         $publicId = $uploaded->getPublicId();
 
-        $imageType = $validated['type_id'] ??
-            ($facility->images()->count() == 0 ? 1 : 2);
+        $imageType = $validated['type_id'] ?? ($facility->images()->count() == 0 ? 1 : 2);
 
         $facility->images()->create([
             'image_url' => $imageUrl,
@@ -265,65 +299,17 @@ class FacilityController extends Controller
             'sort_order' => $facility->images()->count() + 1
         ]);
 
-        return response()->json([
-            'message' => 'Image uploaded successfully',
-            'type' => $imageType == 1 ? 'primary' : 'additional'
-        ]);
+        return redirect()->back()->with('success', 'Image uploaded successfully!');
     }
 
-    // ----- Upload Images In Bulk ----- //
-
-    public function uploadMultipleImages(Request $request, $facilityId): JsonResponse
-    {
-        $validated = $request->validate([
-            'images' => 'required|array',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'description' => 'nullable|string|max:255',
-            'type_id' => 'sometimes|exists:image_types,type_id',
-        ]);
-
-        $facility = Facility::findOrFail($facilityId);
-        $user = auth()->user();
-
-        if (!$user->departments->pluck('department_id')->contains($facility->department_id)) {
-            return response()->json(['message' => 'You do not manage this facility.'], 403);
-        }
-
-        $currentImageCount = $facility->images()->count();
-        $typeId = $validated['type_id'] ?? null;
-
-        foreach ($validated['images'] as $index => $image) {
-            $upload = Cloudinary::upload(
-                $image->getRealPath(),
-                ['upload_preset' => 'facility-photos']
-            );
-
-            $imageUrl = $upload->getSecurePath();
-            $publicId = $upload->getPublicId();
-
-            $imageType = $typeId ?? (($currentImageCount + $index) === 0 ? 1 : 2);
-
-            $facility->images()->create([
-                'image_url' => $imageUrl,
-                'type_id' => $imageType,
-                'cloudinary_public_id' => $publicId,
-                'description' => $validated['description'] ?? null,
-                'sort_order' => $currentImageCount + $index + 1,
-            ]);
-        }
-
-        return response()->json(['message' => 'Images uploaded successfully']);
-    }
-
-    // ----- Delete Facility Images ----- //
-
-    public function deleteImage($facilityId, $imageId): JsonResponse
+    // ----- Delete Facility Image ----- //
+    public function deleteImage($facilityId, $imageId)
     {
         $facility = Facility::findOrFail($facilityId);
         $user = auth()->user();
 
         if (!$user->departments->pluck('department_id')->contains($facility->department_id)) {
-            return response()->json(['message' => 'You do not manage this facility.'], 403);
+            return redirect()->back()->with('error', 'You do not manage this facility.');
         }
 
         $image = $facility->images()->findOrFail($imageId);
@@ -332,15 +318,10 @@ class FacilityController extends Controller
             Cloudinary::destroy($image->cloudinary_public_id);
         }
 
-        $path = str_replace('/storage', 'public', parse_url($image->image_url, PHP_URL_PATH));
-        if (Storage::exists($path)) {
-            Storage::delete($path);
-        }
-
         $image->delete();
         $this->reorderImageRecords($facility);
 
-        return response()->json(['message' => 'Image deleted successfully']);
+        return redirect()->back()->with('success', 'Image deleted successfully!');
     }
 
     private function reorderImageRecords(Facility $facility): void
@@ -349,110 +330,4 @@ class FacilityController extends Controller
         foreach ($images as $index => $image) {
             $image->update(['sort_order' => $index + 1]);
         }
-    }
-
-    // ----- Reorder Images ----- //
-
-    public function reorderImages(Request $request, $facilityId): JsonResponse
-    {
-        $request->validate([
-            'order' => 'required|array',
-            'order.*' => 'exists:facility_images,image_id'
-        ]);
-
-        $facility = Facility::findOrFail($facilityId);
-        $user = auth()->user();
-
-        if (!$user->departments->pluck('department_id')->contains($facility->department_id)) {
-            return response()->json(['message' => 'You do not manage this facility.'], 403);
-        }
-
-        foreach ($request->input('order') as $position => $imageId) {
-            $facility->images()->where('image_id', $imageId)
-                ->update(['sort_order' => $position + 1]);
-        }
-
-        return response()->json(['message' => 'Images reordered successfully']);
-    }
-
-    // ----- Formatting ----- //
-
-    private function formatFacility($facility): array
-    {
-        $facility->load(['category', 'subcategory', 'status', 'department', 'images']);
-
-        return [
-            'facility_id' => $facility->facility_id,
-            'facility_name' => $facility->facility_name,
-            'description' => $facility->description,
-            'location_note' => $facility->location_note,
-            'capacity' => $facility->capacity,
-            'category' => [
-                'category_id' => $facility->category_id,
-                'category_name' => $facility->category->category_name,
-            ],
-            'subcategory' => $facility->subcategory ? [
-                'subcategory_id' => $facility->subcategory_id,
-                'subcategory_name' => $facility->subcategory->subcategory_name,
-            ] : null,
-            'department' => [
-                'department_id' => $facility->department_id,
-                'department_name' => $facility->department->department_name,
-            ],
-            'location_type' => $facility->location_type,
-            'internal_fee' => $facility->internal_fee,
-            'external_fee' => $facility->external_fee,
-            'rate_type' => $facility->rate_type,
-            'status' => [
-                'status_id' => $facility->status_id,
-                'status_name' => $facility->status->status_name,
-                'color_code' => $facility->status->color_code,
-            ],
-            'maximum_rental_hour' => $facility->maximum_rental_hour,
-            'parent_facility_id' => $facility->parent_facility_id,
-            'room_code' => $facility->room_code,
-            'floor_level' => $facility->floor_level,
-            'building_code' => $facility->building_code,
-            'total_levels' => $facility->total_levels,
-            'total_rooms' => $facility->total_rooms,
-            'images' => $facility->images,
-            'created_at' => $facility->created_at,
-            'updated_at' => $facility->updated_at,
-        ];
-    }
-
-    private function formatPublicFacility($facility): array
-    {
-        $facility->load(['category', 'subcategory', 'status', 'department', 'images']);
-
-        return [
-            'facility_id' => $facility->facility_id,
-            'facility_name' => $facility->facility_name,
-            'description' => $facility->description,
-            'location_note' => $facility->location_note,
-            'capacity' => $facility->capacity,
-            'category' => [
-                'category_id' => $facility->category_id,
-                'category_name' => $facility->category->category_name,
-            ],
-            'subcategory' => $facility->subcategory ? [
-                'subcategory_id' => $facility->subcategory_id,
-                'subcategory_name' => $facility->subcategory->subcategory_name,
-            ] : null,
-            'department' => [
-                'department_id' => $facility->department_id,
-                'department_name' => $facility->department->department_name,
-            ],
-            'location_type' => $facility->location_type,
-            'internal_fee' => $facility->internal_fee,
-            'external_fee' => $facility->external_fee,
-            'rate_type' => $facility->rate_type,
-            'status' => [
-                'status_id' => $facility->status_id,
-                'status_name' => $facility->status->status_name,
-                'color_code' => $facility->status->color_code,
-            ],
-            'images' => $facility->images,
-        ];
-    }
-}
+    }} 

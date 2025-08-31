@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RequisitionFormController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\FacilityController; 
 
 Route::middleware('web')->group(function () {
     Route::get('/', function () {
@@ -38,10 +39,32 @@ Route::middleware('web')->group(function () {
     Route::view('/admin/dashboard', 'admin.dashboard');
     Route::view('/admin/manage-equipment', 'admin.manage-equipment');
     Route::view('/admin/manage-facilities', 'admin.manage-facilities');
-    Route::view('/admin/manage-facility', 'admin.manage-facility');
     Route::view('/admin/manage-requests', 'admin.manage-requests');
+
     Route::get('/admin/requisition/{requestId}', function($requestId) {
         return view('admin.request-view', ['requestId' => $requestId]);
+
+
+     // ----- FACILITY ROUTES (CRUD Operations) ----- //
+    // GET: Show all facilities (Read)
+    Route::get('/facilities', [FacilityController::class, 'index'])->name('admin.manage-facilities');
+    
+    // GET: Show form to add new facility (Create - Form)
+    Route::get('/facilities/add', [FacilityController::class, 'create'])->name('add-facility');
+    
+    // POST: Store new facility (Create - Process)
+    Route::post('/facilities', [FacilityController::class, 'store'])->name('facilities.store');
+    
+    // GET: Show form to edit facility (Update - Form)
+    Route::get('/facilities/{id}/edit', [FacilityController::class, 'edit'])->name('edit-facility');
+    
+    // PUT: Update existing facility (Update - Process)
+    Route::put('/facilities/{id}', [FacilityController::class, 'update'])->name('facilities.update');
+    
+    // DELETE: Delete facility (Delete)
+    Route::delete('/facilities/{id}', [FacilityController::class, 'destroy'])->name('facilities.destroy');
+    // SHOW 
+    Route::get('/facilities/{id}', [FacilityController::class, 'show'])->name('facilities.show');
     }); 
     
     // ----- Auth Routes ----- //
