@@ -413,7 +413,7 @@
 
                         <!-- Form Actions -->
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" class="btn btn-secondary" id="resetBtn">Reset</button>
+                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
                             <button type="submit" class="btn btn-primary">Update Equipment</button>
                         </div>
                     </form>
@@ -452,19 +452,19 @@
         </div>
     </div>
     <!-- Reset Confirmation Modal -->
-    <div class="modal fade" id="resetConfirmationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="cancelConfirmationModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirm Reset</h5>
+                    <h5 class="modal-title">Discard Changes</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to reset the form? This will clear all uploaded photos and inventory items.
+                    Are you sure you want to cancel? Unsaved changes will be lost.
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmResetBtn">Reset</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancelBtn">Confirm</button>
                 </div>
             </div>
         </div>
@@ -546,6 +546,10 @@
                     return;
                 }
 
+                let currentEditingItemId = null;
+                let equipmentItems = [];
+
+
                 // Global helper function for toast notifications
                 window.showToast = function (message, type = 'success', duration = 3000) {
                     const toast = document.createElement('div');
@@ -571,18 +575,18 @@
                     toast.style.borderRadius = '0.3rem';
 
                     toast.innerHTML = `
-                                                                <div class="d-flex align-items-center px-3 py-1"> 
-                                                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                                                </div>
-                                                                <div class="loading-bar" style="
-                                                                    height: 3px;
-                                                                    background: rgba(255,255,255,0.7);
-                                                                    width: 100%;
-                                                                    transition: width ${duration}ms linear;
-                                                                "></div>
-                                                            `;
+                                                                                                                <div class="d-flex align-items-center px-3 py-1"> 
+                                                                                                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                                                                                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                                                                                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                                                                                </div>
+                                                                                                                <div class="loading-bar" style="
+                                                                                                                    height: 3px;
+                                                                                                                    background: rgba(255,255,255,0.7);
+                                                                                                                    width: 100%;
+                                                                                                                    transition: width ${duration}ms linear;
+                                                                                                                "></div>
+                                                                                                            `;
 
                     document.body.appendChild(toast);
 
@@ -671,156 +675,163 @@
                 });
 
                 async function handleEquipmentFiles(files) {
-    const equipmentId = document.getElementById('equipmentId').value;
-    const photosPreview = document.getElementById('photosPreview');
-    
-    for (const file of files) {
-        // Check if file is an image
-        if (!file.type.startsWith('image/')) {
-            showToast('Please upload only image files', 'error');
-            continue;
-        }
-        
-        // Check if we've reached the maximum of 5 photos
-        if (uploadedPhotos.length >= 5) {
-            showToast('Maximum of 5 photos allowed', 'error');
-            break;
-        }
-        
-        try {
-            // Create a preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const previewId = Date.now();
-                const preview = document.createElement('div');
-                preview.className = 'photo-preview';
-                preview.dataset.id = previewId;
-                
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
-                
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
-                removeBtn.innerHTML = '<i class="bi bi-x"></i>';
-                removeBtn.onclick = function() {
-                    preview.remove();
-                    uploadedPhotos = uploadedPhotos.filter(photo => photo.previewId !== previewId);
-                };
-                
-                preview.appendChild(img);
-                preview.appendChild(removeBtn);
-                photosPreview.appendChild(preview);
-                
-                // Store file and preview info
-                uploadedPhotos.push({
-                    file: file,
-                    previewId: previewId,
-                    previewElement: preview
-                });
-            };
-            reader.readAsDataURL(file);
-            
-            // Upload to Cloudinary
-            const result = await uploadToCloudinary(file, equipmentId);
-            
-            // Update the preview with the actual image from Cloudinary
-            if (result && result.secure_url) {
-                const preview = photosPreview.querySelector(`[data-id="${previewId}"]`);
-                if (preview) {
-                    const img = preview.querySelector('img');
-                    img.src = result.secure_url;
+                    const equipmentId = document.getElementById('equipmentId').value;
+                    const photosPreview = document.getElementById('photosPreview');
+
+                    for (const file of files) {
+                        // Check if file is an image
+                        if (!file.type.startsWith('image/')) {
+                            showToast('Please upload only image files', 'error');
+                            continue;
+                        }
+
+                        // Check if we've reached the maximum of 5 photos
+                        if (uploadedPhotos.length >= 5) {
+                            showToast('Maximum of 5 photos allowed', 'error');
+                            break;
+                        }
+
+                        try {
+                            const previewId = Date.now(); // Define previewId here so it's accessible
+
+                            // Create a preview
+                            const reader = new FileReader();
+                            reader.onload = async (e) => { // Make this async
+                                const preview = document.createElement('div');
+                                preview.className = 'photo-preview';
+                                preview.dataset.id = previewId;
+
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
+
+                                const removeBtn = document.createElement('button');
+                                removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
+                                removeBtn.innerHTML = '<i class="bi bi-x"></i>';
+                                removeBtn.onclick = function () {
+                                    preview.remove();
+                                    uploadedPhotos = uploadedPhotos.filter(photo => photo.previewId !== previewId);
+                                };
+
+                                preview.appendChild(img);
+                                preview.appendChild(removeBtn);
+                                photosPreview.appendChild(preview);
+
+                                // Store file and preview info
+                                uploadedPhotos.push({
+                                    file: file,
+                                    previewId: previewId,
+                                    previewElement: preview
+                                });
+
+                                try {
+                                    // Upload to Cloudinary
+                                    const result = await uploadToCloudinary(file, equipmentId);
+
+                                    // Update the preview with the actual image from Cloudinary
+                                    if (result && result.secure_url) {
+                                        img.src = result.secure_url;
+
+                                        // Update the uploadedPhotos array with the Cloudinary data
+                                        const photoIndex = uploadedPhotos.findIndex(photo => photo.previewId === previewId);
+                                        if (photoIndex !== -1) {
+                                            uploadedPhotos[photoIndex] = {
+                                                ...uploadedPhotos[photoIndex],
+                                                id: result.public_id,
+                                                url: result.secure_url
+                                            };
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error('Error uploading to Cloudinary:', error);
+                                    showToast('Upload failed: ' + error.message, 'error');
+                                    // Remove the preview if upload fails
+                                    preview.remove();
+                                    uploadedPhotos = uploadedPhotos.filter(photo => photo.previewId !== previewId);
+                                }
+                            };
+                            reader.readAsDataURL(file);
+
+                        } catch (error) {
+                            console.error('Error processing file:', error);
+                            showToast('Failed to process file: ' + error.message, 'error');
+                        }
+                    }
                 }
-                
-                // Update the uploadedPhotos array with the Cloudinary data
-                const photoIndex = uploadedPhotos.findIndex(photo => photo.previewId === previewId);
-                if (photoIndex !== -1) {
-                    uploadedPhotos[photoIndex] = {
-                        ...uploadedPhotos[photoIndex],
-                        id: result.public_id,
-                        url: result.secure_url
-                    };
+
+                // Cloudinary direct upload implementation
+                async function uploadToCloudinary(file, equipmentId) {
+                    const CLOUD_NAME = 'dn98ntlkd'; // Your Cloudinary cloud name
+                    const UPLOAD_PRESET = 'equipment-photos'; // Your unsigned upload preset
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('upload_preset', UPLOAD_PRESET);
+                    formData.append('folder', `equipment-photos/${equipmentId}`);
+                    formData.append('tags', `equipment_${equipmentId}`);
+
+                    try {
+                        showToast('Uploading image to Cloudinary...', 'info', 3000);
+
+                        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error?.message || 'Upload failed');
+                        }
+
+                        const data = await response.json();
+                        console.log('Cloudinary upload successful:', data);
+
+                        // Now save the image reference to your database
+                        await saveImageToDatabase(equipmentId, data.secure_url, data.public_id);
+
+                        showToast('Image uploaded to Cloudinary successfully!', 'success');
+                        return data;
+
+                    } catch (error) {
+                        console.error('Cloudinary upload error:', error);
+                        showToast('Cloudinary upload failed: ' + error.message, 'error');
+                        throw error;
+                    }
                 }
-            }
-            
-        } catch (error) {
-            console.error('Error processing file:', error);
-            showToast('Failed to process file: ' + error.message, 'error');
-        }
-    }
-}
 
-               // Cloudinary direct upload implementation
-async function uploadToCloudinary(file, equipmentId) {
-    const CLOUD_NAME = 'dn98ntlkd'; // Your Cloudinary cloud name
-    const UPLOAD_PRESET = 'equipment-photos'; // Your unsigned upload preset
+                // Function to save image reference to your database
+                async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
+                    try {
+                        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/save`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                image_url: imageUrl,
+                                cloudinary_public_id: publicId,
+                                description: 'Equipment photo'
+                            })
+                        });
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', UPLOAD_PRESET);
-    formData.append('folder', `equipment-photos/${equipmentId}`);
-    formData.append('tags', `equipment_${equipmentId}`);
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Database save failed:', response.status, errorText);
+                            throw new Error(`Failed to save image to database: ${response.status} ${errorText}`);
+                        }
 
-    try {
-        showToast('Uploading image to Cloudinary...', 'info', 3000);
+                        const result = await response.json();
+                        console.log('Image saved to database:', result);
+                        return result;
 
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Upload failed');
-        }
-
-        const data = await response.json();
-        console.log('Cloudinary upload successful:', data);
-
-        // Now save the image reference to your database
-        await saveImageToDatabase(equipmentId, data.secure_url, data.public_id);
-
-        showToast('Image uploaded to Cloudinary successfully!', 'success');
-        return data;
-
-    } catch (error) {
-        console.error('Cloudinary upload error:', error);
-        showToast('Cloudinary upload failed: ' + error.message, 'error');
-        throw error;
-    }
-}
-
-// Function to save image reference to your database
-async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
-    try {
-        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/save`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                image_url: imageUrl,
-                cloudinary_public_id: publicId,
-                description: 'Equipment photo'
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to save image to database');
-        }
-
-        const result = await response.json();
-        console.log('Image saved to database:', result);
-        return result;
-
-    } catch (error) {
-        console.error('Error saving image to database:', error);
-        // Don't throw here - we still want to keep the Cloudinary upload
-        showToast('Warning: Image uploaded but database save failed', 'warning');
-    }
-}
+                    } catch (error) {
+                        console.error('Error saving image to database:', error);
+                        showToast('Warning: Image uploaded but database save failed', 'warning');
+                        throw error; // Re-throw to handle in the calling function
+                    }
+                }
 
 
                 async function deleteImageFromCloudinary(publicId) {
@@ -852,12 +863,25 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                     }
                 }
 
-                async function deleteImage(equipmentId, imageId, publicId = null) {
+                async function deleteImage(equipmentId, imageId, cloudinaryPublicId) {
                     try {
                         const token = localStorage.getItem('adminToken');
 
-                        // Updated endpoint to match your new route
-                        const response = await fetch(`http://127.0.0.1:8000/api/admin/${imageId}/delete-photo`, {
+                        // 1. Delete from Cloudinary via your simple backend endpoint
+                        if (cloudinaryPublicId) {
+                            await fetch(`http://127.0.0.1:8000/api/admin/cloudinary/delete`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ public_id: cloudinaryPublicId })
+                            });
+                            showToast('Image deleted from storage', 'success');
+                        }
+
+                        // 2. Delete from your database
+                        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/${imageId}`, {
                             method: 'DELETE',
                             headers: {
                                 'Authorization': `Bearer ${token}`,
@@ -869,12 +893,46 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                             throw new Error('Failed to delete image from database');
                         }
 
-                        showToast('Image deleted successfully', 'success');
-                        return await response.json();
+                        showToast('Image reference deleted', 'success');
+
                     } catch (error) {
                         console.error('Error deleting image:', error);
                         showToast('Failed to delete image: ' + error.message, 'error');
                         throw error;
+                    }
+                }
+
+                // Direct Cloudinary delete function
+                async function deleteFromCloudinary(publicId) {
+                    const CLOUD_NAME = 'dn98ntlkd';
+
+                    try {
+                        // Cloudinary DELETE API endpoint
+                        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/destroy`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                public_id: publicId,
+                                api_key: 'YOUR_API_KEY', // You'll need to add this
+                                timestamp: Math.floor(Date.now() / 1000),
+                                signature: 'GENERATE_THIS' // You'll need to generate a signature
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error?.message || 'Cloudinary delete failed');
+                        }
+
+                        const result = await response.json();
+                        console.log('Cloudinary delete successful:', result);
+                        return result;
+
+                    } catch (error) {
+                        console.error('Cloudinary delete error:', error);
+                        throw new Error('Failed to delete from Cloudinary: ' + error.message);
                     }
                 }
 
@@ -939,25 +997,25 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                     return;
                 }
 
-                // Initialize the reset confirmation modal
-                const resetConfirmationModal = new bootstrap.Modal('#resetConfirmationModal', {
+                // Initialize the cancel confirmation modal
+                const cancelConfirmationModal = new bootstrap.Modal('#cancelConfirmationModal', {
                     backdrop: 'static',
                     keyboard: false
                 });
 
-                // Handle reset button click
-                document.getElementById('resetBtn').addEventListener('click', function (e) {
+                // Handle cancel button click
+                document.getElementById('cancelBtn').addEventListener('click', function (e) {
                     e.preventDefault();
-                    resetConfirmationModal.show();
+                    cancelConfirmationModal.show();
                 });
 
-                // Handle confirm reset button click
-                document.getElementById('confirmResetBtn').addEventListener('click', function () {
-                    // Reset to original equipment data
-                    loadEquipmentData(equipmentId);
+                // Handle confirm cancel button click
+                document.getElementById('confirmCancelBtn').addEventListener('click', function () {
+                    // Hide the modal first
+                    cancelConfirmationModal.hide();
 
-                    // Hide the modal
-                    resetConfirmationModal.hide();
+                    // Then redirect to manage-equipment
+                    window.location.href = '/admin/manage-equipment';
                 });
 
                 // Equipment Photos Section
@@ -1052,8 +1110,8 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                                     if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
                                     if (itemPhotoPreview) {
                                         itemPhotoPreview.innerHTML = `
-                                                                                                                                                                            <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
-                                                                                                                                                                          `;
+                                                                                                                                                                                                                            <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
+                                                                                                                                                                                                                          `;
                                     }
                                 };
                                 reader.readAsDataURL(this.files[0]);
@@ -1165,23 +1223,23 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                             const itemCard = document.createElement('div');
                             itemCard.className = 'card equipment-item';
                             itemCard.innerHTML = `
-                                                                                                                                                                      <div class="card-body">
-                                                                                                                                                                        <div class="photo-container">
-                                                                                                                                                                          ${itemPhoto ? `<img src="${itemPhoto}" class="img-thumbnail">` : ''}
-                                                                                                                                                                        </div>
-                                                                                                                                                                        <div class="flex-grow-1">
-                                                                                                                                                                          <h6 class="card-title">Item #${itemId}</h6>
-                                                                                                                                                                          <div class="d-flex flex-wrap gap-3">
-                                                                                                                                                                            <span class="badge ${conditionColors[condition]}">${condition}</span>
-                                                                                                                                                                          </div>
-                                                                                                                                                                          ${barcode ? `<div class="mt-2"><strong>Barcode:</strong> ${barcode}</div>` : ''}
-                                                                                                                                                                          ${notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${notes.substring(0, 50)}${notes.length > 50 ? '...' : ''}</p>` : ''}
-                                                                                                                                                                        </div>
-                                                                                                                                                                        <button class="btn btn-sm btn-danger align-self-start" onclick="this.closest('.equipment-item').remove()">
-                                                                                                                                                                          <i class="bi bi-trash"></i>
-                                                                                                                                                                        </button>
-                                                                                                                                                                      </div>
-                                                                                                                                                                    `;
+                                                                                                                                                                                                                      <div class="card-body">
+                                                                                                                                                                                                                        <div class="photo-container">
+                                                                                                                                                                                                                          ${itemPhoto ? `<img src="${itemPhoto}" class="img-thumbnail">` : ''}
+                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                        <div class="flex-grow-1">
+                                                                                                                                                                                                                          <h6 class="card-title">Item #${itemId}</h6>
+                                                                                                                                                                                                                          <div class="d-flex flex-wrap gap-3">
+                                                                                                                                                                                                                            <span class="badge ${conditionColors[condition]}">${condition}</span>
+                                                                                                                                                                                                                          </div>
+                                                                                                                                                                                                                          ${barcode ? `<div class="mt-2"><strong>Barcode:</strong> ${barcode}</div>` : ''}
+                                                                                                                                                                                                                          ${notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${notes.substring(0, 50)}${notes.length > 50 ? '...' : ''}</p>` : ''}
+                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                        <button class="btn btn-sm btn-danger align-self-start" onclick="this.closest('.equipment-item').remove()">
+                                                                                                                                                                                                                          <i class="bi bi-trash"></i>
+                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                      </div>
+                                                                                                                                                                                                                    `;
 
                             if (itemsContainer) {
                                 if (itemsContainer.querySelector('p.text-muted')) {
@@ -1257,7 +1315,7 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                             removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
                             removeBtn.innerHTML = '<i class="bi bi-x"></i>';
                             removeBtn.onclick = function () {
-                                deleteImage(equipmentId, image.image_id);
+                                deleteImage(equipmentId, image.image_id, image.cloudinary_public_id);
                                 preview.remove();
                             };
 
@@ -1336,9 +1394,9 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                     const rateTypeDropdown = document.getElementById('rateType');
                     if (rateTypeDropdown) {
                         rateTypeDropdown.innerHTML = `
-                                                                                            <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
-                                                                                            <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
-                                                                                        `;
+                                                                                                                                            <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
+                                                                                                                                            <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
+                                                                                                                                        `;
                     }
 
                     // Fetch conditions for inventory items
@@ -1416,24 +1474,30 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                 });
             }
 
-            async function deleteImage(equipmentId, imageId) {
+            async function deleteImage(equipmentId, imageId, cloudinaryPublicId) {
                 try {
+                    const token = localStorage.getItem('adminToken');
+
+                    // Only call the single endpoint that handles both Cloudinary and database deletion
                     const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/${imageId}`, {
                         method: 'DELETE',
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                            'Authorization': `Bearer ${token}`,
                             'Accept': 'application/json'
                         }
                     });
 
                     if (!response.ok) {
-                        throw new Error('Failed to delete image');
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to delete image');
                     }
 
-                    console.log('Image deleted successfully');
+                    showToast('Image deleted successfully', 'success');
+
                 } catch (error) {
                     console.error('Error deleting image:', error);
-                    alert('Failed to delete image: ' + error.message);
+                    showToast('Failed to delete image: ' + error.message, 'error');
+                    throw error;
                 }
             }
 
@@ -1442,6 +1506,8 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                 e.preventDefault();
 
                 const equipmentId = document.getElementById('equipmentId').value;
+                const token = localStorage.getItem('adminToken');
+
                 const formData = {
                     equipment_name: document.getElementById('equipmentName').value,
                     description: document.getElementById('description').value,
@@ -1451,15 +1517,13 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                     total_quantity: document.getElementById('totalQuantity').value,
                     internal_fee: document.getElementById('companyFee').value,
                     external_fee: document.getElementById('rentalFee').value,
-                    rate_type: document.getElementById('rateType').value === '1' ? 'Per Hour' : 'Per Event',
+                    rate_type: document.getElementById('rateType').value,
                     status_id: document.getElementById('availabilityStatus').value,
                     department_id: document.getElementById('department').value,
                     maximum_rental_hour: document.getElementById('minRentalHours').value,
                 };
 
                 try {
-                    const token = localStorage.getItem('adminToken');
-
                     const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}`, {
                         method: 'PUT',
                         headers: {
@@ -1471,53 +1535,18 @@ async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Failed to update equipment');
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to update equipment');
                     }
 
-                    // Upload new images if any
-                    await uploadNewImages(equipmentId);
-
-                    alert('Equipment updated successfully!');
-                    window.location.href = '/admin/manage-equipment';
+                    showToast('Equipment updated successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/admin/manage-equipment';
+                    }, 1500);
                 } catch (error) {
                     console.error('Error updating equipment:', error);
-                    alert('Failed to update equipment: ' + error.message);
+                    showToast('Failed to update equipment: ' + error.message, 'error');
                 }
             });
-
-          async function uploadNewImages(equipmentId) {
-    const filesToUpload = uploadedPhotos.filter(photo => photo.file).map(photo => photo.file);
-
-    for (const file of filesToUpload) {
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('description', 'Equipment photo');
-        formData.append('equipmentId', equipmentId); // Add equipmentId to form data
-
-        try {
-            const token = localStorage.getItem('adminToken');
-            
-            // Updated endpoint to match your new route
-            const response = await fetch(`http://127.0.0.1:8000/api/admin/upload`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to upload image');
-            }
-
-            const result = await response.json();
-            console.log('Image uploaded successfully:', result);
-
-        } catch (error) {
-            console.error('Error uploading image:', error);
-            showToast('Failed to upload image: ' + error.message, 'error');
-        }
-    }
-}
         </script>
     @endsection
