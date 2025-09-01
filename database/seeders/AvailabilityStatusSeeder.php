@@ -12,6 +12,10 @@ class AvailabilityStatusSeeder extends Seeder
      */
     public function run(): void
     {
+
+        // NOTE: Primary key: status_id (auto-increment)
+        // NOTE: Timestamps: created_at, updated_at (auto-managed by Laravel)
+        
         DB::table('availability_statuses')->insert([
             [
                 'status_name' => 'Available',

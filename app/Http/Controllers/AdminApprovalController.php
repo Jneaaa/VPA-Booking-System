@@ -28,6 +28,8 @@ use App\Models\RequisitionComment;
 use App\Models\AvailabilityStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class AdminApprovalController extends Controller
@@ -176,6 +178,17 @@ class AdminApprovalController extends Controller
             // Calculate approved fee including requisition fees
             $approvedFee = $this->calculateApprovedFee($form);
 
+            // Add approval and rejection counts
+            $approvalCount = $form->requisitionApprovals->whereNotNull('approved_by')->count();
+            $rejectionCount = $form->requisitionApprovals->whereNotNull('rejected_by')->count();
+            // Add finalization info
+            $isFinalized = $form->is_finalized;
+            $finalizedBy = $form->finalizedBy ? [
+                'id' => $form->finalizedBy->admin_id,
+                'name' => $form->finalizedBy->first_name . ' ' . $form->finalizedBy->last_name,
+                'role' => $form->finalizedBy->roles->first()->role_name ?? 'Unknown'
+            ] : null;
+
             // Format requisition fees for response
             $requisitionFees = $form->requisitionFees->map(function ($fee) {
                 return [
@@ -230,6 +243,7 @@ class AdminApprovalController extends Controller
                 'requested_items' => [
                     'facilities' => $form->requestedFacilities->map(function ($facility) {
                     return [
+                        'requested_facility_id' => $facility->requested_facility_id,
                         'name' => $facility->facility->facility_name,
                         'fee' => $facility->facility->external_fee,
                         'is_waived' => $facility->is_waived
@@ -237,6 +251,7 @@ class AdminApprovalController extends Controller
                 }),
                     'equipment' => $form->requestedEquipment->map(function ($equipment) {
                     return [
+                        'requested_equipment_id' => $equipment->requested_equipment_id,
                         'name' => $equipment->equipment->equipment_name,
                         'quantity' => $equipment->quantity,
                         'fee' => $equipment->equipment->external_fee,
@@ -290,9 +305,12 @@ class AdminApprovalController extends Controller
                         'public_id' => $form->official_receipt_public_id
                     ]
                 ],
-                'approvals' => [
-                    'count' => $form->requisitionApprovals()->whereNotNull('approved_by')->count(),
-                    'rejections' => $form->requisitionApprovals()->whereNotNull('rejected_by')->count(),
+                'approval_info' => [
+                    'approval_count' => $approvalCount,
+                    'rejection_count' => $rejectionCount,
+                    'is_finalized' => $isFinalized,
+                    'finalized_by' => $finalizedBy,
+                    'can_finalize' => $approvalCount >= 3 && !$isFinalized,
                     'latest_action' => $form->requisitionApprovals()->latest('date_updated')->first()
                 ],
                 'access_code' => $form->access_code
@@ -302,14 +320,29 @@ class AdminApprovalController extends Controller
     return response()->json($forms);
 }
 
-    public function approveRequest(Request $request, $requestId)
-    {
+   public function approveRequest(Request $request, $requestId)
+{
+    try {
         // Validate admin permissions
         $allowedRoles = ['Head Admin', 'Vice President of Administration', 'Approving Officer'];
         $admin = Admin::with('roles')->find(auth()->id());
 
         if (!$admin->roles->whereIn('role_name', $allowedRoles)->count()) {
             return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Check if this admin has already approved/rejected this request
+        $existingApproval = RequisitionApproval::where('request_id', $requestId)
+            ->where(function($query) use ($admin) {
+                $query->where('approved_by', $admin->admin_id)
+                      ->orWhere('rejected_by', $admin->admin_id);
+            })
+            ->first();
+
+        if ($existingApproval) {
+            return response()->json([
+                'error' => 'You have already taken action on this request'
+            ], 400);
         }
 
         // Create approval record
@@ -323,17 +356,52 @@ class AdminApprovalController extends Controller
 
         $approval->save();
 
-        return response()->json(['message' => 'Request approved successfully']);
-    }
+        // Get updated approval and rejection counts
+        $approvalCount = RequisitionApproval::where('request_id', $requestId)
+            ->whereNotNull('approved_by')
+            ->count();
 
-    public function rejectRequest(Request $request, $requestId)
-    {
+        $rejectionCount = RequisitionApproval::where('request_id', $requestId)
+            ->whereNotNull('rejected_by')
+            ->count();
+
+        return response()->json([
+            'message' => 'Request approved successfully',
+            'approval_count' => $approvalCount,
+            'rejection_count' => $rejectionCount
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Failed to approve request',
+            'details' => $e->getMessage()
+        ], 500);
+    }
+}
+
+public function rejectRequest(Request $request, $requestId)
+{
+    try {
         // Validate admin permissions
         $allowedRoles = ['Head Admin', 'Vice President of Administration', 'Approving Officer'];
         $admin = Admin::with('roles')->find(auth()->id());
 
         if (!$admin->roles->whereIn('role_name', $allowedRoles)->count()) {
             return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Check if this admin has already approved/rejected this request
+        $existingApproval = RequisitionApproval::where('request_id', $requestId)
+            ->where(function($query) use ($admin) {
+                $query->where('approved_by', $admin->admin_id)
+                      ->orWhere('rejected_by', $admin->admin_id);
+            })
+            ->first();
+
+        if ($existingApproval) {
+            return response()->json([
+                'error' => 'You have already taken action on this request'
+            ], 400);
         }
 
         // Create rejection record
@@ -347,9 +415,28 @@ class AdminApprovalController extends Controller
 
         $rejection->save();
 
-        return response()->json(['message' => 'Request rejected successfully']);
-    }
+        // Get updated approval and rejection counts
+        $approvalCount = RequisitionApproval::where('request_id', $requestId)
+            ->whereNotNull('approved_by')
+            ->count();
 
+        $rejectionCount = RequisitionApproval::where('request_id', $requestId)
+            ->whereNotNull('rejected_by')
+            ->count();
+
+        return response()->json([
+            'message' => 'Request rejected successfully',
+            'approval_count' => $approvalCount,
+            'rejection_count' => $rejectionCount
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Failed to reject request',
+            'details' => $e->getMessage()
+        ], 500);
+    }
+}
     public function getSimplifiedForms()
     {
         // Get status IDs to exclude (same as index)
@@ -442,7 +529,6 @@ class AdminApprovalController extends Controller
         }
     }
 
-    // --- NEW FUNCTIONS IN NEED OF TESTING -- //
 
     public function addFee(Request $request, $requestId)
     {
@@ -627,6 +713,148 @@ class AdminApprovalController extends Controller
         ], 500);
     }
 }
+
+public function waiveItems(Request $request, $requestId)
+{
+    try {
+        \Log::debug('Waive items request received', [
+            'request_id' => $requestId,
+            'waive_all' => $request->waive_all,
+            'waived_facilities' => $request->waived_facilities,
+            'waived_equipment' => $request->waived_equipment
+        ]);
+
+        // Custom validation to check if items belong to this request
+        $validator = Validator::make($request->all(), [
+            'waive_all' => 'sometimes|boolean',
+            'waived_facilities' => 'sometimes|array',
+            'waived_facilities.*' => [
+                function ($attribute, $value, $fail) use ($requestId) {
+                    $exists = RequestedFacility::where('requested_facility_id', $value)
+                        ->where('request_id', $requestId)
+                        ->exists();
+                    
+                    \Log::debug('Facility validation check', [
+                        'requested_facility_id' => $value,
+                        'request_id' => $requestId,
+                        'exists' => $exists
+                    ]);
+                    
+                    if (!$exists) {
+                        $fail('The selected facility is invalid for this request.');
+                    }
+                }
+            ],
+            'waived_equipment' => 'sometimes|array',
+            'waived_equipment.*' => [
+                function ($attribute, $value, $fail) use ($requestId) {
+                    $exists = RequestedEquipment::where('requested_equipment_id', $value)
+                        ->where('request_id', $requestId)
+                        ->exists();
+                    
+                    \Log::debug('Equipment validation check', [
+                        'requested_equipment_id' => $value,
+                        'request_id' => $requestId,
+                        'exists' => $exists
+                    ]);
+                    
+                    if (!$exists) {
+                        $fail('The selected equipment is invalid for this request.');
+                    }
+                }
+            ]
+        ]);
+
+        if ($validator->fails()) {
+            \Log::error('Waive items validation failed', [
+                'errors' => $validator->errors()->toArray(),
+                'request_data' => $request->all()
+            ]);
+            
+            return response()->json([
+                'error' => 'Validation failed',
+                'details' => $validator->errors()
+            ], 422);
+        }
+
+        $validatedData = $validator->validated();
+
+        DB::beginTransaction();
+
+        if (isset($validatedData['waive_all']) && $validatedData['waive_all']) {
+            // Waive all facilities and equipment
+            RequestedFacility::where('request_id', $requestId)
+                ->update(['is_waived' => true]);
+            
+            RequestedEquipment::where('request_id', $requestId)
+                ->update(['is_waived' => true]);
+        } else {
+            // Only update waivers for specific items
+            // Update facilities based on the provided list
+            if (isset($validatedData['waived_facilities'])) {
+                // Waive the specified facilities
+                RequestedFacility::where('request_id', $requestId)
+                    ->whereIn('requested_facility_id', $validatedData['waived_facilities'])
+                    ->update(['is_waived' => true]);
+                
+                // Unwaive facilities not in the list
+                RequestedFacility::where('request_id', $requestId)
+                    ->whereNotIn('requested_facility_id', $validatedData['waived_facilities'])
+                    ->update(['is_waived' => false]);
+            } else {
+                // If no facilities specified, unwaive all facilities
+                RequestedFacility::where('request_id', $requestId)
+                    ->update(['is_waived' => false]);
+            }
+
+            // Update equipment based on the provided list
+            if (isset($validatedData['waived_equipment'])) {
+                // Waive the specified equipment
+                RequestedEquipment::where('request_id', $requestId)
+                    ->whereIn('requested_equipment_id', $validatedData['waived_equipment'])
+                    ->update(['is_waived' => true]);
+                
+                // Unwaive equipment not in the list
+                RequestedEquipment::where('request_id', $requestId)
+                    ->whereNotIn('requested_equipment_id', $validatedData['waived_equipment'])
+                    ->update(['is_waived' => false]);
+            } else {
+                // If no equipment specified, unwaive all equipment
+                RequestedEquipment::where('request_id', $requestId)
+                    ->update(['is_waived' => false]);
+            }
+        }
+
+        // Recalculate approved fee
+        $form = RequisitionForm::with(['requestedFacilities', 'requestedEquipment', 'requisitionFees'])
+            ->findOrFail($requestId);
+        
+        $approvedFee = $this->calculateApprovedFee($form);
+        $form->approved_fee = $approvedFee;
+        $form->save();
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Items waived successfully',
+            'updated_approved_fee' => $approvedFee,
+            'tentative_fee' => $this->calculateTentativeFee($requestId)
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Failed to waive items', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'error' => 'Failed to waive items',
+            'details' => $e->getMessage()
+        ], 500);
+    }
+}
+
 
     public function addComment(Request $request, $requestId)
     {
@@ -844,13 +1072,13 @@ class AdminApprovalController extends Controller
     return max(0, $approvedFee);
 }
 
-private function calculateAdditionalFees($form)
-{
-    // Sum only positive fee amounts (additional fees)
-    return $form->requisitionFees->sum(function ($fee) {
-        return max(0, (float) $fee->fee_amount);
-    });
-}
+    private function calculateAdditionalFees($form)
+    {
+        // Sum only positive fee amounts (additional fees)
+        return $form->requisitionFees->sum(function ($fee) {
+            return max(0, (float) $fee->fee_amount);
+        });
+    }
 
 private function calculateTotalDiscounts($form, $subtotal)
 {
@@ -873,8 +1101,6 @@ private function calculateTotalDiscounts($form, $subtotal)
 
     return $totalDiscount;
 }
-
-
 
     // Completed Transactions // 
 

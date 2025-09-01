@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\EquipmentItemController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminApprovalController;
@@ -34,14 +36,48 @@ Route::delete('/admins/{admin}', [AdminController::class, 'deleteAdmin']);
 Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']);
 Route::put('/admins/{admin}', [AdminController::class, 'update']);
 
+// --- Equipment and Facility Management Routes --- //
+
+// Equipment Image Management
+
+// Cloudinary delete route
+Route::post('/admin/cloudinary/delete', function (Request $request) {
+$request->validate([
+'public_id' => 'required|string'
+]);
+try {
+$result = Cloudinary::destroy($request->public_id);
+return response()->json(['message' => 'Image deleted from Cloudinary', 'result' => $result]);
+} catch (\Exception $e) {
+\Log::error('Cloudinary delete error', ['error' => $e->getMessage()]);
+return response()->json(['message' => 'Failed to delete image', 'error' => $e->getMessage()], 500);
+}
+})->middleware('auth:sanctum');
+
+Route::get('/admin/edit-equipment', [EquipmentController::class, 'edit'])->name('admin.edit-equipment');
+Route::post('/admin/upload', [EquipmentController::class, 'uploadImage']);
+Route::post('/admin/bulk-upload', [EquipmentController::class, 'uploadMultipleImages']);
+Route::delete('/admin/{imageId}/delete-photo', [EquipmentController::class, 'deleteImage']);
+Route::post('/admin/reorder', [EquipmentController::class, 'reorderImages']);
+Route::post('/admin/equipment/{equipmentId}/images/save', [EquipmentController::class, 'saveImageReference']);
+
+// Facility Image Management
+Route::prefix('facilities/{facilityId}/images')->group(function () {
+Route::post('/', [FacilityController::class, 'uploadImage']);
+Route::post('/bulk', [FacilityController::class, 'uploadMultipleImages']);
+Route::delete('/{imageId}', [FacilityController::class, 'deleteImage']);
+Route::post('/reorder', [FacilityController::class, 'reorderImages']);
+});
+
 // ---------------- Lookup Tables ---------------- //
 
 Route::get('/departments', [DepartmentController::class, 'index']);
 Route::get('/availability-statuses', [AvailabilityStatusController::class, 'index']);
 Route::get('/form-statuses', [FormStatusController::class, 'index']);
 Route::get('/conditions', [ConditionController::class, 'index']);
+Route::get('/equipment/{id}', [EquipmentController::class, 'show']);
 Route::get('/equipment-categories', [EquipmentCategoryController::class, 'index']);
-Route::get('/equipment-items', [EquipmentItem::class, 'index']);
+Route::get('/equipment-items', [EquipmentItemController::class, 'index']);
 Route::get('/facility-categories', [FacilityCategoryController::class, 'index']);
 Route::get('/facility-categories/index', [FacilityCategoryController::class, 'indexWithSubcategories']);
 Route::get('/facility-subcategories/{category}', [FacilitySubcategoryController::class, 'index']);
@@ -110,8 +146,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'pendingRequests']);
     Route::get('/admin/simplified-forms', [AdminApprovalController::class, 'getSimplifiedForms']);
     Route::get('/admin/completed-requests', [AdminApprovalController::class, 'completedRequests']);
-    Route::post('/admin/approve-request', [AdminApprovalController::class, 'approveRequest']);
-    Route::post('/admin/reject-request', [AdminApprovalController::class, 'rejectRequest']);
     Route::get('/admin/profile', function (Request $request) {
         $user = $request->user();
         $user->load(['role', 'departments']);
@@ -119,60 +153,29 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/admin/update-photo', [AdminController::class, 'updatePhoto']);
 
-     // --- Form Management Routes --- //
+    // --- Form Management Routes --- //
     Route::prefix('admin/requisition')->group(function () {
 
-    // Add fees, waivers, and discounts
-    Route::post('/{requestId}/fee', [AdminApprovalController::class, 'addFee']);
-    Route::post('/{requestId}/discount', [AdminApprovalController::class, 'addDiscount']);
-    Route::post('/{requestId}/late-penalty', [AdminApprovalController::class, 'addLatePenalty']);
-    Route::post('/{requestId}/remove-late-penalty', [AdminApprovalController::class, 'removeLatePenalty']);
-    Route::delete('/{requestId}/fee/{feeId}', [AdminApprovalController::class, 'removeFee']);
-    Route::get('/{requestId}/fees', [AdminApprovalController::class, 'getRequisitionFees']);
-    Route::post('/{requestId}/waive', [AdminApprovalController::class, 'waiveItems']);
+        // Add fees, waivers, and discounts
+        Route::post('/{requestId}/fee', [AdminApprovalController::class, 'addFee']);
+        Route::post('/{requestId}/discount', [AdminApprovalController::class, 'addDiscount']);
+        Route::post('/{requestId}/late-penalty', [AdminApprovalController::class, 'addLatePenalty']);
+        Route::post('/{requestId}/remove-late-penalty', [AdminApprovalController::class, 'removeLatePenalty']);
+        Route::delete('/{requestId}/fee/{feeId}', [AdminApprovalController::class, 'removeFee']);
+        Route::get('/{requestId}/fees', [AdminApprovalController::class, 'getRequisitionFees']);
+        Route::post('/{requestId}/waive', [AdminApprovalController::class, 'waiveItems']);
 
-    // Add and get comments
-    Route::post('/{requestId}/comment', [AdminApprovalController::class, 'addComment']);
-    Route::get('/{requestId}/comments', [AdminApprovalController::class, 'getComments']);
+        // Add and get comments
+        Route::post('/{requestId}/comment', [AdminApprovalController::class, 'addComment']);
+        Route::get('/{requestId}/comments', [AdminApprovalController::class, 'getComments']);
 
-    // Closing and finalizing forms
-    Route::post('/{requestId}/finalize', [AdminApprovalController::class, 'finalizeForm']);
-    Route::post('/{requestId}/close', [AdminApprovalController::class, 'closeForm']);
-    Route::post('/{requestId}/mark-returned', [AdminApprovalController::class, 'markReturned']);
+        // Closing and finalizing forms
+        Route::post('/{requestId}/finalize', [AdminApprovalController::class, 'finalizeForm']);
+        Route::post('/{requestId}/close', [AdminApprovalController::class, 'closeForm']);
+        Route::post('/{requestId}/mark-returned', [AdminApprovalController::class, 'markReturned']);
 
-    // Get form details
-    Route::get('/{requestId}/receipt', [AdminApprovalController::class, 'getOfficialReceipt']);
-    
-     });
-    
-    // --- Needs fixing --- //
-    Route::prefix('admin')->middleware(['check.admin.role'])->group(function () {
+        // Get form details
+        Route::get('/{requestId}/receipt', [AdminApprovalController::class, 'getOfficialReceipt']);
 
-    // --- Equipment and Facility Management Routes --- //
-
-        // Equipment
-        Route::apiResource('equipment', EquipmentController::class);
-
-        // Facilities
-        Route::apiResource('facilities', FacilityController::class);
-
-        // Equipment Image Management
-        Route::prefix('equipment/{equipmentId}/images')->group(function () {
-            Route::post('/upload', [EquipmentController::class, 'uploadImage']);
-            Route::post('/bulk-upload', [EquipmentController::class, 'uploadMultipleImages']);
-            Route::delete('/{imageId}', [EquipmentController::class, 'deleteImage']);
-            Route::post('/reorder', [EquipmentController::class, 'reorderImages']);
-        });
-
-        // Facility Image Management
-        Route::prefix('facilities/{facilityId}/images')->group(function () {
-            Route::post('/', [FacilityController::class, 'uploadImage']);
-            Route::post('/bulk', [FacilityController::class, 'uploadMultipleImages']);
-            Route::delete('/{imageId}', [FacilityController::class, 'deleteImage']);
-            Route::post('/reorder', [FacilityController::class, 'reorderImages']);
-        });
     });
-    
-
-
 });

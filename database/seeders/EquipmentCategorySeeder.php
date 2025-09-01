@@ -13,6 +13,10 @@ class EquipmentCategorySeeder extends Seeder
      */
     public function run(): void
     {
+
+        // NOTE: Primary key: category_id (auto-increment)
+        // NOTE: Timestamps: created_at, updated_at (auto-managed by Laravel)
+
         DB::table('equipment_categories')->insert([
             [
                 'category_name' => 'Audio Equipment',
@@ -29,7 +33,15 @@ class EquipmentCategorySeeder extends Seeder
             [
                 'category_name' => 'Conference Equipment',
                 'description' => 'Meeting and conference room equipment and accessories',
-            ]
+            ],
+            [
+                'category_name' => 'Event Equipment',
+                'description' => 'Specialized equipment for events and performances',
+            ],
+            [
+                'category_name' => 'IT Equipment',
+                'description' => 'Hardware and devices used for computing and communication',
+            ],
          ]);
     }
 }
