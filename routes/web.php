@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RequisitionFormController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\EquipmentController;
 
 Route::middleware('web')->group(function () {
     Route::get('/', function () {
@@ -25,9 +26,9 @@ Route::middleware('web')->group(function () {
     Route::view('/policies', 'public.policies');
 
     // ----- Admin Views ----- //
-    Route::get('/admin/profile/{adminId}', function($adminId) {
+    Route::get('/admin/profile/{adminId}', function ($adminId) {
         return view('admin.admin-profile', ['adminId' => $adminId]);
-    }); 
+    });
     Route::view('/admin/add-equipment', 'admin.add-equipment');
     Route::view('/admin/add-facility', 'admin.add-facility');
     Route::view('/admin/admin-page-template', 'admin.admin-page-template');
@@ -37,13 +38,14 @@ Route::middleware('web')->group(function () {
     Route::view('/admin/calendar', 'admin.calendar');
     Route::view('/admin/dashboard', 'admin.dashboard');
     Route::view('/admin/manage-equipment', 'admin.manage-equipment');
+    Route::get('/admin/edit-equipment', [EquipmentController::class, 'edit'])->name('admin.edit-equipment');
     Route::view('/admin/manage-facilities', 'admin.manage-facilities');
     Route::view('/admin/manage-facility', 'admin.manage-facility');
     Route::view('/admin/manage-requests', 'admin.manage-requests');
-    Route::get('/admin/requisition/{requestId}', function($requestId) {
+    Route::get('/admin/requisition/{requestId}', function ($requestId) {
         return view('admin.request-view', ['requestId' => $requestId]);
-    }); 
-    
+    });
+
     // ----- Auth Routes ----- //
     Route::get('/login', function () {
         return view('auth.login');
