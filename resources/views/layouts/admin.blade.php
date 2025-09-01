@@ -8,8 +8,8 @@
     <title>@yield('title', 'CPU Booking')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/admin/admin-styles.css') }}" />
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <style>
         .text-primary {
             color: var(--cpu-primary) !important;
@@ -264,7 +264,6 @@
         /* Main Content */
         #layout {
             margin-left: 250px;
-            margin-top: 60px;
             display: flex;
             flex: 1;
         }
@@ -519,7 +518,6 @@
 
     {{-- Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="{{ asset('js/admin/authentication.js') }}"></script>
 
     @yield('scripts')

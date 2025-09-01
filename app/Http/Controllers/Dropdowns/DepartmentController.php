@@ -11,7 +11,7 @@ class DepartmentController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $departments = Department::all(['department_name', 'department_code']);
+            $departments = Department::all(['department_id', 'department_name', 'department_code']);
             return response()->json($departments);
         } catch (\Exception $e) {
             \Log::error('Error fetching departments', ['error' => $e->getMessage()]);

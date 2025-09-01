@@ -63,9 +63,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <span class="text-muted small">Total Requisitions</span>
-                                    <h2 class="mt-2 mb-0 fw-bold">245</h2>
-                                    <span class="badge bg-primary bg-opacity-10 text-primary mt-2">+12% from last
-                                        month</span>
+                                    <h2 class="mt-2 mb-0 fw-bold" id="totalRequisitions">0</h2>
                                 </div>
                                 <div class="bg-primary bg-opacity-10 p-3 rounded">
                                     <i class="bi bi-file-earmark-text fs-4 text-primary"></i>
@@ -81,9 +79,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <span class="text-muted small">Ongoing Events</span>
-                                    <h2 class="mt-2 mb-0 fw-bold">245</h2>
-                                    <span class="badge bg-primary bg-opacity-10 text-primary mt-2">+12% from last
-                                        month</span>
+                                    <h2 class="mt-2 mb-0 fw-bold" id="ongoingEvents">0</h2>
                                 </div>
                                 <div class="bg-primary bg-opacity-10 p-3 rounded">
                                     <i class="bi bi-calendar-event fs-4 text-primary"></i>
@@ -99,9 +95,8 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <span class="text-muted small">Pending Requests</span>
-                                    <h2 class="mt-2 mb-0 fw-bold">245</h2>
-                                    <span class="badge bg-primary bg-opacity-10 text-primary mt-2">+12% from last
-                                        month</span>
+                                    <h2 class="mt-2 mb-0 fw-bold" id="pendingRequests">0</h2>
+
                                 </div>
                                 <div class="bg-primary bg-opacity-10 p-3 rounded">
                                     <i class="bi bi-clock-history fs-4 text-primary"></i>
@@ -112,100 +107,103 @@
                 </div>
             </div>
 
- <!-- Calendar Section -->
-<div class="card shadow-sm">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold">Events Calendar</h3>
-            <div class="d-flex gap-2">
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="eventTypeDropdown"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-funnel me-1"></i> Filter Events
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="eventTypeDropdown">
-                        <li>
-                            <button class="dropdown-item" data-filter="facility">
-                                <i class="bi bi-door-open me-2"></i> Facility Rentals
-                            </button>
-                        </li>
-                        <li>
-                            <button class="dropdown-item" data-filter="equipment">
-                                <i class="bi bi-tools me-2"></i> Equipment Rentals
-                            </button>
-                        </li>
-                        <li>
-                            <button class="dropdown-item" data-filter="university">
-                                <i class="bi bi-building me-2"></i> University Events
-                            </button>
-                        </li>
-                        <li>
-                            <button class="dropdown-item" data-filter="external">
-                                <i class="bi bi-globe me-2"></i> External Events
-                            </button>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <button class="dropdown-item" data-filter="all">
-                                <i class="bi bi-eye me-2"></i> Show All
-                            </button>
-                        </li>
-                    </ul>
+            <!-- Calendar Section -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold">Events Calendar</h3>
+                        <div class="d-flex gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="eventTypeDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-funnel me-1"></i> Filter Events
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="eventTypeDropdown">
+                                    <li>
+                                        <button class="dropdown-item" data-filter="facility">
+                                            <i class="bi bi-door-open me-2"></i> Facility Rentals
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item" data-filter="equipment">
+                                            <i class="bi bi-tools me-2"></i> Equipment Rentals
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item" data-filter="university">
+                                            <i class="bi bi-building me-2"></i> University Events
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item" data-filter="external">
+                                            <i class="bi bi-globe me-2"></i> External Events
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item" data-filter="all">
+                                            <i class="bi bi-eye me-2"></i> Show All
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <a href="calendar.html" class="btn btn-primary">
+                                <i class="bi bi-calendar-week me-1"></i> Open Calendar
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Calendar container -->
+                    <div id="calendar" class="border rounded p-3 calendar-container" style="height: 600px;">
+                        <!-- Calendar will render here -->
+                    </div>
                 </div>
-                <a href="calendar.html" class="btn btn-primary">
-                    <i class="bi bi-calendar-week me-1"></i> Open Calendar
-                </a>
-            </div>
-        </div>
+            </div> <!-- ✅ Calendar card closes here -->
 
-        <!-- Calendar container -->
-        <div id="calendar" class="border rounded p-3 calendar-container" style="height: 600px;">
-            <!-- Calendar will render here -->
-        </div>
-    </div>
-</div> <!-- ✅ Calendar card closes here -->
+            <!-- System Log Section -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold">System Log</h3>
+                        <div class="d-flex gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="adminRoleDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person me-1"></i> Filter by Role
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="adminRoleDropdown">
+                                    <li><button class="dropdown-item" data-filter="head-admin">Head Admin</button></li>
+                                    <li><button class="dropdown-item" data-filter="assistant-admin">Assistant Admin</button>
+                                    </li>
+                                    <li><button class="dropdown-item" data-filter="all">Show All</button></li>
+                                </ul>
+                            </div>
+                            <input type="date" class="form-control" id="logDateFilter" placeholder="Filter by Date">
+                        </div>
+                    </div>
 
-<!-- System Log Section -->
-<div class="card shadow-sm mt-3">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold">System Log</h3>
-            <div class="d-flex gap-2">
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="adminRoleDropdown"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person me-1"></i> Filter by Role
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="adminRoleDropdown">
-                        <li><button class="dropdown-item" data-filter="head-admin">Head Admin</button></li>
-                        <li><button class="dropdown-item" data-filter="assistant-admin">Assistant Admin</button></li>
-                        <li><button class="dropdown-item" data-filter="all">Show All</button></li>
-                    </ul>
+                    <!-- System log container -->
+                    <div id="systemLog" class="border rounded p-3 log-container">
+                        <ul class="list-group">
+                            <!-- Example log entries -->
+                            <li class="list-group-item">
+                                <strong>John Doe</strong> (Head Admin) approved a requisition for the Main Auditorium on
+                                <em>March 15, 2024</em>.
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Jane Smith</strong> (Assistant Admin) added new equipment: Sound System on
+                                <em>March 10, 2024</em>.
+                            </li>
+                            <li class="list-group-item">
+                                <strong>John Doe</strong> (Head Admin) deleted a facility: Old Gymnasium on
+                                <em>March 5, 2024</em>.
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <input type="date" class="form-control" id="logDateFilter" placeholder="Filter by Date">
             </div>
-        </div>
-
-        <!-- System log container -->
-        <div id="systemLog" class="border rounded p-3 log-container">
-            <ul class="list-group">
-                <!-- Example log entries -->
-                <li class="list-group-item">
-                    <strong>John Doe</strong> (Head Admin) approved a requisition for the Main Auditorium on
-                    <em>March 15, 2024</em>.
-                </li>
-                <li class="list-group-item">
-                    <strong>Jane Smith</strong> (Assistant Admin) added new equipment: Sound System on
-                    <em>March 10, 2024</em>.
-                </li>
-                <li class="list-group-item">
-                    <strong>John Doe</strong> (Head Admin) deleted a facility: Old Gymnasium on
-                    <em>March 5, 2024</em>.
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
 
         </main>
     </div>
@@ -251,6 +249,64 @@
             if (adminId) {
                 manageProfileBtn.href = `/admin/profile/${adminId}`;
             }
+
+            // Get the authentication token
+            const token = localStorage.getItem('adminToken');
+
+            if (!token) {
+                console.error('No authentication token found');
+                return;
+            }
+
+            // Fetch requisition data from API with authentication
+            fetch('http://127.0.0.1:8000/api/admin/requisition-forms', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API Response:', data); // Debug: check what data is returned
+
+                    let totalRequisitions = data.length;
+                    let pendingRequests = 0;
+                    let ongoingEvents = 0;
+
+                    data.forEach(item => {
+                        const status = item.form_details.status.name;
+
+                        // Count pending requests (based on your controller logic)
+                        if (status === 'Pending Approval' || status === 'Awaiting Payment') {
+                            pendingRequests++;
+                        }
+
+                        // Count ongoing events
+                        if (status === 'Scheduled' || status === 'Ongoing') {
+                            ongoingEvents++;
+                        }
+                    });
+
+                    // Update the DOM with the calculated values
+                    document.getElementById('totalRequisitions').textContent = totalRequisitions;
+                    document.getElementById('pendingRequests').textContent = pendingRequests;
+                    document.getElementById('ongoingEvents').textContent = ongoingEvents;
+                })
+                .catch(error => {
+                    console.error('Error fetching requisition data:', error);
+                    // Set default values or show error message
+                    document.getElementById('totalRequisitions').textContent = 'Error';
+                    document.getElementById('pendingRequests').textContent = 'Error';
+                    document.getElementById('ongoingEvents').textContent = 'Error';
+                });
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 @endsection
