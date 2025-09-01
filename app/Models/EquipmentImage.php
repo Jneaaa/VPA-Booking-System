@@ -16,14 +16,10 @@ class EquipmentImage extends Model
     protected $fillable = [
         'equipment_id',
         'description',
-        'is_primary',
         'sort_order',
         'image_url',
-        'cloudinary_public_id'
-    ];
-
-    protected $casts = [
-        'is_primary'
+        'cloudinary_public_id',
+        'image_type'
     ];
 
     public function equipment()

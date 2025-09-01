@@ -104,7 +104,7 @@ class EquipmentController extends Controller
             'images.*.image_url' => 'required|url|max:500',
             'images.*.description' => 'nullable|string',
             'images.*.sort_order' => 'sometimes|integer',
-            'images.*.type_id' => 'required|exists:image_types,type_id',
+            'images.*.image_type' => 'required|exists:image_types,image_type',
         ]);
 
         $user = auth()->user();
@@ -151,62 +151,124 @@ class EquipmentController extends Controller
 
     // ----- Display Equipment ----- //
 
-    public function show(Equipment $equipment): JsonResponse
+    public function show($id)
     {
-        $equipment->load(['category', 'status', 'department', 'items.condition', 'images']);
+        try {
+            $equipment = Equipment::with([
+                'category',
+                'status',
+                'department',
+                'images'
+            ])->findOrFail($id);
 
-        return response()->json([
-            'data' => $this->formatEquipment($equipment),
-        ]);
+            return response()->json([
+                'data' => $equipment
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching equipment: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to fetch equipment',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 
     // ----- Update Equipment ----- //
 
-    public function update(Request $request, Equipment $equipment): JsonResponse
+    public function update(Request $request, $id)
     {
-        $data = $request->validate([
-            'equipment_name' => 'sometimes|string|max:50',
+        try {
+            $validated = $request->validate([
+                'equipment_name' => 'required|string|max:255',
+                'description' => 'nullable|string|max:255',
+                'brand' => 'nullable|string|max:255',
+                'storage_location' => 'required|string|max:255',
+                'category_id' => 'required|exists:equipment_categories,category_id',
+                'total_quantity' => 'required|integer|min:0',
+                'internal_fee' => 'required|numeric|min:0',
+                'external_fee' => 'required|numeric|min:0',
+                'rate_type' => 'required|in:Per Hour,Per Event',
+                'status_id' => 'required|exists:availability_statuses,status_id',
+                'department_id' => 'required|exists:departments,department_id',
+                'maximum_rental_hour' => 'required|integer|min:1',
+            ]);
+
+            $equipment = Equipment::findOrFail($id);
+            $equipment->update($validated);
+
+            return response()->json([
+                'message' => 'Equipment updated successfully',
+                'data' => $equipment
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error updating equipment: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to update equipment',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function edit(Request $request)
+    {
+        $equipmentId = $request->query('id');
+
+        if (!$equipmentId) {
+            return redirect('/admin/manage-equipment')->with('error', 'No equipment ID provided');
+        }
+
+        return view('admin.edit-equipment', ['equipmentId' => $equipmentId]);
+    }
+
+    public function saveImageReference(Request $request, $equipmentId): JsonResponse
+{
+    try {
+        $validated = $request->validate([
+            'image_url' => 'required|url',
+            'cloudinary_public_id' => 'required|string',
             'description' => 'nullable|string|max:255',
-            'brand' => 'nullable|string|max:80',
-            'storage_location' => 'sometimes|string|max:50',
-            'category_id' => 'sometimes|exists:equipment_categories,category_id',
-            'total_quantity' => 'sometimes|integer|min:1',
-            'internal_fee' => 'sometimes|numeric|min:0',
-            'external_fee' => 'sometimes|numeric|min:0',
-            'rate_type' => 'sometimes|in:Per Hour,Per Event',
-            'status_id' => 'sometimes|exists:availability_statuses,status_id',
-            'department_id' => 'sometimes|exists:departments,department_id',
-            'maximum_rental_hour' => 'nullable|integer',
+            'image_type' => 'sometimes|in:Primary,Secondary'
         ]);
 
-        $user = auth()->user();
+        $equipment = Equipment::findOrFail($equipmentId);
 
+        // Check authorization
+        $user = auth()->user();
         if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
             return response()->json(['message' => 'You do not manage this equipment.'], 403);
         }
 
-        $equipment->update([
-            'equipment_name' => $data['equipment_name'] ?? $equipment->equipment_name,
-            'description' => $data['description'] ?? $equipment->description,
-            'brand' => $data['brand'] ?? $equipment->brand,
-            'storage_location' => $data['storage_location'] ?? $equipment->storage_location,
-            'category_id' => $data['category_id'] ?? $equipment->category_id,
-            'total_quantity' => $data['total_quantity'] ?? $equipment->total_quantity,
-            'internal_fee' => $data['internal_fee'] ?? $equipment->internal_fee,
-            'external_fee' => $data['external_fee'] ?? $equipment->external_fee,
-            'rate_type' => $data['rate_type'] ?? $equipment->rate_type,
-            'status_id' => $data['status_id'] ?? $equipment->status_id,
-            'department_id' => $data['department_id'] ?? $equipment->department_id,
-            'maximum_rental_hour' => $data['maximum_rental_hour'] ?? $equipment->maximum_rental_hour,
-            'updated_by' => $user->admin_id,
+        // Determine image type
+        $imageType = $validated['image_type'] ?? ($equipment->images()->count() == 0 ? 'Primary' : 'Secondary');
+
+        // Create the image record
+        $equipment->images()->create([
+            'image_url' => $validated['image_url'],
+            'image_type' => $imageType,
+            'cloudinary_public_id' => $validated['cloudinary_public_id'],
+            'description' => $validated['description'] ?? null,
+            'sort_order' => $equipment->images()->count() + 1
         ]);
 
         return response()->json([
-            'message' => 'Equipment updated successfully',
-            'data' => $this->formatEquipment($equipment->fresh()),
+            'message' => 'Image reference saved successfully',
+            'type' => $imageType
         ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error saving image reference', [
+            'error' => $e->getMessage(),
+            'equipmentId' => $equipmentId
+        ]);
+        
+        return response()->json([
+            'message' => 'Failed to save image reference: ' . $e->getMessage()
+        ], 500);
     }
+}
 
 
     // ----- Remove Equipment ----- //
@@ -241,7 +303,7 @@ class EquipmentController extends Controller
         $validated = $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'description' => 'nullable|string|max:255',
-            'type_id' => 'sometimes|exists:image_types,type_id'
+            'image_type' => 'sometimes|in:Primary,Secondary' // Change validation to match enum values
         ]);
 
         // Find the equipment
@@ -262,14 +324,14 @@ class EquipmentController extends Controller
         $imageUrl = $uploaded->getSecurePath();
         $publicId = $uploaded->getPublicId();
 
-        // Determine image type if not provided
-        $imageType = $validated['type_id'] ??
-            ($equipment->images()->count() == 0 ? 1 : 2); // First image = primary
+        // Determine image type if not provided - use enum string values
+        $imageType = $validated['image_type'] ??
+            ($equipment->images()->count() == 0 ? 'Primary' : 'Secondary'); // Use string values
 
         // Create the image record
         $equipment->images()->create([
             'image_url' => $imageUrl,
-            'type_id' => $imageType,
+            'image_type' => $imageType, // Change to match database column name
             'cloudinary_public_id' => $publicId,
             'description' => $validated['description'] ?? null,
             'sort_order' => $equipment->images()->count() + 1
@@ -277,20 +339,21 @@ class EquipmentController extends Controller
 
         return response()->json([
             'message' => 'Image uploaded successfully',
-            'type' => $imageType == 1 ? 'primary' : 'additional'
+            'type' => $imageType,
+            'image_url' => $imageUrl,
+            'public_id' => $publicId
         ]);
     }
-
 
     // ----- Upload Images In Bulk ----- //
     public function uploadMultipleImages(Request $request, $equipmentId): JsonResponse
     {
-        // Validate the images and optional type_id
+        // Validate the images and optional image_type
         $validated = $request->validate([
             'images' => 'required|array',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'required|image|mimes:jpeg,png,jjpg,gif|max:2048',
             'description' => 'nullable|string|max:255',
-            'type_id' => 'sometimes|exists:image_types,type_id',
+            'image_type' => 'sometimes|in:Primary,Secondary', // Change validation
         ]);
 
         // Find the equipment
@@ -303,7 +366,7 @@ class EquipmentController extends Controller
         }
 
         $currentImageCount = $equipment->images()->count();
-        $typeId = $validated['type_id'] ?? null;
+        $typeId = $validated['image_type'] ?? null;
 
         foreach ($validated['images'] as $index => $image) {
             // Upload to Cloudinary
@@ -316,12 +379,12 @@ class EquipmentController extends Controller
             $publicId = $upload->getPublicId();
 
             // Decide image type (first image = primary if none specified)
-            $imageType = $typeId ?? (($currentImageCount + $index) === 0 ? 1 : 2);
+            $imageType = $typeId ?? (($currentImageCount + $index) === 0 ? 'Primary' : 'Secondary');
 
             // Create image record
             $equipment->images()->create([
                 'image_url' => $imageUrl,
-                'type_id' => $imageType,
+                'image_type' => $imageType, // Change to match database column name
                 'cloudinary_public_id' => $publicId,
                 'description' => $validated['description'] ?? null,
                 'sort_order' => $currentImageCount + $index + 1,
