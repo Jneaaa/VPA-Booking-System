@@ -54,12 +54,28 @@ return response()->json(['message' => 'Failed to delete image', 'error' => $e->g
 }
 })->middleware('auth:sanctum');
 
-Route::get('/admin/edit-equipment', [EquipmentController::class, 'edit'])->name('admin.edit-equipment');
-Route::post('/admin/upload', [EquipmentController::class, 'uploadImage']);
-Route::post('/admin/bulk-upload', [EquipmentController::class, 'uploadMultipleImages']);
-Route::delete('/admin/{imageId}/delete-photo', [EquipmentController::class, 'deleteImage']);
-Route::post('/admin/reorder', [EquipmentController::class, 'reorderImages']);
-Route::post('/admin/equipment/{equipmentId}/images/save', [EquipmentController::class, 'saveImageReference']);
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Equipment Image Management
+    Route::post('/admin/upload', [EquipmentController::class, 'uploadImage']);
+    Route::post('/admin/bulk-upload', [EquipmentController::class, 'uploadMultipleImages']);
+    Route::delete('/admin/equipment/{equipmentId}/images/{imageId}', [EquipmentController::class, 'deleteImage']);
+    Route::post('/admin/reorder', [EquipmentController::class, 'reorderImages']);
+    Route::post('/admin/equipment/{equipmentId}/images/save', [EquipmentController::class, 'saveImageReference']);
+
+    // Equipment Item Management Routes
+    Route::get('admin/equipment/{equipmentId}/items', [EquipmentController::class, 'getItems']);
+    Route::post('admin/equipment/{equipmentId}/items', [EquipmentController::class, 'storeItem']);
+    Route::put('admin/equipment/{equipmentId}/items/{itemId}', [EquipmentController::class, 'updateItem']);
+    Route::delete('admin/equipment/{equipmentId}/items/{itemId}', [EquipmentController::class, 'deleteItem']);
+
+    // Update One Equipment
+    Route::put('admin/equipment/{equipmentId}', [EquipmentController::class, 'update']);
+
+});
+
+
 
 // Facility Image Management
 Route::prefix('facilities/{facilityId}/images')->group(function () {
