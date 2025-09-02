@@ -271,15 +271,14 @@
     function getStatusName(statusId) {
       const statusMap = {
         1: 'Pending Approval',
-        2: 'In Review',
-        3: 'Awaiting Payment',
-        4: 'Scheduled',
-        5: 'Ongoing',
-        6: 'Returned',
-        7: 'Late Return',
-        8: 'Completed',
-        9: 'Rejected',
-        10: 'Cancelled'
+        2: 'Awaiting Payment',
+        3: 'Scheduled',
+        4: 'Ongoing',
+        5: 'Returned',
+        6: 'Late Return',
+        7: 'Completed',
+        8: 'Rejected',
+        9: 'Cancelled'
       };
       return statusMap[statusId] || 'Unknown';
     }
@@ -288,7 +287,6 @@
     function getStatusColor(status) {
       const colors = {
         'Pending Approval': 'warning',
-        'In Review': 'info',
         'Awaiting Payment': 'pink',
         'Scheduled': 'purple',
         'Ongoing': 'primary',

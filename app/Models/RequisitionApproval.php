@@ -8,10 +8,14 @@ class RequisitionApproval extends Model
 {
     protected $table = "requisition_approvals";
 
+     // Disable timestamps since your table doesn't have created_at and updated_at columns
+    public $timestamps = false;
+
     protected $fillable = [
         'request_id',
         'approved_by',
         'rejected_by',
+        'remarks', 
         'date_updated',
     ];
 

@@ -42,16 +42,16 @@ Route::put('/admins/{admin}', [AdminController::class, 'update']);
 
 // Cloudinary delete route
 Route::post('/admin/cloudinary/delete', function (Request $request) {
-$request->validate([
-'public_id' => 'required|string'
-]);
-try {
-$result = Cloudinary::destroy($request->public_id);
-return response()->json(['message' => 'Image deleted from Cloudinary', 'result' => $result]);
-} catch (\Exception $e) {
-\Log::error('Cloudinary delete error', ['error' => $e->getMessage()]);
-return response()->json(['message' => 'Failed to delete image', 'error' => $e->getMessage()], 500);
-}
+    $request->validate([
+        'public_id' => 'required|string'
+    ]);
+    try {
+        $result = Cloudinary::destroy($request->public_id);
+        return response()->json(['message' => 'Image deleted from Cloudinary', 'result' => $result]);
+    } catch (\Exception $e) {
+        \Log::error('Cloudinary delete error', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'Failed to delete image', 'error' => $e->getMessage()], 500);
+    }
 })->middleware('auth:sanctum');
 
 
@@ -75,14 +75,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-
-
 // Facility Image Management
 Route::prefix('facilities/{facilityId}/images')->group(function () {
-Route::post('/', [FacilityController::class, 'uploadImage']);
-Route::post('/bulk', [FacilityController::class, 'uploadMultipleImages']);
-Route::delete('/{imageId}', [FacilityController::class, 'deleteImage']);
-Route::post('/reorder', [FacilityController::class, 'reorderImages']);
+    Route::post('/', [FacilityController::class, 'uploadImage']);
+    Route::post('/bulk', [FacilityController::class, 'uploadMultipleImages']);
+    Route::delete('/{imageId}', [FacilityController::class, 'deleteImage']);
+    Route::post('/reorder', [FacilityController::class, 'reorderImages']);
 });
 
 // ---------------- Lookup Tables ---------------- //
@@ -106,6 +104,13 @@ Route::get('/admin-role', [AdminController::class, 'adminRoles']);
 Route::get('/equipment', [EquipmentController::class, 'publicIndex']);
 Route::get('/facilities', [FacilityController::class, 'publicIndex']);
 Route::get('/facilities/{facility}', [FacilityController::class, 'show']);
+
+// Public cancellation route for requesters
+Route::post('/requester/requisition/{requestId}/cancel', [AdminApprovalController::class, 'cancelRequestPublic']);
+
+// Upload proof of payment receipt for a request
+Route::post('/requester/requisition/{requestId}/upload-receipt', [AdminApprovalController::class, 'uploadPaymentReceipt']);
+
 
 // ---------------- Requester Routes ---------------- //
 
@@ -158,6 +163,8 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware
 
 Route::middleware('auth:sanctum')->group(function () {
 
+        
+
     // ---- Admin Approval Routes ---- //
     Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'pendingRequests']);
     Route::get('/admin/simplified-forms', [AdminApprovalController::class, 'getSimplifiedForms']);
@@ -181,9 +188,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{requestId}/fees', [AdminApprovalController::class, 'getRequisitionFees']);
         Route::post('/{requestId}/waive', [AdminApprovalController::class, 'waiveItems']);
 
+        // Change request status
+        Route::post('/{requestId}/update-status', [AdminApprovalController::class, 'updateStatus']);
+
         // Add and get comments
         Route::post('/{requestId}/comment', [AdminApprovalController::class, 'addComment']);
         Route::get('/{requestId}/comments', [AdminApprovalController::class, 'getComments']);
+
+        // Approving and rejecting forms
+        Route::post('/{requestId}/approve', [AdminApprovalController::class, 'approveRequest']);
+        Route::post('/{requestId}/reject', [AdminApprovalController::class, 'rejectRequest']);
+
+        // Cancel forms
+        Route::post('{requestId}/cancel', [AdminApprovalController::class, 'cancelForm']);
 
         // Closing and finalizing forms
         Route::post('/{requestId}/finalize', [AdminApprovalController::class, 'finalizeForm']);
@@ -194,4 +211,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{requestId}/receipt', [AdminApprovalController::class, 'getOfficialReceipt']);
 
     });
+});
+
+Route::get('/test-email', function() {
+    try {
+        \Mail::raw('Test email', function($message) {
+            $message->to('test@example.com')->subject('Test Email');
+        });
+        return 'Email sent successfully!';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
 });

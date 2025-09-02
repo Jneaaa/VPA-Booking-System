@@ -40,16 +40,15 @@ class RequisitionForm extends Model
         'date_endorsed',
         'tentative_fee',
         'approved_fee',
-        'official_receipt_no', 
-        'official_receipt_url', 
-        'official_receipt_public_id',
         'calendar_title',
         'calendar_description',
         'access_code',
         'formal_letter_url',
         'formal_letter_public_id',
         'facility_layout_url',
-        'facility_layout_public_id'
+        'facility_layout_public_id',
+        'proof_of_payment_url',
+        'proof_of_payment_public_id'
     ];
 
     protected $casts = [

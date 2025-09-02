@@ -5,47 +5,27 @@
 @section('content')
     <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
 
         .main-content {
-            flex-grow: 1;
             padding: 2rem 0;
             background-image: url('{{ asset('assets/homepage.jpg') }}');
             background-size: cover;
             background-position: center bottom;
             background-repeat: no-repeat;
+            background-attachment: fixed;
             position: relative;
-        }
-
-        .main-content::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 1;
         }
 
         .content-wrapper {
             position: relative;
-            z-index: 2;
             background-color: #ffffff;
             border-radius: 0.5rem;
             padding: 2rem;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .1);
             margin: 2rem auto;
-            max-width: 700px;
+            max-width: 1000px;
             width: 90%;
+            min-height: auto;
         }
 
         .content-wrapper h2 {
@@ -54,7 +34,6 @@
             margin-bottom: 1.5rem;
             text-align: center;
         }
-
 
         .lookup-form .input-group {
             margin-bottom: 1.5rem;
@@ -87,122 +66,69 @@
             margin-top: 1.5rem;
         }
 
-
         .requisition-list {
             margin-top: 2rem;
         }
 
-        .requisition-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 0.5rem;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1rem;
-            background-color: #fff;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, .075);
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .requisition-card .status-badge {
+        /* Custom Status Badges */
+        .status-badge {
             padding: 0.4em 0.8em;
-            border-radius: 0.25rem;
+            border-radius: 0.5rem;
             font-weight: bold;
             font-size: 0.85rem;
             min-width: 80px;
             text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        /* Custom Status Badges */
         .status-badge.completed {
             background-color: #d1e7dd;
             color: #0f5132;
+            border-color: #badbcc;
         }
 
-        /* Light green, dark green text */
         .status-badge.pending {
             background-color: #fff3cd;
             color: #664d03;
+            border-color: #ffecb5;
         }
 
-        /* Light yellow, dark yellow text */
         .status-badge.cancelled {
             background-color: #f8d7da;
             color: #842029;
+            border-color: #f1b0b7;
         }
 
-        /* Light red, dark red text */
         .status-badge.on-going {
             background-color: #cfe2ff;
             color: #052c65;
+            border-color: #b6d4fe;
         }
 
-        /* Light blue, dark blue text */
         .status-badge.rejected {
             background-color: #f8d7da;
             color: #842029;
+            border-color: #f1b0b7;
         }
 
-        /* Light red, dark red text */
-
-
-        .requisition-details {
-            flex-grow: 1;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-
-            font-size: 0.95rem;
-            color: #555;
-            padding-right: 1rem;
-
+        .status-badge.scheduled {
+            background-color: #fff3cd;
+            color: #664d03;
+            border-color: #ffecb5;
         }
 
-        .requisition-details div {
-            margin-bottom: 0.3rem;
+        .status-badge.ongoing {
+            background-color: #cfe2ff;
+            color: #052c65;
+            border-color: #b6d4fe;
         }
 
-        .requisition-details strong {
-            color: #333;
-            min-width: 80px;
-            /* Align labels */
-            display: inline-block;
-        }
-
-        .requisition-total {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #041A4B;
-            text-align: right;
-            /* Align total to the right */
-            width: 100%;
-            /* Take full width on smaller screens */
-            margin-top: 0.5rem;
-        }
-
-        .requisition-actions {
-            display: flex;
-            flex-direction: column;
-            /* Stack buttons on smaller screens */
-            align-items: flex-end;
-            /* Align buttons to the right */
-            margin-top: 1rem;
-            width: 100%;
-            /* Take full width on smaller screens */
-        }
-
-        .requisition-actions .btn {
-            margin-left: 0.5rem;
-            /* Space between buttons if they are side-by-side */
-            margin-bottom: 0.5rem;
-            /* Space between stacked buttons */
-            white-space: nowrap;
-            /* Prevent button text from wrapping */
-        }
-
-        .requisition-actions .btn:last-child {
-            margin-bottom: 0;
-            /* No margin for the last button */
+        .status-badge.awaiting-payment {
+            background-color: #e8dfff;
+            color: #4a1fb8;
+            border-color: #d0bcf9;
         }
 
         /* Filter Dropdown */
@@ -211,55 +137,104 @@
             text-align: right;
         }
 
-        /* Footer */
-        footer {
-            background-color: #041A4B;
-            /* Dark blue from the image */
-            color: white;
-            text-align: center;
-            padding: 1.5rem 0;
-            margin-top: auto;
-            /* Pushes footer to the bottom */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 0.75rem 1.25rem;
         }
 
-        footer p {
-            margin-bottom: 0;
+        .request-id {
+            font-weight: bold;
+            color: #041A4B;
+        }
+
+        .no-items {
+            font-style: italic;
+            color: #6c757d;
             font-size: 0.9rem;
         }
 
-        /* Responsive adjustments */
-        @media (min-width: 768px) {
-            .requisition-card {
-                justify-content: space-between;
-                align-items: center;
-                /* Center align items for larger screens */
-            }
-
-            .requisition-details {
-                flex: 1;
-                padding-right: 1rem;
-            }
-
-            .requisition-total {
-                width: auto;
-                /* Allow total to shrink on larger screens */
-                text-align: right;
-                margin-top: 0;
-            }
-
-            .requisition-actions {
-                flex-direction: row;
-                /* Buttons side-by-side on larger screens */
-                width: auto;
-                /* Auto width */
-                margin-top: 0;
-            }
+        .card-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            background-color: #f8f9fa;
+            padding: 0.75rem 1.25rem;
         }
 
-        @media (min-width: 992px) {
-            .content-wrapper {
-                padding: 2rem;
+        .card-body {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .left-column {
+            flex: 1;
+            min-width: 300px;
+            padding-right: 1.5rem;
+        }
+
+        .right-column {
+            flex: 1;
+            min-width: 300px;
+            border-left: 1px solid #dee2e6;
+            padding-left: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .card-body {
+                flex-direction: column;
             }
+
+            .left-column,
+            .right-column {
+                padding: 0;
+                border-left: none;
+            }
+
+            .right-column {
+                border-top: 1px solid #dee2e6;
+                padding-top: 1rem;
+                margin-top: 1rem;
+            }
+
+            /* Bigger text size */
+            .dropdown-menu .dropdown-item {
+                font-size: 1rem;
+                /* adjust as needed, e.g. 1.1rem */
+            }
+
+            /* Remove background outline */
+            .dropdown-menu .dropdown-item:focus {
+                outline: none;
+                box-shadow: none;
+            }
+
+            /* Text + arrow color (default state) */
+            .dropdown-toggle {
+                color: #000;
+                /* black text */
+                border: none;
+                /* remove button outline */
+                background: none;
+                /* remove button background */
+            }
+
+            /* Change arrow color to black */
+            .dropdown-toggle::after {
+                border-top-color: #000;
+                /* makes the caret arrow black */
+            }
+
+            /* Hover state */
+            .dropdown-menu .dropdown-item:hover {
+                background-color: #f0f0f0;
+                /* light gray background */
+                color: #000;
+                /* keep text black */
+            }
+
         }
     </style>
 
@@ -271,7 +246,7 @@
                 <div class="input-group">
                     <input type="text" class="form-control" id="referenceInput"
                         placeholder="Enter your reference code or email address" aria-label="Reference code or email">
-                    <button class="btn btn-primary" type="button" onclick="showResults()">Search Requisitions</button>
+                    <button class="btn btn-primary" type="button" onclick="showResults()">Search</button>
                 </div>
                 <p id="noResultsMessage" class="no-requisition-message">No requisition forms found. Please check your
                     reference code or email and try again.</p>
@@ -280,158 +255,559 @@
             <div id="resultsSection" style="display: none;">
                 <div class="lookup-form">
                     <div class="input-group">
-                        <input type="text" class="form-control" value="juan_costareal@email.com"
-                            aria-label="Reference code or email" readonly>
-                        <button class="btn btn-primary" type="button" onclick="showLookup()">New Search</button>
+                        <input type="text" class="form-control" aria-label="Reference code or email">
+                        <button class="btn btn-primary" type="button" onclick="showResults()">Search</button>
                     </div>
                 </div>
 
-                <h4 class="mt-4 mb-3 fw-bold">Your Requisition Forms</h4>
+                <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+                    <h4 class="fw-bold mb-0">Your Requisition Forms</h4>
 
-                <div class="d-flex justify-content-end filter-dropdown">
                     <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
                             Filter by
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#">All</a></li>
-                            <li><a class="dropdown-item" href="#">Completed</a></li>
                             <li><a class="dropdown-item" href="#">Pending Approval</a></li>
-                            <li><a class="dropdown-item" href="#">On-going</a></li>
-                            <li><a class="dropdown-item" href="#">Cancelled</a></li>
-                            <li><a class="dropdown-item" href="#">Rejected</a></li>
+                            <li><a class="dropdown-item" href="#">Awaiting Payment</a></li>
+                            <li><a class="dropdown-item" href="#">Scheduled</a></li>
+                            <li><a class="dropdown-item" href="#">Ongoing</a></li>
+                            <li><a class="dropdown-item" href="#">Completed</a></li>
                         </ul>
                     </div>
                 </div>
-
                 <div class="requisition-list">
-                    <div class="requisition-card">
-                        <div class="requisition-details">
-                            <div><strong>Form 7B-109283192038</strong> <span class="text-muted small">Form Submitted:
-                                    5/13/2025</span></div>
-                            <div><strong>Facility:</strong> Promenade Park</div>
-                            <div><strong>Equipment:</strong> • Equipment Name <br>&emsp;&emsp;&emsp;&emsp;&emsp;•
-                                Equipment Name <br>&emsp;&emsp;&emsp;&emsp;&emsp;• Equipment Name</div>
-                            <div><strong>Extra Services:</strong> • Security Personnel
-                                <br>&emsp;&emsp;&emsp;&emsp;&emsp;• Technical Support
+                    <!-- Cards will be dynamically inserted here by JavaScript -->
+                </div>
+                <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="cancelModalLabel">Confirm Cancellation</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                        </div>
-                        <div class="requisition-total">Total Fee: 1200.00</div>
-                        <div class="requisition-actions">
-                            <span class="status-badge completed">Completed</span>
-                            <button class="btn btn-sm btn-outline-dark">View</button>
-                        </div>
-                    </div>
-
-                    <div class="requisition-card">
-                        <div class="requisition-details">
-                            <div><strong>Form 7B-109283192038</strong> <span class="text-muted small">Form Submitted:
-                                    5/13/2025</span></div>
-                            <div><strong>Facility:</strong> Promenade Park</div>
-                            <div><strong>Equipment:</strong> • Equipment Name <br>&emsp;&emsp;&emsp;&emsp;&emsp;•
-                                Equipment Name <br>&emsp;&emsp;&emsp;&emsp;&emsp;• Equipment Name</div>
-                            <div><strong>Extra Services:</strong> • Security Personnel
-                                <br>&emsp;&emsp;&emsp;&emsp;&emsp;• Technical Support
+                            <div class="modal-body">
+                                <p>Are you sure you want to cancel this request? This action cannot be undone.</p>
+                                <p class="text-danger"><strong>Note:</strong> Cancellation fees may apply depending on the
+                                    timing of
+                                    your cancellation.</p>
                             </div>
-                        </div>
-                        <div class="requisition-total">Total Fee: 1200.00</div>
-                        <div class="requisition-actions">
-                            <span class="status-badge pending">Pending Approval</span>
-                            <button class="btn btn-sm btn-primary">Edit</button>
-                            <button class="btn btn-sm btn-danger">Cancel</button>
-                        </div>
-                    </div>
-
-                    <div class="requisition-card">
-                        <div class="requisition-details">
-                            <div><strong>Form 7B-109283192038</strong> <span class="text-muted small">Form Submitted:
-                                    5/13/2025</span></div>
-                            <div><strong>Facility:</strong> Promenade Park</div>
-                            <div><strong>Equipment:</strong> • Equipment Name <br>&emsp;&emsp;&emsp;&emsp;&emsp;•
-                                Equipment Name <br>&emsp;&emsp;&emsp;&emsp;&emsp;• Equipment Name</div>
-                            <div><strong>Extra Services:</strong> • Security Personnel
-                                <br>&emsp;&emsp;&emsp;&emsp;&emsp;• Technical Support
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep
+                                    Request</button>
+                                <button type="button" class="btn btn-danger" id="confirmCancelBtn">Yes, Cancel
+                                    Request</button>
                             </div>
-                        </div>
-                        <div class="requisition-total">Total Fee: 1200.00</div>
-                        <div class="requisition-actions">
-                            <span class="status-badge cancelled">Cancelled</span>
-                            <button class="btn btn-sm btn-outline-dark">View</button>
-                            <button class="btn btn-sm btn-outline-dark">Rebook</button>
-                        </div>
-                    </div>
-
-                    <div class="requisition-card">
-                        <div class="requisition-details">
-                            <div><strong>Form 7B-109283192038</strong> <span class="text-muted small">Form Submitted:
-                                    5/13/2025</span></div>
-                            <div><strong>Facility:</strong> Promenade Park</div>
-                            <div><strong>Equipment:</strong> • Equipment Name <br>&emsp;&emsp;&emsp;&emsp;&emsp;•
-                                Equipment Name <br>&emsp;&emsp;&emsp;&emsp;&emsp;• Equipment Name</div>
-                            <div><strong>Extra Services:</strong> • Security Personnel
-                                <br>&emsp;&emsp;&emsp;&emsp;&emsp;• Technical Support
-                            </div>
-                        </div>
-                        <div class="requisition-total">Total Fee: 1200.00</div>
-                        <div class="requisition-actions">
-                            <span class="status-badge on-going">On-going</span>
-                            <button class="btn btn-sm btn-outline-dark">View</button>
-                        </div>
-                    </div>
-
-                    <div class="requisition-card">
-                        <div class="requisition-details">
-                            <div><strong>Form 7B-109283192038</strong> <span class="text-muted small">Form Submitted:
-                                    5/13/2025</span></div>
-                            <div><strong>Facility:</strong> Promenade Park</div>
-                            <div><strong>Equipment:</strong> • Equipment Name <br>&emsp;&emsp;&emsp;&emsp;&emsp;•
-                                Equipment Name <br>&emsp;&emsp;&emsp;&emsp;&emsp;• Equipment Name</div>
-                            <div><strong>Extra Services:</strong> • Security Personnel
-                                <br>&emsp;&emsp;&emsp;&emsp;&emsp;• Technical Support
-                            </div>
-                        </div>
-                        <div class="requisition-total">Total Fee: 1200.00</div>
-                        <div class="requisition-actions">
-                            <span class="status-badge rejected">Rejected</span>
-                            <button class="btn btn-sm btn-outline-dark">View</button>
-                            <button class="btn btn-sm btn-outline-dark">Resubmit</button>
                         </div>
                     </div>
                 </div>
+               <!-- Upload Receipt Modal -->
+<div class="modal fade" id="uploadReceiptModal" tabindex="-1" aria-labelledby="uploadReceiptModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadReceiptModalLabel">Upload Payment Receipt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="uploadArea" class="border-dashed p-4 text-center" style="border: 2px dashed #ccc; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-cloud-upload-alt fa-3x mb-2"></i>
+                    <p>Drag & drop your receipt here or click to browse</p>
+                    <p class="small text-muted">Supported formats: JPG, PNG, PDF (Max: 5MB)</p>
+                </div>
+                <input type="file" id="receiptFile" accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+                
+                <div id="uploadPreview" class="mt-3" style="display: none;">
+                    <div class="alert alert-info">
+                        <i class="fas fa-file"></i>
+                        <span id="fileName"></span>
+                        <button type="button" class="btn-close float-end" onclick="clearFileSelection()"></button>
+                    </div>
+                </div>
+                
+                <div id="uploadProgress" class="progress mt-3" style="display: none;">
+                    <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+                
+                <div id="uploadError" class="alert alert-danger mt-3" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmUploadBtn" disabled onclick="uploadReceipt()">Upload Receipt</button>
             </div>
         </div>
+    </div>
+</div>
+                               
+
+
     </main>
 
 @endsection
 
+
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        function showResults() {
-            document.getElementById('lookupSection').style.display = 'none';
-            document.getElementById('resultsSection').style.display = 'block';
-            // In a real application, you'd fetch data here based on input
-            // and hide/show the "no results" message accordingly.
-            document.getElementById('noResultsMessage').style.display = 'none';
-        }
 
-        function showLookup() {
-            document.getElementById('lookupSection').style.display = 'block';
-            document.getElementById('resultsSection').style.display = 'none';
-            // Clear input and show no results message when going back to lookup
-            document.getElementById('referenceInput').value = '';
-            document.getElementById('noResultsMessage').style.display = 'block';
-        }
+        // Cloudinary configuration
+        const cloudName = 'dn98ntlkd';
+        const uploadPreset = 'payment-receipts';
+        let selectedFile = null;
+        let currentRequestId = null;
 
-        // Optional: Check URL parameter to load results directly
-        window.onload = function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('show') === 'results') {
-                showResults();
-            } else {
-                showLookup();
+        // Initialize upload area
+        document.addEventListener('DOMContentLoaded', function () {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('receiptFile');
+
+            uploadArea.addEventListener('click', function () {
+                fileInput.click();
+            });
+
+            uploadArea.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#007bff';
+            });
+
+            uploadArea.addEventListener('dragleave', function () {
+                uploadArea.style.borderColor = '#ccc';
+            });
+
+            uploadArea.addEventListener('drop', function (e) {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+
+                if (e.dataTransfer.files.length) {
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', function () {
+                if (this.files.length) {
+                    handleFileSelection(this.files[0]);
+                }
+            });
+        });
+
+        function handleFileSelection(file) {
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+            if (!validTypes.includes(file.type)) {
+                showUploadError('Invalid file type. Please upload JPG, PNG, or PDF files only.');
+                return;
             }
-        };
+
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                showUploadError('File too large. Maximum size is 5MB.');
+                return;
+            }
+
+            selectedFile = file;
+
+            // Show file preview
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('uploadPreview').style.display = 'block';
+            document.getElementById('confirmUploadBtn').disabled = false;
+            document.getElementById('uploadError').style.display = 'none';
+        }
+
+        function clearFileSelection() {
+            selectedFile = null;
+            document.getElementById('receiptFile').value = '';
+            document.getElementById('uploadPreview').style.display = 'none';
+            document.getElementById('confirmUploadBtn').disabled = true;
+        }
+
+        function showUploadError(message) {
+            const errorDiv = document.getElementById('uploadError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showUploadModal(requestId) {
+            currentRequestId = requestId;
+            clearFileSelection();
+            const modal = new bootstrap.Modal(document.getElementById('uploadReceiptModal'));
+            modal.show();
+        }
+
+        function uploadReceipt() {
+            if (!selectedFile || !currentRequestId) {
+                showUploadError('Please select a file to upload.');
+                return;
+            }
+
+            const progressBar = document.querySelector('#uploadProgress .progress-bar');
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            document.getElementById('uploadProgress').style.display = 'block';
+            document.getElementById('confirmUploadBtn').disabled = true;
+
+            // Create form data for Cloudinary upload
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('upload_preset', uploadPreset);
+            formData.append('cloud_name', cloudName);
+
+            // Upload to Cloudinary
+            const xhr = new XMLHttpRequest();
+
+            xhr.upload.addEventListener('progress', function (e) {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressBar.textContent = percent + '%';
+                }
+            });
+
+            xhr.addEventListener('load', function () {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+
+                    // Send to our server to save to database
+                    fetch(`/api/requester/requisition/${currentRequestId}/upload-receipt`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            receipt_url: response.secure_url,
+                            public_id: response.public_id
+                        })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Close modal and refresh page
+                                bootstrap.Modal.getInstance(document.getElementById('uploadReceiptModal')).hide();
+                                alert('Receipt uploaded successfully!');
+                                location.reload();
+                            } else {
+                                showUploadError('Failed to save receipt details: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error saving receipt:', error);
+                            showUploadError('Failed to save receipt details. Please try again.');
+                        });
+                } else {
+                    showUploadError('Upload failed. Please try again.');
+                }
+
+                document.getElementById('uploadProgress').style.display = 'none';
+            });
+
+            xhr.addEventListener('error', function () {
+                showUploadError('Upload failed. Please check your connection and try again.');
+                document.getElementById('uploadProgress').style.display = 'none';
+            });
+
+            xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`);
+            xhr.send(formData);
+        }
+
+        let allForms = [];
+        let statuses = [];
+
+
+        // Fetch statuses from API
+        async function fetchStatuses() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/form-statuses');
+                const data = await response.json();
+
+                // Filter out unwanted statuses
+                statuses = data.filter(status =>
+                    status.status_name !== 'Returned' &&
+                    status.status_name !== 'Late Return'
+                );
+
+                // Update dropdown menu - use a more specific selector to avoid navbar conflict
+                const dropdownMenu = document.querySelector('#resultsSection .dropdown-menu');
+                if (dropdownMenu) {
+                    dropdownMenu.innerHTML = `
+                                <li><a class="dropdown-item" href="#" data-status="all">All</a></li>
+                                ${statuses.map(status => `
+                                    <li><a class="dropdown-item" href="#" data-status="${status.status_name.toLowerCase().replace(/\s+/g, '-')}">${status.status_name}</a></li>
+                                `).join('')}
+                            `;
+                }
+
+            } catch (error) {
+                console.error('Failed to fetch statuses:', error);
+            }
+        }
+
+        function showResults() {
+            const referenceInput = document.getElementById('referenceInput').value.trim();
+
+            if (!referenceInput) {
+                alert('Please enter a reference code or email address');
+                return;
+            }
+
+            // Check if input is email or access code
+            const isEmail = referenceInput.includes('@');
+
+            if (isEmail) {
+                fetchFormsByEmail(referenceInput);
+            } else {
+                fetchFormByAccessCode(referenceInput);
+            }
+        }
+
+        async function fetchFormByAccessCode(accessCode) {
+            try {
+                const response = await fetch(`/api/requester/form/${accessCode}`);
+                if (!response.ok) throw new Error('Form not found');
+
+                const form = await response.json();
+
+                // Check if the response structure is correct (updated for new structure)
+                if (!form.form_status || !form.purpose) {
+                    console.error('Invalid form structure:', form);
+                    throw new Error('Invalid form data structure');
+                }
+
+                allForms = [form];
+                displayForms();
+
+                document.getElementById('lookupSection').style.display = 'none';
+                document.getElementById('resultsSection').style.display = 'block';
+                document.getElementById('noResultsMessage').style.display = 'none';
+
+            } catch (error) {
+                console.error('Error fetching form:', error);
+                document.getElementById('noResultsMessage').style.display = 'block';
+            }
+        }
+
+        async function fetchFormsByEmail(email) {
+            try {
+                const response = await fetch(`/api/requester/forms/${email}`);
+                if (!response.ok) throw new Error('No forms found');
+
+                const forms = await response.json();
+                if (forms.length === 0) throw new Error('No forms found');
+
+                // Fetch details for each form
+                const formDetails = [];
+                for (const form of forms) {
+                    try {
+                        const detailResponse = await fetch(`/api/requester/form/${form.access_code}`);
+                        if (detailResponse.ok) {
+                            const detail = await detailResponse.json();
+                            // Validate the detail structure
+                            if (detail.form_details && detail.form_details.status) {
+                                formDetails.push(detail);
+                            } else {
+                                console.warn('Skipping invalid form detail:', detail);
+                            }
+                        }
+                    } catch (detailError) {
+                        console.warn('Failed to fetch form detail:', detailError);
+                    }
+                }
+
+                if (formDetails.length === 0) throw new Error('No valid forms found');
+
+                allForms = formDetails;
+                displayForms();
+
+                document.getElementById('lookupSection').style.display = 'none';
+                document.getElementById('resultsSection').style.display = 'block';
+                document.getElementById('noResultsMessage').style.display = 'none';
+
+            } catch (error) {
+                console.error('Error fetching forms:', error);
+                document.getElementById('noResultsMessage').style.display = 'block';
+            }
+        }
+  function displayForms() {
+        const requisitionList = document.querySelector('.requisition-list');
+        if (!requisitionList) return;
+        
+        requisitionList.innerHTML = '';
+
+        allForms.forEach(form => {
+            // Update the safety check to match the new structure
+            if (!form.form_status || !form.purpose) {
+                console.error('Invalid form structure:', form);
+                return;
+            }
+
+            const statusClass = form.form_status.status_name.toLowerCase().replace(/\s+/g, '-');
+            const statusName = form.form_status.status_name;
+            
+            let footerButtons = '';
+            
+            if (['Pending Approval', 'Scheduled'].includes(statusName)) {
+                footerButtons = `
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-danger" onclick="showCancelModal(${form.request_id})">Cancel Request</button>
+                    </div>
+                `;
+            } else if (statusName === 'Awaiting Payment') {
+                footerButtons = `
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-success" onclick="showUploadModal(${form.request_id})">Upload Receipt</button>
+                        <button class="btn btn-sm btn-danger" onclick="showCancelModal(${form.request_id})">Cancel Request</button>
+                    </div>
+                `;
+            } else {
+                footerButtons = '<div class="card-footer"></div>';
+            }
+
+            const facilitiesList = form.requested_facilities && form.requested_facilities.length > 0
+                ? form.requested_facilities.map(f => `<li>${f.facility_name}</li>`).join('')
+                : '<p class="no-items mb-0">No facilities requested</p>';
+
+            const equipmentList = form.requested_equipment && form.requested_equipment.length > 0
+                ? form.requested_equipment.map(e => `<li>${e.equipment_name}</li>`).join('')
+                : '<p class="no-items mb-0">No equipment requested</p>';
+
+            const purpose = form.purpose.purpose_name || 'No purpose specified';
+            const numParticipants = form.num_participants || 0;
+            const totalFee = form.total_fee ? parseFloat(form.total_fee).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' }) : '₱0.00';
+
+            // Format dates properly
+            const formatDate = (dateString) => {
+                return new Date(dateString).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            };
+
+            // Format time properly (remove seconds if present)
+            const formatTime = (timeString) => {
+                return timeString.substring(0, 5); // Get only HH:MM
+            };
+
+            const card = `
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <span class="request-id">Request ID #${form.request_id.toString().padStart(4, '0')}</span>
+                        <span class="status-badge ${statusClass}">${statusName}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="left-column">
+                            <p><strong>Purpose:</strong> ${purpose}</p>
+                            <p><strong>Total Fee:</strong> ${totalFee}</p>
+                            <p class="mb-0"><strong>Number of Participants:</strong> ${numParticipants}</p>
+                        </div>
+                        <div class="right-column">
+                            <p><strong>Start Schedule:</strong> ${formatDate(form.start_date)}, ${formatTime(form.start_time)}</p>
+                            <p><strong>End Schedule:</strong> ${formatDate(form.end_date)}, ${formatTime(form.end_time)}</p>
+
+                            <h6 class="fw-bold mt-4">Request Details</h6>
+
+                            <p class="mb-1"><strong>Facilities:</strong></p>
+                            <ul class="mb-2">${facilitiesList}</ul>
+
+                            <p class="mb-1"><strong>Equipment:</strong></p>
+                            <ul class="mb-0">${equipmentList}</ul>
+                        </div>
+                    </div>
+                    ${footerButtons}
+                </div>
+            `;
+
+            requisitionList.innerHTML += card;
+        });
+    }
+
+        function showCancelModal(requestId) {
+            currentRequestId = requestId;
+            const cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
+            cancelModal.show();
+        }
+
+        async function cancelRequest() {
+            if (!currentRequestId) return;
+
+            try {
+                const response = await fetch(`/api/requester/requisition/${currentRequestId}/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Request cancelled successfully');
+                    location.reload();
+                } else {
+                    throw new Error(result.details || 'Failed to cancel request');
+                }
+            } catch (error) {
+                console.error('Error cancelling request:', error);
+                alert('Error: ' + error.message);
+            } finally {
+                currentRequestId = null;
+            }
+        }
+
+        function filterRequisitions(status) {
+            const cards = document.querySelectorAll('.requisition-list .card.mb-3');
+
+            cards.forEach(card => {
+                if (status === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    const statusBadge = card.querySelector('.status-badge');
+                    if (statusBadge) {
+                        const badgeStatus = statusBadge.textContent.toLowerCase().replace(/\s+/g, '-');
+                        if (badgeStatus === status.toLowerCase()) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            fetchStatuses();
+
+            // Set up filter dropdown - use more specific selector
+            const resultsSection = document.getElementById('resultsSection');
+            if (resultsSection) {
+                resultsSection.addEventListener('click', function (e) {
+                    if (e.target.classList.contains('dropdown-item')) {
+                        e.preventDefault();
+                        const status = e.target.getAttribute('data-status');
+                        filterRequisitions(status);
+
+                        const dropdownBtn = resultsSection.querySelector('.dropdown-toggle');
+                        if (dropdownBtn && status === 'all') {
+                            dropdownBtn.textContent = 'Filter by';
+                        } else if (dropdownBtn) {
+                            dropdownBtn.textContent = 'Filter: ' + e.target.textContent;
+                        }
+                    }
+                });
+            }
+
+            // Set up cancel confirmation button
+            const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+            if (confirmCancelBtn) {
+                confirmCancelBtn.addEventListener('click', cancelRequest);
+            }
+        });
     </script>
 @endsection
