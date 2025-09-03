@@ -83,7 +83,7 @@
   }
 </style>
 
-<link rel="stylesheet" href="{{ asset('public\css\admin\equipment.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/equipment.css') }}">
 <div id="layout">
   <!-- Main Content -->
   <main id="main">
@@ -98,8 +98,13 @@
               <a href="{{ url('/admin/add-equipment') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle-fill me-2"></i>Add New
               </a>
+
+               <a href="{{ url('/admin/scan-equipment') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle-fill me-2"></i>Equipment Scanner
+            </a>
             </div>
           </div>
+
           <!-- Filters & Search Bar -->
           <div class="row mb-3 g-2">
             <div class="col-sm-6 col-md-2 col-lg-2">
@@ -177,7 +182,7 @@
       // Authentication check
       const token = localStorage.getItem("adminToken");
       if (!token) {
-        window.location.href = "admin/admin-login";
+        window.location.href = "/admin/admin-login";
         return;
       }
 
@@ -390,35 +395,32 @@
 
           const card = document.createElement("div");
           card.className = "col-md-4 col-lg-3 equipment-card mb-3";
-          card.dataset.status = equipment.status.status_name.toLowerCase();
-          card.dataset.category = equipment.category.category_name;
+          card.dataset.status = equipment.status.status_id.toString();
+          card.dataset.category = equipment.category.category_id.toString();
           card.dataset.title = equipment.equipment_name.toLowerCase();
 
 
+
           card.innerHTML = `
-                            <div class="card h-100">
-                              <img src="${primaryImage}" class="card-img-top" style="height: 120px; object-fit: cover;" alt="${equipment.equipment_name}">
-                              <div class="card-body d-flex flex-column p-2">
-                                <div>
-                                  <h6 class="card-title mb-1" style="font-weight:bold;">${equipment.equipment_name}</h6>
-                                  <p class="card-text text-muted mb-1 small">
-                                    <i class="bi bi-tag-fill text-primary me-1"></i>${equipment.category.category_name}
-                                  </p>
-                                  <span class="badge ${statusClass} mb-2">${equipment.status.status_name}</span>
-                                  <p class="card-text mb-2 small text-truncate">${equipment.description || "No description available"}</p>
-                                </div>
-                                <div class="equipment-actions mt-auto d-grid gap-1">
-                                <a 
-                                  href="{{ url('/admin/edit-equipment') }}?id=${equipment.equipment_id}" 
-                                  class="btn btn-sm btn-primary btn-manage"
-                                >
-                                  Manage
-                                </a>
-                                  <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${equipment.equipment_id}">Delete</button>
-                                </div>
-                              </div>
-                            </div>
-                          `;
+          <div class="card h-100">
+            <img src="${primaryImage}" class="card-img-top" style="height: 120px; object-fit: cover;" alt="${equipment.equipment_name}">
+            <div class="card-body d-flex flex-column p-2">
+              <div>
+                <h6 class="card-title mb-1 fw-bold">${equipment.equipment_name}</h6>
+                <p class="card-text text-muted mb-1 small">
+                  <i class="bi bi-tag-fill text-primary me-1"></i>${equipment.category.category_name}
+                </p>
+                <span class="badge ${statusClass} mb-2">${equipment.status.status_name}</span>
+                <p class="card-text mb-2 small text-truncate">${equipment.description || "No description available"}</p>
+              </div>
+              <div class="equipment-actions mt-auto d-grid gap-1">
+                <a href="/admin/edit-equipment?id=${equipment.equipment_id}" class="btn btn-sm btn-primary btn-manage">Manage</a>
+                <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${equipment.equipment_id}">Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+
 
           container.appendChild(card);
         }
