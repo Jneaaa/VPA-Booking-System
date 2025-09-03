@@ -284,6 +284,34 @@
               </div>
             </div>
 
+            <!-- Barcode Generator Section -->
+             <div class="card shadow mb-4 mt-4">
+              <div class="card-body">
+                <h5 class="fw-bold mb-3">Equipment Barcode</h5>
+                <div class="mb-3">
+                  <label for="equipmentBarcode" class="form-label">Barcode Number</label>
+                  <div class="d-flex gap-2">
+                    <input type="text" class="form-control" id="equipmentBarcode" name="equipment_barcode" placeholder="Auto-generated or enter manually">
+                    <button type="button" class="btn btn-outline-primary" id="generateMainBarcodeBtn">
+                      <i class="bi bi-upc-scan"></i> Generate
+                    </button>
+                  </div>
+                  <div class="text-center mt-3">
+                    <svg id="equipmentBarcodePreview"></svg>
+                  </div>
+                  <div class="d-flex justify-content-center gap-2 mt-3">
+                    <button type="button" class="btn btn-sm btn-success" id="downloadJpegBtn">
+                      <i class="bi bi-image"></i> Download JPEG
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" id="downloadPdfBtn">
+                      <i class="bi bi-file-earmark-pdf"></i> Download PDF
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
             <!-- Form Actions -->
             <div class="d-flex justify-content-end gap-2 mt-4">
               <button type="reset" class="btn btn-secondary">Reset</button>
@@ -412,76 +440,145 @@
   </div>
 
   @section('scripts')
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      // Initialize the reset confirmation modal
-      const resetConfirmationModal = new bootstrap.Modal('#resetConfirmationModal', {
-      backdrop: 'static',
-      keyboard: false
-      });
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-      // Handle reset button click
-      document.querySelector('button[type="reset"]').addEventListener('click', function (e) {
+<script>
+// Global variable to store uploaded photos
+let uploadedPhotos = [];
+
+document.addEventListener("DOMContentLoaded", function () {
+  const barcodeInput = document.getElementById("equipmentBarcode");
+  const barcodePreview = document.getElementById("equipmentBarcodePreview");
+  const generateBtn = document.getElementById("generateMainBarcodeBtn");
+  const downloadJpegBtn = document.getElementById("downloadJpegBtn");
+  const downloadPdfBtn = document.getElementById("downloadPdfBtn");
+
+  // Function to generate barcode
+  function generateBarcode(value) {
+    if (!value) return;
+    JsBarcode("#equipmentBarcodePreview", value, {
+      format: "CODE128",
+      lineColor: "#000",
+      width: 2,
+      height: 60,
+      displayValue: true
+    });
+  }
+
+  // Auto-generate when page loads
+  const defaultCode = "EQP-" + Date.now().toString().slice(-8);
+  barcodeInput.value = defaultCode;
+  generateBarcode(defaultCode);
+
+  // Generate on button click
+  generateBtn.addEventListener("click", () => {
+    const newCode = "EQP-" + Date.now().toString().slice(-8);
+    barcodeInput.value = newCode;
+    generateBarcode(newCode);
+  });
+
+  // Update preview if user edits manually
+  barcodeInput.addEventListener("input", (e) => {
+    generateBarcode(e.target.value);
+  });
+
+  // Download as JPEG
+  downloadJpegBtn.addEventListener("click", async () => {
+    const canvas = await html2canvas(barcodePreview.parentElement);
+    const link = document.createElement("a");
+    link.download = `${barcodeInput.value}.jpeg`;
+    link.href = canvas.toDataURL("image/jpeg", 1.0);
+    link.click();
+  });
+
+  // Download as PDF
+  downloadPdfBtn.addEventListener("click", async () => {
+    const canvas = await html2canvas(barcodePreview.parentElement);
+    const imgData = canvas.toDataURL("image/png");
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    pdf.addImage(imgData, "PNG", 10, 10, pdfWidth - 20, pdfHeight);
+    pdf.save(`${barcodeInput.value}.pdf`);
+  });
+
+    // Initialize the reset confirmation modal
+    const resetConfirmationModal = new bootstrap.Modal('#resetConfirmationModal', {
+    backdrop: 'static',
+    keyboard: false
+    });
+
+    // Handle reset button click
+    document.querySelector('button[type="reset"]').addEventListener('click', function (e) {
+    e.preventDefault();
+    resetConfirmationModal.show();
+    });
+
+    // Handle confirm reset button click
+    document.getElementById('confirmResetBtn').addEventListener('click', function () {
+    // Clear uploaded photos
+    const photosPreview = document.getElementById('photosPreview');
+    if (photosPreview) photosPreview.innerHTML = '';
+    uploadedPhotos = [];
+
+    // Reset inventory items
+    const itemsContainer = document.getElementById('itemsContainer');
+    if (itemsContainer) itemsContainer.innerHTML = '<p class="text-muted">No items added yet. Click "Add Item" to track individual equipment pieces.</p>';
+
+    // Reset the form
+    const form = document.getElementById('addEquipmentForm');
+    if (form) form.reset();
+
+    // Reset barcode
+    const newCode = "EQP-" + Date.now().toString().slice(-8);
+    document.getElementById("equipmentBarcode").value = newCode;
+    generateBarcode(newCode);
+
+    // Scroll to the top smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Hide the modal
+    resetConfirmationModal.hide();
+    });
+
+  // Equipment Photos Section
+  const equipmentDropzone = document.getElementById('equipmentPhotosDropzone');
+  const equipmentFileInput = document.getElementById('equipmentPhotos');
+  const photosPreview = document.getElementById('photosPreview');
+
+  if (equipmentDropzone && equipmentFileInput) {
+    equipmentDropzone.addEventListener('click', function () {
+      equipmentFileInput.click();
+    });
+
+    equipmentFileInput.addEventListener('change', function () {
+      handleEquipmentFiles(this.files);
+      this.value = '';
+    });
+
+    equipmentDropzone.addEventListener('dragover', function (e) {
       e.preventDefault();
-      resetConfirmationModal.show();
-      });
+      this.classList.add('border-primary');
+    });
 
-      // Handle confirm reset button click
-      document.getElementById('confirmResetBtn').addEventListener('click', function () {
-      // Clear uploaded photos
-      const photosPreview = document.getElementById('photosPreview');
-      if (photosPreview) photosPreview.innerHTML = '';
+    equipmentDropzone.addEventListener('dragleave', function (e) {
+      e.preventDefault();
+      this.classList.remove('border-primary');
+    });
 
-      // Reset inventory items
-      const itemsContainer = document.getElementById('itemsContainer');
-      if (itemsContainer) itemsContainer.innerHTML = '<p class="text-muted">No items added yet. Click "Add Item" to track individual equipment pieces.</p>';
-
-      // Reset the form
-      const form = document.getElementById('addEquipmentForm');
-      if (form) form.reset();
-
-      // Scroll to the top smoothly
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      // Hide the modal
-      resetConfirmationModal.hide();
-      });
-
-      // Equipment Photos Section
-      const equipmentDropzone = document.getElementById('equipmentPhotosDropzone');
-      const equipmentFileInput = document.getElementById('equipmentPhotos');
-      const photosPreview = document.getElementById('photosPreview');
-      let uploadedPhotos = [];
-
-      if (equipmentDropzone && equipmentFileInput) {
-      equipmentDropzone.addEventListener('click', function () {
-        equipmentFileInput.click();
-      });
-
-      equipmentFileInput.addEventListener('change', function () {
-        handleEquipmentFiles(this.files);
-        this.value = '';
-      });
-
-      equipmentDropzone.addEventListener('dragover', function (e) {
-        e.preventDefault();
-        this.classList.add('border-primary');
-      });
-
-      equipmentDropzone.addEventListener('dragleave', function () {
-        this.classList.remove('border-primary');
-      });
-
-      equipmentDropzone.addEventListener('drop', function (e) {
-        e.preventDefault();
-        this.classList.remove('border-primary');
-        if (e.dataTransfer.files.length) {
+    equipmentDropzone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      this.classList.remove('border-primary');
+      if (e.dataTransfer.files.length) {
         handleEquipmentFiles(e.dataTransfer.files);
-        }
-      });
       }
+    });
 
-      function handleEquipmentFiles(files) {
+    function handleEquipmentFiles(files) {
       // Filter out non-image files
       const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
 
@@ -498,128 +595,133 @@
       filesToUpload.forEach(file => {
         const reader = new FileReader();
         reader.onload = function (e) {
-        const photoId = Date.now();
+          const photoId = Date.now();
 
-        const preview = document.createElement('div');
-        preview.className = 'photo-preview';
-        preview.dataset.id = photoId;
+          const preview = document.createElement('div');
+          preview.className = 'photo-preview';
+          preview.dataset.id = photoId;
 
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
 
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
-        removeBtn.innerHTML = '<i class="bi bi-x"></i>';
-        removeBtn.onclick = function () {
-          preview.remove();
-          uploadedPhotos = uploadedPhotos.filter(photo => photo.id !== photoId);
-        };
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
+          removeBtn.innerHTML = '<i class="bi bi-x"></i>';
+          removeBtn.onclick = function () {
+            preview.remove();
+            uploadedPhotos = uploadedPhotos.filter(photo => photo.id !== photoId);
+          };
 
-        preview.appendChild(img);
-        preview.appendChild(removeBtn);
-        if (photosPreview) photosPreview.appendChild(preview);
+          preview.appendChild(img);
+          preview.appendChild(removeBtn);
+          photosPreview.appendChild(preview);
 
-        uploadedPhotos.push({
-          id: photoId,
-          file: file,
-          element: preview
-        });
+          uploadedPhotos.push({
+            id: photoId,
+            file: file,
+            element: preview
+          });
         };
         reader.readAsDataURL(file);
       });
+    }
+  }
+
+  // Word count limiter for Description textbox
+  const description = document.getElementById('description');
+  const descriptionWordCount = document.getElementById('descriptionWordCount');
+  const descriptionMaxChars = 255;
+
+  if (description && descriptionWordCount) {
+    description.addEventListener('input', function () {
+      if (this.value.length > descriptionMaxChars) {
+        this.value = this.value.substring(0, descriptionMaxChars);
       }
 
-      // Word count limiter for Description textbox
-      const description = document.getElementById('description');
-      const descriptionWordCount = document.getElementById('descriptionWordCount');
-      const descriptionMaxChars = 255;
+      const charCount = this.value.length;
+      descriptionWordCount.textContent = `${charCount}/${descriptionMaxChars} characters`;
+      descriptionWordCount.classList.toggle('text-danger', charCount >= descriptionMaxChars);
+    });
 
-      if (description && descriptionWordCount) {
-      description.addEventListener('input', function () {
-        if (this.value.length > descriptionMaxChars) {
-        this.value = this.value.substring(0, descriptionMaxChars);
-        }
+    description.addEventListener('paste', function (e) {
+      e.preventDefault();
+      const pasteText = (e.clipboardData || window.clipboardData).getData('text');
+      const newText = this.value.substring(0, this.selectionStart) +
+      pasteText +
+      this.value.substring(this.selectionEnd);
 
-        const charCount = this.value.length;
-        descriptionWordCount.textContent = `${charCount}/${descriptionMaxChars} characters`;
-        descriptionWordCount.classList.toggle('text-danger', charCount >= descriptionMaxChars);
-      });
-
-      description.addEventListener('paste', function (e) {
-        e.preventDefault();
-        const pasteText = (e.clipboardData || window.clipboardData).getData('text');
-        const newText = this.value.substring(0, this.selectionStart) +
-        pasteText +
-        this.value.substring(this.selectionEnd);
-
-        const remainingChars = descriptionMaxChars - this.value.length + (this.selectionEnd - this.selectionStart);
-        if (remainingChars > 0) {
+      const remainingChars = descriptionMaxChars - this.value.length + (this.selectionEnd - this.selectionStart);
+      if (remainingChars > 0) {
         const pasteToInsert = pasteText.substring(0, remainingChars);
         document.execCommand('insertText', false, pasteToInsert);
-        }
-      });
       }
+    });
+  }
 
-      // Initialize Inventory Item Modal
-      const addItemBtn = document.getElementById('addItemBtn');
-      if (addItemBtn) {
-      const inventoryItemModal = new bootstrap.Modal('#inventoryItemModal');
-      const itemPhotoInput = document.getElementById('itemPhoto');
-      const itemPhotoPreview = document.getElementById('itemPhotoPreview');
-      const itemNotes = document.getElementById('itemNotes');
-      const notesWordCount = document.getElementById('notesWordCount');
-      const saveItemBtn = document.getElementById('saveItemBtn');
-      const itemsContainer = document.getElementById('itemsContainer');
+  // Initialize Inventory Item Modal
+  const addItemBtn = document.getElementById('addItemBtn');
+  if (addItemBtn) {
+    const inventoryItemModal = new bootstrap.Modal('#inventoryItemModal');
+    const itemPhotoInput = document.getElementById('itemPhoto');
+    const itemPhotoPreview = document.getElementById('itemPhotoPreview');
+    const itemNotes = document.getElementById('itemNotes');
+    const notesWordCount = document.getElementById('notesWordCount');
+    const saveItemBtn = document.getElementById('saveItemBtn');
+    const itemsContainer = document.getElementById('itemsContainer');
 
-      addItemBtn.addEventListener('click', () => {
-        document.getElementById('itemForm').reset();
-        if (itemPhotoPreview) itemPhotoPreview.innerHTML = '';
-        inventoryItemModal.show();
-      });
+    addItemBtn.addEventListener('click', () => {
+      document.getElementById('itemForm').reset();
+      if (itemPhotoPreview) itemPhotoPreview.innerHTML = '';
+      const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
+      if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'block';
+      const removePhotoBtn = document.getElementById('removePhotoBtn');
+      if (removePhotoBtn) removePhotoBtn.classList.add('d-none');
+      inventoryItemModal.show();
+    });
 
-      if (itemPhotoInput) {
-        itemPhotoInput.addEventListener('change', function () {
+    if (itemPhotoInput) {
+      itemPhotoInput.addEventListener('change', function () {
         if (this.files?.[0]) {
           const reader = new FileReader();
           reader.onload = (e) => {
-          const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
-          if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'none';
-          const removePhotoBtn = document.getElementById('removePhotoBtn');
-          if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
-          if (itemPhotoPreview) {
-            itemPhotoPreview.innerHTML = `
-            <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
-            `;
-          }
+            const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
+            if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'none';
+            const removePhotoBtn = document.getElementById('removePhotoBtn');
+            if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
+            if (itemPhotoPreview) {
+              itemPhotoPreview.innerHTML = `
+                <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
+              `;
+            }
           };
           reader.readAsDataURL(this.files[0]);
         }
-        });
-      }
+      });
+    }
 
-      const removePhotoBtn = document.getElementById('removePhotoBtn');
-      if (removePhotoBtn) {
-        removePhotoBtn.addEventListener('click', function () {
+    const removePhotoBtn = document.getElementById('removePhotoBtn');
+    if (removePhotoBtn) {
+      removePhotoBtn.addEventListener('click', function () {
         if (itemPhotoPreview) itemPhotoPreview.innerHTML = '';
         const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
         if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'block';
         const itemPhotoInput = document.getElementById('itemPhoto');
         if (itemPhotoInput) itemPhotoInput.value = '';
         this.classList.add('d-none');
-        });
-      }
+      });
+    }
 
-      const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
-      if (itemPhotoDropzone) {
-        itemPhotoDropzone.addEventListener('click', function () {
+    const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
+    if (itemPhotoDropzone) {
+      itemPhotoDropzone.addEventListener('click', function () {
         const itemPhotoInput = document.getElementById('itemPhoto');
         if (itemPhotoInput) itemPhotoInput.click();
-        });
-      }
+      });
+    }
 
-      if (itemNotes && notesWordCount) {
-        itemNotes.addEventListener('input', function () {
+    if (itemNotes && notesWordCount) {
+      itemNotes.addEventListener('input', function () {
         const words = this.value.trim() ? this.value.trim().split(/\s+/) : [];
         const wordCount = words.length;
 
@@ -632,23 +734,23 @@
           this.value = allowedWords;
 
           if (cursorPos <= allowedWords.length) {
-          this.setSelectionRange(cursorPos, cursorPos);
+            this.setSelectionRange(cursorPos, cursorPos);
           }
         }
-        });
+      });
 
-        itemNotes.addEventListener('keydown', function (e) {
+      itemNotes.addEventListener('keydown', function (e) {
         const words = this.value.trim() ? this.value.trim().split(/\s+/) : [];
         const allowedKeys = [8, 46, 37, 38, 39, 40, 16, 17, 91, 9];
 
         if (words.length >= 80 && !allowedKeys.includes(e.keyCode)) {
           if (e.key.length === 1 || e.keyCode === 32) {
-          e.preventDefault();
+            e.preventDefault();
           }
         }
-        });
+      });
 
-        itemNotes.addEventListener('paste', function (e) {
+      itemNotes.addEventListener('paste', function (e) {
         e.preventDefault();
         const pasteText = (e.clipboardData || window.clipboardData).getData('text');
         const currentText = this.value;
@@ -671,15 +773,15 @@
         } else {
           const remainingWords = 80 - (currentWords.length - selectedWords.length);
           if (remainingWords > 0) {
-          const wordsToPaste = pasteWords.slice(0, remainingWords).join(' ');
-          document.execCommand('insertText', false, wordsToPaste);
+            const wordsToPaste = pasteWords.slice(0, remainingWords).join(' ');
+            document.execCommand('insertText', false, wordsToPaste);
           }
         }
-        });
-      }
+      });
+    }
 
-      if (saveItemBtn) {
-        saveItemBtn.addEventListener('click', function () {
+    if (saveItemBtn) {
+      saveItemBtn.addEventListener('click', function () {
         const condition = document.getElementById('itemCondition')?.value;
         if (!condition) {
           alert('Please select the item condition');
@@ -687,6 +789,7 @@
         }
 
         const itemId = Date.now();
+        const itemName = document.getElementById('itemName')?.value || `Item #${itemId}`;
         const barcode = document.getElementById('barcode')?.value || '';
         const notes = document.getElementById('itemNotes')?.value || '';
         const itemPhoto = itemPhotoPreview?.querySelector('img')?.src || '';
@@ -703,147 +806,173 @@
         itemCard.className = 'card equipment-item';
         itemCard.innerHTML = `
           <div class="card-body">
-          <div class="photo-container">
-            ${itemPhoto ? `<img src="${itemPhoto}" class="img-thumbnail">` : ''}
-          </div>
-          <div class="flex-grow-1">
-            <h6 class="card-title">Item #${itemId}</h6>
-            <div class="d-flex flex-wrap gap-3">
-            <span class="badge ${conditionColors[condition]}">${condition}</span>
+            <div class="photo-container">
+              ${itemPhoto ? `<img src="${itemPhoto}" class="img-thumbnail">` : ''}
             </div>
-            ${barcode ? `<div class="mt-2"><strong>Barcode:</strong> ${barcode}</div>` : ''}
-            ${notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${notes.substring(0, 50)}${notes.length > 50 ? '...' : ''}</p>` : ''}
-          </div>
-          <button class="btn btn-sm btn-danger align-self-start" onclick="this.closest('.equipment-item').remove()">
-            <i class="bi bi-trash"></i>
-          </button>
+            <div class="flex-grow-1">
+              <h6 class="card-title">${itemName}</h6>
+              <div class="d-flex flex-wrap gap-3">
+                <span class="badge ${conditionColors[condition]}">${condition}</span>
+              </div>
+              ${barcode ? `<div class="mt-2"><strong>Barcode:</strong> ${barcode}</div>` : ''}
+              ${notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${notes.substring(0, 50)}${notes.length > 50 ? '...' : ''}</p>` : ''}
+            </div>
+            <button class="btn btn-sm btn-danger align-self-start" onclick="this.closest('.equipment-item').remove()">
+              <i class="bi bi-trash"></i>
+            </button>
           </div>
         `;
 
         if (itemsContainer) {
           if (itemsContainer.querySelector('p.text-muted')) {
-          itemsContainer.innerHTML = '';
+            itemsContainer.innerHTML = '';
           }
           itemsContainer.appendChild(itemCard);
         }
 
         inventoryItemModal.hide();
-        });
-      }
-      }
-
-      // Add 'required' class to labels with required fields
-      document.querySelectorAll('label[for]').forEach(label => {
-      const input = document.getElementById(label.getAttribute('for'));
-      if (input && input.hasAttribute('required')) {
-        label.classList.add('required');
-      }
       });
+    }
+  }
+
+  // Add 'required' class to labels with required fields
+  document.querySelectorAll('label[for]').forEach(label => {
+    const input = document.getElementById(label.getAttribute('for'));
+    if (input && input.hasAttribute('required')) {
+      label.classList.add('required');
+    }
+  });
+
+  // Authentication check
+  const token = localStorage.getItem('adminToken');
+  if (!token) {
+    window.location.href = '/admin/admin-login';
+    return;
+  }
+
+  const form = document.getElementById('addEquipmentForm');
+  if (!form) return;
+
+  // Fetch necessary dropdown data
+  fetchDropdownData();
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    // Validate required fields
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+    requiredFields.forEach(field => {
+      if (!field.value.trim()) {
+        field.classList.add('is-invalid');
+        isValid = false;
+      } else {
+        field.classList.remove('is-invalid');
+      }
     });
-    </script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      // Authentication check
-      const token = localStorage.getItem('adminToken');
-      if (!token) {
-      window.location.href = '/admin/admin-login';
+
+    if (!isValid) {
+      alert('Please fill in all required fields');
       return;
+    }
+
+    // Validate at least one photo is uploaded
+    if (uploadedPhotos.length === 0) {
+      alert('Please upload at least one equipment photo');
+      return;
+    }
+
+    // Create FormData object for file uploads
+    const formData = new FormData();
+    
+    // Add equipment data
+    formData.append('equipment_name', document.getElementById('equipmentName').value);
+    formData.append('description', document.getElementById('description').value);
+    formData.append('brand', document.getElementById('brand').value);
+    formData.append('storage_location', document.getElementById('storageLocation').value);
+    formData.append('category_id', document.getElementById('category').value);
+    formData.append('total_quantity', document.getElementById('totalQuantity').value);
+    formData.append('internal_fee', document.getElementById('rentalFee').value);
+    formData.append('external_fee', document.getElementById('companyFee').value);
+    formData.append('type_id', document.getElementById('rateType').value);
+    formData.append('status_id', document.getElementById('availabilityStatus').value);
+    formData.append('department_id', document.getElementById('department').value);
+    formData.append('minimum_hour', document.getElementById('minRentalHours').value);
+    formData.append('equipment_barcode', document.getElementById('equipmentBarcode').value);
+
+    // Add uploaded photos
+    uploadedPhotos.forEach((photo, index) => {
+      formData.append(`images[${index}]`, photo.file);
+      formData.append(`image_types[${index}]`, index === 0 ? 'primary' : 'secondary');
+    });
+
+    // Add inventory items
+    const itemCards = document.querySelectorAll('.equipment-item');
+    itemCards.forEach((card, index) => {
+      formData.append(`items[${index}][item_name]`, card.querySelector('.card-title').textContent);
+      formData.append(`items[${index}][condition]`, card.querySelector('.badge').textContent);
+      
+      const barcodeElement = card.querySelector('div.mt-2');
+      if (barcodeElement) {
+        formData.append(`items[${index}][barcode_number]`, barcodeElement.textContent.replace('Barcode:', '').trim());
       }
+      
+      const notesElement = card.querySelector('p');
+      if (notesElement) {
+        formData.append(`items[${index}][item_notes]`, notesElement.textContent.replace('Notes:', '').trim());
+      }
+    });
 
-      const form = document.getElementById('addEquipmentForm');
-      if (!form) return;
-
-      // Fetch necessary dropdown data
-      fetchDropdownData();
-
-      form.addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      // Collect form data
-      const formData = {
-        equipment_name: document.getElementById('equipmentName').value,
-        description: document.getElementById('description').value,
-        brand: document.getElementById('brand').value,
-        storage_location: document.getElementById('storageLocation').value,
-        category_id: document.getElementById('category').value,
-        total_quantity: document.getElementById('totalQuantity').value,
-        internal_fee: document.getElementById('internal_fee').value,
-        external_fee: document.getElementById('external_fee').value,
-        type_id: document.getElementById('rateType').value,
-        status_id: document.getElementById('availabilityStatus').value,
-        department_id: document.getElementById('department').value,
-        minimum_hour: document.getElementById('minRentalHours').value,
-        images: [], // Will be populated with uploaded images
-        items: []  // Will be populated with inventory items
-      };
-
-      // Add inventory items if any
-      const itemCards = document.querySelectorAll('.equipment-item');
-      itemCards.forEach(card => {
-        formData.items.push({
-        item_name: card.querySelector('.card-title').textContent.replace('Item #', ''),
-        condition_id: card.querySelector('.badge').textContent,
-        barcode_number: card.querySelector('div:nth-child(3)')?.textContent.replace('Barcode:', '').trim() || '',
-        item_notes: card.querySelector('p')?.textContent.replace('Notes:', '').trim() || ''
-        });
-      });
-
-      try {
-        // First create the equipment
-        const response = await fetch('http://127.0.0.1:8000/api/admin/equipment', {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/admin/equipment', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(formData)
-        });
-
-        if (!response.ok) {
-        throw new Error('Failed to create equipment');
-        }
-
-        const data = await response.json();
-        const equipmentId = data.data.equipment_id;
-
-        // Then upload images if any
-        await uploadImages(equipmentId);
-
-        alert('Equipment created successfully!');
-        window.location.href = '{{ url('/admin/manage-equipment') }}';
-      } catch (error) {
-        console.error('Error creating equipment:', error);
-        alert('Failed to create equipment: ' + error.message);
-      }
+        body: formData
       });
 
-      async function fetchDropdownData() {
-      try {
-        // Fetch user role
-        const userResponse = await fetch('http://127.0.0.1:8000/api/admin/user-role', {
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Failed to create equipment');
+      }
+
+      alert('Equipment created successfully!');
+      window.location.href = '{{ url('/admin/manage-equipment') }}';
+    } catch (error) {
+      console.error('Error creating equipment:', error);
+      alert('Failed to create equipment: ' + error.message);
+    }
+  });
+
+  async function fetchDropdownData() {
+    try {
+      // Fetch user role
+      const userResponse = await fetch('http://127.0.0.1:8000/api/admin/user-role', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
-        });
+      });
 
-        if (!userResponse.ok) {
+      if (!userResponse.ok) {
         throw new Error('Failed to fetch user role');
-        }
+      }
 
-        const userData = await userResponse.json();
-        const userRole = userData.role;
+      const userData = await userResponse.json();
+      const userRole = userData.role;
 
-        // Fetch departments
-        const departmentsResponse = await fetch('http://127.0.0.1:8000/api/admin/departments', {
+      // Fetch departments
+      const departmentsResponse = await fetch('http://127.0.0.1:8000/api/admin/departments', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
-        });
+      });
 
-        if (departmentsResponse.ok) {
+      if (departmentsResponse.ok) {
         const departmentsData = await departmentsResponse.json();
 
         // Filter departments based on role
@@ -852,108 +981,75 @@
           filteredDepartments = departmentsData.data; // Head admins see all departments
         } else if (userRole === 'inventory manager') {
           filteredDepartments = departmentsData.data.filter(department =>
-          department.assigned_to.includes(userData.id)
+            department.assigned_to.includes(userData.id)
           ); // Inventory managers see only their assigned departments
         }
 
         populateDropdown('department', filteredDepartments);
-        }
+      }
 
-        // Fetch categories
-        const categoriesResponse = await fetch('http://127.0.0.1:8000/api/admin/equipment-categories', {
+      // Fetch categories
+      const categoriesResponse = await fetch('http://127.0.0.1:8000/api/admin/equipment-categories', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
-        });
+      });
 
-        if (categoriesResponse.ok) {
+      if (categoriesResponse.ok) {
         const categoriesData = await categoriesResponse.json();
         populateDropdown('category', categoriesData.data);
-        }
+      }
 
-        // Fetch statuses
-        const statusesResponse = await fetch('http://127.0.0.1:8000/api/admin/availability-statuses', {
+      // Fetch statuses
+      const statusesResponse = await fetch('http://127.0.0.1:8000/api/admin/availability-statuses', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
-        });
+      });
 
-        if (statusesResponse.ok) {
+      if (statusesResponse.ok) {
         const statusesData = await statusesResponse.json();
         populateDropdown('availabilityStatus', statusesData.data);
-        }
+      }
 
-        // Fetch rate types
-        const rateTypesResponse = await fetch('http://127.0.0.1:8000/api/admin/rate-types', {
+      // Fetch rate types
+      const rateTypesResponse = await fetch('http://127.0.0.1:8000/api/admin/rate-types', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
-        });
+      });
 
-        if (rateTypesResponse.ok) {
+      if (rateTypesResponse.ok) {
         const rateTypesData = await rateTypesResponse.json();
         populateDropdown('rateType', rateTypesData.data);
-        }
-
-      } catch (error) {
-        console.error('Error fetching dropdown data:', error);
-      }
       }
 
-      function populateDropdown(elementId, data) {
-      const dropdown = document.getElementById(elementId);
-      if (!dropdown) return;
+    } catch (error) {
+      console.error('Error fetching dropdown data:', error);
+    }
+  }
 
-      // Clear existing options except the first one
-      while (dropdown.options.length > 1) {
-        dropdown.remove(1);
-      }
+  function populateDropdown(elementId, data) {
+    const dropdown = document.getElementById(elementId);
+    if (!dropdown) return;
 
-      // Add new options
-      data.forEach(item => {
-        const option = document.createElement('option');
-        option.value = item[Object.keys(item)[0]]; // Get the ID (first key)
-        option.textContent = item[Object.keys(item)[1]]; // Get the name (second key)
-        dropdown.appendChild(option);
-      });
-      }
+    // Clear existing options except the first one
+    while (dropdown.options.length > 1) {
+      dropdown.remove(1);
+    }
 
-      async function uploadImages(equipmentId) {
-      const photos = Array.from(document.querySelectorAll('.photo-preview'));
-      if (photos.length === 0) return;
-
-      for (const photo of photos) {
-        const img = photo.querySelector('img');
-        if (!img) continue;
-
-        try {
-        // Convert data URL to blob
-        const blob = await fetch(img.src).then(r => r.blob());
-        const formData = new FormData();
-        formData.append('image', blob);
-        formData.append('type_id', photo === photos[0] ? 1 : 2); // First image is primary
-
-        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/upload-image`, {
-          method: 'POST',
-          headers: {
-          'Authorization': `Bearer ${token}`
-          },
-          body: formData
-        });
-
-        if (!response.ok) {
-          console.error('Failed to upload image');
-        }
-        } catch (error) {
-        console.error('Error uploading image:', error);
-        }
-      }
-      }
-
-      // Existing form handling code remains the same...
+    // Add new options
+    data.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item[Object.keys(item)[0]]; // Get the ID (first key)
+      option.textContent = item[Object.keys(item)[1]]; // Get the name (second key)
+      dropdown.appendChild(option);
     });
-    </script>
-  @endsection
+  }
+});
+</script>
+@endsection
+@endsection
