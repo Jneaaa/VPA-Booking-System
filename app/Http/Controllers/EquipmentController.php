@@ -617,10 +617,12 @@ public function getItems($equipmentId): JsonResponse
     }
 }
 
-public function storeItem(Request $request, $equipmentId): JsonResponse
+public function storeItem(Request $request, $equipmentId)
 {
     try {
-        $validated = $request->validate([
+        $admin = auth()->user(); // This gets the authenticated admin
+        
+        $validatedData = $request->validate([
             'item_name' => 'required|string|max:50',
             'condition_id' => 'required|exists:conditions,condition_id',
             'barcode_number' => 'nullable|string|max:20',
@@ -629,39 +631,42 @@ public function storeItem(Request $request, $equipmentId): JsonResponse
             'cloudinary_public_id' => 'nullable|string'
         ]);
 
-        $equipment = Equipment::findOrFail($equipmentId);
-        
-        // Authorization check
-        $user = auth()->user();
-        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
-            return response()->json(['message' => 'You do not manage this equipment.'], 403);
-        }
+        // Log authentication details for debugging
+        \Log::info('Creating equipment item', [
+            'admin_id' => $admin->admin_id,
+            'admin_email' => $admin->email,
+            'equipment_id' => $equipmentId,
+            'validated_data' => $validatedData
+        ]);
 
-        $item = $equipment->items()->create([
-            'item_name' => $validated['item_name'],
-            'condition_id' => $validated['condition_id'],
-            'barcode_number' => $validated['barcode_number'] ?? null,
-            'item_notes' => $validated['item_notes'] ?? 'No notes provided for this asset.',
-            'image_url' => $validated['image_url'] ?? 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp',
-            'cloudinary_public_id' => $validated['cloudinary_public_id'] ?? 'oxvsxogzu9koqhctnf7s',
-            'status_id' => 1, // Default to available
-            'created_by' => $user->admin_id
+        $item = EquipmentItem::create([
+            'equipment_id' => $equipmentId,
+            'item_name' => $validatedData['item_name'],
+            'condition_id' => $validatedData['condition_id'],
+            'barcode_number' => $validatedData['barcode_number'] ?? null,
+            'item_notes' => $validatedData['item_notes'] ?? 'No notes provided for this asset.',
+            'image_url' => $validatedData['image_url'] ?? 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp',
+            'cloudinary_public_id' => $validatedData['cloudinary_public_id'] ?? 'oxvsxogzu9koqhctnf7s',
+            'status_id' => 1,
+            'created_by' => $admin->admin_id // Use authenticated admin's ID
         ]);
 
         return response()->json([
             'message' => 'Item added successfully',
-            'data' => $item->load('condition')
-        ], 201);
+            'item' => $item->load('condition')
+        ]);
 
     } catch (\Exception $e) {
-        \Log::error('Error adding equipment item', [
+        \Log::error('Failed to create equipment item', [
+            'equipment_id' => $equipmentId,
             'error' => $e->getMessage(),
-            'equipmentId' => $equipmentId
+            'trace' => $e->getTraceAsString(),
+            'admin_id' => auth()->check() ? auth()->user()->admin_id : 'Not authenticated'
         ]);
-        
+
         return response()->json([
-            'message' => 'Failed to add item',
-            'error' => $e->getMessage()
+            'error' => 'Failed to add item',
+            'details' => $e->getMessage()
         ], 500);
     }
 }
@@ -683,6 +688,11 @@ public function updateItem(Request $request, $equipmentId, $itemId): JsonRespons
         // Authorization check
         $user = auth()->user();
         if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
+            \Log::warning('Unauthorized update attempt for equipment item', [
+                'user_id' => $user->admin_id,
+                'equipment_id' => $equipmentId,
+                'item_id' => $itemId
+            ]);
             return response()->json(['message' => 'You do not manage this equipment.'], 403);
         }
 
@@ -700,6 +710,12 @@ public function updateItem(Request $request, $equipmentId, $itemId): JsonRespons
             'updated_by' => $user->admin_id
         ]);
 
+        \Log::info('Equipment item updated successfully', [
+            'item_id' => $itemId,
+            'equipment_id' => $equipmentId,
+            'updated_by' => $user->admin_id
+        ]);
+
         return response()->json([
             'message' => 'Item updated successfully',
             'data' => $item->fresh()->load('condition')
@@ -709,7 +725,8 @@ public function updateItem(Request $request, $equipmentId, $itemId): JsonRespons
         \Log::error('Error updating equipment item', [
             'error' => $e->getMessage(),
             'equipmentId' => $equipmentId,
-            'itemId' => $itemId
+            'itemId' => $itemId,
+            'trace' => $e->getTraceAsString()
         ]);
         
         return response()->json([
@@ -718,45 +735,45 @@ public function updateItem(Request $request, $equipmentId, $itemId): JsonRespons
         ], 500);
     }
 }
-
-public function deleteItem($equipmentId, $itemId): JsonResponse
+public function deleteItem($equipmentId, $itemId)
 {
     try {
-        $equipment = Equipment::findOrFail($equipmentId);
-        
-        // Authorization check
-        $user = auth()->user();
-        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
-            return response()->json(['message' => 'You do not manage this equipment.'], 403);
-        }
-
         $item = EquipmentItem::where('equipment_id', $equipmentId)
             ->where('item_id', $itemId)
             ->firstOrFail();
 
-        // Soft delete tracking
-        $item->update([
-            'deleted_by' => $user->admin_id,
-        ]);
+        // Delete from Cloudinary if it's not the default image
+        if ($item->cloudinary_public_id && $item->cloudinary_public_id !== 'oxvsxogzu9koqhctnf7s') {
+            // This will be handled by the frontend or you can implement backend deletion here
+        }
 
         $item->delete();
 
-        return response()->json(['message' => 'Item deleted successfully']);
+        \Log::info('Equipment item deleted', [
+            'item_id' => $itemId,
+            'equipment_id' => $equipmentId,
+            'admin_id' => auth()->id()
+        ]);
+
+        return response()->json([
+            'message' => 'Item deleted successfully'
+        ]);
 
     } catch (\Exception $e) {
-        \Log::error('Error deleting equipment item', [
+        \Log::error('Failed to delete equipment item', [
+            'item_id' => $itemId,
+            'equipment_id' => $equipmentId,
+            'admin_id' => auth()->id(),
             'error' => $e->getMessage(),
-            'equipmentId' => $equipmentId,
-            'itemId' => $itemId
+            'trace' => $e->getTraceAsString()
         ]);
-        
+
         return response()->json([
-            'message' => 'Failed to delete item',
-            'error' => $e->getMessage()
+            'error' => 'Failed to delete item',
+            'details' => $e->getMessage()
         ], 500);
     }
 }
-    
 
 
 }

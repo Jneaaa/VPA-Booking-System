@@ -209,35 +209,37 @@
     </div>
 
     <!-- Event Modal -->
-    <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Event Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <strong>Title:</strong> <span id="eventTitle"></span>
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Date:</strong> <span id="eventDate"></span>
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Time:</strong> <span id="eventTime">10:00 AM - 12:00 PM</span>
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Description:</strong> <span id="eventDescription"></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Event Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Title:</strong> <span id="eventTitle"></span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Date:</strong> <span id="eventDate"></span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Time:</strong> <span id="eventTime">10:00 AM - 12:00 PM</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Description:</strong> <span id="eventDescription"></span>
+                    </li>
+                    <!-- Additional event details will be inserted here -->
+                    <div id="eventDetails"></div>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
 @endsection
 
 @section('scripts')

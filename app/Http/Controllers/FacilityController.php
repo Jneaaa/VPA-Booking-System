@@ -4,96 +4,98 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
-use App\Models\Category;
+use App\Models\LookupTables\FacilityCategory;
 use App\Models\Department;
-use App\Models\Status;
-use App\Models\Subcategory;
+use App\Models\LookupTables\AvailabilityStatus;
+use App\Models\LookupTables\FacilitySubcategory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Http\JsonResponse;
+
 
 
 class FacilityController extends Controller
 {
     // ----- Index - Show all facilities ----- //
-public function index(Request $request) // Add Request parameter
-{
-    \Log::info('FacilityController index method called'); 
-    try {
-        $user = auth()->user();
-        
-        // Get filter parameters
-        $status = $request->input('status', 'all');
-        $department = $request->input('department', 'all');
-        $category = $request->input('category', 'all');
-        $search = $request->input('search', '');
-        
-        // Base query
-        $query = Facility::with(['category', 'subcategory', 'status', 'department', 'images']);
-        
-        // Apply filters based on user role
-        if ($user->role?->role_title !== 'Head Admin') {
-            $userDepartments = $user->departments->pluck('department_id');
-            if ($userDepartments->isNotEmpty()) {
-                $query->whereIn('department_id', $userDepartments);
-            } else {
-                // If user has no departments, return empty results
-                $query->where('department_id', 0); // Force no results
-            }
-        }
-        
-        // Apply filters
-        if ($status !== 'all') {
-            $query->where('status_id', $status);
-        }
-        
-        if ($department !== 'all') {
-            $query->where('department_id', $department);
-        }
-        
-        if ($category !== 'all') {
-            $query->where('category_id', $category);
-        }
-        
-        if (!empty($search)) {
-            $query->where(function($q) use ($search) {
-                $q->where('facility_name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('location_note', 'like', "%{$search}%");
+// ----- Index - Show all facilities ----- //
+    public function publicIndex(): JsonResponse
+    {
+        try {
+            $facilities = Facility::with([
+                'category',
+                'subcategory',
+                'status',
+                'department',
+                'images'
+            ])->orderBy('facility_name')->get();
+
+            $formatted = $facilities->map(function ($facility) {
+                return $this->formatPublicFacility($facility);
             });
+
+            return response()->json(['data' => $formatted]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching public facilities', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'message' => 'Failed to fetch facilities data',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        
-        // Get the facilities - THIS WAS MISSING
-        $facilities = $query->paginate(10); // or ->get() if you don't want pagination
-        
-        // Get filter options - Use correct model classes
-        $statuses = Status::all(); // Changed from AvailabilityStatus
-        $departments = Department::all();
-        $categories = Category::all(); // Changed from FacilityCategory
-        
-        // Debug: Check if variables are set
-         \Log::debug('Variables being passed to view:');
-        \Log::debug('Facilities count: ' . $facilities->count());
-        \Log::debug('Statuses count: ' . $statuses->count());
-        \Log::debug('Departments count: ' . $departments->count());
-        \Log::debug('Categories count: ' . $categories->count());
-        
-         return view('admin.manage-facilities', compact('facilities', 'statuses', 'departments', 'categories'));
-        
-    } catch (\Exception $e) {
-        \Log::error('Error loading manage facilities page: ' . $e->getMessage());
-        \Log::error('Stack trace: ' . $e->getTraceAsString());
-        return redirect()->route('admin.dashboard')->with('error', 'Failed to load facilities management page');
     }
-}
+
+    // ----- Formatting ----- //
+    private function formatPublicFacility($facility): array
+    {
+        $facility->load(['category', 'subcategory', 'status', 'department', 'images']);
+
+        return [
+            'facility_id' => $facility->facility_id,
+            'facility_name' => $facility->facility_name,
+            'description' => $facility->description,
+            'location_note' => $facility->location_note,
+            'capacity' => $facility->capacity,
+            'category' => [
+                'category_id' => $facility->category_id,
+                'category_name' => $facility->category->category_name,
+            ],
+            'subcategory' => $facility->subcategory ? [
+                'subcategory_id' => $facility->subcategory_id,
+                'subcategory_name' => $facility->subcategory->subcategory_name,
+            ] : null,
+            'department' => [
+                'department_id' => $facility->department_id,
+                'department_name' => $facility->department->department_name,
+            ],
+            'location_type' => $facility->location_type,
+            'internal_fee' => $facility->internal_fee,
+            'external_fee' => $facility->external_fee,
+            'rate_type' => $facility->rate_type,
+            'status' => [
+                'status_id' => $facility->status_id,
+                'status_name' => $facility->status->status_name,
+                'color_code' => $facility->status->color_code,
+            ],
+            'maximum_rental_hour' => $facility->maximum_rental_hour,
+            'parent_facility_id' => $facility->parent_facility_id,
+            'room_code' => $facility->room_code,
+            'floor_level' => $facility->floor_level,
+            'building_code' => $facility->building_code,
+            'total_levels' => $facility->total_levels,
+            'total_rooms' => $facility->total_rooms,
+            'images' => $facility->images,
+        ];
+    }
 
     // ----- Create - Show add facility form ----- //
     public function create()
     {
-        $categories = Category::all();
-        $subcategories = Subcategory::all();
+        $categories = FacilityCategory::all();
+        $subcategories = FacilitySubcategory::all();
         $departments = Department::all();
-        $statuses = Status::all();
+        $statuses = AvailabilityStatus::all();
 
         return view('admin.add-facility', compact('categories', 'subcategories', 'departments', 'statuses'));
     }
@@ -156,17 +158,17 @@ public function index(Request $request) // Add Request parameter
             ->with('success', 'Facility created successfully!');
     }
 
-    
+
     // ----- Edit - Show edit form ----- //
     public function edit($id)
     {
         $facility = Facility::with(['category', 'subcategory', 'status', 'department', 'images'])
             ->findOrFail($id);
-            
-        $categories = Category::all();
-        $subcategories = Subcategory::all();
+
+        $categories = FacilityCategory::all();
+        $subcategories = FacilitySubcategory::all();
         $departments = Department::all();
-        $statuses = Status::all();
+        $statuses = AvailabilityStatus::all();
 
         return view('admin.edit-facility', compact('facility', 'categories', 'subcategories', 'departments', 'statuses'));
     }
@@ -175,7 +177,7 @@ public function index(Request $request) // Add Request parameter
     public function update(Request $request, $id)
     {
         $facility = Facility::findOrFail($id);
-        
+
         $data = $request->validate([
             'facility_name' => 'required|string|max:50',
             'description' => 'nullable|string|max:250',
@@ -330,4 +332,5 @@ public function index(Request $request) // Add Request parameter
         foreach ($images as $index => $image) {
             $image->update(['sort_order' => $index + 1]);
         }
-    }} 
+    }
+}

@@ -539,7 +539,6 @@
     @section('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-
                 // Authentication check
                 const token = localStorage.getItem('adminToken');
                 if (!token) {
@@ -550,18 +549,6 @@
                 let currentEditingItemId = null;
                 let equipmentItems = [];
 
-                const inventoryItemModal = new bootstrap.Modal('#inventoryItemModal');
-                const itemPhotoInput = document.getElementById('itemPhoto');
-                const itemPhotoPreview = document.getElementById('itemPhotoPreview');
-                const itemNotes = document.getElementById('itemNotes');
-                const notesWordCount = document.getElementById('notesWordCount');
-                const saveItemBtn = document.getElementById('saveItemBtn');
-                const itemsContainer = document.getElementById('itemsContainer');
-                const removePhotoBtn = document.getElementById('removePhotoBtn');
-                const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
-
-                let itemPhotoFile = null;
-                let itemCloudinaryPublicId = null;
 
                 // Global helper function for toast notifications
                 window.showToast = function (message, type = 'success', duration = 3000) {
@@ -588,18 +575,18 @@
                     toast.style.borderRadius = '0.3rem';
 
                     toast.innerHTML = `
-                                                                                                                        <div class="d-flex align-items-center px-3 py-1"> 
-                                                                                                                            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                                                                                                            <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                                                                                                            <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                                                                                                        </div>
-                                                                                                                        <div class="loading-bar" style="
-                                                                                                                            height: 3px;
-                                                                                                                            background: rgba(255,255,255,0.7);
-                                                                                                                            width: 100%;
-                                                                                                                            transition: width ${duration}ms linear;
-                                                                                                                        "></div>
-                                                                                                                    `;
+                                                                                                                <div class="d-flex align-items-center px-3 py-1"> 
+                                                                                                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                                                                                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                                                                                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                                                                                </div>
+                                                                                                                <div class="loading-bar" style="
+                                                                                                                    height: 3px;
+                                                                                                                    background: rgba(255,255,255,0.7);
+                                                                                                                    width: 100%;
+                                                                                                                    transition: width ${duration}ms linear;
+                                                                                                                "></div>
+                                                                                                            `;
 
                     document.body.appendChild(toast);
 
@@ -1108,51 +1095,46 @@
 
                     addItemBtn.addEventListener('click', () => {
                         document.getElementById('itemForm').reset();
-                        itemPhotoPreview.innerHTML = '';
-                        itemPhotoFile = null;
-                        itemCloudinaryPublicId = null;
-                        if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'block';
-                        if (removePhotoBtn) removePhotoBtn.classList.add('d-none');
+                        if (itemPhotoPreview) itemPhotoPreview.innerHTML = '';
                         inventoryItemModal.show();
                     });
 
-
-                    // Handle item photo upload
                     if (itemPhotoInput) {
                         itemPhotoInput.addEventListener('change', function () {
                             if (this.files?.[0]) {
-                                itemPhotoFile = this.files[0];
                                 const reader = new FileReader();
                                 reader.onload = (e) => {
+                                    const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
                                     if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'none';
+                                    const removePhotoBtn = document.getElementById('removePhotoBtn');
                                     if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
                                     if (itemPhotoPreview) {
                                         itemPhotoPreview.innerHTML = `
-                            <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
-                        `;
+                                                                                                                                                                                                                            <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
+                                                                                                                                                                                                                          `;
                                     }
                                 };
-                                reader.readAsDataURL(itemPhotoFile);
+                                reader.readAsDataURL(this.files[0]);
                             }
                         });
                     }
 
-
-                    // Handle photo removal
+                    const removePhotoBtn = document.getElementById('removePhotoBtn');
                     if (removePhotoBtn) {
                         removePhotoBtn.addEventListener('click', function () {
                             if (itemPhotoPreview) itemPhotoPreview.innerHTML = '';
+                            const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
                             if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'block';
+                            const itemPhotoInput = document.getElementById('itemPhoto');
                             if (itemPhotoInput) itemPhotoInput.value = '';
                             this.classList.add('d-none');
-                            itemPhotoFile = null;
-                            itemCloudinaryPublicId = null;
                         });
                     }
 
-                    // Handle dropzone click
+                    const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
                     if (itemPhotoDropzone) {
                         itemPhotoDropzone.addEventListener('click', function () {
+                            const itemPhotoInput = document.getElementById('itemPhoto');
                             if (itemPhotoInput) itemPhotoInput.click();
                         });
                     }
@@ -1217,146 +1199,59 @@
                         });
                     }
 
-                    // Save item functionality
-                 // Save item functionality
-// Save item functionality
-if (saveItemBtn) {
-    saveItemBtn.addEventListener('click', async function() {
-        const itemName = document.getElementById('itemName')?.value;
-        const itemCondition = document.getElementById('itemCondition')?.value;
-        const barcode = document.getElementById('barcode')?.value || '';
-        const notes = document.getElementById('itemNotes')?.value || '';
+                    if (saveItemBtn) {
+                        saveItemBtn.addEventListener('click', function () {
+                            const condition = document.getElementById('itemCondition')?.value;
+                            if (!condition) {
+                                alert('Please select the item condition');
+                                return;
+                            }
 
-        if (!itemName || !itemCondition) {
-            showToast('Please fill in all required fields', 'error');
-            return;
-        }
+                            const itemId = Date.now();
+                            const barcode = document.getElementById('barcode')?.value || '';
+                            const notes = document.getElementById('itemNotes')?.value || '';
+                            const itemPhoto = itemPhotoPreview?.querySelector('img')?.src || '';
 
-        try {
-            let imageUrl = 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp';
-            let publicId = 'oxvsxogzu9koqhctnf7s';
+                            const conditionColors = {
+                                "New": "bg-success text-white",
+                                "Good": "bg-primary text-white",
+                                "Fair": "bg-warning text-dark",
+                                "Needs Maintenance": "bg-danger text-white",
+                                "Damaged": "bg-dark text-white"
+                            };
 
-            // Upload to Cloudinary if a new photo was selected
-            if (itemPhotoFile) {
-                showToast('Uploading item photo...', 'info');
-                const cloudinaryData = await uploadItemToCloudinary(itemPhotoFile, equipmentId);
-                imageUrl = cloudinaryData.secure_url;
-                publicId = cloudinaryData.public_id;
-            }
+                            const itemCard = document.createElement('div');
+                            itemCard.className = 'card equipment-item';
+                            itemCard.innerHTML = `
+                                                                                                                                                                                                                      <div class="card-body">
+                                                                                                                                                                                                                        <div class="photo-container">
+                                                                                                                                                                                                                          ${itemPhoto ? `<img src="${itemPhoto}" class="img-thumbnail">` : ''}
+                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                        <div class="flex-grow-1">
+                                                                                                                                                                                                                          <h6 class="card-title">Item #${itemId}</h6>
+                                                                                                                                                                                                                          <div class="d-flex flex-wrap gap-3">
+                                                                                                                                                                                                                            <span class="badge ${conditionColors[condition]}">${condition}</span>
+                                                                                                                                                                                                                          </div>
+                                                                                                                                                                                                                          ${barcode ? `<div class="mt-2"><strong>Barcode:</strong> ${barcode}</div>` : ''}
+                                                                                                                                                                                                                          ${notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${notes.substring(0, 50)}${notes.length > 50 ? '...' : ''}</p>` : ''}
+                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                        <button class="btn btn-sm btn-danger align-self-start" onclick="this.closest('.equipment-item').remove()">
+                                                                                                                                                                                                                          <i class="bi bi-trash"></i>
+                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                      </div>
+                                                                                                                                                                                                                    `;
 
-            const token = localStorage.getItem('adminToken');
+                            if (itemsContainer) {
+                                if (itemsContainer.querySelector('p.text-muted')) {
+                                    itemsContainer.innerHTML = '';
+                                }
+                                itemsContainer.appendChild(itemCard);
+                            }
 
-            // Save item to database
-            const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/items`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    item_name: itemName,
-                    condition_id: itemCondition,
-                    barcode_number: barcode,
-                    item_notes: notes,
-                    image_url: imageUrl,
-                    cloudinary_public_id: publicId
-                    // Let the backend handle created_by from the authenticated user
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.details || 'Failed to save item');
-            }
-
-            const result = await response.json();
-            showToast('Item added successfully!', 'success');
-            
-            // Add the new item to the UI
-            addItemToUI(result.item);
-            
-            inventoryItemModal.hide();
-
-        } catch (error) {
-            console.error('Error saving item:', error);
-            showToast('Failed to save item: ' + error.message, 'error');
-        }
-    });
-}
+                            inventoryItemModal.hide();
+                        });
+                    }
                 }
-
-                // Function to upload item photo to Cloudinary
-async function uploadItemToCloudinary(file, equipmentId) {
-    const CLOUD_NAME = 'dn98ntlkd';
-    const UPLOAD_PRESET = 'equipment-photos';
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', UPLOAD_PRESET);
-    formData.append('folder', `equipment-items/${equipmentId}`);
-    formData.append('tags', `equipment_item_${equipmentId}`);
-
-    try {
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Upload failed');
-        }
-
-        return await response.json();
-
-    } catch (error) {
-        console.error('Cloudinary upload error:', error);
-        throw new Error('Failed to upload image: ' + error.message);
-    }
-}
-
-
-
-// Function to add item to UI
-function addItemToUI(item) {
-    const conditionColors = {
-        "New": "bg-success text-white",
-        "Good": "bg-primary text-white",
-        "Fair": "bg-warning text-dark",
-        "Needs Maintenance": "bg-danger text-white",
-        "Damaged": "bg-dark text-white"
-    };
-
-    const itemCard = document.createElement('div');
-    itemCard.className = 'card equipment-item';
-    itemCard.dataset.itemId = item.item_id;
-    itemCard.innerHTML = `
-        <div class="card-body">
-            <div class="photo-container">
-                <img src="${item.image_url}" class="img-thumbnail">
-            </div>
-            <div class="flex-grow-1">
-                <h6 class="card-title">${item.item_name}</h6>
-                <div class="d-flex flex-wrap gap-3">
-                    <span class="badge ${conditionColors[item.condition.condition_name] || 'bg-secondary'}">${item.condition.condition_name}</span>
-                </div>
-                ${item.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${item.barcode_number}</div>` : ''}
-                ${item.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${item.item_notes.substring(0, 50)}${item.item_notes.length > 50 ? '...' : ''}</p>` : ''}
-            </div>
-            <button class="btn btn-sm btn-danger align-self-start" onclick="deleteItem(${item.item_id}, '${item.cloudinary_public_id}')">
-                <i class="bi bi-trash"></i>
-            </button>
-        </div>
-    `;
-
-    if (itemsContainer) {
-        if (itemsContainer.querySelector('p.text-muted')) {
-            itemsContainer.innerHTML = '';
-        }
-        itemsContainer.appendChild(itemCard);
-    }
-}
 
                 // Add 'required' class to labels with required fields
                 document.querySelectorAll('label[for]').forEach(label => {
@@ -1369,8 +1264,6 @@ function addItemToUI(item) {
                 // Load equipment data
                 loadEquipmentData(equipmentId);
             });
-
-            
 
             async function loadEquipmentData(equipmentId) {
                 try {
@@ -1501,9 +1394,9 @@ function addItemToUI(item) {
                     const rateTypeDropdown = document.getElementById('rateType');
                     if (rateTypeDropdown) {
                         rateTypeDropdown.innerHTML = `
-                                                                                                                                                    <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
-                                                                                                                                                    <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
-                                                                                                                                                `;
+                                                                                                                                            <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
+                                                                                                                                            <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
+                                                                                                                                        `;
                     }
 
                     // Fetch conditions for inventory items
@@ -1580,45 +1473,6 @@ function addItemToUI(item) {
                     dropdown.appendChild(option);
                 });
             }
-
-            // Function to delete item (frontend)
-async function deleteItem(itemId, cloudinaryPublicId) {
-    if (!confirm('Are you sure you want to delete this item?')) {
-        return;
-    }
-
-    try {
-        const token = localStorage.getItem('adminToken');
-        const equipmentId = document.getElementById('equipmentId').value;
-
-        // Delete from Cloudinary if it's not the default image
-        if (cloudinaryPublicId && cloudinaryPublicId !== 'oxvsxogzu9koqhctnf7s') {
-            await deleteImageFromCloudinary(cloudinaryPublicId);
-        }
-
-        // Delete from database
-        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/items/${itemId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete item from database');
-        }
-
-        // Remove from UI
-        document.querySelector(`.equipment-item[data-item-id="${itemId}"]`)?.remove();
-        
-        showToast('Item deleted successfully', 'success');
-
-    } catch (error) {
-        console.error('Error deleting item:', error);
-        showToast('Failed to delete item: ' + error.message, 'error');
-    }
-}
 
             async function deleteImage(equipmentId, imageId, cloudinaryPublicId) {
                 try {

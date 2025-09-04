@@ -23,6 +23,9 @@ class EquipmentItem extends Model
         'condition_id',
         'barcode_number',
         'item_notes',
+        'created_by',
+        'updated_by',
+        'deleted_by'
     ];
 
     // Relationships
