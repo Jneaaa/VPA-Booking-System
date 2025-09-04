@@ -35,7 +35,65 @@ document.addEventListener('DOMContentLoaded', function() {
             week: 'Week',
             day: 'Day'
         },
-        events: [], // Empty events array - mock events removed
+        events: function(fetchInfo, successCallback, failureCallback) {
+            // Get the authentication token
+            const token = localStorage.getItem('adminToken');
+            
+            if (!token) {
+                console.error('No authentication token found');
+                failureCallback('Authentication required');
+                return;
+            }
+            
+            // Fetch requisition forms from API
+            fetch('http://127.0.0.1:8000/api/admin/requisition-forms', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Transform API data to FullCalendar events
+                const events = data.map(form => {
+                    // Only include scheduled/ongoing events in the calendar
+                    if (!['Scheduled', 'Ongoing'].includes(form.form_details.status.name)) {
+                        return null;
+                    }
+                    
+                    const startDateTime = new Date(`${form.schedule.start_date}T${form.schedule.start_time}`);
+                    const endDateTime = new Date(`${form.schedule.end_date}T${form.schedule.end_time}`);
+                    
+                    return {
+                        id: form.request_id,
+                        title: form.form_details.calendar_info.title || 'Untitled Event',
+                        start: startDateTime,
+                        end: endDateTime,
+                        extendedProps: {
+                            description: form.form_details.calendar_info.description || 'No description available.',
+                            requester: `${form.user_details.first_name} ${form.user_details.last_name}`,
+                            purpose: form.form_details.purpose,
+                            status: form.form_details.status.name,
+                            facilities: form.requested_items.facilities.map(f => f.name).join(', '),
+                            equipment: form.requested_items.equipment.map(e => e.name).join(', ')
+                        }
+                    };
+                }).filter(event => event !== null);
+                
+                successCallback(events);
+            })
+            .catch(error => {
+                console.error('Error fetching calendar events:', error);
+                failureCallback('Failed to load events');
+            });
+        },
         eventClick: function(info) {
             const modalElement = document.getElementById('eventModal');
             if (!modalElement) {
@@ -45,19 +103,46 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const modal = new bootstrap.Modal(modalElement);
             document.getElementById('eventTitle').textContent = info.event.title;
+            
             const startDate = info.event.start;
             const endDate = info.event.end || startDate;
+            
             document.getElementById('eventDate').textContent = startDate.toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
             });
+            
             const timeOptions = { hour: '2-digit', minute: '2-digit' };
             const startTime = startDate.toLocaleTimeString('en-US', timeOptions);
             const endTime = endDate.toLocaleTimeString('en-US', timeOptions);
+            
             document.getElementById('eventTime').textContent = `${startTime} - ${endTime}`;
-            document.getElementById('eventDescription').textContent = info.event.extendedProps.description || 'No description available.';
+            document.getElementById('eventDescription').textContent = info.event.extendedProps.description;
+            
+            // Add additional event details to modal
+            const eventDetails = document.getElementById('eventDetails');
+            if (eventDetails) {
+                eventDetails.innerHTML = `
+                    <li class="list-group-item">
+                        <strong>Requester:</strong> ${info.event.extendedProps.requester}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Purpose:</strong> ${info.event.extendedProps.purpose}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Status:</strong> ${info.event.extendedProps.status}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Facilities:</strong> ${info.event.extendedProps.facilities || 'None'}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Equipment:</strong> ${info.event.extendedProps.equipment || 'None'}
+                    </li>
+                `;
+            }
+            
             modal.show();
         }
     });

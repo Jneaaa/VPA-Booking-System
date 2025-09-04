@@ -6,6 +6,10 @@
 
 <style>
 
+.spinner-border {
+  bordier-radius: 100% !important;
+}
+
 /* Custom pagination colors using CPU theme */
 .pagination .page-link {
   color: var(--cpu-primary); /* dark blue text */

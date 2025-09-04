@@ -26,6 +26,9 @@ class Equipment extends Model
         'rate_type',
         'status_id',
         'maximum_rental_hour',
+        'created_by',
+        'updated_by',
+        'deleted_by'
     ];
 
     // Relationships

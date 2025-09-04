@@ -291,6 +291,10 @@ class AdminApprovalController extends Controller
                             'number' => $form->official_receipt_no,
                             'url' => $form->official_receipt_url,
                             'public_id' => $form->official_receipt_public_id
+                        ],
+                        'proof_of_payment' => [
+                            'url' => $form->proof_of_payment_url,
+                            'public_id' => $form->proof_of_payment_public_id
                         ]
                     ],
                     'approval_info' => [
