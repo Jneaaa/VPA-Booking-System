@@ -749,7 +749,9 @@
             <p class="text-muted mt-4" style="font-size: 0.875rem;">
               In case of emergency, please ensure to cancel reservations at least 5 days before the scheduled date to
               avoid complications.
+              A 1-hour interval is required after each booking to allow for facility cleaning and preparation.
             </p>
+
           </div>
         </div>
       </div>
