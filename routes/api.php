@@ -94,6 +94,7 @@ Route::get('/availability-statuses', [AvailabilityStatusController::class, 'inde
 Route::get('/form-statuses', [FormStatusController::class, 'index']);
 Route::get('/conditions', [ConditionController::class, 'index']);
 Route::get('/equipment/{id}', [EquipmentController::class, 'show']);
+Route::get('/admin/facilities/{id}', [FacilityController::class, 'show']);
 Route::get('/equipment-categories', [EquipmentCategoryController::class, 'index']);
 Route::get('/equipment-items', [EquipmentItemController::class, 'index']);
 Route::get('/facility-categories', [FacilityCategoryController::class, 'index']);
@@ -107,7 +108,6 @@ Route::get('/admin-role', [AdminController::class, 'adminRoles']);
 
 Route::get('/equipment', [EquipmentController::class, 'publicIndex']);
 Route::get('/facilities', [FacilityController::class, 'publicIndex']);
-Route::get('/facilities/{facility}', [FacilityController::class, 'show']);
 
 // Public cancellation route for requesters
 Route::post('/requester/requisition/{requestId}/cancel', [AdminApprovalController::class, 'cancelRequestPublic']);

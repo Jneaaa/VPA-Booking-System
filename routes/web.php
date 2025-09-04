@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RequisitionFormController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EquipmentController;
+use App\Http\Controllers\FacilityController;
 
 Route::middleware('web')->group(function () {
     Route::get('/', function () {
@@ -39,7 +40,8 @@ Route::middleware('web')->group(function () {
     Route::view('/admin/dashboard', 'admin.dashboard');
     Route::view('/admin/manage-equipment', 'admin.manage-equipment');
     Route::get('/admin/edit-equipment', [EquipmentController::class, 'edit'])->name('admin.edit-equipment');
-    Route::view('/admin/scan-equipment','admin.scan-equipment');
+    Route::get('/admin/edit-facility', [FacilityController::class, 'edit'])->name('admin.edit-facility');
+    Route::view('/admin/scan-equipment', 'admin.scan-equipment');
     Route::view('/admin/manage-facilities', 'admin.manage-facilities');
     Route::view('/admin/manage-facilities', 'admin.manage-facilities');
     Route::view('/admin/manage-requests', 'admin.manage-requests');

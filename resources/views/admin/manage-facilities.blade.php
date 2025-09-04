@@ -412,8 +412,8 @@ card.innerHTML = `
         <p class="card-text mb-2 small text-truncate">${facilities.description || "No description available"}</p>
       </div>
       <div class="facilities-actions mt-auto d-grid gap-1">
-        <a href="/admin/edit-facility?id=${facilities.facilities_id}" class="btn btn-sm btn-primary btn-manage">Manage</a>
-        <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${facilities.facilities_id}">Delete</button>
+        <a href="/admin/edit-facility?id=${facilities.facility_id}" class="btn btn-sm btn-primary btn-manage">Manage</a>
+        <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${facilities.facility_id}">Delete</button>
       </div>
     </div>
   </div>

@@ -160,17 +160,15 @@ class FacilityController extends Controller
 
 
     // ----- Edit - Show edit form ----- //
-    public function edit($id)
+    public function edit(Request $request)
     {
-        $facility = Facility::with(['category', 'subcategory', 'status', 'department', 'images'])
-            ->findOrFail($id);
+        $facilityId = $request->query('id');
 
-        $categories = FacilityCategory::all();
-        $subcategories = FacilitySubcategory::all();
-        $departments = Department::all();
-        $statuses = AvailabilityStatus::all();
+        if (!$facilityId) {
+            return redirect('/admin/manage-facilities')->with('error', 'No facility ID provided');
+        }
 
-        return view('admin.edit-facility', compact('facility', 'categories', 'subcategories', 'departments', 'statuses'));
+        return view('admin.edit-facility', ['facilityId' => $facilityId]);
     }
 
     // ----- Update - Save facility changes ----- //
@@ -261,10 +259,26 @@ class FacilityController extends Controller
     // ----- Show - View single facility (optional) ----- //
     public function show($id)
     {
-        $facility = Facility::with(['category', 'subcategory', 'status', 'department', 'images'])
-            ->findOrFail($id);
+        try {
+            $facility = Facility::with([
+                'category',
+                'subcategory',
+                'status',
+                'department',
+                'images'
+            ])->findOrFail($id);
 
-        return view('admin.view-facility', compact('facility'));
+            return response()->json([
+                'data' => $facility
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching facility: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to fetch facility',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // ----- Upload Facility Image ----- //

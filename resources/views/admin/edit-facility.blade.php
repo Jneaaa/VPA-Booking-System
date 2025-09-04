@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Equipment')
+@section('title', 'Edit Facility')
 
 @section('content')
 <style>
@@ -90,7 +90,7 @@
     }
 
     .amenity-item,
-    .equipment-item {
+    .facility-item {
         margin-bottom: 0.75rem;
     }
 
@@ -116,7 +116,7 @@
         z-index: 1;
     }
 
-    .equipment-item img {
+    .facility-item img {
         max-width: 100px;
         /* Restrict photo width */
         max-height: 100px;
@@ -125,14 +125,14 @@
         /* Ensure photo fits within bounds */
     }
 
-    .equipment-item .card-body {
+    .facility-item .card-body {
         display: flex;
         align-items: center;
         gap: 1rem;
         /* Add spacing between elements */
     }
 
-    .equipment-item .flex-grow-1 {
+    .facility-item .flex-grow-1 {
         flex: 1;
         /* Allow details section to take remaining space */
     }
@@ -142,40 +142,40 @@
     <div id="layout">
         <!-- Main Content -->
         <main id="main">
-            <!-- Edit Equipment Page -->
+            <!-- Edit Facility Page -->
 
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Edit Equipment</h1>
-                <a href="{{ url('/admin/manage-equipment') }}" class="btn btn-primary">
-                    <i class="bi bi-arrow-left me-2"></i>Back to Equipment
+                <h1 class="h3 mb-0 text-gray-800">Edit Facility</h1>
+                <a href="{{ url('/admin/manage-facilities') }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Facilities
                 </a>
             </div>
 
             <div class="card shadow mb-4">
                 <div class="card-body">
-                    <form id="editEquipmentForm">
-                        <input type="hidden" id="equipmentId" value="{{ request()->get('id') }}">
+                    <form id="editFacilityForm">
+                        <input type="hidden" id="facilityId" value="{{ request()->get('id') }}">
 
-                        <!-- Equipment Photos and Inventory Items Section -->
+                        <!-- Facility Photos and Details Section -->
                         <div class="row mb-4">
-                            <!-- Equipment Photos Card -->
+                            <!-- Facility Photos Card -->
                             <div class="col-md-6">
                                 <div class="card h-100">
                                     <div class="card-header d-flex justify-content-between align-items-center"
                                         style="height: 56px;">
-                                        <h5 class="fw-bold mb-0">Equipment Photos</h5>
+                                        <h5 class="fw-bold mb-0">Facility Photos</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="photo-section">
-                                            <div class="dropzone border p-4 text-center" id="equipmentPhotosDropzone"
+                                            <div class="dropzone border p-4 text-center" id="facilityPhotosDropzone"
                                                 style="cursor: pointer;">
                                                 <i class="bi bi-images fs-1 text-muted"></i>
-                                                <p class="mt-2">Drag & drop equipment photos here or click to browse</p>
-                                                <input type="file" id="equipmentPhotos" class="d-none" multiple
+                                                <p class="mt-2">Drag & drop facility photos here or click to browse</p>
+                                                <input type="file" id="facilityPhotos" class="d-none" multiple
                                                     accept="image/*">
                                             </div>
                                             <small class="text-muted mt-2 d-block">Upload at least one photo of the
-                                                equipment (max 5
+                                                facility (max 5
                                                 photos)</small>
                                             <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
                                         </div>
@@ -204,75 +204,24 @@
                                 </div>
                             </div>
 
-
-                            <!-- Inventory Items Card -->
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-header d-flex justify-content-between align-items-center"
-                                        style="height: 56px;">
-                                        <h5 class="fw-bold mb-0">Inventory Items</h5>
-                                        <button type="button" class="btn btn-sm btn-secondary" id="addItemBtn">
-                                            <i class="bi bi-plus me-1"></i>Add Item
-                                        </button>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="itemsContainer">
-                                            <p class="text-muted">No items added yet. Click "Add Item" to track
-                                                individual equipment pieces.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Equipment Details Section -->
-                        <div class="row mb-4">
+                              <!-- Facility Details Section -->
+                        <div class="col-md-6">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h5 class="fw-bold mb-0">Equipment Details</h5>
+                                        <h5 class="fw-bold mb-0">Facility Details</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="details-section">
                                             <!-- Basic Information Section -->
                                             <div class="row mb-4">
-
-
                                                 <div class="col-md-6">
-                                                    <label for="equipmentName"
+                                                    <label for="facilityName"
                                                         class="form-label fw-bold d-flex align-items-center">
-                                                        Equipment Name
-
-                                                        <!-- edit icon (default) -->
-                                                        <i class="bi bi-pencil text-secondary ms-2"
-                                                            id="editEquipmentName" style="cursor: pointer;"></i>
-
-                                                        <!-- save + cancel buttons (hidden at first) -->
-                                                        <div id="editActions" class="ms-2 d-none">
-                                                            <button type="button" class="btn btn-sm btn-success me-1"
-                                                                id="saveEquipmentName">
-                                                                <i class="bi bi-check"></i>
-                                                            </button>
-                                                            <button type="button" class="btn btn-sm btn-danger"
-                                                                id="cancelEquipmentName">
-                                                                <i class="bi bi-x"></i>
-                                                            </button>
-                                                        </div>
-                                                    </label>
-
-                                                    <input type="text" class="form-control text-secondary"
-                                                        id="equipmentName" value="HD Projector" readonly>
-                                                </div>
-
-
-                                                <div class="col-md-6">
-                                                    <label for="brand"
-                                                        class="form-label fw-bold d-flex align-items-center">
-                                                        Brand
+                                                        Facility Name
                                                         <i class="bi bi-pencil text-secondary ms-2 edit-icon"
-                                                            data-field="brand" style="cursor: pointer;"></i>
-                                                        <div class="edit-actions ms-2 d-none" data-field="brand">
+                                                            data-field="facilityName" style="cursor: pointer;"></i>
+                                                        <div class="edit-actions ms-2 d-none" data-field="facilityName">
                                                             <button type="button"
                                                                 class="btn btn-sm btn-success me-1 save-btn">
                                                                 <i class="bi bi-check"></i>
@@ -283,12 +232,31 @@
                                                             </button>
                                                         </div>
                                                     </label>
-                                                    <input type="text" class="form-control text-secondary" id="brand"
-                                                        value="" readonly>
+                                                    <input type="text" class="form-control text-secondary"
+                                                        id="facilityName" value="" readonly>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label for="buildingCode"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Building Code
+                                                        <i class="bi bi-pencil text-secondary ms-2 edit-icon"
+                                                            data-field="buildingCode" style="cursor: pointer;"></i>
+                                                        <div class="edit-actions ms-2 d-none" data-field="buildingCode">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-success me-1 save-btn">
+                                                                <i class="bi bi-check"></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-danger cancel-btn">
+                                                                <i class="bi bi-x"></i>
+                                                            </button>
+                                                        </div>
+                                                    </label>
+                                                    <input type="text" class="form-control text-secondary"
+                                                        id="buildingCode" value="" readonly>
                                                 </div>
                                             </div>
-
-
 
                                             <div class="row mb-4">
                                                 <div class="col-12 position-relative">
@@ -311,19 +279,18 @@
                                                     <textarea class="form-control text-secondary" id="description"
                                                         rows="3" readonly></textarea>
                                                     <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1"
-                                                        id="descriptionWordCount">0/255 characters</small>
+                                                        id="descriptionWordCount">0/250 characters</small>
                                                 </div>
                                             </div>
 
                                             <div class="row mb-4">
-                                                <div class="col-md-6">
-                                                    <label for="storageLocation"
+                                                <div class="col-md-4">
+                                                    <label for="locationNote"
                                                         class="form-label fw-bold d-flex align-items-center">
-                                                        Storage Location
+                                                        Location Note
                                                         <i class="bi bi-pencil text-secondary ms-2 edit-icon"
-                                                            data-field="storageLocation" style="cursor: pointer;"></i>
-                                                        <div class="edit-actions ms-2 d-none"
-                                                            data-field="storageLocation">
+                                                            data-field="locationNote" style="cursor: pointer;"></i>
+                                                        <div class="edit-actions ms-2 d-none" data-field="locationNote">
                                                             <button type="button"
                                                                 class="btn btn-sm btn-success me-1 save-btn">
                                                                 <i class="bi bi-check"></i>
@@ -335,51 +302,84 @@
                                                         </div>
                                                     </label>
                                                     <input type="text" class="form-control text-secondary"
-                                                        id="storageLocation" value="" readonly>
+                                                        id="locationNote" value="" readonly>
                                                 </div>
 
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <label for="category" class="form-label fw-bold">Category</label>
                                                     <select class="form-select" id="category" required>
                                                         <option value="">Select Category</option>
                                                         <!-- Categories will be populated dynamically -->
                                                     </select>
                                                 </div>
-                                            </div>
 
-                                            <!-- Quantity & Pricing Section -->
-                                            <div class="row mb-4">
-                                                <div class="col-md-3">
-                                                    <label for="totalQuantity" class="form-label fw-bold">Total
-                                                        Quantity</label>
-                                                    <input type="number" class="form-control" id="totalQuantity" min="1"
-                                                        value="1" required>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="rentalFee" class="form-label fw-bold">Rental Fee
-                                                        (₱)</label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text">₱</span>
-                                                        <input type="number" class="form-control" id="rentalFee" min="0"
-                                                            step="0.01" required placeholder="0.00">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="companyFee" class="form-label fw-bold">Company Fee
-                                                        (₱)</label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text">₱</span>
-                                                        <input type="number" class="form-control" id="companyFee"
-                                                            min="0" step="0.01" placeholder="0.00">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="rateType" class="form-label fw-bold">Rate Type</label>
-                                                    <select class="form-select" id="rateType" required>
-                                                        <!-- Rate types will be populated dynamically -->
+                                                <div class="col-md-4">
+                                                    <label for="subcategory"
+                                                        class="form-label fw-bold">Subcategory</label>
+                                                    <select class="form-select" id="subcategory">
+                                                        <option value="">Select Subcategory</option>
+                                                        <!-- Subcategories will be populated dynamically -->
                                                     </select>
                                                 </div>
                                             </div>
+
+                                            <!-- Capacity & Location Section -->
+                                            <div class="row mb-4">
+                                                <div class="col-md-3">
+                                                    <label for="capacity" class="form-label fw-bold">Capacity</label>
+                                                    <input type="number" class="form-control" id="capacity" min="1"
+                                                        value="1" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="locationType" class="form-label fw-bold">Location
+                                                        Type</label>
+                                                    <select class="form-select" id="locationType" required>
+                                                        <option value="Indoors">Indoors</option>
+                                                        <option value="Outdoors">Outdoors</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="floorLevel" class="form-label fw-bold">Floor
+                                                        Level</label>
+                                                    <input type="number" class="form-control" id="floorLevel" min="1"
+                                                        placeholder="Floor level">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="roomCode" class="form-label fw-bold">Room Code</label>
+                                                    <input type="text" class="form-control" id="roomCode"
+                                                        placeholder="Room code">
+                                                </div>
+                                            </div>
+
+                                            <!-- Pricing Section -->
+                                            <div class="row mb-4">
+                                                <div class="col-md-4">
+                                                    <label for="internalFee" class="form-label fw-bold">Internal Fee
+                                                        (₱)</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">₱</span>
+                                                        <input type="number" class="form-control" id="internalFee"
+                                                            min="0" step="0.01" required placeholder="0.00">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="externalFee" class="form-label fw-bold">External Fee
+                                                        (₱)</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">₱</span>
+                                                        <input type="number" class="form-control" id="externalFee"
+                                                            min="0" step="0.01" required placeholder="0.00">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="rateType" class="form-label fw-bold">Rate Type</label>
+                                                    <select class="form-select" id="rateType" required>
+                                                        <option value="Per Hour">Per Hour</option>
+                                                        <option value="Per Event">Per Event</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
                                             <!-- Department & Availability Section -->
                                             <div class="row mb-4">
                                                 <div class="col-md-4">
@@ -390,11 +390,10 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-md-4">
-                                                    <label for="minRentalHours" class="form-label fw-bold">Minimum
-                                                        Rental
-                                                        Duration (hours)</label>
-                                                    <input type="number" class="form-control" id="minRentalHours"
-                                                        min="1" value="1" required>
+                                                    <label for="maximumRentalHour" class="form-label fw-bold">Maximum
+                                                        Rental Duration (hours)</label>
+                                                    <input type="number" class="form-control" id="maximumRentalHour"
+                                                        min="1" placeholder="Maximum rental hours">
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label for="availabilityStatus"
@@ -402,6 +401,30 @@
                                                         Status</label>
                                                     <select class="form-select" id="availabilityStatus" required>
                                                         <!-- Statuses will be populated dynamically -->
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Building Details Section -->
+                                            <div class="row mb-4">
+                                                <div class="col-md-4">
+                                                    <label for="totalLevels" class="form-label fw-bold">Total
+                                                        Levels</label>
+                                                    <input type="number" class="form-control" id="totalLevels" min="1"
+                                                        placeholder="Total building levels">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="totalRooms" class="form-label fw-bold">Total
+                                                        Rooms</label>
+                                                    <input type="number" class="form-control" id="totalRooms" min="1"
+                                                        placeholder="Total rooms in building">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="parentFacility" class="form-label fw-bold">Parent
+                                                        Facility</label>
+                                                    <select class="form-select" id="parentFacility">
+                                                        <option value="">None</option>
+                                                        <!-- Parent facilities will be populated dynamically -->
                                                     </select>
                                                 </div>
                                             </div>
@@ -414,12 +437,11 @@
                         <!-- Form Actions -->
                         <div class="d-flex justify-content-end gap-2 mt-4">
                             <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Update Equipment</button>
+                            <button type="submit" class="btn btn-primary">Update Facility</button>
                         </div>
                     </form>
                 </div>
             </div>
-
     </div>
     <!-- Event Modal -->
     <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
@@ -469,72 +491,6 @@
             </div>
         </div>
     </div>
-    <!-- Inventory Item Modal -->
-    <div class="modal fade" id="inventoryItemModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Inventory Item</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="itemForm">
-                        <!-- Item Photo -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label class="form-label fw-bold">Item Photo</label>
-                                <button class="btn btn-sm btn-danger d-none" id="removePhotoBtn">
-                                    <i class="bi bi-trash"></i> Remove
-                                </button>
-                            </div>
-                            <div class="dropzone border p-4 text-center" id="itemPhotoDropzone"
-                                style="cursor: pointer;">
-                                <i class="bi bi-image fs-1 text-muted"></i>
-                                <p class="mt-2">Click to upload item photo</p>
-                                <input type="file" id="itemPhoto" class="d-none" accept="image/*">
-                            </div>
-                            <div id="itemPhotoPreview" class="mt-3 text-center"></div>
-                        </div>
-
-                        <!-- Item Name -->
-                        <div class="mb-3">
-                            <label for="itemName" class="form-label fw-bold">Item Name</label>
-                            <input type="text" class="form-control" id="itemName" placeholder="Enter item name">
-                        </div>
-
-                        <!-- Condition -->
-                        <div class="mb-3">
-                            <label for="itemCondition" class="form-label fw-bold">Condition</label>
-                            <select class="form-select" id="itemCondition" required>
-                                <option value="">Select Condition</option>
-                                <!-- Conditions will be populated dynamically -->
-                            </select>
-                        </div>
-
-                        <!-- Barcode -->
-                        <div class="mb-3">
-                            <label for="barcode" class="form-label fw-bold">Barcode Number</label>
-                            <input type="text" class="form-control" id="barcode" placeholder="Scan or enter barcode">
-                        </div>
-
-                        <!-- Notes -->
-                        <div class="mb-3 position-relative">
-                            <label for="itemNotes" class="form-label fw-bold">Item Notes</label>
-                            <textarea class="form-control" id="itemNotes" rows="3"
-                                placeholder="Additional notes about this item"></textarea>
-                            <small class="text-muted position-absolute bottom-0 end-0 me-2 mb-1"
-                                id="notesWordCount">0/80
-                                words</small>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveItemBtn">Save Item</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     @section('scripts')
         <script>
@@ -545,10 +501,6 @@
                     window.location.href = '/admin/admin-login';
                     return;
                 }
-
-                let currentEditingItemId = null;
-                let equipmentItems = [];
-
 
                 // Global helper function for toast notifications
                 window.showToast = function (message, type = 'success', duration = 3000) {
@@ -575,18 +527,18 @@
                     toast.style.borderRadius = '0.3rem';
 
                     toast.innerHTML = `
-                                                                                                                <div class="d-flex align-items-center px-3 py-1"> 
-                                                                                                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                                                                                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                                                                                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                                                                                                </div>
-                                                                                                                <div class="loading-bar" style="
-                                                                                                                    height: 3px;
-                                                                                                                    background: rgba(255,255,255,0.7);
-                                                                                                                    width: 100%;
-                                                                                                                    transition: width ${duration}ms linear;
-                                                                                                                "></div>
-                                                                                                            `;
+                            <div class="d-flex align-items-center px-3 py-1"> 
+                                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="loading-bar" style="
+                                height: 3px;
+                                background: rgba(255,255,255,0.7);
+                                width: 100%;
+                                transition: width ${duration}ms linear;
+                            "></div>
+                        `;
 
                     document.body.appendChild(toast);
 
@@ -643,7 +595,7 @@
                 // Handle confirm delete button click
                 document.getElementById('confirmDeleteImageBtn').addEventListener('click', async function () {
                     try {
-                        const equipmentId = document.getElementById('equipmentId').value;
+                        const facilityId = document.getElementById('facilityId').value;
 
                         // Delete from Cloudinary first if public ID exists
                         if (currentDeletePublicId) {
@@ -653,7 +605,7 @@
 
                         // Then delete from database if it's a saved image (has photoId)
                         if (currentDeletePhotoId && typeof currentDeletePhotoId === 'number') {
-                            await deleteImage(equipmentId, currentDeletePhotoId);
+                            await deleteImage(facilityId, currentDeletePhotoId);
                             showToast('Image reference removed from database', 'success');
                         }
 
@@ -674,8 +626,8 @@
                     }
                 });
 
-                async function handleEquipmentFiles(files) {
-                    const equipmentId = document.getElementById('equipmentId').value;
+                async function handleFacilityFiles(files) {
+                    const facilityId = document.getElementById('facilityId').value;
                     const photosPreview = document.getElementById('photosPreview');
 
                     for (const file of files) {
@@ -726,7 +678,7 @@
 
                                 try {
                                     // Upload to Cloudinary
-                                    const result = await uploadToCloudinary(file, equipmentId);
+                                    const result = await uploadToCloudinary(file, facilityId);
 
                                     // Update the preview with the actual image from Cloudinary
                                     if (result && result.secure_url) {
@@ -760,15 +712,15 @@
                 }
 
                 // Cloudinary direct upload implementation
-                async function uploadToCloudinary(file, equipmentId) {
+                async function uploadToCloudinary(file, facilityId) {
                     const CLOUD_NAME = 'dn98ntlkd'; // Your Cloudinary cloud name
-                    const UPLOAD_PRESET = 'equipment-photos'; // Your unsigned upload preset
+                    const UPLOAD_PRESET = 'facility-photos'; // Your unsigned upload preset
 
                     const formData = new FormData();
                     formData.append('file', file);
                     formData.append('upload_preset', UPLOAD_PRESET);
-                    formData.append('folder', `equipment-photos/${equipmentId}`);
-                    formData.append('tags', `equipment_${equipmentId}`);
+                    formData.append('folder', `facility-photos/${facilityId}`);
+                    formData.append('tags', `facility_${facilityId}`);
 
                     try {
                         showToast('Uploading image to Cloudinary...', 'info', 3000);
@@ -787,7 +739,7 @@
                         console.log('Cloudinary upload successful:', data);
 
                         // Now save the image reference to your database
-                        await saveImageToDatabase(equipmentId, data.secure_url, data.public_id);
+                        await saveImageToDatabase(facilityId, data.secure_url, data.public_id);
 
                         showToast('Image uploaded to Cloudinary successfully!', 'success');
                         return data;
@@ -800,9 +752,9 @@
                 }
 
                 // Function to save image reference to your database
-                async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
+                async function saveImageToDatabase(facilityId, imageUrl, publicId) {
                     try {
-                        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/save`, {
+                        const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}/images/save`, {
                             method: 'POST',
                             headers: {
                                 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
@@ -812,7 +764,7 @@
                             body: JSON.stringify({
                                 image_url: imageUrl,
                                 cloudinary_public_id: publicId,
-                                description: 'Equipment photo'
+                                description: 'Facility photo'
                             })
                         });
 
@@ -832,7 +784,6 @@
                         throw error; // Re-throw to handle in the calling function
                     }
                 }
-
 
                 async function deleteImageFromCloudinary(publicId) {
                     try {
@@ -863,7 +814,7 @@
                     }
                 }
 
-                async function deleteImage(equipmentId, imageId, cloudinaryPublicId) {
+                async function deleteImage(facilityId, imageId, cloudinaryPublicId) {
                     try {
                         const token = localStorage.getItem('adminToken');
 
@@ -881,7 +832,7 @@
                         }
 
                         // 2. Delete from your database
-                        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/${imageId}`, {
+                        const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}/images/${imageId}`, {
                             method: 'DELETE',
                             headers: {
                                 'Authorization': `Bearer ${token}`,
@@ -899,40 +850,6 @@
                         console.error('Error deleting image:', error);
                         showToast('Failed to delete image: ' + error.message, 'error');
                         throw error;
-                    }
-                }
-
-                // Direct Cloudinary delete function
-                async function deleteFromCloudinary(publicId) {
-                    const CLOUD_NAME = 'dn98ntlkd';
-
-                    try {
-                        // Cloudinary DELETE API endpoint
-                        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/destroy`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                public_id: publicId,
-                                api_key: 'YOUR_API_KEY', // You'll need to add this
-                                timestamp: Math.floor(Date.now() / 1000),
-                                signature: 'GENERATE_THIS' // You'll need to generate a signature
-                            })
-                        });
-
-                        if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.error?.message || 'Cloudinary delete failed');
-                        }
-
-                        const result = await response.json();
-                        console.log('Cloudinary delete successful:', result);
-                        return result;
-
-                    } catch (error) {
-                        console.error('Cloudinary delete error:', error);
-                        throw new Error('Failed to delete from Cloudinary: ' + error.message);
                     }
                 }
 
@@ -990,10 +907,11 @@
                     });
                 });
 
-                const equipmentId = document.getElementById('equipmentId').value;
-                if (!equipmentId) {
-                    alert('No equipment ID provided');
-                    window.location.href = '/admin/manage-equipment';
+                const facilityId = document.getElementById('facilityId').value;
+
+                if (!facilityId) {
+                    alert('No facility ID provided');
+                    window.location.href = '/admin/manage-facilities';
                     return;
                 }
 
@@ -1014,39 +932,39 @@
                     // Hide the modal first
                     cancelConfirmationModal.hide();
 
-                    // Then redirect to manage-equipment
-                    window.location.href = '/admin/manage-equipment';
+                    // Then redirect to manage-facilities
+                    window.location.href = '/admin/manage-facilities';
                 });
 
-                // Equipment Photos Section
-                const equipmentDropzone = document.getElementById('equipmentPhotosDropzone');
-                const equipmentFileInput = document.getElementById('equipmentPhotos');
+                // Facility Photos Section
+                const facilityDropzone = document.getElementById('facilityPhotosDropzone');
+                const facilityFileInput = document.getElementById('facilityPhotos');
                 const photosPreview = document.getElementById('photosPreview');
                 let uploadedPhotos = [];
-                if (equipmentDropzone && equipmentFileInput) {
-                    equipmentDropzone.addEventListener('click', function () {
-                        equipmentFileInput.click();
+                if (facilityDropzone && facilityFileInput) {
+                    facilityDropzone.addEventListener('click', function () {
+                        facilityFileInput.click();
                     });
 
-                    equipmentFileInput.addEventListener('change', function () {
-                        handleEquipmentFiles(this.files);
+                    facilityFileInput.addEventListener('change', function () {
+                        handleFacilityFiles(this.files);
                         this.value = '';
                     });
 
-                    equipmentDropzone.addEventListener('dragover', function (e) {
+                    facilityDropzone.addEventListener('dragover', function (e) {
                         e.preventDefault();
                         this.classList.add('border-primary');
                     });
 
-                    equipmentDropzone.addEventListener('dragleave', function () {
+                    facilityDropzone.addEventListener('dragleave', function () {
                         this.classList.remove('border-primary');
                     });
 
-                    equipmentDropzone.addEventListener('drop', function (e) {
+                    facilityDropzone.addEventListener('drop', function (e) {
                         e.preventDefault();
                         this.classList.remove('border-primary');
                         if (e.dataTransfer.files.length) {
-                            handleEquipmentFiles(e.dataTransfer.files);
+                            handleFacilityFiles(e.dataTransfer.files);
                         }
                     });
                 }
@@ -1054,499 +972,337 @@
                 // Word count limiter for Description textbox
                 const description = document.getElementById('description');
                 const descriptionWordCount = document.getElementById('descriptionWordCount');
-                const descriptionMaxChars = 255;
-
                 if (description && descriptionWordCount) {
                     description.addEventListener('input', function () {
-                        if (this.value.length > descriptionMaxChars) {
-                            this.value = this.value.substring(0, descriptionMaxChars);
-                        }
-
-                        const charCount = this.value.length;
-                        descriptionWordCount.textContent = `${charCount}/${descriptionMaxChars} characters`;
-                        descriptionWordCount.classList.toggle('text-danger', charCount >= descriptionMaxChars);
-                    });
-
-                    description.addEventListener('paste', function (e) {
-                        e.preventDefault();
-                        const pasteText = (e.clipboardData || window.clipboardData).getData('text');
-                        const newText = this.value.substring(0, this.selectionStart) +
-                            pasteText +
-                            this.value.substring(this.selectionEnd);
-
-                        const remainingChars = descriptionMaxChars - this.value.length + (this.selectionEnd - this.selectionStart);
-                        if (remainingChars > 0) {
-                            const pasteToInsert = pasteText.substring(0, remainingChars);
-                            document.execCommand('insertText', false, pasteToInsert);
+                        const currentLength = this.value.length;
+                        descriptionWordCount.textContent = `${currentLength}/250 characters`;
+                        if (currentLength > 250) {
+                            this.value = this.value.substring(0, 250);
+                            descriptionWordCount.textContent = '250/250 characters';
                         }
                     });
                 }
 
-                // Initialize Inventory Item Modal
-                const addItemBtn = document.getElementById('addItemBtn');
-                if (addItemBtn) {
-                    const inventoryItemModal = new bootstrap.Modal('#inventoryItemModal');
-                    const itemPhotoInput = document.getElementById('itemPhoto');
-                    const itemPhotoPreview = document.getElementById('itemPhotoPreview');
-                    const itemNotes = document.getElementById('itemNotes');
-                    const notesWordCount = document.getElementById('notesWordCount');
-                    const saveItemBtn = document.getElementById('saveItemBtn');
-                    const itemsContainer = document.getElementById('itemsContainer');
-
-                    addItemBtn.addEventListener('click', () => {
-                        document.getElementById('itemForm').reset();
-                        if (itemPhotoPreview) itemPhotoPreview.innerHTML = '';
-                        inventoryItemModal.show();
-                    });
-
-                    if (itemPhotoInput) {
-                        itemPhotoInput.addEventListener('change', function () {
-                            if (this.files?.[0]) {
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                    const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
-                                    if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'none';
-                                    const removePhotoBtn = document.getElementById('removePhotoBtn');
-                                    if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
-                                    if (itemPhotoPreview) {
-                                        itemPhotoPreview.innerHTML = `
-                                                                                                                                                                                                                            <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
-                                                                                                                                                                                                                          `;
-                                    }
-                                };
-                                reader.readAsDataURL(this.files[0]);
-                            }
-                        });
-                    }
-
-                    const removePhotoBtn = document.getElementById('removePhotoBtn');
-                    if (removePhotoBtn) {
-                        removePhotoBtn.addEventListener('click', function () {
-                            if (itemPhotoPreview) itemPhotoPreview.innerHTML = '';
-                            const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
-                            if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'block';
-                            const itemPhotoInput = document.getElementById('itemPhoto');
-                            if (itemPhotoInput) itemPhotoInput.value = '';
-                            this.classList.add('d-none');
-                        });
-                    }
-
-                    const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
-                    if (itemPhotoDropzone) {
-                        itemPhotoDropzone.addEventListener('click', function () {
-                            const itemPhotoInput = document.getElementById('itemPhoto');
-                            if (itemPhotoInput) itemPhotoInput.click();
-                        });
-                    }
-
-                    if (itemNotes && notesWordCount) {
-                        itemNotes.addEventListener('input', function () {
-                            const words = this.value.trim() ? this.value.trim().split(/\s+/) : [];
-                            const wordCount = words.length;
-
-                            notesWordCount.textContent = `${wordCount}/80 words`;
-                            notesWordCount.classList.toggle('text-danger', wordCount >= 80);
-
-                            if (wordCount > 80) {
-                                const allowedWords = words.slice(0, 80).join(' ');
-                                const cursorPos = this.selectionStart;
-                                this.value = allowedWords;
-
-                                if (cursorPos <= allowedWords.length) {
-                                    this.setSelectionRange(cursorPos, cursorPos);
-                                }
+                // Fetch facility data
+                async function fetchFacilityData() {
+                    try {
+                        const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}`, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                                'Accept': 'application/json'
                             }
                         });
 
-                        itemNotes.addEventListener('keydown', function (e) {
-                            const words = this.value.trim() ? this.value.trim().split(/\s+/) : [];
-                            const allowedKeys = [8, 46, 37, 38, 39, 40, 16, 17, 91, 9];
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch facility data');
+                        }
 
-                            if (words.length >= 80 && !allowedKeys.includes(e.keyCode)) {
-                                if (e.key.length === 1 || e.keyCode === 32) {
-                                    e.preventDefault();
-                                }
-                            }
-                        });
+                        const result = await response.json();
+                        const facility = result.data;
 
-                        itemNotes.addEventListener('paste', function (e) {
-                            e.preventDefault();
-                            const pasteText = (e.clipboardData || window.clipboardData).getData('text');
-                            const currentText = this.value;
-                            const selectionStart = this.selectionStart;
-                            const selectionEnd = this.selectionEnd;
+                        // Populate form fields
+                        document.getElementById('facilityName').value = facility.facility_name || '';
+                        document.getElementById('buildingCode').value = facility.building_code || '';
+                        document.getElementById('description').value = facility.description || '';
+                        document.getElementById('locationNote').value = facility.location_note || '';
+                        document.getElementById('capacity').value = facility.capacity || 1;
+                        document.getElementById('locationType').value = facility.location_type || 'Indoors';
+                        document.getElementById('floorLevel').value = facility.floor_level || '';
+                        document.getElementById('roomCode').value = facility.room_code || '';
+                        document.getElementById('internalFee').value = facility.internal_fee || '0.00';
+                        document.getElementById('externalFee').value = facility.external_fee || '0.00';
+                        document.getElementById('rateType').value = facility.rate_type || 'Per Hour';
+                        document.getElementById('maximumRentalHour').value = facility.maximum_rental_hour || '';
+                        document.getElementById('totalLevels').value = facility.total_levels || '';
+                        document.getElementById('totalRooms').value = facility.total_rooms || '';
 
-                            const newText = currentText.substring(0, selectionStart) +
-                                pasteText +
-                                currentText.substring(selectionEnd);
+                        // Update word count display
+                        if (descriptionWordCount) {
+                            descriptionWordCount.textContent = `${facility.description?.length || 0}/250 characters`;
+                        }
 
-                            const currentWords = currentText.trim() ? currentText.trim().split(/\s+/) : [];
-                            const pasteWords = pasteText.trim() ? pasteText.trim().split(/\s+/) : [];
-                            const selectedWords = currentText.substring(selectionStart, selectionEnd).trim() ?
-                                currentText.substring(selectionStart, selectionEnd).trim().split(/\s+/) : [];
+                        // Populate details card
+                        document.getElementById('categoryDisplay').textContent = facility.category?.category_name || 'N/A';
+                        document.getElementById('subcategoryDisplay').textContent = facility.subcategory?.subcategory_name || 'N/A';
+                        document.getElementById('capacityDisplay').textContent = facility.capacity || 'N/A';
+                        document.getElementById('locationTypeDisplay').textContent = facility.location_type || 'N/A';
+                        document.getElementById('locationNoteDisplay').textContent = facility.location_note || 'N/A';
 
-                            const newWordCount = currentWords.length - selectedWords.length + pasteWords.length;
+                        // Load existing images
+                        if (facility.images && facility.images.length > 0) {
+                            facility.images.forEach(image => {
+                                const preview = document.createElement('div');
+                                preview.className = 'photo-preview';
+                                preview.dataset.id = image.image_id;
 
-                            if (newWordCount <= 80) {
-                                document.execCommand('insertText', false, pasteText);
-                            } else {
-                                const remainingWords = 80 - (currentWords.length - selectedWords.length);
-                                if (remainingWords > 0) {
-                                    const wordsToPaste = pasteWords.slice(0, remainingWords).join(' ');
-                                    document.execCommand('insertText', false, wordsToPaste);
-                                }
-                            }
-                        });
-                    }
+                                const img = document.createElement('img');
+                                img.src = image.image_url;
+                                img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
 
-                    if (saveItemBtn) {
-                        saveItemBtn.addEventListener('click', function () {
-                            const condition = document.getElementById('itemCondition')?.value;
-                            if (!condition) {
-                                alert('Please select the item condition');
-                                return;
-                            }
+                                const removeBtn = document.createElement('button');
+                                removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
+                                removeBtn.innerHTML = '<i class="bi bi-x"></i>';
+                                removeBtn.onclick = () => handleImageDeletion(image.image_id, image.cloudinary_public_id, preview);
 
-                            const itemId = Date.now();
-                            const barcode = document.getElementById('barcode')?.value || '';
-                            const notes = document.getElementById('itemNotes')?.value || '';
-                            const itemPhoto = itemPhotoPreview?.querySelector('img')?.src || '';
+                                preview.appendChild(img);
+                                preview.appendChild(removeBtn);
+                                photosPreview.appendChild(preview);
 
-                            const conditionColors = {
-                                "New": "bg-success text-white",
-                                "Good": "bg-primary text-white",
-                                "Fair": "bg-warning text-dark",
-                                "Needs Maintenance": "bg-danger text-white",
-                                "Damaged": "bg-dark text-white"
-                            };
+                                uploadedPhotos.push({
+                                    id: image.image_id,
+                                    url: image.image_url,
+                                    publicId: image.cloudinary_public_id
+                                });
+                            });
+                        }
 
-                            const itemCard = document.createElement('div');
-                            itemCard.className = 'card equipment-item';
-                            itemCard.innerHTML = `
-                                                                                                                                                                                                                      <div class="card-body">
-                                                                                                                                                                                                                        <div class="photo-container">
-                                                                                                                                                                                                                          ${itemPhoto ? `<img src="${itemPhoto}" class="img-thumbnail">` : ''}
-                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                        <div class="flex-grow-1">
-                                                                                                                                                                                                                          <h6 class="card-title">Item #${itemId}</h6>
-                                                                                                                                                                                                                          <div class="d-flex flex-wrap gap-3">
-                                                                                                                                                                                                                            <span class="badge ${conditionColors[condition]}">${condition}</span>
-                                                                                                                                                                                                                          </div>
-                                                                                                                                                                                                                          ${barcode ? `<div class="mt-2"><strong>Barcode:</strong> ${barcode}</div>` : ''}
-                                                                                                                                                                                                                          ${notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${notes.substring(0, 50)}${notes.length > 50 ? '...' : ''}</p>` : ''}
-                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                        <button class="btn btn-sm btn-danger align-self-start" onclick="this.closest('.equipment-item').remove()">
-                                                                                                                                                                                                                          <i class="bi bi-trash"></i>
-                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                      </div>
-                                                                                                                                                                                                                    `;
+                        // Fetch and populate dropdowns
+                        await fetchCategories();
+                        await fetchSubcategories(facility.category_id);
+                        await fetchDepartments();
+                        await fetchStatuses();
+                        await fetchParentFacilities();
 
-                            if (itemsContainer) {
-                                if (itemsContainer.querySelector('p.text-muted')) {
-                                    itemsContainer.innerHTML = '';
-                                }
-                                itemsContainer.appendChild(itemCard);
-                            }
+                        // Set dropdown values
+                        if (facility.category_id) document.getElementById('category').value = facility.category_id;
+                        if (facility.subcategory_id) document.getElementById('subcategory').value = facility.subcategory_id;
+                        if (facility.department_id) document.getElementById('department').value = facility.department_id;
+                        if (facility.status_id) document.getElementById('availabilityStatus').value = facility.status_id;
+                        if (facility.parent_facility_id) document.getElementById('parentFacility').value = facility.parent_facility_id;
 
-                            inventoryItemModal.hide();
-                        });
+                    } catch (error) {
+                        console.error('Error fetching facility data:', error);
+                        showToast('Failed to load facility data: ' + error.message, 'error');
                     }
                 }
 
-                // Add 'required' class to labels with required fields
-                document.querySelectorAll('label[for]').forEach(label => {
-                    const input = document.getElementById(label.getAttribute('for'));
-                    if (input && input.hasAttribute('required')) {
-                        label.classList.add('required');
+                // Fetch categories
+                async function fetchCategories() {
+                    try {
+                        const response = await fetch('http://127.0.0.1:8000/api/facility-categories/index', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch categories');
+                        }
+
+                        const result = await response.json();
+                        const categorySelect = document.getElementById('category');
+                        categorySelect.innerHTML = '<option value="">Select Category</option>';
+
+                        result.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category.category_id;
+                            option.textContent = category.category_name;
+                            categorySelect.appendChild(option);
+                        });
+
+                        return result; // Return categories for subcategory handling
+                    } catch (error) {
+                        console.error('Error fetching categories:', error);
+                        showToast('Failed to load categories: ' + error.message, 'error');
+                    }
+                }
+
+
+                // Fetch subcategories based on selected category
+                async function fetchSubcategories(categoryId = null, categoriesData = null) {
+                    try {
+                        const subcategorySelect = document.getElementById('subcategory');
+                        subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+
+                        if (!categoryId || !categoriesData) {
+                            return;
+                        }
+
+                        // Find the selected category in the categories data
+                        const selectedCategory = categoriesData.find(cat => cat.category_id == categoryId);
+
+                        if (selectedCategory && selectedCategory.subcategories) {
+                            selectedCategory.subcategories.forEach(subcategory => {
+                                const option = document.createElement('option');
+                                option.value = subcategory.subcategory_id;
+                                option.textContent = subcategory.subcategory_name;
+                                subcategorySelect.appendChild(option);
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error fetching subcategories:', error);
+                        showToast('Failed to load subcategories: ' + error.message, 'error');
+                    }
+                }
+
+                // Fetch departments
+                async function fetchDepartments() {
+                    try {
+                        const response = await fetch('http://127.0.0.1:8000/api/departments', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch departments');
+                        }
+
+                        const result = await response.json();
+                        const departmentSelect = document.getElementById('department');
+                        departmentSelect.innerHTML = '<option value="">Select Department</option>';
+
+                        result.forEach(department => {
+                            const option = document.createElement('option');
+                            option.value = department.department_id;
+                            option.textContent = department.department_name;
+                            departmentSelect.appendChild(option);
+                        });
+                    } catch (error) {
+                        console.error('Error fetching departments:', error);
+                        showToast('Failed to load departments: ' + error.message, 'error');
+                    }
+                }
+
+                // Fetch statuses
+                async function fetchStatuses() {
+                    try {
+                        const response = await fetch('http://127.0.0.1:8000/api/availability-statuses', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch statuses');
+                        }
+
+                        const result = await response.json();
+                        const statusSelect = document.getElementById('availabilityStatus');
+                        statusSelect.innerHTML = '<option value="">Select Status</option>';
+
+                        result.forEach(status => {
+                            const option = document.createElement('option');
+                            option.value = status.status_id;
+                            option.textContent = status.status_name;
+                            statusSelect.appendChild(option);
+                        });
+                    } catch (error) {
+                        console.error('Error fetching statuses:', error);
+                        showToast('Failed to load statuses: ' + error.message, 'error');
+                    }
+                }
+                // Fetch parent facilities
+                async function fetchParentFacilities() {
+                    try {
+                        const response = await fetch('http://127.0.0.1:8000/api/facilities', {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch facilities');
+                        }
+
+                        const result = await response.json();
+                        const parentSelect = document.getElementById('parentFacility');
+                        parentSelect.innerHTML = '<option value="">None</option>';
+
+                        result.data.forEach(facility => {
+                            // Don't include the current facility as a parent option
+                            if (facility.facility_id != facilityId) {
+                                const option = document.createElement('option');
+                                option.value = facility.facility_id;
+                                option.textContent = facility.facility_name;
+                                parentSelect.appendChild(option);
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Error fetching facilities:', error);
+                        showToast('Failed to load facilities: ' + error.message, 'error');
+                    }
+                }
+
+                // Category change event
+                document.getElementById('category').addEventListener('change', function () {
+                    const categoryId = this.value;
+                    fetchSubcategories(categoryId);
+                });
+
+                // Form submission
+                document.getElementById('editFacilityForm').addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    try {
+                        const formData = {
+                            facility_name: document.getElementById('facilityName').value,
+                            building_code: document.getElementById('buildingCode').value,
+                            description: document.getElementById('description').value,
+                            location_note: document.getElementById('locationNote').value,
+                            category_id: document.getElementById('category').value,
+                            subcategory_id: document.getElementById('subcategory').value,
+                            capacity: document.getElementById('capacity').value,
+                            location_type: document.getElementById('locationType').value,
+                            floor_level: document.getElementById('floorLevel').value || null,
+                            room_code: document.getElementById('roomCode').value || null,
+                            internal_fee: document.getElementById('internalFee').value,
+                            external_fee: document.getElementById('externalFee').value,
+                            rate_type: document.getElementById('rateType').value,
+                            department_id: document.getElementById('department').value,
+                            maximum_rental_hour: document.getElementById('maximumRentalHour').value || null,
+                            status_id: document.getElementById('availabilityStatus').value,
+                            total_levels: document.getElementById('totalLevels').value || null,
+                            total_rooms: document.getElementById('totalRooms').value || null,
+                            parent_facility_id: document.getElementById('parentFacility').value || null
+                        };
+
+                        // Validate required fields
+                        if (!formData.facility_name || !formData.building_code || !formData.category_id ||
+                            !formData.capacity || !formData.location_type || !formData.internal_fee ||
+                            !formData.external_fee || !formData.rate_type || !formData.department_id ||
+                            !formData.status_id) {
+                            showToast('Please fill in all required fields', 'error');
+                            return;
+                        }
+
+                        const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(formData)
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Failed to update facility');
+                        }
+
+                        const result = await response.json();
+                        showToast('Facility updated successfully!', 'success');
+
+                        // Redirect after a short delay
+                        setTimeout(() => {
+                            window.location.href = '/admin/manage-facilities';
+                        }, 1500);
+
+                    } catch (error) {
+                        console.error('Error updating facility:', error);
+                        showToast('Failed to update facility: ' + error.message, 'error');
                     }
                 });
 
-                // Load equipment data
-                loadEquipmentData(equipmentId);
-            });
-
-            async function loadEquipmentData(equipmentId) {
-                try {
-                    const response = await fetch(`http://127.0.0.1:8000/api/equipment/${equipmentId}`, {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch equipment data');
-                    }
-
-                    const data = await response.json();
-                    const equipment = data.data;
-
-                    // Populate form fields
-                    document.getElementById('equipmentName').value = equipment.equipment_name;
-                    document.getElementById('description').value = equipment.description || '';
-                    document.getElementById('brand').value = equipment.brand || '';
-                    document.getElementById('storageLocation').value = equipment.storage_location;
-                    document.getElementById('totalQuantity').value = equipment.total_quantity;
-                    document.getElementById('rentalFee').value = equipment.external_fee;
-                    document.getElementById('companyFee').value = equipment.internal_fee;
-                    document.getElementById('minRentalHours').value = equipment.maximum_rental_hour || 1;
-
-                    // Update word count
-                    const descriptionWordCount = document.getElementById('descriptionWordCount');
-                    if (descriptionWordCount) {
-                        descriptionWordCount.textContent = `${equipment.description?.length || 0}/255 characters`;
-                    }
-
-                    // Load images
-                    if (equipment.images && equipment.images.length > 0) {
-                        const photosPreview = document.getElementById('photosPreview');
-                        photosPreview.innerHTML = '';
-
-                        equipment.images.forEach(image => {
-                            const preview = document.createElement('div');
-                            preview.className = 'photo-preview';
-                            preview.dataset.id = image.image_id;
-
-                            const img = document.createElement('img');
-                            img.src = image.image_url;
-                            img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
-
-                            const removeBtn = document.createElement('button');
-                            removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
-                            removeBtn.innerHTML = '<i class="bi bi-x"></i>';
-                            removeBtn.onclick = function () {
-                                deleteImage(equipmentId, image.image_id, image.cloudinary_public_id);
-                                preview.remove();
-                            };
-
-                            preview.appendChild(img);
-                            preview.appendChild(removeBtn);
-                            photosPreview.appendChild(preview);
-                        });
-                    }
-
-                    // Fetch dropdown data
-                    await fetchDropdownData(equipment);
-
-                } catch (error) {
-                    console.error('Error loading equipment data:', error);
-                    alert('Failed to load equipment data: ' + error.message);
-                }
-            }
-
-            async function fetchDropdownData(equipment) {
-                try {
-                    const token = localStorage.getItem('adminToken');
-                    console.log('Equipment data:', equipment); // Debug log
-
-                    // Fetch categories
-                    const categoriesResponse = await fetch('http://127.0.0.1:8000/api/equipment-categories', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (categoriesResponse.ok) {
-                        const categoriesData = await categoriesResponse.json();
-                        console.log('Categories data:', categoriesData); // Debug log
-                        // Remove the .data access - the response is the array directly
-                        if (Array.isArray(categoriesData)) {
-                            populateDropdown('category', categoriesData, equipment.category_id, 'category_id', 'category_name');
-                        }
-                    }
-
-                    // Fetch statuses
-                    const statusesResponse = await fetch('http://127.0.0.1:8000/api/availability-statuses', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (statusesResponse.ok) {
-                        const statusesData = await statusesResponse.json();
-                        console.log('Statuses data:', statusesData); // Debug log
-                        // Remove the .data access - the response is the array directly
-                        if (Array.isArray(statusesData)) {
-                            populateDropdown('availabilityStatus', statusesData, equipment.status_id, 'status_id', 'status_name');
-                        }
-                    }
-
-                    // Fetch departments
-                    const departmentsResponse = await fetch('http://127.0.0.1:8000/api/departments', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (departmentsResponse.ok) {
-                        const departmentsData = await departmentsResponse.json();
-                        console.log('Departments data:', departmentsData); // Debug log
-                        // Remove the .data access - the response is the array directly
-                        if (Array.isArray(departmentsData)) {
-                            populateDropdown('department', departmentsData, equipment.department_id, 'department_id', 'department_name');
-                        }
-                    }
-
-                    // Populate rate type dropdown
-                    const rateTypeDropdown = document.getElementById('rateType');
-                    if (rateTypeDropdown) {
-                        rateTypeDropdown.innerHTML = `
-                                                                                                                                            <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
-                                                                                                                                            <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
-                                                                                                                                        `;
-                    }
-
-                    // Fetch conditions for inventory items
-                    const conditionsResponse = await fetch('http://127.0.0.1:8000/api/conditions', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (conditionsResponse.ok) {
-                        const conditionsData = await conditionsResponse.json();
-                        // Remove the .data access - the response is the array directly
-                        if (Array.isArray(conditionsData)) {
-                            populateDropdown('itemCondition', conditionsData, null, 'condition_id', 'condition_name');
-                        }
-                    }
-
-                } catch (error) {
-                    console.error('Error fetching dropdown data:', error);
-                }
-            }
-
-            function populateDropdown(elementId, data, selectedValue = null, idKey, nameKey) {
-                const dropdown = document.getElementById(elementId);
-                if (!dropdown) {
-                    console.error('Dropdown element not found:', elementId);
-                    return;
-                }
-
-                // Clear existing options except the first one
-                while (dropdown.options.length > 1) {
-                    dropdown.remove(1);
-                }
-
-                // Add new options
-                data.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item[idKey];
-                    option.textContent = item[nameKey];
-
-                    if (selectedValue !== null && option.value == selectedValue) {
-                        option.selected = true;
-                    }
-
-                    dropdown.appendChild(option);
-                });
-
-                // If no option was selected, try to select the first one
-                if (selectedValue !== null && dropdown.value !== selectedValue) {
-                    console.warn(`Could not find selected value ${selectedValue} in dropdown ${elementId}`);
-                }
-            }
-
-            function populateDropdown(elementId, data, selectedValue = null, idKey, nameKey) {
-                const dropdown = document.getElementById(elementId);
-                if (!dropdown) return;
-
-                // Clear existing options except the first one
-                while (dropdown.options.length > 1) {
-                    dropdown.remove(1);
-                }
-
-                // Add new options
-                data.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item[idKey];
-                    option.textContent = item[nameKey];
-
-                    if (selectedValue !== null && option.value == selectedValue) {
-                        option.selected = true;
-                    }
-
-                    dropdown.appendChild(option);
-                });
-            }
-
-            async function deleteImage(equipmentId, imageId, cloudinaryPublicId) {
-                try {
-                    const token = localStorage.getItem('adminToken');
-
-                    // Only call the single endpoint that handles both Cloudinary and database deletion
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/${imageId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Failed to delete image');
-                    }
-
-                    showToast('Image deleted successfully', 'success');
-
-                } catch (error) {
-                    console.error('Error deleting image:', error);
-                    showToast('Failed to delete image: ' + error.message, 'error');
-                    throw error;
-                }
-            }
-
-            // Form submission
-            document.getElementById('editEquipmentForm').addEventListener('submit', async function (e) {
-                e.preventDefault();
-
-                const equipmentId = document.getElementById('equipmentId').value;
-                const token = localStorage.getItem('adminToken');
-
-                const formData = {
-                    equipment_name: document.getElementById('equipmentName').value,
-                    description: document.getElementById('description').value,
-                    brand: document.getElementById('brand').value,
-                    storage_location: document.getElementById('storageLocation').value,
-                    category_id: document.getElementById('category').value,
-                    total_quantity: document.getElementById('totalQuantity').value,
-                    internal_fee: document.getElementById('companyFee').value,
-                    external_fee: document.getElementById('rentalFee').value,
-                    rate_type: document.getElementById('rateType').value,
-                    status_id: document.getElementById('availabilityStatus').value,
-                    department_id: document.getElementById('department').value,
-                    maximum_rental_hour: document.getElementById('minRentalHours').value,
-                };
-
-                try {
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(formData)
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Failed to update equipment');
-                    }
-
-                    showToast('Equipment updated successfully!', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/admin/manage-equipment';
-                    }, 1500);
-                } catch (error) {
-                    console.error('Error updating equipment:', error);
-                    showToast('Failed to update equipment: ' + error.message, 'error');
-                }
+                // Initialize the page
+                fetchFacilityData();
             });
         </script>
     @endsection
