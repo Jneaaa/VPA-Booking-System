@@ -6,10 +6,10 @@
 
 <style>
 
-.spinner-border {
-  bordier-radius: 100% !important;
-}
 
+* {
+  border-radius: 0 !important;
+}
 /* Custom pagination colors using CPU theme */
 .pagination .page-link {
   color: var(--cpu-primary); /* dark blue text */
@@ -201,34 +201,35 @@
       const paginationContainer = document.getElementById("paginationContainer");
       const addEquipmentBtn = document.getElementById("addEquipmentBtn");
 
-      // State variables
-      let allEquipment = [];
-      let filteredEquipment = [];
-      let categories = [];
-      let itemsPerPage = 12;
-      let currentPage = 1;
-      let totalPages = 1;
+// State variables
+let allEquipment = [];
+let filteredEquipment = [];
+let categories = [];
+let itemsPerPage = 12;
+let currentPage = 1;
+let totalPages = 1;
 
       // Update the init function to fetch statuses
-      async function init() {
-        try {
-          // Fetch equipment data
-          await fetchEquipment();
+     // Update the init function
+async function init() {
+  try {
+    // Fetch equipment data
+    await fetchEquipment();
 
-          // Fetch and populate dropdowns
-          await fetchStatuses();
-          await fetchCategories();
+    // Fetch and populate dropdowns
+    await fetchStatuses();
+    await fetchCategories();
 
-          // Set up event listeners
-          setupEventListeners();
+    // Set up event listeners
+    setupEventListeners();
 
-          // Initialize pagination
-          initializePagination();
-        } catch (error) {
-          console.error("Initialization error:", error);
-          alert("Failed to initialize page. Please try again.");
-        }
-      }
+    // Initialize pagination
+    initializePagination();
+  } catch (error) {
+    console.error("Initialization error:", error);
+    alert("Failed to initialize page. Please try again.");
+  }
+}
 
       // Fetch and populate availability statuses
       async function fetchStatuses() {
@@ -361,80 +362,128 @@
         });
       }
 
-      // Render equipment cards
-      function renderEquipment(equipmentList) {
-        loadingIndicator.classList.add("d-none");
+    // Render equipment cards
+// Render equipment cards
+function renderEquipment(equipmentList) {
+  loadingIndicator.classList.add("d-none");
 
-        // Clear existing content
-        const container = document.getElementById('equipmentCardsContainer');
-        container.innerHTML = "";
+  // Clear existing content
+  const container = document.getElementById('equipmentCardsContainer');
+  container.innerHTML = "";
 
-        if (equipmentList.length === 0) {
-          // Show no equipment found message with icon
-          container.innerHTML = `
-                                        <div class="col-12 text-center py-5">
-                                          <i class="bi bi-tools fs-1 text-muted" style="font-size: 4rem !important;"></i>
-                                          <p class="mt-2 text-muted">No equipment found.</p>
-                                        </div>
-                                      `;
-          // Clear pagination when no results
-          paginationContainer.innerHTML = '';
-          return;
-        }
+  if (equipmentList.length === 0) {
+    // Show no equipment found message with icon
+    container.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <i class="bi bi-tools fs-1 text-muted" style="font-size: 4rem !important;"></i>
+        <p class="mt-2 text-muted">No equipment found.</p>
+      </div>
+    `;
+    // Clear pagination when no results
+    paginationContainer.innerHTML = '';
+    return;
+  }
 
-        noResultsMessage.classList.add("d-none");
+  noResultsMessage.classList.add("d-none");
 
-        // Calculate pagination
-        totalPages = Math.ceil(equipmentList.length / itemsPerPage);
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = Math.min(startIndex + itemsPerPage, equipmentList.length);
+  // Calculate pagination
+  totalPages = Math.ceil(equipmentList.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, equipmentList.length);
 
-        // Render only the current page's items
-        for (let i = startIndex; i < endIndex; i++) {
-          const equipment = equipmentList[i];
-          const statusClass = getStatusClass(equipment.status.status_name);
-          const primaryImage =
-            equipment.images?.find((img) => img.type_id === 1)?.image_url ||
-            "https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp"
+  // Get layout selection
+  const layout = layoutSelect.value;
 
-          const card = document.createElement("div");
-          card.className = "col-md-4 col-lg-3 equipment-card mb-3";
-          card.dataset.status = equipment.status.status_id.toString();
-          card.dataset.category = equipment.category.category_id.toString();
-          card.dataset.title = equipment.equipment_name.toLowerCase();
+  // Set container class based on layout
+  container.className = layout === "list" ? "row g-3" : "row g-2";
 
+  // Render only the current page's items
+  for (let i = startIndex; i < endIndex; i++) {
+    const equipment = equipmentList[i];
+    const statusClass = getStatusClass(equipment.status.status_name);
+    const primaryImage =
+      equipment.images?.find((img) => img.type_id === 1)?.image_url ||
+      "https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp"
 
+    const card = document.createElement("div");
+    card.dataset.status = equipment.status.status_id.toString();
+    card.dataset.category = equipment.category.category_id.toString();
+    card.dataset.title = equipment.equipment_name.toLowerCase();
 
-          card.innerHTML = `
-          <div class="card h-100">
-            <img src="${primaryImage}" class="card-img-top" style="height: 120px; object-fit: cover;" alt="${equipment.equipment_name}">
-            <div class="card-body d-flex flex-column p-2">
-              <div>
-                <h6 class="card-title mb-1 fw-bold">${equipment.equipment_name}</h6>
-                <p class="card-text text-muted mb-1 small">
-                  <i class="bi bi-tag-fill text-primary me-1"></i>${equipment.category.category_name}
+    if (layout === "list") {
+      // List layout
+      card.className = "col-12 equipment-card mb-3";
+      card.innerHTML = `
+        <div class="card h-100 shadow-sm rounded-3">
+          <div class="row g-0">
+            <div class="col-md-2" style="max-width: 120px; flex: 0 0 120px;">
+              <img src="${primaryImage}" 
+                   class="img-fluid rounded-start h-100 w-100" 
+                   style="object-fit: cover;" 
+                   alt="${equipment.equipment_name}">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body py-3">
+                <h5 class="card-title fw-bold mb-2">${equipment.equipment_name}</h5>
+                <p class="card-text mb-2">
+                  <span class="badge ${statusClass} me-2">${equipment.status.status_name}</span>
+                  <small class="text-muted">
+                    <i class="bi bi-tag-fill text-primary me-1"></i>${equipment.category.category_name}
+                  </small>
                 </p>
-                <span class="badge ${statusClass} mb-2">${equipment.status.status_name}</span>
-                <p class="card-text mb-2 small text-truncate">${equipment.description || "No description available"}</p>
+                <p class="card-text text-muted mb-0">
+                  ${equipment.description || "No description available"}
+                </p>
               </div>
-              <div class="equipment-actions mt-auto d-grid gap-1">
-                <a href="/admin/edit-equipment?id=${equipment.equipment_id}" class="btn btn-sm btn-primary btn-manage">Manage</a>
-                <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${equipment.equipment_id}">Delete</button>
+            </div>
+            <div class="col-md-2 d-flex align-items-center justify-content-center">
+              <div class="d-grid gap-2 w-100 px-2">
+                <a href="/admin/edit-equipment?id=${equipment.equipment_id}" 
+                   class="btn btn-sm btn-primary">
+                   Manage
+                </a>
+                <button class="btn btn-sm btn-outline-danger btn-delete" 
+                        data-id="${equipment.equipment_id}">
+                  Delete
+                </button>
               </div>
             </div>
           </div>
-        `;
+        </div>
+      `;
+    } else {
+      // Grid layout
+      card.className = "col-md-4 col-lg-3 equipment-card mb-3";
+      card.innerHTML = `
+        <div class="card h-100">
+          <img src="${primaryImage}" class="card-img-top" style="height: 120px; object-fit: cover;" alt="${equipment.equipment_name}">
+          <div class="card-body d-flex flex-column p-2">
+            <div>
+              <h6 class="card-title mb-1 fw-bold">${equipment.equipment_name}</h6>
+              <p class="card-text text-muted mb-1 small">
+                <i class="bi bi-tag-fill text-primary me-1"></i>${equipment.category.category_name}
+              </p>
+              <span class="badge ${statusClass} mb-2">${equipment.status.status_name}</span>
+              <p class="card-text mb-2 small text-truncate">${equipment.description || "No description available"}</p>
+            </div>
+            <div class="equipment-actions mt-auto d-grid gap-1">
+              <a href="/admin/edit-equipment?id=${equipment.equipment_id}" class="btn btn-sm btn-primary btn-manage">Manage</a>
+              <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${equipment.equipment_id}">Delete</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
+    container.appendChild(card);
+  }
 
-          container.appendChild(card);
-        }
+  // Add event listeners to new buttons
+  addButtonEventListeners();
 
-        // Add event listeners to new buttons
-        addButtonEventListeners();
-
-        // Update pagination controls
-        updatePagination();
-      }
+  // Update pagination controls
+  updatePagination();
+}
 
       // Get appropriate status class
       function getStatusClass(status) {
@@ -453,18 +502,18 @@
       }
 
       // Set up event listeners
-      function setupEventListeners() {
-        // Filter controls
-        [
-          searchInput,
-          layoutSelect,
-          statusFilter,
-          categoryFilter,
-        ].forEach((control) => {
-          control.addEventListener("change", filterEquipment);
-        });
-        searchInput.addEventListener("input", filterEquipment);
-      }
+// Set up event listeners
+function setupEventListeners() {
+  // Filter controls
+  searchInput.addEventListener("input", filterEquipment);
+  statusFilter.addEventListener("change", filterEquipment);
+  categoryFilter.addEventListener("change", filterEquipment);
+  
+  // Simple layout switch
+  layoutSelect.addEventListener("change", function() {
+    filterEquipment();
+  });
+}
 
       // Add event listeners to manage and delete buttons
       function addButtonEventListeners() {
@@ -518,33 +567,34 @@
         }
       }
 
-      // Filter Equipment based on all criteria
-      function filterEquipment() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const status = statusFilter.value;
-        const category = categoryFilter.value;
-        const layout = layoutSelect.value;
-        // Apply layout view
-        equipmentContainer.className = `row g-2 ${layout === "list" ? "list-view" : ""}`;
+     // Filter Equipment based on all criteria
+// Filter Equipment based on all criteria
+function filterEquipment() {
+  const searchTerm = searchInput.value.toLowerCase();
+  const status = statusFilter.value;
+  const category = categoryFilter.value;
+  const layout = layoutSelect.value;
 
-        // Reset to first page when filters change
-        currentPage = 1;
+  // Reset to first page when filters change
+  currentPage = 1;
 
-        // Filter the equipment array
-        filteredEquipment = allEquipment.filter(equipment => {
-          const equipmentStatus = equipment.status.status_id.toString();
-          const equipmentCategory = equipment.category.category_id.toString(); // Use category_id instead of category_name
-          const equipmentTitle = equipment.equipment_name.toLowerCase();
+  // Filter the equipment array
+  filteredEquipment = allEquipment.filter(equipment => {
+    const equipmentStatus = equipment.status.status_id.toString();
+    const equipmentCategory = equipment.category.category_id.toString();
+    const equipmentTitle = equipment.equipment_name.toLowerCase();
 
-          const matchesSearch = equipmentTitle.includes(searchTerm);
-          const matchesStatus = status === "all" || equipmentStatus === status;
-          const matchesCategory = category === "all" || equipmentCategory === category; // Compare by ID
+    const matchesSearch = equipmentTitle.includes(searchTerm);
+    const matchesStatus = status === "all" || equipmentStatus === status;
+    const matchesCategory = category === "all" || equipmentCategory === category;
 
-          return matchesSearch && matchesStatus && matchesCategory;
-        });
-        // Re-render with filtered results
-        renderEquipment(filteredEquipment);
-      }
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
+  
+  // Re-render with filtered results
+  renderEquipment(filteredEquipment);
+}
+
 
       // Initialize pagination
       function initializePagination() {

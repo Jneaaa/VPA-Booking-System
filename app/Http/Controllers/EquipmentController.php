@@ -234,47 +234,53 @@ class EquipmentController extends Controller
         return view('admin.edit-equipment', ['equipmentId' => $equipmentId]);
     }
 
-    public function saveImageReference(Request $request, $equipmentId): JsonResponse
-    {
-        try {
-            $validated = $request->validate([
-                'image_url' => 'required|url',
-                'cloudinary_public_id' => 'required|string',
-                'description' => 'nullable|string|max:255',
-                'image_type' => 'sometimes|in:Primary,Secondary'
-            ]);
+public function saveImageReference(Request $request, $equipmentId): JsonResponse
+{
+    try {
+        $validated = $request->validate([
+            'image_url' => 'required|url',
+            'cloudinary_public_id' => 'required|string',
+            'description' => 'nullable|string|max:255'
+        ]);
 
-            $equipment = Equipment::findOrFail($equipmentId);
+        $equipment = Equipment::findOrFail($equipmentId);
 
+        // Determine image type (first image = primary, others = secondary)
+        $imageType = $equipment->images()->count() == 0 ? 'Primary' : 'Secondary';
 
-            // Determine image type
-            $imageType = $validated['image_type'] ?? ($equipment->images()->count() == 0 ? 'Primary' : 'Secondary');
+        // Create the image record
+        $image = $equipment->images()->create([
+            'image_url' => $validated['image_url'],
+            'image_type' => $imageType,
+            'cloudinary_public_id' => $validated['cloudinary_public_id'],
+            'description' => $validated['description'] ?? 'Equipment photo',
+            'sort_order' => $equipment->images()->count() + 1
+        ]);
 
-            // Create the image record
-            $equipment->images()->create([
-                'image_url' => $validated['image_url'],
-                'image_type' => $imageType,
-                'cloudinary_public_id' => $validated['cloudinary_public_id'],
-                'description' => $validated['description'] ?? null,
-                'sort_order' => $equipment->images()->count() + 1
-            ]);
+        \Log::info('Image reference saved successfully', [
+            'equipment_id' => $equipmentId,
+            'image_id' => $image->image_id,
+            'public_id' => $validated['cloudinary_public_id']
+        ]);
 
-            return response()->json([
-                'message' => 'Image reference saved successfully',
-                'type' => $imageType
-            ]);
+        return response()->json([
+            'message' => 'Image reference saved successfully',
+            'image_id' => $image->image_id,
+            'type' => $imageType
+        ]);
 
-        } catch (\Exception $e) {
-            \Log::error('Error saving image reference', [
-                'error' => $e->getMessage(),
-                'equipmentId' => $equipmentId
-            ]);
+    } catch (\Exception $e) {
+        \Log::error('Error saving image reference', [
+            'error' => $e->getMessage(),
+            'equipmentId' => $equipmentId,
+            'request_data' => $request->all()
+        ]);
 
-            return response()->json([
-                'message' => 'Failed to save image reference: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'message' => 'Failed to save image reference: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     // ----- Upload Equipment Images ----- //
 
@@ -599,15 +605,20 @@ class EquipmentController extends Controller
 public function getItems($equipmentId): JsonResponse
 {
     try {
-        $equipment = Equipment::with(['items.condition'])->findOrFail($equipmentId);
+
+        $items = EquipmentItem::with(['condition'])
+            ->where('equipment_id', $equipmentId)
+            ->orderBy('item_name')
+            ->get();
         
         return response()->json([
-            'data' => $equipment->items
+            'data' => $items
         ]);
     } catch (\Exception $e) {
         \Log::error('Error fetching equipment items', [
             'error' => $e->getMessage(),
-            'equipmentId' => $equipmentId
+            'equipmentId' => $equipmentId,
+            'trace' => $e->getTraceAsString()
         ]);
         
         return response()->json([
@@ -735,6 +746,7 @@ public function updateItem(Request $request, $equipmentId, $itemId): JsonRespons
         ], 500);
     }
 }
+
 public function deleteItem($equipmentId, $itemId)
 {
     try {
@@ -742,22 +754,47 @@ public function deleteItem($equipmentId, $itemId)
             ->where('item_id', $itemId)
             ->firstOrFail();
 
-        // Delete from Cloudinary if it's not the default image
-        if ($item->cloudinary_public_id && $item->cloudinary_public_id !== 'oxvsxogzu9koqhctnf7s') {
-            // This will be handled by the frontend or you can implement backend deletion here
+        // Authorization check - ensure user manages this equipment's department
+        $user = auth()->user();
+        $equipment = Equipment::findOrFail($equipmentId);
+        
+        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
+            \Log::warning('Unauthorized delete attempt for equipment item', [
+                'user_id' => $user->admin_id,
+                'equipment_id' => $equipmentId,
+                'item_id' => $itemId
+            ]);
+            return response()->json(['message' => 'You do not manage this equipment.'], 403);
         }
 
+        // Store public ID before deletion
+        $publicId = $item->cloudinary_public_id;
+
+        // Delete the database record
         $item->delete();
 
-        \Log::info('Equipment item deleted', [
+        \Log::info('Equipment item deleted successfully', [
             'item_id' => $itemId,
             'equipment_id' => $equipmentId,
-            'admin_id' => auth()->id()
+            'admin_id' => auth()->id(),
+            'cloudinary_public_id' => $publicId
         ]);
 
         return response()->json([
             'message' => 'Item deleted successfully'
         ]);
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        \Log::error('Equipment item not found for deletion', [
+            'equipment_id' => $equipmentId,
+            'item_id' => $itemId,
+            'error' => $e->getMessage()
+        ]);
+        
+        return response()->json([
+            'error' => 'Item not found',
+            'details' => $e->getMessage()
+        ], 404);
 
     } catch (\Exception $e) {
         \Log::error('Failed to delete equipment item', [

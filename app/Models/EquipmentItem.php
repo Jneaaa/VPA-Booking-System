@@ -26,7 +26,10 @@ class EquipmentItem extends Model
         'created_by',
         'updated_by',
         'deleted_by'
+            // the migration also includes laravel timestamps() in the table (created_at and updated_at)
     ];
+
+
 
     // Relationships
     public function equipment()
