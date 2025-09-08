@@ -4,6 +4,16 @@
 
 @section('content')
 <style>
+    #itemsContainer {
+        min-height: 100px;
+        max-height: 450px;
+        /* Adjust this value as needed */
+        overflow-y: auto;
+        padding: 10px;
+        border: none;
+        border-radius: 0 !important;
+    }
+
     /* Toast notification styles */
     .toast {
         z-index: 1100;
@@ -539,31 +549,92 @@
     @section('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+                // 1. Global variables first
+                window.equipmentItems = [];
+                window.currentEditingItemId = null;
+                window.pendingImageUploads = []; // Track images to be uploaded
+                window.pendingImageDeletions = []; // Track images to be deleted
+                window.pendingItemPhotoChanges = new Map(); // Track item photo changes (itemId -> {action, file, publicId})
 
-                // Authentication check
+                // 2. Authentication check
                 const token = localStorage.getItem('adminToken');
                 if (!token) {
                     window.location.href = '/admin/admin-login';
                     return;
                 }
 
-                let currentEditingItemId = null;
-                let equipmentItems = [];
+                // 3. Delete item function (needs to be defined before event handlers)
+               window.deleteItem = async function (itemId, cloudinaryPublicId, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
 
-                const inventoryItemModal = new bootstrap.Modal('#inventoryItemModal');
-                const itemPhotoInput = document.getElementById('itemPhoto');
-                const itemPhotoPreview = document.getElementById('itemPhotoPreview');
-                const itemNotes = document.getElementById('itemNotes');
-                const notesWordCount = document.getElementById('notesWordCount');
-                const saveItemBtn = document.getElementById('saveItemBtn');
-                const itemsContainer = document.getElementById('itemsContainer');
-                const removePhotoBtn = document.getElementById('removePhotoBtn');
-                const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
+    if (!confirm('Are you sure you want to delete this item? The change will be applied when you click "Update Equipment".')) {
+        return;
+    }
 
-                let itemPhotoFile = null;
-                let itemCloudinaryPublicId = null;
+    try {
+        // Mark for deletion (will be processed on form submit)
+        pendingItemPhotoChanges.set(itemId, {
+            action: 'delete',
+            publicId: cloudinaryPublicId
+        });
 
-                // Global helper function for toast notifications
+        // Remove from UI immediately
+        document.querySelector(`.equipment-item[data-item-id="${itemId}"]`)?.remove();
+
+        // showToast('Item marked for deletion. Click "Update Equipment" to confirm.', 'info');//
+
+    } catch (error) {
+        console.error('Error staging item deletion:', error);
+        showToast('Failed to stage item deletion: ' + error.message, 'error');
+    }
+};
+
+                // 4. Open edit item modal function (needs to be defined before event handlers)
+                window.openEditItemModal = function (itemId, event) {
+                    if (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+
+                    const item = window.equipmentItems.find(i => i.item_id === itemId);
+                    if (!item) return;
+
+                    // Fill the form with existing data
+                    document.getElementById('itemName').value = item.item_name;
+                    document.getElementById('itemCondition').value = item.condition_id;
+                    document.getElementById('barcode').value = item.barcode_number || '';
+                    document.getElementById('itemNotes').value = item.item_notes || '';
+
+                    // Set the photo preview
+                    const itemPhotoPreview = document.getElementById('itemPhotoPreview');
+                    const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
+                    const removePhotoBtn = document.getElementById('removePhotoBtn');
+
+                    if (item.image_url && item.image_url !== 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp') {
+                        itemPhotoPreview.innerHTML = `<img src="${item.image_url}" class="img-thumbnail" style="max-height: 150px;">`;
+                        itemPhotoDropzone.style.display = 'none';
+                        removePhotoBtn.classList.remove('d-none');
+                    } else {
+                        itemPhotoPreview.innerHTML = '';
+                        itemPhotoDropzone.style.display = 'block';
+                        removePhotoBtn.classList.add('d-none');
+                    }
+
+                    // Store the current editing item ID
+                    window.currentEditingItemId = itemId;
+
+                    // Change modal title and button text
+                    document.querySelector('#inventoryItemModal .modal-title').textContent = 'Edit Inventory Item';
+                    document.getElementById('saveItemBtn').textContent = 'Update Item';
+
+                    // Show the modal
+                    bootstrap.Modal.getOrCreateInstance('#inventoryItemModal').show();
+                };
+
+                // 5. Toast notification function
                 window.showToast = function (message, type = 'success', duration = 3000) {
                     const toast = document.createElement('div');
 
@@ -588,18 +659,18 @@
                     toast.style.borderRadius = '0.3rem';
 
                     toast.innerHTML = `
-                                                                                                                                <div class="d-flex align-items-center px-3 py-1"> 
-                                                                                                                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                                                                                                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                                                                                                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                                                                                                                </div>
-                                                                                                                                <div class="loading-bar" style="
-                                                                                                                                    height: 3px;
-                                                                                                                                    background: rgba(255,255,255,0.7);
-                                                                                                                                    width: 100%;
-                                                                                                                                    transition: width ${duration}ms linear;
-                                                                                                                                "></div>
-                                                                                                                            `;
+                            <div class="d-flex align-items-center px-3 py-1"> 
+                                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="loading-bar" style="
+                                height: 3px;
+                                background: rgba(255,255,255,0.7);
+                                width: 100%;
+                                transition: width ${duration}ms linear;
+                            "></div>
+                        `;
 
                     document.body.appendChild(toast);
 
@@ -632,18 +703,18 @@
                     }, duration);
                 };
 
-                // Initialize the delete confirmation modal
+                // 6. Delete image modal initialization
                 const deleteImageModal = new bootstrap.Modal('#deleteImageModal', {
                     backdrop: 'static',
                     keyboard: false
                 });
 
-                // Variables to track the image to be deleted
+                // 7. Image deletion variables
                 let currentDeletePhotoId = null;
                 let currentDeletePublicId = null;
                 let currentDeletePreviewElement = null;
 
-                // Function to handle image deletion with confirmation
+                // 8. Image deletion handler
                 async function handleImageDeletion(photoId, publicId, previewElement) {
                     currentDeletePhotoId = photoId;
                     currentDeletePublicId = publicId;
@@ -653,126 +724,7 @@
                     deleteImageModal.show();
                 }
 
-                // Handle confirm delete button click
-                document.getElementById('confirmDeleteImageBtn').addEventListener('click', async function () {
-                    try {
-                        const equipmentId = document.getElementById('equipmentId').value;
-
-                        // Delete from Cloudinary first if public ID exists
-                        if (currentDeletePublicId) {
-                            await deleteImageFromCloudinary(currentDeletePublicId);
-                            showToast('Image deleted from storage successfully', 'success');
-                        }
-
-                        // Then delete from database if it's a saved image (has photoId)
-                        if (currentDeletePhotoId && typeof currentDeletePhotoId === 'number') {
-                            await deleteImage(equipmentId, currentDeletePhotoId);
-                            showToast('Image reference removed from database', 'success');
-                        }
-
-                        // Remove the preview element
-                        if (currentDeletePreviewElement) {
-                            currentDeletePreviewElement.remove();
-                        }
-
-                        // Update the uploadedPhotos array
-                        uploadedPhotos = uploadedPhotos.filter(photo => photo.id !== currentDeletePhotoId);
-
-                        // Hide the modal
-                        deleteImageModal.hide();
-
-                    } catch (error) {
-                        console.error('Error deleting image:', error);
-                        showToast('Failed to delete image: ' + error.message, 'error');
-                    }
-                });
-
-                async function handleEquipmentFiles(files) {
-                    const equipmentId = document.getElementById('equipmentId').value;
-                    const photosPreview = document.getElementById('photosPreview');
-
-                    for (const file of files) {
-                        // Check if file is an image
-                        if (!file.type.startsWith('image/')) {
-                            showToast('Please upload only image files', 'error');
-                            continue;
-                        }
-
-                        // Check if we've reached the maximum of 5 photos
-                        if (uploadedPhotos.length >= 5) {
-                            showToast('Maximum of 5 photos allowed', 'error');
-                            break;
-                        }
-
-                        try {
-                            const previewId = Date.now(); // Define previewId here so it's accessible
-
-                            // Create a preview
-                            const reader = new FileReader();
-                            reader.onload = async (e) => { // Make this async
-                                const preview = document.createElement('div');
-                                preview.className = 'photo-preview';
-                                preview.dataset.id = previewId;
-
-                                const img = document.createElement('img');
-                                img.src = e.target.result;
-                                img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
-
-                                const removeBtn = document.createElement('button');
-                                removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
-                                removeBtn.innerHTML = '<i class="bi bi-x"></i>';
-                                removeBtn.onclick = function () {
-                                    preview.remove();
-                                    uploadedPhotos = uploadedPhotos.filter(photo => photo.previewId !== previewId);
-                                };
-
-                                preview.appendChild(img);
-                                preview.appendChild(removeBtn);
-                                photosPreview.appendChild(preview);
-
-                                // Store file and preview info
-                                uploadedPhotos.push({
-                                    file: file,
-                                    previewId: previewId,
-                                    previewElement: preview
-                                });
-
-                                try {
-                                    // Upload to Cloudinary
-                                    const result = await uploadToCloudinary(file, equipmentId);
-
-                                    // Update the preview with the actual image from Cloudinary
-                                    if (result && result.secure_url) {
-                                        img.src = result.secure_url;
-
-                                        // Update the uploadedPhotos array with the Cloudinary data
-                                        const photoIndex = uploadedPhotos.findIndex(photo => photo.previewId === previewId);
-                                        if (photoIndex !== -1) {
-                                            uploadedPhotos[photoIndex] = {
-                                                ...uploadedPhotos[photoIndex],
-                                                id: result.public_id,
-                                                url: result.secure_url
-                                            };
-                                        }
-                                    }
-                                } catch (error) {
-                                    console.error('Error uploading to Cloudinary:', error);
-                                    showToast('Upload failed: ' + error.message, 'error');
-                                    // Remove the preview if upload fails
-                                    preview.remove();
-                                    uploadedPhotos = uploadedPhotos.filter(photo => photo.previewId !== previewId);
-                                }
-                            };
-                            reader.readAsDataURL(file);
-
-                        } catch (error) {
-                            console.error('Error processing file:', error);
-                            showToast('Failed to process file: ' + error.message, 'error');
-                        }
-                    }
-                }
-
-                // Cloudinary direct upload implementation
+                // 9. Cloudinary upload functions
                 async function uploadToCloudinary(file, equipmentId) {
                     const CLOUD_NAME = 'dn98ntlkd'; // Your Cloudinary cloud name
                     const UPLOAD_PRESET = 'equipment-photos'; // Your unsigned upload preset
@@ -784,7 +736,7 @@
                     formData.append('tags', `equipment_${equipmentId}`);
 
                     try {
-                        showToast('Uploading image to Cloudinary...', 'info', 3000);
+                       // showToast('Uploading image to Cloudinary...', 'info', 3000);// 
 
                         const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
                             method: 'POST',
@@ -802,17 +754,17 @@
                         // Now save the image reference to your database
                         await saveImageToDatabase(equipmentId, data.secure_url, data.public_id);
 
-                        showToast('Image uploaded to Cloudinary successfully!', 'success');
+                      //  showToast('Image uploaded to Cloudinary successfully!', 'success');//#cancelConfirmationModal
                         return data;
 
                     } catch (error) {
                         console.error('Cloudinary upload error:', error);
-                        showToast('Cloudinary upload failed: ' + error.message, 'error');
+                        showToast('Cloudinary upload failed: ' + error.message, 'error'); 
                         throw error;
                     }
                 }
 
-                // Function to save image reference to your database
+                // 10. Function to save image reference to your database
                 async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                     try {
                         const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/save`, {
@@ -841,20 +793,20 @@
 
                     } catch (error) {
                         console.error('Error saving image to database:', error);
-                        showToast('Warning: Image uploaded but database save failed', 'warning');
+                        showToast('Warning: Image uploaded but database save failed', 'warning'); 
                         throw error; // Re-throw to handle in the calling function
                     }
                 }
 
-
+                // 11. Image deletion functions
                 async function deleteImageFromCloudinary(publicId) {
                     try {
+                        const token = localStorage.getItem('adminToken');
+
+                        // Use FormData instead of JSON for Cloudinary deletion
                         const formData = new FormData();
                         formData.append('public_id', publicId);
 
-                        const token = localStorage.getItem('adminToken');
-
-                        // Updated endpoint to match your new route
                         const response = await fetch(`http://127.0.0.1:8000/api/admin/cloudinary/delete`, {
                             method: 'POST',
                             headers: {
@@ -864,18 +816,31 @@
                         });
 
                         if (!response.ok) {
-                            throw new Error('Failed to delete image from Cloudinary');
+                            const errorText = await response.text();
+                            console.error('Cloudinary delete failed:', response.status, errorText);
+                            throw new Error(`Failed to delete image from Cloudinary: ${response.status} ${errorText}`);
                         }
 
-                        showToast('Image deleted from storage', 'success');
-                        return await response.json();
+                        const result = await response.json();
+
+                        // Check if the deletion was actually successful based on the actual response format
+                        if (result.result && (result.result.deleted || result.result === 'ok' || result.result === 'success')) {
+                            // Success! The image was deleted from Cloudinary
+                          //  showToast('Image deleted from storage', 'success'); //
+                            return result;
+                        } else {
+                            console.warn('Unexpected Cloudinary response format:', result);
+                            // Still consider it a success since the API call didn't fail
+                         //   showToast('Image cleanup completed', 'success'); //
+                            return result;
+                        }
+
                     } catch (error) {
                         console.error('Error deleting image from Cloudinary:', error);
-                        showToast('Failed to delete from storage: ' + error.message, 'error');
+                        showToast('Failed to delete from storage: ' + error.message, 'error'); 
                         throw error;
                     }
                 }
-
                 async function deleteImage(equipmentId, imageId, cloudinaryPublicId) {
                     try {
                         const token = localStorage.getItem('adminToken');
@@ -890,7 +855,7 @@
                                 },
                                 body: JSON.stringify({ public_id: cloudinaryPublicId })
                             });
-                            showToast('Image deleted from storage', 'success');
+                     //       showToast('Image deleted from storage', 'success'); //
                         }
 
                         // 2. Delete from your database
@@ -906,7 +871,7 @@
                             throw new Error('Failed to delete image from database');
                         }
 
-                        showToast('Image reference deleted', 'success');
+                   //     showToast('Image reference deleted', 'success'); //
 
                     } catch (error) {
                         console.error('Error deleting image:', error);
@@ -915,41 +880,71 @@
                     }
                 }
 
-                // Direct Cloudinary delete function
-                async function deleteFromCloudinary(publicId) {
-                    const CLOUD_NAME = 'dn98ntlkd';
+                // 12. Equipment file handling function (moved outside conditional block)
+              async function handleEquipmentFiles(files) {
+    const equipmentId = document.getElementById('equipmentId').value;
 
-                    try {
-                        // Cloudinary DELETE API endpoint
-                        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/destroy`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                public_id: publicId,
-                                api_key: 'YOUR_API_KEY', // You'll need to add this
-                                timestamp: Math.floor(Date.now() / 1000),
-                                signature: 'GENERATE_THIS' // You'll need to generate a signature
-                            })
-                        });
+    for (const file of files) {
+        // Check if file is an image
+        if (!file.type.startsWith('image/')) {
+            showToast('Please upload only image files', 'error');
+            continue;
+        }
 
-                        if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.error?.message || 'Cloudinary delete failed');
-                        }
+        // Check if we've reached the maximum of 5 photos
+        const currentCount = document.querySelectorAll('#photosPreview .photo-preview').length;
+        if (currentCount + pendingImageUploads.length >= 5) {
+            showToast('Maximum of 5 photos allowed', 'error');
+            break;
+        }
 
-                        const result = await response.json();
-                        console.log('Cloudinary delete successful:', result);
-                        return result;
+        try {
+            const previewId = 'temp-' + Date.now();
 
-                    } catch (error) {
-                        console.error('Cloudinary delete error:', error);
-                        throw new Error('Failed to delete from Cloudinary: ' + error.message);
+            // Create a preview
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const preview = document.createElement('div');
+                preview.className = 'photo-preview';
+                preview.dataset.previewId = previewId;
+
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
+                removeBtn.innerHTML = '<i class="bi bi-x"></i>';
+                removeBtn.onclick = function () {
+                    // Remove from pending uploads
+                    const index = pendingImageUploads.findIndex(photo => photo.previewId === previewId);
+                    if (index !== -1) {
+                        pendingImageUploads.splice(index, 1);
                     }
-                }
+                    preview.remove();
+                };
 
-                // Generic edit functionality for all fields
+                preview.appendChild(img);
+                preview.appendChild(removeBtn);
+                photosPreview.appendChild(preview);
+
+                // Add to pending uploads (will be processed on form submit)
+                pendingImageUploads.push({
+                    file: file,
+                    previewId: previewId,
+                    previewElement: preview
+                });
+            };
+            reader.readAsDataURL(file);
+
+        } catch (error) {
+            console.error('Error processing file:', error);
+            showToast('Failed to process file: ' + error.message, 'error'); 
+        }
+    }
+}
+
+                // 13. Edit functionality for fields
                 document.querySelectorAll('.edit-icon').forEach(icon => {
                     const fieldId = icon.getAttribute('data-field');
                     const inputField = document.getElementById(fieldId);
@@ -1010,32 +1005,54 @@
                     return;
                 }
 
-                // Initialize the cancel confirmation modal
+                // 14. Cancel confirmation modal
                 const cancelConfirmationModal = new bootstrap.Modal('#cancelConfirmationModal', {
                     backdrop: 'static',
                     keyboard: false
                 });
 
-                // Handle cancel button click
+                // 15. Cancel button handlers
                 document.getElementById('cancelBtn').addEventListener('click', function (e) {
                     e.preventDefault();
                     cancelConfirmationModal.show();
                 });
 
-                // Handle confirm cancel button click
                 document.getElementById('confirmCancelBtn').addEventListener('click', function () {
                     // Hide the modal first
                     cancelConfirmationModal.hide();
 
-                    // Then redirect to manage-equipment
-                    window.location.href = '/admin/manage-equipment';
+                    // Reset all changes and reload data
+                    resetAllChanges();
+                    showToast('Changes discarded', 'info');
                 });
 
-                // Equipment Photos Section
+                // Add this function to handle cancel operations
+                function resetAllChanges() {
+                    // Clear all pending changes
+                    pendingImageUploads = [];
+                    pendingImageDeletions = [];
+                    pendingItemPhotoChanges.clear();
+
+                    // Reload equipment data to reset UI
+                    const equipmentId = document.getElementById('equipmentId').value;
+                    loadEquipmentData(equipmentId);
+
+                    // Clear any temporary UI elements
+                    const photosPreview = document.getElementById('photosPreview');
+                    if (photosPreview) {
+                        photosPreview.innerHTML = '';
+                    }
+
+                    // Reload items
+                    loadEquipmentItems(equipmentId);
+                }
+
+                // 16. Equipment Photos Section
                 const equipmentDropzone = document.getElementById('equipmentPhotosDropzone');
                 const equipmentFileInput = document.getElementById('equipmentPhotos');
                 const photosPreview = document.getElementById('photosPreview');
                 let uploadedPhotos = [];
+
                 if (equipmentDropzone && equipmentFileInput) {
                     equipmentDropzone.addEventListener('click', function () {
                         equipmentFileInput.click();
@@ -1064,7 +1081,7 @@
                     });
                 }
 
-                // Word count limiter for Description textbox
+                // 17. Word count limiter for Description textbox
                 const description = document.getElementById('description');
                 const descriptionWordCount = document.getElementById('descriptionWordCount');
                 const descriptionMaxChars = 255;
@@ -1095,7 +1112,7 @@
                     });
                 }
 
-                // Initialize Inventory Item Modal
+                // 18. Initialize Inventory Item Modal
                 const addItemBtn = document.getElementById('addItemBtn');
                 if (addItemBtn) {
                     const inventoryItemModal = new bootstrap.Modal('#inventoryItemModal');
@@ -1105,6 +1122,11 @@
                     const notesWordCount = document.getElementById('notesWordCount');
                     const saveItemBtn = document.getElementById('saveItemBtn');
                     const itemsContainer = document.getElementById('itemsContainer');
+                    const removePhotoBtn = document.getElementById('removePhotoBtn');
+                    const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
+
+                    let itemPhotoFile = null;
+                    let itemCloudinaryPublicId = null;
 
                     addItemBtn.addEventListener('click', () => {
                         document.getElementById('itemForm').reset();
@@ -1115,7 +1137,6 @@
                         if (removePhotoBtn) removePhotoBtn.classList.add('d-none');
                         inventoryItemModal.show();
                     });
-
 
                     // Handle item photo upload
                     if (itemPhotoInput) {
@@ -1128,15 +1149,17 @@
                                     if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
                                     if (itemPhotoPreview) {
                                         itemPhotoPreview.innerHTML = `
-                                    <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
-                                `;
+                            <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
+                        `;
                                     }
+
+                                    // Store the file for later processing
+                                    itemPhotoFile = this.files[0];
                                 };
                                 reader.readAsDataURL(itemPhotoFile);
                             }
                         });
                     }
-
 
                     // Handle photo removal
                     if (removePhotoBtn) {
@@ -1146,7 +1169,17 @@
                             if (itemPhotoInput) itemPhotoInput.value = '';
                             this.classList.add('d-none');
                             itemPhotoFile = null;
-                            itemCloudinaryPublicId = null;
+
+                            // If editing an existing item, mark the current photo for deletion
+                            if (currentEditingItemId) {
+                                const existingItem = equipmentItems.find(i => i.item_id === currentEditingItemId);
+                                if (existingItem && existingItem.cloudinary_public_id !== 'oxvsxogzu9koqhctnf7s') {
+                                    pendingItemPhotoChanges.set(currentEditingItemId, {
+                                        action: 'delete',
+                                        publicId: existingItem.cloudinary_public_id
+                                    });
+                                }
+                            }
                         });
                     }
 
@@ -1218,164 +1251,223 @@
                     }
 
                     // Save item functionality
-                    if (saveItemBtn) {
-                        saveItemBtn.addEventListener('click', async function () {
-                            const itemName = document.getElementById('itemName')?.value;
-                            const itemCondition = document.getElementById('itemCondition')?.value;
-                            const barcode = document.getElementById('barcode')?.value || '';
-                            const notes = document.getElementById('itemNotes')?.value || '';
+                if (saveItemBtn) {
+    saveItemBtn.addEventListener('click', async function () {
+        const itemName = document.getElementById('itemName')?.value;
+        const itemCondition = document.getElementById('itemCondition')?.value;
+        const barcode = document.getElementById('barcode')?.value || '';
+        const notes = document.getElementById('itemNotes')?.value || '';
 
-                            if (!itemName || !itemCondition) {
-                                showToast('Please fill in all required fields', 'error');
-                                return;
-                            }
+        if (!itemName || !itemCondition) {
+            showToast('Please fill in all required fields', 'error');
+            return;
+        }
 
-                            try {
-                                let imageUrl = 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp';
-                                let publicId = 'oxvsxogzu9koqhctnf7s';
+        try {
+            let imageUrl = 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp';
+            let publicId = 'oxvsxogzu9koqhctnf7s';
 
-                                // Upload to Cloudinary if a new photo was selected
-                                if (itemPhotoFile) {
-                                    showToast('Uploading item photo...', 'info');
-                                    const cloudinaryData = await uploadItemToCloudinary(itemPhotoFile, equipmentId);
-                                    imageUrl = cloudinaryData.secure_url;
-                                    publicId = cloudinaryData.public_id;
-                                } else if (currentEditingItemId) {
-                                    // Keep existing photo if not changed during edit
-                                    const existingItem = equipmentItems.find(i => i.item_id === currentEditingItemId);
-                                    if (existingItem) {
-                                        imageUrl = existingItem.image_url;
-                                        publicId = existingItem.cloudinary_public_id;
-                                    }
-                                }
+            // Create a temporary item object
+            const tempItem = {
+                item_id: currentEditingItemId || 'temp-' + Date.now(),
+                item_name: itemName,
+                condition_id: itemCondition,
+                condition: { condition_name: document.getElementById('itemCondition').options[document.getElementById('itemCondition').selectedIndex].text },
+                barcode_number: barcode,
+                item_notes: notes,
+                image_url: imageUrl,
+                cloudinary_public_id: publicId
+            };
 
-                                const token = localStorage.getItem('adminToken');
-                                const url = currentEditingItemId
-                                    ? `http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/items/${currentEditingItemId}`
-                                    : `http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/items`;
-
-                                const method = currentEditingItemId ? 'PUT' : 'POST';
-
-                                const response = await fetch(url, {
-                                    method: method,
-                                    headers: {
-                                        'Authorization': `Bearer ${token}`,
-                                        'Content-Type': 'application/json',
-                                        'Accept': 'application/json'
-                                    },
-                                    body: JSON.stringify({
-                                        item_name: itemName,
-                                        condition_id: itemCondition,
-                                        barcode_number: barcode,
-                                        item_notes: notes,
-                                        image_url: imageUrl,
-                                        cloudinary_public_id: publicId
-                                    })
-                                });
-
-                                if (!response.ok) {
-                                    const errorData = await response.json();
-                                    throw new Error(errorData.details || errorData.message || 'Failed to save item');
-                                }
-
-                                const result = await response.json();
-                                showToast(currentEditingItemId ? 'Item updated successfully!' : 'Item added successfully!', 'success');
-
-                                if (currentEditingItemId) {
-                                    // Update the existing item in UI
-                                    updateItemInUI(result.data);
-                                } else {
-                                    // Add the new item to UI
-                                    addItemToUI(result.item);
-                                }
-
-                                inventoryItemModal.hide();
-                                currentEditingItemId = null;
-
-                            } catch (error) {
-                                console.error('Error saving item:', error);
-                                showToast('Failed to save item: ' + error.message, 'error');
-                            }
-                        });
-                    }
-                }
-
-                // Add this function to update item in UI
-function updateItemInUI(updatedItem) {
-    const itemElement = document.querySelector(`.equipment-item[data-item-id="${updatedItem.item_id}"]`);
-    if (!itemElement) return;
-
-    const conditionColors = {
-        "New": "bg-success text-white",
-        "Good": "bg-primary text-white",
-        "Fair": "bg-warning text-dark",
-        "Needs Maintenance": "bg-danger text-white",
-        "Damaged": "bg-dark text-white"
-    };
-
-    itemElement.innerHTML = `
-        <div class="card-body">
-            <div class="photo-container">
-                <img src="${updatedItem.image_url}" class="img-thumbnail">
-            </div>
-            <div class="flex-grow-1">
-                <h6 class="card-title">${updatedItem.item_name}</h6>
-                <div class="d-flex flex-wrap gap-3">
-                    <span class="badge ${conditionColors[updatedItem.condition.condition_name] || 'bg-secondary'}">${updatedItem.condition.condition_name}</span>
-                </div>
-                ${updatedItem.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${updatedItem.barcode_number}</div>` : ''}
-                ${updatedItem.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${updatedItem.item_notes.substring(0, 50)}${updatedItem.item_notes.length > 50 ? '...' : ''}</p>` : ''}
-            </div>
-            <button class="btn btn-sm btn-primary me-1 align-self-start" onclick="openEditItemModal(${updatedItem.item_id})">
-                <i class="bi bi-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-danger align-self-start" onclick="deleteItem(${updatedItem.item_id}, '${updatedItem.cloudinary_public_id}')">
-                <i class="bi bi-trash"></i>
-            </button>
-        </div>
-    `;
-}
-
-
-
-
-                function openEditItemModal(itemId) {
-                    const item = equipmentItems.find(i => i.item_id === itemId);
-                    if (!item) return;
-
-                    // Fill the form with existing data
-                    document.getElementById('itemName').value = item.item_name;
-                    document.getElementById('itemCondition').value = item.condition_id;
-                    document.getElementById('barcode').value = item.barcode_number || '';
-                    document.getElementById('itemNotes').value = item.item_notes || '';
-
-                    // Set the photo preview
-                    const itemPhotoPreview = document.getElementById('itemPhotoPreview');
-                    const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
-                    const removePhotoBtn = document.getElementById('removePhotoBtn');
-
-                    if (item.image_url && item.image_url !== 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp') {
-                        itemPhotoPreview.innerHTML = `<img src="${item.image_url}" class="img-thumbnail" style="max-height: 150px;">`;
-                        itemPhotoDropzone.style.display = 'none';
-                        removePhotoBtn.classList.remove('d-none');
+            // Handle photo changes
+            if (itemPhotoFile) {
+                // Store file for processing on form submit
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    tempItem.image_url = e.target.result;
+                    
+                    // Update UI with temporary image
+                    if (currentEditingItemId) {
+                        updateItemInUI(tempItem);
                     } else {
-                        itemPhotoPreview.innerHTML = '';
-                        itemPhotoDropzone.style.display = 'block';
-                        removePhotoBtn.classList.add('d-none');
+                        addItemToUI(tempItem);
                     }
+                };
+                reader.readAsDataURL(itemPhotoFile);
+                
+                // Store for processing on form submit
+                pendingItemPhotoChanges.set(tempItem.item_id, {
+                    action: currentEditingItemId ? 'update' : 'create',
+                    itemData: {
+                        item_name: itemName,
+                        condition_id: itemCondition,
+                        barcode_number: barcode,
+                        item_notes: notes
+                    },
+                    file: itemPhotoFile
+                });
+            } else if (currentEditingItemId) {
+                // Keep existing photo if not changed
+                const existingItem = equipmentItems.find(i => i.item_id === currentEditingItemId);
+                if (existingItem) {
+                    tempItem.image_url = existingItem.image_url;
+                    tempItem.cloudinary_public_id = existingItem.cloudinary_public_id;
+                }
+                
+                // Mark for update (no photo change)
+                pendingItemPhotoChanges.set(currentEditingItemId, {
+                    action: 'update',
+                    itemData: {
+                        item_name: itemName,
+                        condition_id: itemCondition,
+                        barcode_number: barcode,
+                        item_notes: notes
+                    }
+                });
+                
+                updateItemInUI(tempItem);
+            } else {
+                // New item without photo
+                addItemToUI(tempItem);
+                pendingItemPhotoChanges.set(tempItem.item_id, {
+                    action: 'create',
+                    itemData: {
+                        item_name: itemName,
+                        condition_id: itemCondition,
+                        barcode_number: barcode,
+                        item_notes: notes
+                    }
+                });
+            }
 
-                    // Store the current editing item ID
-                    currentEditingItemId = itemId;
+          //  showToast(currentEditingItemId ? 'Item changes staged!' : 'Item staged for creation!', 'success');//
+            inventoryItemModal.hide();
+            currentEditingItemId = null;
 
-                    // Change modal title and button text
-                    document.querySelector('#inventoryItemModal .modal-title').textContent = 'Edit Inventory Item';
-                    document.getElementById('saveItemBtn').textContent = 'Update Item';
+        } catch (error) {
+            console.error('Error saving item:', error);
+            showToast('Failed to save item: ' + error.message, 'error');
+        }
+    });
+}
+                    // Handle confirm delete button click
+                    document.getElementById('confirmDeleteImageBtn').addEventListener('click', async function () {
+                        try {
+                            const equipmentId = document.getElementById('equipmentId').value;
 
-                    // Show the modal
-                    inventoryItemModal.show();
+                            // Delete from Cloudinary first if public ID exists
+                            if (currentDeletePublicId) {
+                                await deleteImageFromCloudinary(currentDeletePublicId);
+                             //   showToast('Image deleted from storage successfully', 'success'); //
+                            }
+
+                            // Then delete from database if it's a saved image (has photoId)
+                            if (currentDeletePhotoId && typeof currentDeletePhotoId === 'number') {
+                                await deleteImage(equipmentId, currentDeletePhotoId);
+                          //      showToast('Image reference removed from database', 'success'); //
+                            }
+
+                            // Remove the preview element
+                            if (currentDeletePreviewElement) {
+                                currentDeletePreviewElement.remove();
+                            }
+
+                            // Update the uploadedPhotos array
+                            uploadedPhotos = uploadedPhotos.filter(photo => photo.id !== currentDeletePhotoId);
+
+                            // Hide the modal
+                            deleteImageModal.hide();
+
+                        } catch (error) {
+                            console.error('Error deleting image:', error);
+                            showToast('Failed to delete image: ' + error.message, 'error');
+                        }
+                    });
                 }
 
-                // Function to upload item photo to Cloudinary
+                // 19. UI update functions
+                function updateItemInUI(updatedItem) {
+                    const itemElement = document.querySelector(`.equipment-item[data-item-id="${updatedItem.item_id}"]`);
+                    if (!itemElement) return;
+
+                    const conditionColors = {
+                        "New": "bg-success text-white",
+                        "Good": "bg-primary text-white",
+                        "Fair": "bg-warning text-dark",
+                        "Needs Maintenance": "bg-danger text-white",
+                        "Damaged": "bg-dark text-white"
+                    };
+
+                    itemElement.innerHTML = `
+                            <div class="card-body">
+                                <div class="photo-container">
+                                    <img src="${updatedItem.image_url}" class="img-thumbnail">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="card-title">${updatedItem.item_name}</h6>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <span class="badge ${conditionColors[updatedItem.condition.condition_name] || 'bg-secondary'}">${updatedItem.condition.condition_name}</span>
+                                    </div>
+                                    ${updatedItem.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${updatedItem.barcode_number}</div>` : ''}
+                                    ${updatedItem.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${updatedItem.item_notes.substring(0, 50)}${updatedItem.item_notes.length > 50 ? '...' : ''}</p>` : ''}
+                                </div>
+                                <div class="d-flex align-self-start">
+                                    <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal(${updatedItem.item_id}, event)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem(${updatedItem.item_id}, '${updatedItem.cloudinary_public_id}', event)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                }
+
+                function addItemToUI(item) {
+                    const conditionColors = {
+                        "New": "bg-success text-white",
+                        "Good": "bg-primary text-white",
+                        "Fair": "bg-warning text-dark",
+                        "Needs Maintenance": "bg-danger text-white",
+                        "Damaged": "bg-dark text-white"
+                    };
+
+                    const itemCard = document.createElement('div');
+                    itemCard.className = 'card equipment-item';
+                    itemCard.dataset.itemId = item.item_id;
+                    itemCard.innerHTML = `
+                            <div class="card-body">
+                                <div class="photo-container">
+                                    <img src="${item.image_url}" class="img-thumbnail">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="card-title">${item.item_name}</h6>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <span class="badge ${conditionColors[item.condition.condition_name] || 'bg-secondary'}">${item.condition.condition_name}</span>
+                                    </div>
+                                    ${item.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${item.barcode_number}</div>` : ''}
+                                    ${item.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${item.item_notes.substring(0, 50)}${item.item_notes.length > 50 ? '...' : ''}</p>` : ''}
+                                </div>
+                                <div class="d-flex align-self-start">
+                                    <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal(${item.item_id}, event)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem(${item.item_id}, '${item.cloudinary_public_id}', event)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                    if (itemsContainer) {
+                        if (itemsContainer.querySelector('p.text-muted')) {
+                            itemsContainer.innerHTML = '';
+                        }
+                        itemsContainer.appendChild(itemCard);
+                    }
+                }
+
+                // 20. Function to upload item photo to Cloudinary
                 async function uploadItemToCloudinary(file, equipmentId) {
                     const CLOUD_NAME = 'dn98ntlkd';
                     const UPLOAD_PRESET = 'equipment-photos';
@@ -1405,47 +1497,124 @@ function updateItemInUI(updatedItem) {
                     }
                 }
 
-                // Function to add item to UI
-                function addItemToUI(item) {
-                    const conditionColors = {
-                        "New": "bg-success text-white",
-                        "Good": "bg-primary text-white",
-                        "Fair": "bg-warning text-dark",
-                        "Needs Maintenance": "bg-danger text-white",
-                        "Damaged": "bg-dark text-white"
-                    };
+                // 21. Load equipment data
+                async function loadEquipmentData(equipmentId) {
+                    try {
+                        const response = await fetch(`http://127.0.0.1:8000/api/equipment/${equipmentId}`, {
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                                'Accept': 'application/json'
+                            }
+                        });
 
-                    const itemCard = document.createElement('div');
-                    itemCard.className = 'card equipment-item';
-                    itemCard.dataset.itemId = item.item_id;
-                    itemCard.innerHTML = `
-                <div class="card-body">
-                    <div class="photo-container">
-                        <img src="${item.image_url}" class="img-thumbnail">
-                    </div>
-                    <div class="flex-grow-1">
-                        <h6 class="card-title">${item.item_name}</h6>
-                        <div class="d-flex flex-wrap gap-3">
-                            <span class="badge ${conditionColors[item.condition.condition_name] || 'bg-secondary'}">${item.condition.condition_name}</span>
-                        </div>
-                        ${item.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${item.barcode_number}</div>` : ''}
-                        ${item.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${item.item_notes.substring(0, 50)}${item.item_notes.length > 50 ? '...' : ''}</p>` : ''}
-                    </div>
-                    <button class="btn btn-sm btn-danger align-self-start" onclick="deleteItem(${item.item_id}, '${item.cloudinary_public_id}')">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            `;
-
-                    if (itemsContainer) {
-                        if (itemsContainer.querySelector('p.text-muted')) {
-                            itemsContainer.innerHTML = '';
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch equipment data');
                         }
-                        itemsContainer.appendChild(itemCard);
+
+                        const data = await response.json();
+                        const equipment = data.data;
+
+                        // Populate form fields
+                        document.getElementById('equipmentName').value = equipment.equipment_name;
+                        document.getElementById('description').value = equipment.description || '';
+                        document.getElementById('brand').value = equipment.brand || '';
+                        document.getElementById('storageLocation').value = equipment.storage_location;
+                        document.getElementById('totalQuantity').value = equipment.total_quantity;
+                        document.getElementById('rentalFee').value = equipment.external_fee;
+                        document.getElementById('companyFee').value = equipment.internal_fee;
+                        document.getElementById('minRentalHours').value = equipment.maximum_rental_hour || 1;
+
+                        // Update word count
+                        const descriptionWordCount = document.getElementById('descriptionWordCount');
+                        if (descriptionWordCount) {
+                            descriptionWordCount.textContent = `${equipment.description?.length || 0}/255 characters`;
+                        }
+
+                        // Load images
+                        if (equipment.images && equipment.images.length > 0) {
+                            const photosPreview = document.getElementById('photosPreview');
+                            photosPreview.innerHTML = '';
+
+                            equipment.images.forEach(image => {
+                                const preview = document.createElement('div');
+                                preview.className = 'photo-preview';
+                                preview.dataset.imageId = image.image_id;
+                                preview.dataset.publicId = image.cloudinary_public_id;
+
+                                const img = document.createElement('img');
+                                img.src = image.image_url;
+                                img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
+
+                                const removeBtn = document.createElement('button');
+                                removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
+                                removeBtn.innerHTML = '<i class="bi bi-x"></i>';
+                                removeBtn.onclick = function () {
+                                    // Mark for deletion (will be processed on form submit)
+                                    pendingImageDeletions.push({
+                                        imageId: image.image_id,
+                                        publicId: image.cloudinary_public_id,
+                                        previewElement: preview
+                                    });
+                                    preview.remove();
+                                };
+
+                                preview.appendChild(img);
+                                preview.appendChild(removeBtn);
+                                photosPreview.appendChild(preview);
+                            });
+                        }
+
+                        // Fetch dropdown data
+                        await fetchDropdownData(equipment);
+
+                        // Load equipment items
+                        await loadEquipmentItems(equipmentId);
+
+                    } catch (error) {
+                        console.error('Error loading equipment data:', error);
+                        alert('Failed to load equipment data: ' + error.message);
                     }
                 }
 
-                // Add 'required' class to labels with required fields
+                // 22. Load equipment items
+                async function loadEquipmentItems(equipmentId) {
+                    try {
+                        const token = localStorage.getItem('adminToken');
+                        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/items`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch equipment items');
+                        }
+
+                        const data = await response.json();
+                        equipmentItems = data.data || [];
+
+                        // Clear the container and add items
+                        const itemsContainer = document.getElementById('itemsContainer');
+                        if (itemsContainer) {
+                            itemsContainer.innerHTML = '';
+
+                            if (equipmentItems.length === 0) {
+                                itemsContainer.innerHTML = '<p class="text-muted">No items added yet. Click "Add Item" to track individual equipment pieces.</p>';
+                            } else {
+                                equipmentItems.forEach(item => {
+                                    addItemToUI(item);
+                                });
+                            }
+                        }
+
+                    } catch (error) {
+                        console.error('Error loading equipment items:', error);
+                        showToast('Failed to load equipment items: ' + error.message, 'error');
+                    }
+                }
+
+                // 23. Add 'required' class to labels with required fields
                 document.querySelectorAll('label[for]').forEach(label => {
                     const input = document.getElementById(label.getAttribute('for'));
                     if (input && input.hasAttribute('required')) {
@@ -1453,331 +1622,288 @@ function updateItemInUI(updatedItem) {
                     }
                 });
 
-                // Load equipment data
+                // 24. Load equipment data
                 loadEquipmentData(equipmentId);
-            });
 
-            async function loadEquipmentData(equipmentId) {
-                try {
-                    const response = await fetch(`http://127.0.0.1:8000/api/equipment/${equipmentId}`, {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-                            'Accept': 'application/json'
-                        }
-                    });
+                // 25. Fetch dropdown data function
+                async function fetchDropdownData(equipment) {
+                    try {
+                        const token = localStorage.getItem('adminToken');
+                        console.log('Equipment data:', equipment); // Debug log
 
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch equipment data');
-                    }
-
-                    const data = await response.json();
-                    const equipment = data.data;
-
-                    // Populate form fields
-                    document.getElementById('equipmentName').value = equipment.equipment_name;
-                    document.getElementById('description').value = equipment.description || '';
-                    document.getElementById('brand').value = equipment.brand || '';
-                    document.getElementById('storageLocation').value = equipment.storage_location;
-                    document.getElementById('totalQuantity').value = equipment.total_quantity;
-                    document.getElementById('rentalFee').value = equipment.external_fee;
-                    document.getElementById('companyFee').value = equipment.internal_fee;
-                    document.getElementById('minRentalHours').value = equipment.maximum_rental_hour || 1;
-
-                    // Update word count
-                    const descriptionWordCount = document.getElementById('descriptionWordCount');
-                    if (descriptionWordCount) {
-                        descriptionWordCount.textContent = `${equipment.description?.length || 0}/255 characters`;
-                    }
-
-                    // Load images
-                    if (equipment.images && equipment.images.length > 0) {
-                        const photosPreview = document.getElementById('photosPreview');
-                        photosPreview.innerHTML = '';
-
-                        equipment.images.forEach(image => {
-                            const preview = document.createElement('div');
-                            preview.className = 'photo-preview';
-                            preview.dataset.id = image.image_id;
-
-                            const img = document.createElement('img');
-                            img.src = image.image_url;
-                            img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
-
-                            const removeBtn = document.createElement('button');
-                            removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
-                            removeBtn.innerHTML = '<i class="bi bi-x"></i>';
-                            removeBtn.onclick = function () {
-                                deleteImage(equipmentId, image.image_id, image.cloudinary_public_id);
-                                preview.remove();
-                            };
-
-                            preview.appendChild(img);
-                            preview.appendChild(removeBtn);
-                            photosPreview.appendChild(preview);
+                        // Fetch categories
+                        const categoriesResponse = await fetch('http://127.0.0.1:8000/api/equipment-categories', {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/json'
+                            }
                         });
+
+                        if (categoriesResponse.ok) {
+                            const categoriesData = await categoriesResponse.json();
+                            console.log('Categories data:', categoriesData); // Debug log
+                            // Remove the .data access - the response is the array directly
+                            if (Array.isArray(categoriesData)) {
+                                populateDropdown('category', categoriesData, equipment.category_id, 'category_id', 'category_name');
+                            }
+                        }
+
+                        // Fetch statuses
+                        const statusesResponse = await fetch('http://127.0.0.1:8000/api/availability-statuses', {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (statusesResponse.ok) {
+                            const statusesData = await statusesResponse.json();
+                            console.log('Statuses data:', statusesData); // Debug log
+                            // Remove the .data access - the response is the array directly
+                            if (Array.isArray(statusesData)) {
+                                populateDropdown('availabilityStatus', statusesData, equipment.status_id, 'status_id', 'status_name');
+                            }
+                        }
+
+                        // Fetch departments
+                        const departmentsResponse = await fetch('http://127.0.0.1:8000/api/departments', {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (departmentsResponse.ok) {
+                            const departmentsData = await departmentsResponse.json();
+                            console.log('Departments data:', departmentsData); // Debug log
+                            // Remove the .data access - the response is the array directly
+                            if (Array.isArray(departmentsData)) {
+                                populateDropdown('department', departmentsData, equipment.department_id, 'department_id', 'department_name');
+                            }
+                        }
+
+                        // Populate rate type dropdown
+                        const rateTypeDropdown = document.getElementById('rateType');
+                        if (rateTypeDropdown) {
+                            rateTypeDropdown.innerHTML = `
+                                    <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
+                                    <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
+                                `;
+                        }
+
+                        // Fetch conditions for inventory items
+                        const conditionsResponse = await fetch('http://127.0.0.1:8000/api/conditions', {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (conditionsResponse.ok) {
+                            const conditionsData = await conditionsResponse.json();
+                            // Remove the .data access - the response is the array directly
+                            if (Array.isArray(conditionsData)) {
+                                populateDropdown('itemCondition', conditionsData, null, 'condition_id', 'condition_name');
+                            }
+                        }
+
+                    } catch (error) {
+                        console.error('Error fetching dropdown data:', error);
                     }
-
-                    // Fetch dropdown data
-                    await fetchDropdownData(equipment);
-
-                } catch (error) {
-                    console.error('Error loading equipment data:', error);
-                    alert('Failed to load equipment data: ' + error.message);
-                }
-            }
-
-            async function fetchDropdownData(equipment) {
-                try {
-                    const token = localStorage.getItem('adminToken');
-                    console.log('Equipment data:', equipment); // Debug log
-
-                    // Fetch categories
-                    const categoriesResponse = await fetch('http://127.0.0.1:8000/api/equipment-categories', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (categoriesResponse.ok) {
-                        const categoriesData = await categoriesResponse.json();
-                        console.log('Categories data:', categoriesData); // Debug log
-                        // Remove the .data access - the response is the array directly
-                        if (Array.isArray(categoriesData)) {
-                            populateDropdown('category', categoriesData, equipment.category_id, 'category_id', 'category_name');
-                        }
-                    }
-
-                    // Fetch statuses
-                    const statusesResponse = await fetch('http://127.0.0.1:8000/api/availability-statuses', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (statusesResponse.ok) {
-                        const statusesData = await statusesResponse.json();
-                        console.log('Statuses data:', statusesData); // Debug log
-                        // Remove the .data access - the response is the array directly
-                        if (Array.isArray(statusesData)) {
-                            populateDropdown('availabilityStatus', statusesData, equipment.status_id, 'status_id', 'status_name');
-                        }
-                    }
-
-                    // Fetch departments
-                    const departmentsResponse = await fetch('http://127.0.0.1:8000/api/departments', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (departmentsResponse.ok) {
-                        const departmentsData = await departmentsResponse.json();
-                        console.log('Departments data:', departmentsData); // Debug log
-                        // Remove the .data access - the response is the array directly
-                        if (Array.isArray(departmentsData)) {
-                            populateDropdown('department', departmentsData, equipment.department_id, 'department_id', 'department_name');
-                        }
-                    }
-
-                    // Populate rate type dropdown
-                    const rateTypeDropdown = document.getElementById('rateType');
-                    if (rateTypeDropdown) {
-                        rateTypeDropdown.innerHTML = `
-                                                                                                                                                            <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
-                                                                                                                                                            <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
-                                                                                                                                                        `;
-                    }
-
-                    // Fetch conditions for inventory items
-                    const conditionsResponse = await fetch('http://127.0.0.1:8000/api/conditions', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (conditionsResponse.ok) {
-                        const conditionsData = await conditionsResponse.json();
-                        // Remove the .data access - the response is the array directly
-                        if (Array.isArray(conditionsData)) {
-                            populateDropdown('itemCondition', conditionsData, null, 'condition_id', 'condition_name');
-                        }
-                    }
-
-                } catch (error) {
-                    console.error('Error fetching dropdown data:', error);
-                }
-            }
-
-            function populateDropdown(elementId, data, selectedValue = null, idKey, nameKey) {
-                const dropdown = document.getElementById(elementId);
-                if (!dropdown) {
-                    console.error('Dropdown element not found:', elementId);
-                    return;
                 }
 
-                // Clear existing options except the first one
-                while (dropdown.options.length > 1) {
-                    dropdown.remove(1);
-                }
-
-                // Add new options
-                data.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item[idKey];
-                    option.textContent = item[nameKey];
-
-                    if (selectedValue !== null && option.value == selectedValue) {
-                        option.selected = true;
+                // 26. Populate dropdown function
+                function populateDropdown(elementId, data, selectedValue = null, idKey, nameKey) {
+                    const dropdown = document.getElementById(elementId);
+                    if (!dropdown) {
+                        console.error('Dropdown element not found:', elementId);
+                        return;
                     }
 
-                    dropdown.appendChild(option);
+                    // Clear existing options except the first one
+                    while (dropdown.options.length > 1) {
+                        dropdown.remove(1);
+                    }
+
+                    // Add new options
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item[idKey];
+                        option.textContent = item[nameKey];
+
+                        if (selectedValue !== null && option.value == selectedValue) {
+                            option.selected = true;
+                        }
+
+                        dropdown.appendChild(option);
+                    });
+
+                    // If no option was selected, try to select the first one
+                    if (selectedValue !== null && dropdown.value !== selectedValue) {
+                        console.warn(`Could not find selected value ${selectedValue} in dropdown ${elementId}`);
+                    }
+                }
+
+                // 27. Form submission handler
+             document.getElementById('editEquipmentForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const equipmentId = document.getElementById('equipmentId').value;
+    const token = localStorage.getItem('adminToken');
+
+    try {
+        showToast('Processing changes...', 'success');
+
+        // 1. Process equipment image deletions
+        for (const deletion of pendingImageDeletions) {
+            try {
+                if (deletion.publicId && deletion.publicId !== 'oxvsxogzu9koqhctnf7s') {
+                    await deleteImageFromCloudinary(deletion.publicId);
+                }
+                await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/${deletion.imageId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
                 });
-
-                // If no option was selected, try to select the first one
-                if (selectedValue !== null && dropdown.value !== selectedValue) {
-                    console.warn(`Could not find selected value ${selectedValue} in dropdown ${elementId}`);
-                }
+            } catch (error) {
+                console.error('Error deleting equipment image:', error);
+                showToast('Warning: Failed to delete some images', 'warning');
             }
+        }
 
-            function populateDropdown(elementId, data, selectedValue = null, idKey, nameKey) {
-                const dropdown = document.getElementById(elementId);
-                if (!dropdown) return;
+        // 2. Process equipment image uploads
+        for (const upload of pendingImageUploads) {
+            try {
+                const cloudinaryData = await uploadToCloudinary(upload.file, equipmentId);
+                await saveImageToDatabase(equipmentId, cloudinaryData.secure_url, cloudinaryData.public_id);
+            } catch (error) {
+                console.error('Error uploading equipment image:', error);
+                showToast('Warning: Failed to upload some images', 'warning');
+            }
+        }
 
-                // Clear existing options except the first one
-                while (dropdown.options.length > 1) {
-                    dropdown.remove(1);
-                }
+        // 3. Process item changes
+        for (const [itemId, change] of pendingItemPhotoChanges.entries()) {
+            try {
+                if (change.action === 'delete') {
+                    // Delete item
+                    if (change.publicId && change.publicId !== 'oxvsxogzu9koqhctnf7s') {
+                        await deleteImageFromCloudinary(change.publicId);
+                    }
+                    await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/items/${itemId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+                } else if (change.action === 'create') {
+                    // Create new item
+                    let imageUrl = 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp';
+                    let publicId = 'oxvsxogzu9koqhctnf7s';
 
-                // Add new options
-                data.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item[idKey];
-                    option.textContent = item[nameKey];
-
-                    if (selectedValue !== null && option.value == selectedValue) {
-                        option.selected = true;
+                    if (change.file) {
+                        const cloudinaryData = await uploadItemToCloudinary(change.file, equipmentId);
+                        imageUrl = cloudinaryData.secure_url;
+                        publicId = cloudinaryData.public_id;
                     }
 
-                    dropdown.appendChild(option);
-                });
-            }
+                    const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/items`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            ...change.itemData,
+                            image_url: imageUrl,
+                            cloudinary_public_id: publicId
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to create item');
+                } else if (change.action === 'update') {
+                    // Update existing item
+                    let imageUrl = null;
+                    let publicId = null;
 
-            // Function to delete item (frontend)
-            async function deleteItem(itemId, cloudinaryPublicId) {
-                if (!confirm('Are you sure you want to delete this item?')) {
-                    return;
-                }
-
-                try {
-                    const token = localStorage.getItem('adminToken');
-                    const equipmentId = document.getElementById('equipmentId').value;
-
-                    // Delete from Cloudinary if it's not the default image
-                    if (cloudinaryPublicId && cloudinaryPublicId !== 'oxvsxogzu9koqhctnf7s') {
-                        await deleteImageFromCloudinary(cloudinaryPublicId);
+                    if (change.file) {
+                        const cloudinaryData = await uploadItemToCloudinary(change.file, equipmentId);
+                        imageUrl = cloudinaryData.secure_url;
+                        publicId = cloudinaryData.public_id;
                     }
 
-                    // Delete from database
+                    const updateData = { ...change.itemData };
+                    if (imageUrl) updateData.image_url = imageUrl;
+                    if (publicId) updateData.cloudinary_public_id = publicId;
+
                     const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/items/${itemId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to delete item from database');
-                    }
-
-                    // Remove from UI
-                    document.querySelector(`.equipment-item[data-item-id="${itemId}"]`)?.remove();
-
-                    showToast('Item deleted successfully', 'success');
-
-                } catch (error) {
-                    console.error('Error deleting item:', error);
-                    showToast('Failed to delete item: ' + error.message, 'error');
-                }
-            }
-
-            async function deleteImage(equipmentId, imageId, cloudinaryPublicId) {
-                try {
-                    const token = localStorage.getItem('adminToken');
-
-                    // Only call the single endpoint that handles both Cloudinary and database deletion
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/${imageId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Failed to delete image');
-                    }
-
-                    showToast('Image deleted successfully', 'success');
-
-                } catch (error) {
-                    console.error('Error deleting image:', error);
-                    showToast('Failed to delete image: ' + error.message, 'error');
-                    throw error;
-                }
-            }
-
-            // Form submission
-            document.getElementById('editEquipmentForm').addEventListener('submit', async function (e) {
-                e.preventDefault();
-
-                const equipmentId = document.getElementById('equipmentId').value;
-                const token = localStorage.getItem('adminToken');
-
-                const formData = {
-                    equipment_name: document.getElementById('equipmentName').value,
-                    description: document.getElementById('description').value,
-                    brand: document.getElementById('brand').value,
-                    storage_location: document.getElementById('storageLocation').value,
-                    category_id: document.getElementById('category').value,
-                    total_quantity: document.getElementById('totalQuantity').value,
-                    internal_fee: document.getElementById('companyFee').value,
-                    external_fee: document.getElementById('rentalFee').value,
-                    rate_type: document.getElementById('rateType').value,
-                    status_id: document.getElementById('availabilityStatus').value,
-                    department_id: document.getElementById('department').value,
-                    maximum_rental_hour: document.getElementById('minRentalHours').value,
-                };
-
-                try {
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}`, {
                         method: 'PUT',
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify(formData)
+                        body: JSON.stringify(updateData)
                     });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Failed to update equipment');
-                    }
-
-                    showToast('Equipment updated successfully!', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/admin/manage-equipment';
-                    }, 1500);
-                } catch (error) {
-                    console.error('Error updating equipment:', error);
-                    showToast('Failed to update equipment: ' + error.message, 'error');
+                    
+                    if (!response.ok) throw new Error('Failed to update item');
                 }
+            } catch (error) {
+                console.error('Error processing item change:', error);
+                showToast('Warning: Failed to process some item changes', 'warning');
+            }
+        }
+
+        // 4. Update equipment details
+        const formData = {
+            equipment_name: document.getElementById('equipmentName').value,
+            description: document.getElementById('description').value,
+            brand: document.getElementById('brand').value,
+            storage_location: document.getElementById('storageLocation').value,
+            category_id: document.getElementById('category').value,
+            total_quantity: document.getElementById('totalQuantity').value,
+            internal_fee: document.getElementById('companyFee').value,
+            external_fee: document.getElementById('rentalFee').value,
+            rate_type: document.getElementById('rateType').value,
+            status_id: document.getElementById('availabilityStatus').value,
+            department_id: document.getElementById('department').value,
+            maximum_rental_hour: document.getElementById('minRentalHours').value,
+        };
+
+        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update equipment');
+        }
+
+        // Clear pending changes
+        pendingImageUploads = [];
+        pendingImageDeletions = [];
+        pendingItemPhotoChanges.clear();
+
+        showToast('Equipment updated successfully!', 'success');
+        setTimeout(() => {
+            window.location.href = '/admin/manage-equipment';
+        }, 1500);
+
+    } catch (error) {
+        console.error('Error updating equipment:', error);
+        showToast('Failed to update equipment: ' + error.message, 'error');
+    }
+});
             });
         </script>
     @endsection

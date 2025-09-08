@@ -42,15 +42,59 @@ Route::put('/admins/{admin}', [AdminController::class, 'update']);
 
 // Cloudinary delete route
 Route::post('/admin/cloudinary/delete', function (Request $request) {
-    $request->validate([
-        'public_id' => 'required|string'
-    ]);
     try {
-        $result = Cloudinary::destroy($request->public_id);
-        return response()->json(['message' => 'Image deleted from Cloudinary', 'result' => $result]);
+        $request->validate([
+            'public_id' => 'required|string'
+        ]);
+        
+        $publicId = $request->public_id;
+        
+        \Log::info('Attempting Cloudinary delete', ['public_id' => $publicId]);
+        
+        // Use Cloudinary API directly for more control
+        $cloudinary = new \Cloudinary\Cloudinary([
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                'api_key' => env('CLOUDINARY_API_KEY'),
+                'api_secret' => env('CLOUDINARY_API_SECRET'),
+            ],
+        ]);
+        
+        $result = $cloudinary->adminApi()->deleteAssets($publicId, [
+            'resource_type' => 'image',
+            'type' => 'upload'
+        ]);
+        
+        \Log::info('Cloudinary delete successful', [
+            'public_id' => $publicId,
+            'result' => json_encode($result)
+        ]);
+        
+        return response()->json([
+            'message' => 'Image deleted from Cloudinary', 
+            'result' => $result
+        ]);
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Cloudinary delete validation error', [
+            'error' => $e->getMessage(),
+            'request_data' => $request->all()
+        ]);
+        return response()->json([
+            'message' => 'Validation failed',
+            'error' => $e->getMessage()
+        ], 422);
+        
     } catch (\Exception $e) {
-        \Log::error('Cloudinary delete error', ['error' => $e->getMessage()]);
-        return response()->json(['message' => 'Failed to delete image', 'error' => $e->getMessage()], 500);
+        \Log::error('Cloudinary delete error', [
+            'error' => $e->getMessage(),
+            'public_id' => $request->public_id ?? 'unknown',
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'message' => 'Failed to delete image', 
+            'error' => $e->getMessage()
+        ], 500);
     }
 })->middleware('auth:sanctum');
 
