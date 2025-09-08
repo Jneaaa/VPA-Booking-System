@@ -8,7 +8,6 @@
     <title>@yield('title', 'CPU Booking')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/admin/admin-styles.css') }}" />
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <style>
         .text-primary {
@@ -268,11 +267,12 @@
             flex: 1;
         }
 
-        main {
-            padding: 20px;
-            width: 100%;
-            margin-top: 10px;
-        }
+main {
+  padding: 20px;
+  padding-top: 50px;
+  width: 90%;       /* reduce width */
+ margin-left: auto;
+}
 
         /* Smooth transitions for topbar */
         .transition-all {
@@ -284,11 +284,7 @@
             transform: translateY(-100%);
         }
 
-        /* Adjust main content padding when topbar is fixed */
-        main {
-            padding-top: 70px;
-            /* Match topbar height + some spacing */
-        }
+
     </style>
 </head>
 
@@ -351,8 +347,8 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" style='color: darkred' href="{{ url('/admin/admin-login') }}" id="logoutLink"><i
-                                    class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        <li><a class="dropdown-item" style='color: darkred' href="{{ url('/admin/admin-login') }}"
+                                id="logoutLink"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                     </ul>
                 </div>
         </div>
@@ -369,9 +365,11 @@
                 <div id="profile-img-container" class="position-relative">
                     <div id="profile-skeleton" class="skeleton skeleton-circle" style="width: 80px; height: 80px;">
                     </div>
-                    <img id="admin-profile-img" src="{{ asset('images/default-admin.png') }}"
+                    <img id="admin-profile-img"
+                        src="https://res.cloudinary.com/dn98ntlkd/image/upload/v1751033911/ksdmh4mmpxdtjogdgjmm.png"
                         class="rounded-circle border border-3 border-white shadow-sm"
                         style="width: 80px; height: 80px; object-fit: cover; display: none;">
+
                     <div class="status-indicator bg-success"></div>
                 </div>
             </div>
@@ -512,9 +510,11 @@
         });
     </script>
 
-    <main style="margin-left: 250px; padding: 20px; width: calc(100% - 250px);">
+
+    <main>
         @yield('content')
     </main>
+
 
     {{-- Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
