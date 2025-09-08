@@ -11,19 +11,6 @@
     rel="stylesheet">
   <link rel="stylesheet" href="css/admin-styles.css">
   <style>
-    /* Add sharp edges to all elements */
-    * {
-    border-radius: 0 !important;
-    }
-
-    /* Exclude admin photo container and status circle */
-    .profile-img {
-    border-radius: 50% !important;
-    }
-
-    .status-indicator {
-    border-radius: 50% !important;
-    }
 
     #miniCalendar {
     height: 300px;
@@ -54,6 +41,14 @@
     box-shadow: none;
     border: 1px solid #ddd;
     }
+
+          #layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    margin-top: 10px;
+    }
+    
   </style>
   <!-- Main Layout -->
   <div id="layout">

@@ -6,7 +6,6 @@ use App\Models\Equipment;
 use App\Models\EquipmentItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 
@@ -233,6 +232,63 @@ class EquipmentController extends Controller
 
         return view('admin.edit-equipment', ['equipmentId' => $equipmentId]);
     }
+
+    // ----- Delete Equipment ----- //
+public function destroy($id): JsonResponse
+{
+    try {
+        $equipment = Equipment::findOrFail($id);
+
+
+        // Delete associated images from Cloudinary and database
+        foreach ($equipment->images as $image) {
+            if ($image->cloudinary_public_id && $image->cloudinary_public_id !== 'oxvsxogzu9koqhctnf7s') {
+                try {
+                    Cloudinary::destroy($image->cloudinary_public_id);
+                    \Log::info('Deleted Cloudinary image', [
+                        'public_id' => $image->cloudinary_public_id
+                    ]);
+                } catch (\Exception $cloudinaryError) {
+                    \Log::error('Cloudinary delete failed but continuing', [
+                        'error' => $cloudinaryError->getMessage(),
+                        'public_id' => $image->cloudinary_public_id
+                    ]);
+                    // Continue even if Cloudinary delete fails
+                }
+            }
+            $image->delete();
+        }
+
+        // Delete associated items
+        $equipment->items()->delete();
+
+        // Delete the equipment itself
+        $equipment->delete();
+
+        \Log::info('Equipment deleted successfully', [
+            'equipment_id' => $id,
+        ]);
+
+        return response()->json(['message' => 'Equipment deleted successfully']);
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        \Log::error('Equipment not found for deletion', [
+            'equipment_id' => $id,
+            'error' => $e->getMessage()
+        ]);
+        return response()->json(['message' => 'Equipment not found'], 404);
+
+    } catch (\Exception $e) {
+        \Log::error('Error deleting equipment', [
+            'error' => $e->getMessage(),
+            'equipment_id' => $id,
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'message' => 'Failed to delete equipment: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
 public function saveImageReference(Request $request, $equipmentId): JsonResponse
 {

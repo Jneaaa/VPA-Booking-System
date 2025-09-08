@@ -4,171 +4,182 @@
 
 @section('content')
 
-<style>
+  <style>
+    #layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      margin-top: -20px;
+    }
 
-/* Custom pagination colors using CPU theme */
-.pagination .page-link {
-  color: var(--cpu-primary); /* dark blue text */
-}
+    /* Custom pagination colors using CPU theme */
+    .pagination .page-link {
+      color: var(--cpu-primary);
+      /* dark blue text */
+    }
 
-.pagination .page-link:hover {
-  color: var(--cpu-primary-hover); /* hover text color */
-}
+    .pagination .page-link:hover {
+      color: var(--cpu-primary-hover);
+      /* hover text color */
+    }
 
-/* Active page */
-.pagination .page-item.active .page-link {
-  background-color: var(--cpu-primary);
-  border-color: var(--cpu-primary);
-  color: #fff; /* white text for contrast */
-}
+    /* Active page */
+    .pagination .page-item.active .page-link {
+      background-color: var(--cpu-primary);
+      border-color: var(--cpu-primary);
+      color: #fff;
+      /* white text for contrast */
+    }
 
-/* Disabled state */
-.pagination .page-item.disabled .page-link {
-  color: #6c757d; /* gray */
-  pointer-events: none;
-  background-color: var(--light-gray);
-  border-color: #dee2e6;
-}
+    /* Disabled state */
+    .pagination .page-item.disabled .page-link {
+      color: #6c757d;
+      /* gray */
+      pointer-events: none;
+      background-color: var(--light-gray);
+      border-color: #dee2e6;
+    }
 
 
-  html,
-  body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    /* prevent the whole page from scrolling */
-  }
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      /* prevent the whole page from scrolling */
+    }
 
-  #layout,
-  #main {
-    height: 100%;
-    /* take up full screen */
-    display: flex;
-    flex-direction: column;
-  }
+    #layout,
+    #main {
+      height: 100%;
+      /* take up full screen */
+      display: flex;
+      flex-direction: column;
+    }
 
-  #facilitiesContainer {
-    flex: 1;
-    /* take up remaining space between header and pagination */
-    overflow-y: auto;
-    /* allow inner scrolling */
-    min-height: 0;
-    /* IMPORTANT for flexbox scrolling */
-    padding-right: 8px;
-    /* Add right padding */
-  }
+    #facilitiesContainer {
+      flex: 1;
+      /* take up remaining space between header and pagination */
+      overflow-y: auto;
+      /* allow inner scrolling */
+      min-height: 0;
+      /* IMPORTANT for flexbox scrolling */
+      padding-right: 8px;
+      /* Add right padding */
+    }
 
-  /* Custom thin scrollbar */
-  #facilitiesContainer::-webkit-scrollbar {
-    width: 6px;
-  }
+    /* Custom thin scrollbar */
+    #facilitiesContainer::-webkit-scrollbar {
+      width: 6px;
+    }
 
-  #facilitiesContainer::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
+    #facilitiesContainer::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
 
-  #facilitiesContainer::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-  }
+    #facilitiesContainer::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
 
-  #facilitiesContainer::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
+    #facilitiesContainer::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
 
-  /* Firefox */
-  #facilitiesContainer {
-    scrollbar-width: thin;
-    scrollbar-color: #888 #f1f1f1;
-  }
-</style>
+    /* Firefox */
+    #facilitiesContainer {
+      scrollbar-width: thin;
+      scrollbar-color: #888 #f1f1f1;
+    }
+  </style>
 
-<link rel="stylesheet" href="{{ asset('css/admin/facilities.css') }}">
-<div id="layout">
-  <!-- Main Content -->
-  <main id="main">
-    <div class="container-fluid bg-light rounded p-4 d-flex flex-column h-100">
-      <div class="container-fluid d-flex flex-column h-100">
+  <link rel="stylesheet" href="{{ asset('css/admin/facilities.css') }}">
+  <div id="layout">
+    <!-- Main Content -->
+    <main id="main">
+      <div class="container-fluid bg-light rounded p-4 d-flex flex-column h-100">
+        <div class="container-fluid d-flex flex-column h-100">
 
-        <!-- Header & Controls -->
-        <div>
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="card-title m-0 fw-bold">Manage Facilities</h2>
-            <div>
-              <a href="{{ url('/admin/add-facility') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle-fill me-2"></i>Add New
-              </a>
-            </div>
-          </div>
-
-          <!-- Filters & Search Bar -->
-          <div class="row mb-3 g-2">
-            <div class="col-sm-6 col-md-2 col-lg-2">
-              <select id="layoutSelect" class="form-select">
-                <option value="grid">Grid Layout</option>
-                <option value="list">List Layout</option>
-              </select>
-            </div>
-            <div class="col-sm-6 col-md-2 col-lg-2">
-              <select id="statusFilter" class="form-select">
-                <option value="all">All Statuses</option>
-                <!-- Statuses will be populated dynamically -->
-              </select>
-            </div>
-            <div class="col-sm-6 col-md-2 col-lg-2">
-              <select id="categoryFilter" class="form-select">
-                <option value="all">All Categories</option>
-                <!-- Categories will be populated dynamically -->
-              </select>
-            </div>
-            <div class="col-sm-12 col-md-4 col-lg-4 ms-auto">
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                <input type="text" id="searchInput" class="form-control" placeholder="Search Facilities...">
+          <!-- Header & Controls -->
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h2 class="card-title m-0 fw-bold">Manage Facilities</h2>
+              <div>
+                <a href="{{ url('/admin/add-facility') }}" class="btn btn-primary">
+                  <i class="bi bi-plus-circle-fill me-2"></i>Add New
+                </a>
               </div>
             </div>
-          </div>
 
-          <!-- Facilities List (scrollable) -->
-          <div id="facilitiesContainer" class="flex-grow-1 overflow-auto" style="height: calc(100vh - 300px);">
-            <div class="row g-2" id="facilitiesCardsContainer">
-              <div class="col-12 text-center py-5" id="loadingIndicator">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2">Loading facilities...</p>
+            <!-- Filters & Search Bar -->
+            <div class="row mb-3 g-2">
+              <div class="col-sm-6 col-md-2 col-lg-2">
+                <select id="layoutSelect" class="form-select">
+                  <option value="grid">Grid Layout</option>
+                  <option value="list">List Layout</option>
+                </select>
               </div>
-              <div class="col-12 text-center py-5 d-none" id="noResultsMessage">
-                <i class="bi bi-exclamation-circle fs-1 text-muted"></i>
-                <p class="mt-2 text-muted">No facilities found matching your criteria</p>
+              <div class="col-sm-6 col-md-2 col-lg-2">
+                <select id="statusFilter" class="form-select">
+                  <option value="all">All Statuses</option>
+                  <!-- Statuses will be populated dynamically -->
+                </select>
+              </div>
+              <div class="col-sm-6 col-md-2 col-lg-2">
+                <select id="categoryFilter" class="form-select">
+                  <option value="all">All Categories</option>
+                  <!-- Categories will be populated dynamically -->
+                </select>
+              </div>
+              <div class="col-sm-12 col-md-4 col-lg-4 ms-auto">
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-search"></i></span>
+                  <input type="text" id="searchInput" class="form-control" placeholder="Search Facilities...">
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Pagination Controls (fixed at bottom) -->
-          <div class="d-flex justify-content-center mt-auto pt-3">
-            <nav aria-label="Facilities pagination">
-              <ul class="pagination" id="paginationContainer">
-                <li class="page-item disabled" id="prevPage">
-                  <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                    <span aria-hidden="true">&laquo;</span>
-                    <span class="visually-hidden">Previous</span>
-                  </a>
-                </li>
-                <li class="page-item active">
-                  <a class="page-link" href="#" data-page="1">1</a>
-                </li>
-                <li class="page-item" id="nextPage">
-                  <a class="page-link" href="#" data-page="2">
-                    <span aria-hidden="true">&raquo;</span>
-                    <span class="visually-hidden">Next</span>
-                  </a>
-                </li>
-              </ul>
-            </nav>
+            <!-- Facilities List (scrollable) -->
+            <div id="facilitiesContainer" class="flex-grow-1 overflow-auto" style="height: calc(100vh - 300px);">
+              <div class="row g-2" id="facilitiesCardsContainer">
+                <div class="col-12 text-center py-5" id="loadingIndicator">
+                  <div class="spinner-border text-primary" role="status"></div>
+                  <p class="mt-2">Loading facilities...</p>
+                </div>
+                <div class="col-12 text-center py-5 d-none" id="noResultsMessage">
+                  <i class="bi bi-exclamation-circle fs-1 text-muted"></i>
+                  <p class="mt-2 text-muted">No facilities found matching your criteria</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pagination Controls (fixed at bottom) -->
+            <div class="d-flex justify-content-center mt-auto pt-3">
+              <nav aria-label="Facilities pagination">
+                <ul class="pagination" id="paginationContainer">
+                  <li class="page-item disabled" id="prevPage">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                      <span aria-hidden="true">&laquo;</span>
+                      <span class="visually-hidden">Previous</span>
+                    </a>
+                  </li>
+                  <li class="page-item active">
+                    <a class="page-link" href="#" data-page="1">1</a>
+                  </li>
+                  <li class="page-item" id="nextPage">
+                    <a class="page-link" href="#" data-page="2">
+                      <span aria-hidden="true">&raquo;</span>
+                      <span class="visually-hidden">Next</span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
           </div>
         </div>
-      </div>
-  </main>
-</div>
+    </main>
+  </div>
+@endsection
 
 @section('scripts')
   <!-- Combined JS resources -->
@@ -364,11 +375,11 @@
         if (facilitiesList.length === 0) {
           // Show no facilities found message with icon
           container.innerHTML = `
-                                        <div class="col-12 text-center py-5">
-                                          <i class="bi bi-tools fs-1 text-muted" style="font-size: 4rem !important;"></i>
-                                          <p class="mt-2 text-muted">No facilities found.</p>
-                                        </div>
-                                      `;
+                                          <div class="col-12 text-center py-5">
+                                            <i class="bi bi-tools fs-1 text-muted" style="font-size: 4rem !important;"></i>
+                                            <p class="mt-2 text-muted">No facilities found.</p>
+                                          </div>
+                                        `;
           // Clear pagination when no results
           paginationContainer.innerHTML = '';
           return;
@@ -397,27 +408,27 @@
 
 
 
-card.innerHTML = `
-  <div class="card h-100">
-    <img src="${primaryImage}" class="card-img-top" style="height: 120px; object-fit: cover;" alt="${facilities.facilities_name}">
-    <div class="card-body d-flex flex-column p-2">
-      <div>
-        <h6 class="card-title mb-1 fw-bold">${facilities.facility_name}</h6>
-        <p class="card-text text-muted mb-1 small">
-          <i class="bi bi-tag-fill text-primary me-1"></i>
-          ${facilities.category.category_name} 
-          <span class="ms-2">| ${facilities.subcategory.subcategory_name}</span>
-        </p>
-        <span class="badge ${statusClass} mb-2">${facilities.status.status_name}</span>
-        <p class="card-text mb-2 small text-truncate">${facilities.description || "No description available"}</p>
-      </div>
-      <div class="facilities-actions mt-auto d-grid gap-1">
-        <a href="/admin/edit-facility?id=${facilities.facility_id}" class="btn btn-sm btn-primary btn-manage">Manage</a>
-        <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${facilities.facility_id}">Delete</button>
+          card.innerHTML = `
+    <div class="card h-100">
+      <img src="${primaryImage}" class="card-img-top" style="height: 120px; object-fit: cover;" alt="${facilities.facilities_name}">
+      <div class="card-body d-flex flex-column p-2">
+        <div>
+          <h6 class="card-title mb-1 fw-bold">${facilities.facility_name}</h6>
+          <p class="card-text text-muted mb-1 small">
+            <i class="bi bi-tag-fill text-primary me-1"></i>
+            ${facilities.category.category_name} 
+            <span class="ms-2">| ${facilities.subcategory.subcategory_name}</span>
+          </p>
+          <span class="badge ${statusClass} mb-2">${facilities.status.status_name}</span>
+          <p class="card-text mb-2 small text-truncate">${facilities.description || "No description available"}</p>
+        </div>
+        <div class="facilities-actions mt-auto d-grid gap-1">
+          <a href="/admin/edit-facility?id=${facilities.facility_id}" class="btn btn-sm btn-primary btn-manage">Manage</a>
+          <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${facilities.facility_id}">Delete</button>
+        </div>
       </div>
     </div>
-  </div>
-`;
+  `;
 
 
 
@@ -595,11 +606,11 @@ card.innerHTML = `
         prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
         prevLi.id = "prevPage";
         prevLi.innerHTML = `
-            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-              <span aria-hidden="true">&laquo;</span>
-              <span class="visually-hidden">Previous</span>
-            </a>
-          `;
+              <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                <span aria-hidden="true">&laquo;</span>
+                <span class="visually-hidden">Previous</span>
+              </a>
+            `;
         paginationContainer.appendChild(prevLi);
 
         // Page numbers
@@ -623,11 +634,11 @@ card.innerHTML = `
         nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
         nextLi.id = "nextPage";
         nextLi.innerHTML = `
-                    <a class="page-link" href="#" data-page="${currentPage + 1}">
-                      <span aria-hidden="true">&raquo;</span>
-                      <span class="visually-hidden">Next</span>
-                    </a>
-                  `;
+                      <a class="page-link" href="#" data-page="${currentPage + 1}">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="visually-hidden">Next</span>
+                      </a>
+                    `;
         paginationContainer.appendChild(nextLi);
 
         // Add event listeners
