@@ -6,10 +6,6 @@
 
 <style>
 
-
-* {
-  border-radius: 0 !important;
-}
 /* Custom pagination colors using CPU theme */
 .pagination .page-link {
   color: var(--cpu-primary); /* dark blue text */
@@ -87,7 +83,7 @@
   }
 </style>
 
-<link rel="stylesheet" href="{{ asset('css/admin/equipment.css') }}">
+
 <div id="layout">
   <!-- Main Content -->
   <main id="main">

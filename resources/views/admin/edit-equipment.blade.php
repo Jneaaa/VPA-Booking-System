@@ -725,44 +725,41 @@
                 }
 
                 // 9. Cloudinary upload functions
-                async function uploadToCloudinary(file, equipmentId) {
-                    const CLOUD_NAME = 'dn98ntlkd'; // Your Cloudinary cloud name
-                    const UPLOAD_PRESET = 'equipment-photos'; // Your unsigned upload preset
+               async function uploadToCloudinary(file, equipmentId) {
+    const CLOUD_NAME = 'dn98ntlkd'; // Your Cloudinary cloud name
+    const UPLOAD_PRESET = 'equipment-photos'; // Your unsigned upload preset
 
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('upload_preset', UPLOAD_PRESET);
-                    formData.append('folder', `equipment-photos/${equipmentId}`);
-                    formData.append('tags', `equipment_${equipmentId}`);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+    formData.append('folder', `equipment-photos/${equipmentId}`);
+    formData.append('tags', `equipment_${equipmentId}`);
 
-                    try {
-                       // showToast('Uploading image to Cloudinary...', 'info', 3000);// 
+    try {
+        // showToast('Uploading image to Cloudinary...', 'info', 3000);//
 
-                        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                            method: 'POST',
-                            body: formData
-                        });
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: formData
+        });
 
-                        if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.error?.message || 'Upload failed');
-                        }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Upload failed');
+        }
 
-                        const data = await response.json();
-                        console.log('Cloudinary upload successful:', data);
+        const data = await response.json();
+        console.log('Cloudinary upload successful:', data);
 
-                        // Now save the image reference to your database
-                        await saveImageToDatabase(equipmentId, data.secure_url, data.public_id);
+        // REMOVED THE saveImageToDatabase CALL HERE - it will be called during form submission
+        return data;
 
-                      //  showToast('Image uploaded to Cloudinary successfully!', 'success');//#cancelConfirmationModal
-                        return data;
-
-                    } catch (error) {
-                        console.error('Cloudinary upload error:', error);
-                        showToast('Cloudinary upload failed: ' + error.message, 'error'); 
-                        throw error;
-                    }
-                }
+    } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        showToast('Cloudinary upload failed: ' + error.message, 'error'); 
+        throw error;
+    }
+}
 
                 // 10. Function to save image reference to your database
                 async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
@@ -881,7 +878,7 @@
                 }
 
                 // 12. Equipment file handling function (moved outside conditional block)
-              async function handleEquipmentFiles(files) {
+             async function handleEquipmentFiles(files) {
     const equipmentId = document.getElementById('equipmentId').value;
 
     for (const file of files) {
@@ -1774,15 +1771,15 @@
         }
 
         // 2. Process equipment image uploads
-        for (const upload of pendingImageUploads) {
-            try {
-                const cloudinaryData = await uploadToCloudinary(upload.file, equipmentId);
-                await saveImageToDatabase(equipmentId, cloudinaryData.secure_url, cloudinaryData.public_id);
-            } catch (error) {
-                console.error('Error uploading equipment image:', error);
-                showToast('Warning: Failed to upload some images', 'warning');
-            }
-        }
+for (const upload of pendingImageUploads) {
+    try {
+        const cloudinaryData = await uploadToCloudinary(upload.file, equipmentId);
+        await saveImageToDatabase(equipmentId, cloudinaryData.secure_url, cloudinaryData.public_id);
+    } catch (error) {
+        console.error('Error uploading equipment image:', error);
+        showToast('Warning: Failed to upload some images', 'warning');
+    }
+}
 
         // 3. Process item changes
         for (const [itemId, change] of pendingItemPhotoChanges.entries()) {
