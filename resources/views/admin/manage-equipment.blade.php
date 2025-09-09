@@ -6,6 +6,26 @@
 
 <style>
 
+  /* Toast notification styles */
+.toast {
+    z-index: 1100;
+    bottom: 0;
+    left: 0;
+    margin: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    min-width: 250px;
+    border-radius: 0.3rem;
+}
+
+.toast .loading-bar {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.7);
+    width: 100%;
+    transition: width 3000ms linear;
+}
+
 /* Custom pagination colors using CPU theme */
 .pagination .page-link {
   color: var(--cpu-primary); /* dark blue text */
@@ -512,56 +532,184 @@ function setupEventListeners() {
 }
 
       // Add event listeners to manage and delete buttons
-      function addButtonEventListeners() {
-        // Manage buttons
-        document.querySelectorAll(".btn-manage").forEach((button) => {
-          button.addEventListener("click", function () {
+function addButtonEventListeners() {
+    // Delete buttons
+    document.querySelectorAll(".btn-delete").forEach((button) => {
+        button.addEventListener("click", function () {
             const equipmentId = this.dataset.id;
-            window.location.href = `edit-equipment.html?id=${equipmentId}`;
-          });
+            const equipmentName = this.closest('.card').querySelector('.card-title').textContent.trim();
+            
+            // Show confirmation modal instead of confirm()
+            showDeleteConfirmationModal(equipmentId, equipmentName);
         });
+    });
+}
 
-        // Delete buttons
-        document.querySelectorAll(".btn-delete").forEach((button) => {
-          button.addEventListener("click", async function () {
-            const equipmentId = this.dataset.id;
-            if (confirm("Are you sure you want to delete this equipment?")) {
-              try {
-                await deleteEquipment(equipmentId);
+function showDeleteConfirmationModal(equipmentId, equipmentName) {
+    // Create modal HTML
+const modalHtml = `
+    <div class="modal fade" id="deleteEquipmentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 2.5rem;"></i>
+                    <p class="mt-3 mb-1">Are you sure you want to delete <strong>"${equipmentName}"</strong>?</p>
+                    <p class="text-danger mt-1">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteEquipmentBtn">Delete Equipment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
+
+    
+    // Add modal to DOM
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Initialize and show modal
+    const modal = new bootstrap.Modal(document.getElementById('deleteEquipmentModal'));
+    modal.show();
+    
+    // Handle confirm button click
+    document.getElementById('confirmDeleteEquipmentBtn').addEventListener('click', async function() {
+        try {
+            const success = await deleteEquipment(equipmentId);
+            if (success) {
+                showToast('Equipment deleted successfully!', 'success');
                 await fetchEquipment(); // Refresh the list
-              } catch (error) {
-                console.error("Error deleting equipment:", error);
-                alert("Failed to delete equipment");
-              }
             }
-          });
-        });
-      }
+        } catch (error) {
+            console.error("Error deleting equipment:", error);
+            showToast('Failed to delete equipment: ' + error.message, 'error');
+        } finally {
+            modal.hide();
+            // Remove modal from DOM after hiding
+            setTimeout(() => {
+                document.getElementById('deleteEquipmentModal')?.remove();
+            }, 300);
+        }
+    });
+    
+    // Remove modal from DOM when hidden
+    document.getElementById('deleteEquipmentModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
+
+// Toast notification function (copied from edit-equipment)
+window.showToast = function (message, type = 'success', duration = 3000) {
+    const toast = document.createElement('div');
+
+    // Toast base styles
+    toast.className = `toast align-items-center border-0 position-fixed start-0 mb-2`;
+    toast.style.zIndex = '1100';
+    toast.style.bottom = '0';
+    toast.style.left = '0';
+    toast.style.margin = '1rem';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(20px)';
+    toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+
+    // Colors
+    const bgColor = type === 'success' ? '#004183ff' : '#dc3545';
+    toast.style.backgroundColor = bgColor;
+    toast.style.color = '#fff';
+    toast.style.minWidth = '250px';
+    toast.style.borderRadius = '0.3rem';
+
+    toast.innerHTML = `
+        <div class="d-flex align-items-center px-3 py-1"> 
+            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+            <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+            <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="loading-bar" style="
+            height: 3px;
+            background: rgba(255,255,255,0.7);
+            width: 100%;
+            transition: width ${duration}ms linear;
+        "></div>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Bootstrap toast instance
+    const bsToast = new bootstrap.Toast(toast, { autohide: false });
+    bsToast.show();
+
+    // Float up appear animation
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    });
+
+    // Start loading bar animation
+    const loadingBar = toast.querySelector('.loading-bar');
+    requestAnimationFrame(() => {
+        loadingBar.style.width = '0%';
+    });
+
+    // Remove after duration
+    setTimeout(() => {
+        // Float down disappear animation
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+            bsToast.hide();
+            toast.remove();
+        }, 400);
+    }, duration);
+};
 
       // Delete equipment
-      async function deleteEquipment(id) {
-        try {
-          const response = await fetch(
+     async function deleteEquipment(id) {
+    try {
+        const response = await fetch(
             `http://127.0.0.1:8000/api/admin/equipment/${id}`,
             {
-              method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: "application/json",
-              },
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
+                },
             }
-          );
+        );
 
-          if (!response.ok) {
-            throw new Error("Failed to delete equipment");
-          }
-
-          return true;
-        } catch (error) {
-          console.error("Error deleting equipment:", error);
-          throw error;
+        if (response.status === 401) {
+            console.error("Unauthorized: Invalid or expired token.");
+            localStorage.removeItem("adminToken");
+            alert("Your session has expired. Please log in again.");
+            setTimeout(() => {
+                window.location.href = "/admin/admin-login";
+            }, 2000);
+            return false;
         }
-      }
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to delete equipment");
+        }
+
+        const result = await response.json();
+        return true;
+
+    } catch (error) {
+        console.error("Error deleting equipment:", error);
+        alert(error.message || "Failed to delete equipment");
+        throw error;
+    }
+}
 
      // Filter Equipment based on all criteria
 // Filter Equipment based on all criteria

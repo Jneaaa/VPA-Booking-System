@@ -116,11 +116,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Update One Equipment
     Route::put('admin/equipment/{equipmentId}', [EquipmentController::class, 'update']);
-
-    Route::prefix('admin')->group(function () {
-    Route::post('/equipment', [EquipmentController::class, 'store']);
-});
-
+    Route::delete('/admin/equipment/{equipmentId}', [EquipmentController::class, 'destroy']);
+    Route::post('admin/equipment', [EquipmentController::class, 'store']);
 });
 
 // Facility Image Management
