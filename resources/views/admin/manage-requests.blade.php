@@ -5,7 +5,6 @@
 @section('content')
 <style>
 
-
   .btn-secondary {
     background-color: #889096ff;
     color: white;
@@ -19,15 +18,11 @@
     top: 70px; /* Account for topbar */
   }
 
-.main-content-container {
-  max-width: 100%;
-  margin: 0 auto;    
-  margin-left: 100px;
-  padding: 20px;    
-  margin-top: -10px; /* optional – remove if not needed */
-}
-
-
+  /* Main content container */
+  .main-content-container {
+    padding: 20px;
+    width: 100%;
+  }
 
   .content-area {
     background: #fff;
