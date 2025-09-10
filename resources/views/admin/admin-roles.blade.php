@@ -5,14 +5,6 @@
 @section('content')
   <style>
 
-    /* fix main layout not aligning to the center */
-    #layout {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    margin-top: -20px;
-    }
-
 
     /* Custom styles for the Admin Roles page */
     .form-section {

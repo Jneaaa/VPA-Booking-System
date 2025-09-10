@@ -8,7 +8,6 @@
     <title>@yield('title', 'CPU Booking')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/admin/admin-styles.css') }}" />
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <style>
         .text-primary {
@@ -57,7 +56,7 @@
         }
 
         .fc-col-header-cell {
-            background: #f1f1f1ff;
+            background: #e6e8ebff;
         }
 
         .fc-daygrid-day-number {
@@ -70,7 +69,7 @@
         }
 
         .fc-day-today {
-            background: #d5d8dfff !important;
+            background: #f3f4f7ff !important;
         }
 
         /* Essential Skeleton Loading */
@@ -261,17 +260,10 @@
             }
         }
 
-        /* Main Content */
-        #layout {
-            margin-left: 250px;
-            display: flex;
-            flex: 1;
-        }
+
 
         main {
-            padding: 20px;
             width: 100%;
-            margin-top: 10px;
         }
 
         /* Smooth transitions for topbar */
@@ -369,7 +361,7 @@
                 <div id="profile-img-container" class="position-relative">
                     <div id="profile-skeleton" class="skeleton skeleton-circle" style="width: 80px; height: 80px;">
                     </div>
-                    <img id="admin-profile-img" src="{{ asset('images/default-admin.png') }}"
+                    <img id="admin-profile-img"
                         class="rounded-circle border border-3 border-white shadow-sm"
                         style="width: 80px; height: 80px; object-fit: cover; display: none;">
                     <div class="status-indicator bg-success"></div>
