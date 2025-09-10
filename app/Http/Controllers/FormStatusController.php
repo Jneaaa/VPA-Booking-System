@@ -10,7 +10,7 @@ class FormStatusController extends Controller
 {
     public function index(): JsonResponse
     {
-        $status = FormStatus::orderBy('status_id')->get(['status_name', 'status_name']);
+        $status = FormStatus::orderBy('status_id')->get(['status_id', 'status_name', 'color_code']);
         return response()->json($status);
     }
 }

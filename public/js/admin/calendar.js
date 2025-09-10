@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     return {
                         id: form.request_id,
-                        title: form.form_details.calendar_info.title || 'Untitled Event',
+                        title: form.form_details.calendar_info.title || form.form_details.purpose,
                         start: startDateTime,
                         end: endDateTime,
                         extendedProps: {

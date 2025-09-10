@@ -218,7 +218,7 @@ class AdminApprovalController extends Controller
                         'additional_requests' => $form->additional_requests,
                         'status' => [
                             'name' => $form->formStatus->status_name,
-                            'color' => $form->formStatus->color
+                            'color' => $form->formStatus->color_code
                         ],
                         'calendar_info' => [
                             'title' => $form->calendar_title,
@@ -409,62 +409,67 @@ class AdminApprovalController extends Controller
     }
 
     public function getSimplifiedForms()
-    {
-        // Get status IDs to exclude (same as index)
-        $excludedStatuses = FormStatus::whereIn('status_name', [
-            'Returned',
-            'Late Return',
-            'Completed',
-            'Rejected',
-            'Cancelled'
-        ])->pluck('status_id');
+{
+    // Get status IDs to exclude
+    $excludedStatuses = FormStatus::whereIn('status_name', [
+        'Returned',
+        'Late Return',
+        'Completed',
+        'Rejected',
+        'Cancelled'
+    ])->pluck('status_id');
 
-        // Get pending forms with necessary relationships
-        $forms = RequisitionForm::whereNotIn('status_id', $excludedStatuses)
-            ->with([
-                'purpose',
-                'formStatus',
-                'requestedFacilities.facility',
-                'requestedEquipment.equipment',
-                'requisitionApprovals'
-            ])
-            ->get()
-            ->map(function ($form) {
-                // Calculate tentative fee
-                $facilityFees = $form->requestedFacilities->sum(function ($facility) {
-                    return $facility->is_waived ? 0 : $facility->facility->external_fee;
-                });
-
-                $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
-                    return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
-                });
-
-                $totalTentativeFee = $facilityFees + $equipmentFees + ($form->is_late ? $form->late_penalty_fee : 0);
-
-                // Format schedule
-                $startDateTime = date('F j, Y g:i A', strtotime($form->start_date . ' ' . $form->start_time));
-                $endDateTime = date('F j, Y g:i A', strtotime($form->end_date . ' ' . $form->end_time));
-
-                // Format requested items
-                $requestedItems = collect([
-                    ...$form->requestedFacilities->map(fn($rf) => $rf->facility->facility_name),
-                    ...$form->requestedEquipment->map(fn($re) => $re->equipment->equipment_name . ' (×' . $re->quantity . ')')
-                ])->join(', ');
-
-                return [
-                    'request_id' => $form->request_id,
-                    'purpose' => $form->purpose->purpose_name,
-                    'schedule' => $startDateTime . ' to ' . $endDateTime,
-                    'requester' => $form->first_name . ' ' . $form->last_name,
-                    'status_id' => $form->status_id,
-                    'requested_items' => $requestedItems,
-                    'tentative_fee' => number_format($totalTentativeFee, 2),
-                    'approvals' => $form->requisitionApprovals()->whereNotNull('approved_by')->count() . '/3 approved'
-                ];
+    // Get pending forms with necessary relationships
+    $forms = RequisitionForm::whereNotIn('status_id', $excludedStatuses)
+        ->with([
+            'purpose',
+            'formStatus',
+            'requestedFacilities.facility',
+            'requestedEquipment.equipment',
+            'requisitionApprovals'
+        ])
+        ->get()
+        ->map(function ($form) {
+            // Calculate tentative fee
+            $facilityFees = $form->requestedFacilities->sum(function ($facility) {
+                return $facility->is_waived ? 0 : $facility->facility->external_fee;
             });
 
-        return response()->json($forms);
-    }
+            $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
+                return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
+            });
+
+            $totalTentativeFee = $facilityFees + $equipmentFees + ($form->is_late ? $form->late_penalty_fee : 0);
+
+            // Format schedule
+            $startDateTime = date('F j, Y g:i A', strtotime($form->start_date . ' ' . $form->start_time));
+            $endDateTime = date('F j, Y g:i A', strtotime($form->end_date . ' ' . $form->end_time));
+
+            // Format requested items
+            $requestedItems = collect([
+                ...$form->requestedFacilities->map(fn($rf) => $rf->facility->facility_name),
+                ...$form->requestedEquipment->map(fn($re) => $re->equipment->equipment_name . ' (×' . $re->quantity . ')')
+            ])->join(', ');
+
+            return [
+                'request_id' => $form->request_id,
+                'purpose' => $form->purpose->purpose_name,
+                'schedule' => $startDateTime . ' to ' . $endDateTime,
+                'requester' => $form->first_name . ' ' . $form->last_name,
+                'status_id' => $form->status_id,
+                'requested_items' => $requestedItems,
+                'tentative_fee' => number_format($totalTentativeFee, 2),
+                'approvals' => $form->requisitionApprovals()->whereNotNull('approved_by')->count(),
+                'rejections' => $form->requisitionApprovals()->whereNotNull('rejected_by')->count(),
+                'date_submitted' => $form->created_at
+            ];
+        })
+        ->sortBy('status_id') // Sort ascending by status_id
+        ->values(); // Reset indexes
+
+    return response()->json($forms);
+}
+
 
     public function getRequisitionFees($requestId)
     {

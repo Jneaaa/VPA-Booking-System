@@ -39,14 +39,6 @@
     /* prevent the whole page from scrolling */
   }
 
-  #layout,
-  #main {
-    height: 100%;
-    /* take up full screen */
-    display: flex;
-    flex-direction: column;
-  }
-
   #facilitiesContainer {
     flex: 1;
     /* take up remaining space between header and pagination */
@@ -169,7 +161,7 @@
       </div>
   </main>
 </div>
-
+@endsection
 @section('scripts')
   <!-- Combined JS resources -->
   <script>

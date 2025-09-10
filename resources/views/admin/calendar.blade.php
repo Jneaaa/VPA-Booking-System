@@ -9,21 +9,8 @@
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/admin-styles.css">
   <style>
-    /* Add sharp edges to all elements */
-    * {
-    border-radius: 0 !important;
-    }
 
-    /* Exclude admin photo container and status circle */
-    .profile-img {
-    border-radius: 50% !important;
-    }
-
-    .status-indicator {
-    border-radius: 50% !important;
-    }
 
     #miniCalendar {
     height: 300px;
@@ -58,7 +45,7 @@
   <!-- Main Layout -->
   <div id="layout">
     <!-- Calendar Section -->
-    <main id="main" style="padding: 1rem;">
+    <main id="main">
     <section class="d-flex" style="height: calc(100vh - 60px);">
       <!-- Left Section: Mini Calendar and Event List -->
       <div class="me-4" style="width: 300px; flex-shrink: 0;"> <!-- Increased width -->
