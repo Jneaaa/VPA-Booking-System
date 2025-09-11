@@ -91,6 +91,26 @@
       padding: 0.375rem 0.75rem;
       font-size: 0.875rem;
     }
+
+    /* Ensure proper calendar container sizing */
+    .fc .fc-view-harness {
+      min-height: 400px;
+    }
+
+    /* Fix for calendar rendering */
+    .fc-view {
+      height: 100% !important;
+    }
+
+    /* Loading state for calendar */
+    .calendar-loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 400px;
+      background-color: #f8f9fa;
+      border-radius: 0.375rem;
+    }
   </style>
   <!-- Main Layout -->
   <div id="layout">
@@ -133,7 +153,13 @@
         </div>
         <!-- Right Section: Events Calendar -->
         <div style="flex-grow: 1; height: 100%;">
-          <div id="calendar" class="border p-2 calendar-container" style="height: 100%;"></div>
+          <div id="calendar" class="border p-2 calendar-container" style="height: 100%;">
+            <div class="calendar-loading" id="calendarLoading">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading calendar...</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
@@ -179,7 +205,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
-  <script src="{{ asset('js/admin/calendar.js') }}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize Mini Calendar with Bootstrap Datepicker
@@ -202,6 +227,7 @@
 
       // Initialize FullCalendar
       const calendarElement = document.getElementById('calendar');
+      const calendarLoading = document.getElementById('calendarLoading');
       
       // Check if calendar element exists
       if (!calendarElement) {
@@ -369,10 +395,27 @@
           }
           
           modal.show();
+        },
+        loading: function(isLoading) {
+          if (isLoading) {
+            calendarLoading.style.display = 'flex';
+          } else {
+            calendarLoading.style.display = 'none';
+          }
         }
       });
       
       calendar.render();
+
+      // Force calendar to update its size after rendering
+      setTimeout(() => {
+        calendar.updateSize();
+      }, 100);
+
+      // Also update size when window resizes
+      window.addEventListener('resize', () => {
+        calendar.updateSize();
+      });
 
       // Event Filtering with Checkboxes
       const filterCheckboxes = document.querySelectorAll('.filter-checkbox');
