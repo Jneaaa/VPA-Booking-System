@@ -637,7 +637,7 @@ class AdminApprovalController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'penalty_amount' => 'required|numeric|min:0.01'
+                'penalty_amount' => 'required|numeric|min:0'
             ]);
 
             $form = RequisitionForm::findOrFail($requestId);
