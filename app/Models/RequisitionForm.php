@@ -69,6 +69,11 @@ class RequisitionForm extends Model
 
     // Relationships
     
+    public function feedbacks()
+{
+    return $this->hasMany(Feedback::class, 'request_id', 'request_id');
+}
+    
     public function purpose()
     {
         return $this->belongsTo(RequisitionPurpose::class, 'purpose_id', 'purpose_id');

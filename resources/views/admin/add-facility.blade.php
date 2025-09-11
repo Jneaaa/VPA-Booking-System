@@ -267,7 +267,7 @@
                                             <div class="row mb-3 subcategory-row" style="display: none;">
                                                 <div class="col-12">
                                                     <label for="subcategory" class="form-label fw-bold">Subcategory</label>
-                                                    <select class="form-select w-100" id="subcategory">
+                                                    <select class="form-select w-100" id="subcategory" required>
                                                         <option value="">Select Subcategory</option>
                                                         <!-- Subcategories populated dynamically -->
                                                     </select>
@@ -605,7 +605,7 @@
                 }
 
                 // 9. Cloudinary upload functions
-                async function uploadToCloudinary(file, facilityId) {
+              async function uploadToCloudinary(file, facilityId) {
                     const CLOUD_NAME = 'dn98ntlkd'; // Your Cloudinary cloud name
                     const UPLOAD_PRESET = 'facility-photos'; // Your unsigned upload preset
 
@@ -616,6 +616,8 @@
                     formData.append('tags', `facility_${facilityId}`);
 
                     try {
+                        showToast('Uploading image to Cloudinary...', 'info', 3000);
+
                         const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
                             method: 'POST',
                             body: formData
@@ -628,6 +630,11 @@
 
                         const data = await response.json();
                         console.log('Cloudinary upload successful:', data);
+
+                        // Now save the image reference to your database
+                        await saveImageToDatabase(facilityId, data.secure_url, data.public_id);
+
+                        showToast('Image uploaded to Cloudinary successfully!', 'success');
                         return data;
 
                     } catch (error) {
@@ -638,9 +645,9 @@
                 }
 
                 // 10. Function to save image reference to your database
-                async function saveImageToDatabase(facilityId, imageUrl, publicId) {
+  async function saveImageToDatabase(facilityId, imageUrl, publicId) {
                     try {
-                        const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}/images/save`, {
+                        const response = await fetch(`http://127.0.0.1:8000/api/admin/upload`, {
                             method: 'POST',
                             headers: {
                                 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
@@ -667,111 +674,165 @@
                     } catch (error) {
                         console.error('Error saving image to database:', error);
                         showToast('Warning: Image uploaded but database save failed', 'warning');
-                        throw error;
+                        throw error; // Re-throw to handle in the calling function
                     }
                 }
 
                 // 11. Image deletion functions
-                async function deleteImageFromCloudinary(publicId) {
-                    try {
-                        const token = localStorage.getItem('adminToken');
+               async function deleteImageFromCloudinary(publicId) {
+    try {
+        const formData = new FormData();
+        formData.append('public_id', publicId);
 
-                        // Use FormData instead of JSON for Cloudinary deletion
-                        const formData = new FormData();
-                        formData.append('public_id', publicId);
+        const token = localStorage.getItem('adminToken');
 
-                        const response = await fetch(`http://127.0.0.1:8000/api/admin/cloudinary/delete`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                            },
-                            body: formData
-                        });
+        // Updated endpoint to match your new route
+        const response = await fetch(`http://127.0.0.1:8000/api/admin/cloudinary/delete`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData
+        });
 
-                        if (!response.ok) {
-                            const errorText = await response.text();
-                            console.error('Cloudinary delete failed:', response.status, errorText);
-                            throw new Error(`Failed to delete image from Cloudinary: ${response.status} ${errorText}`);
-                        }
+        if (!response.ok) {
+            throw new Error('Failed to delete image from Cloudinary');
+        }
 
-                        const result = await response.json();
+        showToast('Image deleted from storage', 'success');
+        return await response.json();
+    } catch (error) {
+        console.error('Error deleting image from Cloudinary:', error);
+        showToast('Failed to delete from storage: ' + error.message, 'error');
+        throw error;
+    }
+}
 
-                        // Check if the deletion was actually successful based on the actual response format
-                        if (result.result && (result.result.deleted || result.result === 'ok' || result.result === 'success')) {
-                            return result;
-                        } else {
-                            console.warn('Unexpected Cloudinary response format:', result);
-                            return result;
-                        }
+async function deleteImage(facilityId, imageId, cloudinaryPublicId) {
+    try {
+        const token = localStorage.getItem('adminToken');
 
-                    } catch (error) {
-                        console.error('Error deleting image from Cloudinary:', error);
-                        showToast('Failed to delete from storage: ' + error.message, 'error');
-                        throw error;
-                    }
-                }
+        // 1. Delete from Cloudinary via your simple backend endpoint
+        if (cloudinaryPublicId) {
+            await fetch(`http://127.0.0.1:8000/api/admin/cloudinary/delete`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ public_id: cloudinaryPublicId })
+            });
+            showToast('Image deleted from storage', 'success');
+        }
+
+        // 2. Delete from your database
+        const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}/images/${imageId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete image from database');
+        }
+
+        showToast('Image reference deleted', 'success');
+
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        showToast('Failed to delete image: ' + error.message, 'error');
+        throw error;
+    }
+}
+
 
                 // 12. Facility file handling function
-                async function handleFacilityFiles(files) {
-                    for (const file of files) {
-                        // Check if file is an image
-                        if (!file.type.startsWith('image/')) {
-                            showToast('Please upload only image files', 'error');
-                            continue;
-                        }
+            async function handleFacilityFiles(files) {
+    const facilityId = document.getElementById('facilityId').value;
+    const photosPreview = document.getElementById('photosPreview');
 
-                        // Check if we've reached the maximum of 5 photos
-                        const currentCount = document.querySelectorAll('#photosPreview .photo-preview').length;
-                        if (currentCount + pendingImageUploads.length >= 5) {
-                            showToast('Maximum of 5 photos allowed', 'error');
-                            break;
-                        }
+    for (const file of files) {
+        // Check if file is an image
+        if (!file.type.startsWith('image/')) {
+            showToast('Please upload only image files', 'error');
+            continue;
+        }
 
-                        try {
-                            const previewId = 'temp-' + Date.now();
+        // Check if we've reached the maximum of 5 photos
+        if (uploadedPhotos.length >= 5) {
+            showToast('Maximum of 5 photos allowed', 'error');
+            break;
+        }
 
-                            // Create a preview
-                            const reader = new FileReader();
-                            reader.onload = async (e) => {
-                                const preview = document.createElement('div');
-                                preview.className = 'photo-preview';
-                                preview.dataset.previewId = previewId;
+        try {
+            const previewId = Date.now(); // Define previewId here so it's accessible
 
-                                const img = document.createElement('img');
-                                img.src = e.target.result;
-                                img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
+            // Create a preview
+            const reader = new FileReader();
+            reader.onload = async (e) => { // Make this async
+                const preview = document.createElement('div');
+                preview.className = 'photo-preview';
+                preview.dataset.id = previewId;
 
-                                const removeBtn = document.createElement('button');
-                                removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
-                                removeBtn.innerHTML = '<i class="bi bi-x"></i>';
-                                removeBtn.onclick = function () {
-                                    // Remove from pending uploads
-                                    const index = pendingImageUploads.findIndex(photo => photo.previewId === previewId);
-                                    if (index !== -1) {
-                                        pendingImageUploads.splice(index, 1);
-                                    }
-                                    preview.remove();
-                                };
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'img-thumbnail h-100 w-100 object-fit-cover';
 
-                                preview.appendChild(img);
-                                preview.appendChild(removeBtn);
-                                photosPreview.appendChild(preview);
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
+                removeBtn.innerHTML = '<i class="bi bi-x"></i>';
+                removeBtn.onclick = function () {
+                    preview.remove();
+                    uploadedPhotos = uploadedPhotos.filter(photo => photo.previewId !== previewId);
+                };
 
-                                // Add to pending uploads (will be processed on form submit)
-                                pendingImageUploads.push({
-                                    file: file,
-                                    previewId: previewId,
-                                    previewElement: preview
-                                });
+                preview.appendChild(img);
+                preview.appendChild(removeBtn);
+                photosPreview.appendChild(preview);
+
+                // Store file and preview info
+                uploadedPhotos.push({
+                    file: file,
+                    previewId: previewId,
+                    previewElement: preview
+                });
+
+                try {
+                    // Upload to Cloudinary
+                    const result = await uploadToCloudinary(file, facilityId);
+
+                    // Update the preview with the actual image from Cloudinary
+                    if (result && result.secure_url) {
+                        img.src = result.secure_url;
+
+                        // Update the uploadedPhotos array with the Cloudinary data
+                        const photoIndex = uploadedPhotos.findIndex(photo => photo.previewId === previewId);
+                        if (photoIndex !== -1) {
+                            uploadedPhotos[photoIndex] = {
+                                ...uploadedPhotos[photoIndex],
+                                id: result.public_id,
+                                url: result.secure_url
                             };
-                            reader.readAsDataURL(file);
-
-                        } catch (error) {
-                            console.error('Error processing file:', error);
-                            showToast('Failed to process file: ' + error.message, 'error');
                         }
                     }
+                } catch (error) {
+                    console.error('Error uploading to Cloudinary:', error);
+                    showToast('Upload failed: ' + error.message, 'error');
+                    // Remove the preview if upload fails
+                    preview.remove();
+                    uploadedPhotos = uploadedPhotos.filter(photo => photo.previewId !== previewId);
                 }
+            };
+            reader.readAsDataURL(file);
+
+        } catch (error) {
+            console.error('Error processing file:', error);
+            showToast('Failed to process file: ' + error.message, 'error');
+        }
+    }
+}
 
                 // 13. Cancel confirmation modal
                 const cancelConfirmationModal = new bootstrap.Modal('#cancelConfirmationModal', {
@@ -830,39 +891,39 @@
                     facilityItems = [];
                 }
 
-                // 15. Facility Photos Section
-                const facilitiesDropzone = document.getElementById('facilitiesPhotosDropzone');
-                const facilitiesFileInput = document.getElementById('facilitiesPhotos');
-                const photosPreview = document.getElementById('photosPreview');
-                let uploadedPhotos = [];
+                // Facility Photos Section
+const facilityDropzone = document.getElementById('facilityPhotosDropzone');
+const facilityFileInput = document.getElementById('facilityPhotos');
+const photosPreview = document.getElementById('photosPreview');
+let uploadedPhotos = [];
 
-                if (facilitiesDropzone && facilitiesFileInput) {
-                    facilitiesDropzone.addEventListener('click', function () {
-                        facilitiesFileInput.click();
-                    });
+if (facilityDropzone && facilityFileInput) {
+    facilityDropzone.addEventListener('click', function () {
+        facilityFileInput.click();
+    });
 
-                    facilitiesFileInput.addEventListener('change', function () {
-                        handleFacilityFiles(this.files);
-                        this.value = '';
-                    });
+    facilityFileInput.addEventListener('change', function () {
+        handleFacilityFiles(this.files);
+        this.value = '';
+    });
 
-                    facilitiesDropzone.addEventListener('dragover', function (e) {
-                        e.preventDefault();
-                        this.classList.add('border-primary');
-                    });
+    facilityDropzone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        this.classList.add('border-primary');
+    });
 
-                    facilitiesDropzone.addEventListener('dragleave', function () {
-                        this.classList.remove('border-primary');
-                    });
+    facilityDropzone.addEventListener('dragleave', function () {
+        this.classList.remove('border-primary');
+    });
 
-                    facilitiesDropzone.addEventListener('drop', function (e) {
-                        e.preventDefault();
-                        this.classList.remove('border-primary');
-                        if (e.dataTransfer.files.length) {
-                            handleFacilityFiles(e.dataTransfer.files);
-                        }
-                    });
-                }
+    facilityDropzone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        this.classList.remove('border-primary');
+        if (e.dataTransfer.files.length) {
+            handleFacilityFiles(e.dataTransfer.files);
+        }
+    });
+}
 
                 // 20. Initialize new facilities form
                 async function initializeNewFacilityForm() {

@@ -71,7 +71,6 @@ class FacilityController extends Controller
                 'department_name' => $facility->department->department_name,
             ],
             'location_type' => $facility->location_type,
-            'internal_fee' => $facility->internal_fee,
             'external_fee' => $facility->external_fee,
             'rate_type' => $facility->rate_type,
             'status' => [
@@ -79,7 +78,6 @@ class FacilityController extends Controller
                 'status_name' => $facility->status->status_name,
                 'color_code' => $facility->status->color_code,
             ],
-            'maximum_rental_hour' => $facility->maximum_rental_hour,
             'parent_facility_id' => $facility->parent_facility_id,
             'room_code' => $facility->room_code,
             'floor_level' => $facility->floor_level,
@@ -120,7 +118,6 @@ public function store(Request $request)
             'external_fee' => 'required|numeric|min:0',
             'rate_type' => 'required|in:Per Hour,Per Event',
             'status_id' => 'required|exists:availability_statuses,status_id',
-            // 'maximum_rental_hour' => 'nullable|integer',
             'parent_facility_id' => 'nullable|exists:facilities,facility_id',
             'room_code' => 'nullable|string|max:50',
             'floor_level' => 'nullable|integer|min:1',
@@ -131,12 +128,6 @@ public function store(Request $request)
         ]);
 
         $user = auth()->user();
-
-        if (!$user->departments->pluck('department_id')->contains($data['department_id'])) {
-            return response()->json([
-                'message' => 'You do not manage this department.'
-            ], 403);
-        }
 
         $facility = Facility::create([
             'facility_name' => $data['facility_name'],
@@ -150,7 +141,6 @@ public function store(Request $request)
             'external_fee' => $data['external_fee'],
             'rate_type' => $data['rate_type'],
             'status_id' => $data['status_id'],
-            // 'maximum_rental_hour' => $data['maximum_rental_hour'],
             'parent_facility_id' => $data['parent_facility_id'] ?? null,
             'room_code' => $data['room_code'] ?? null,
             'floor_level' => $data['floor_level'] ?? null,
@@ -202,74 +192,71 @@ public function store(Request $request)
     }
 
     // ----- Update - Save facility changes ----- //
-    public function update(Request $request, $id)
-    {
-        $facility = Facility::findOrFail($id);
+public function update(Request $request, $id)
+{
+    $facility = Facility::findOrFail($id);
 
-        $data = $request->validate([
-            'facility_name' => 'required|string|max:50',
-            'description' => 'nullable|string|max:250',
-            'location_note' => 'required|string|max:200',
-            'capacity' => 'required|integer|min:1',
-            'category_id' => 'required|exists:facility_categories,category_id',
-            'subcategory_id' => 'nullable|exists:facility_subcategories,subcategory_id',
-            'department_id' => 'required|exists:departments,department_id',
-            'location_type' => 'required|in:Indoors,Outdoors',
-            'internal_fee' => 'required|numeric|min:0',
-            'external_fee' => 'required|numeric|min:0',
-            'rate_type' => 'required|in:Per Hour,Per Event',
-            'status_id' => 'required|exists:availability_statuses,status_id',
-            'maximum_rental_hour' => 'nullable|integer',
-            'parent_facility_id' => 'nullable|exists:facilities,facility_id',
-            'room_code' => 'nullable|string|max:50',
-            'floor_level' => 'nullable|integer|min:1',
-            'building_code' => 'nullable|string|max:20',
-            'total_levels' => 'nullable|integer|min:1',
-            'total_rooms' => 'nullable|integer|min:1',
+    $data = $request->validate([
+        'facility_name' => 'required|string|max:50',
+        'description' => 'nullable|string|max:250',
+        'location_note' => 'nullable|string|max:200',
+        'capacity' => 'required|integer|min:1',
+        'category_id' => 'required|exists:facility_categories,category_id',
+        'subcategory_id' => 'nullable|exists:facility_subcategories,subcategory_id',
+        'department_id' => 'required|exists:departments,department_id',
+        'location_type' => 'required|in:Indoors,Outdoors',
+        'external_fee' => 'required|numeric|min:0',
+        'rate_type' => 'required|in:Per Hour,Per Event',
+        'status_id' => 'required|exists:availability_statuses,status_id',
+        'parent_facility_id' => 'nullable|exists:facilities,facility_id',
+        'room_code' => 'nullable|string|max:50',
+        'floor_level' => 'nullable|integer|min:1',
+        'building_code' => 'nullable|string|max:20',
+        'total_levels' => 'nullable|integer|min:1',
+        'total_rooms' => 'nullable|integer|min:1',
+    ]);
+
+    $user = auth()->user();
+
+    $facility->update([
+        'facility_name' => $data['facility_name'],
+        'description' => $data['description'] ?? null,
+        'location_note' => $data['location_note'],
+        'capacity' => $data['capacity'],
+        'category_id' => $data['category_id'],
+        'subcategory_id' => $data['subcategory_id'] ?? null,
+        'department_id' => $data['department_id'],
+        'location_type' => $data['location_type'],
+        'external_fee' => $data['external_fee'],
+        'rate_type' => $data['rate_type'],
+        'status_id' => $data['status_id'],
+        'parent_facility_id' => $data['parent_facility_id'] ?? null,
+        'room_code' => $data['room_code'] ?? null,
+        'floor_level' => $data['floor_level'] ?? null,
+        'building_code' => $data['building_code'] ?? null,
+        'total_levels' => $data['total_levels'] ?? null,
+        'total_rooms' => $data['total_rooms'] ?? null,
+        'updated_by' => $user->admin_id,
+    ]);
+
+    // Return JSON response for API calls
+    if ($request->wantsJson() || $request->is('api/*')) {
+        return response()->json([
+            'message' => 'Facility updated successfully!',
+            'data' => $facility
         ]);
-
-        $user = auth()->user();
-
-        if (!$user->departments->pluck('department_id')->contains($facility->department_id)) {
-            return redirect()->back()->with('error', 'You do not manage this facility.');
-        }
-
-        $facility->update([
-            'facility_name' => $data['facility_name'],
-            'description' => $data['description'] ?? null,
-            'location_note' => $data['location_note'],
-            'capacity' => $data['capacity'],
-            'category_id' => $data['category_id'],
-            'subcategory_id' => $data['subcategory_id'] ?? null,
-            'department_id' => $data['department_id'],
-            'location_type' => $data['location_type'],
-            'internal_fee' => $data['internal_fee'],
-            'external_fee' => $data['external_fee'],
-            'rate_type' => $data['rate_type'],
-            'status_id' => $data['status_id'],
-            'maximum_rental_hour' => $data['maximum_rental_hour'],
-            'parent_facility_id' => $data['parent_facility_id'] ?? null,
-            'room_code' => $data['room_code'] ?? null,
-            'floor_level' => $data['floor_level'] ?? null,
-            'building_code' => $data['building_code'] ?? null,
-            'total_levels' => $data['total_levels'] ?? null,
-            'total_rooms' => $data['total_rooms'] ?? null,
-            'updated_by' => $user->admin_id,
-        ]);
-
-        return redirect()->route('admin.manage-facilities')
-            ->with('success', 'Facility updated successfully!');
     }
+
+    // Return redirect for web requests
+    return redirect()->route('admin.manage-facilities')
+        ->with('success', 'Facility updated successfully!');
+}
 
     // ----- Destroy - Delete facility ----- //
     public function destroy($id)
     {
         $facility = Facility::findOrFail($id);
         $user = auth()->user();
-
-        if (!$user->departments->pluck('department_id')->contains($facility->department_id)) {
-            return redirect()->back()->with('error', 'You do not manage this facility.');
-        }
 
         // Soft delete tracking
         $facility->update([
@@ -312,63 +299,148 @@ public function store(Request $request)
     }
 
     // ----- Upload Facility Image ----- //
-    public function uploadImage(Request $request, $facilityId)
-    {
+public function uploadImage(Request $request, $facilityId): JsonResponse
+{
+    // Validate the uploaded image and data
+    $validated = $request->validate([
+        'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'description' => 'nullable|string|max:255',
+        'type_id' => 'sometimes|exists:image_types,type_id'
+    ]);
+
+    // Find the facility
+    $facility = Facility::findOrFail($facilityId);
+
+
+    // Upload to Cloudinary
+    $uploaded = Cloudinary::upload(
+        $request->file('image')->getRealPath(),
+        ['upload_preset' => 'facility-photos']
+    );
+
+    $imageUrl = $uploaded->getSecurePath();
+    $publicId = $uploaded->getPublicId();
+
+    // Determine image type if not provided
+    $imageType = $validated['type_id'] ?? ($facility->images()->count() == 0 ? 1 : 2);
+
+    // Create the image record
+    $facility->images()->create([
+        'image_url' => $imageUrl,
+        'type_id' => $imageType,
+        'cloudinary_public_id' => $publicId,
+        'description' => $validated['description'] ?? null,
+        'sort_order' => $facility->images()->count() + 1
+    ]);
+
+    return response()->json([
+        'message' => 'Image uploaded successfully',
+        'type_id' => $imageType,
+        'image_url' => $imageUrl,
+        'public_id' => $publicId
+    ]);
+}
+
+public function saveImageReference(Request $request, $facilityId): JsonResponse
+{
+    try {
         $validated = $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'description' => 'nullable|string|max:255',
-            'type_id' => 'sometimes|exists:image_types,type_id'
+            'image_url' => 'required|url',
+            'cloudinary_public_id' => 'required|string',
+            'description' => 'nullable|string|max:255'
         ]);
 
         $facility = Facility::findOrFail($facilityId);
-        $user = auth()->user();
 
-        if (!$user->departments->pluck('department_id')->contains($facility->department_id)) {
-            return redirect()->back()->with('error', 'You do not manage this facility.');
-        }
+        // Determine image type (first image = primary, others = secondary)
+        $imageType = $facility->images()->count() == 0 ? 'Primary' : 'Secondary';
 
-        $uploaded = Cloudinary::upload(
-            $request->file('image')->getRealPath(),
-            ['upload_preset' => 'facility-photos']
-        );
-
-        $imageUrl = $uploaded->getSecurePath();
-        $publicId = $uploaded->getPublicId();
-
-        $imageType = $validated['type_id'] ?? ($facility->images()->count() == 0 ? 1 : 2);
-
-        $facility->images()->create([
-            'image_url' => $imageUrl,
-            'type_id' => $imageType,
-            'cloudinary_public_id' => $publicId,
-            'description' => $validated['description'] ?? null,
+        // Create the image record
+        $image = $facility->images()->create([
+            'image_url' => $validated['image_url'],
+            'image_type' => $imageType,
+            'cloudinary_public_id' => $validated['cloudinary_public_id'],
+            'description' => $validated['description'] ?? 'Facility photo',
             'sort_order' => $facility->images()->count() + 1
         ]);
 
-        return redirect()->back()->with('success', 'Image uploaded successfully!');
+        \Log::info('Image reference saved successfully', [
+            'facility' => $facilityId,
+            'image_id' => $image->image_id,
+            'public_id' => $validated['cloudinary_public_id']
+        ]);
+
+        return response()->json([
+            'message' => 'Image reference saved successfully',
+            'image_id' => $image->image_id,
+            'type' => $imageType
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error saving image reference', [
+            'error' => $e->getMessage(),
+            'facilityId' => $facilityId,
+            'request_data' => $request->all()
+        ]);
+
+        return response()->json([
+            'message' => 'Failed to save image reference: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     // ----- Delete Facility Image ----- //
-    public function deleteImage($facilityId, $imageId)
-    {
+public function deleteImage($facilityId, $imageId): JsonResponse
+{
+    \Log::info('Attempting to delete facility image', [
+        'facilityId' => $facilityId,
+        'imageId' => $imageId
+    ]);
+
+    try {
+        // Find the facility
         $facility = Facility::findOrFail($facilityId);
-        $user = auth()->user();
 
-        if (!$user->departments->pluck('department_id')->contains($facility->department_id)) {
-            return redirect()->back()->with('error', 'You do not manage this facility.');
-        }
-
+        // Find the image
         $image = $facility->images()->findOrFail($imageId);
 
-        if ($image->cloudinary_public_id) {
-            Cloudinary::destroy($image->cloudinary_public_id);
+        // Store public ID before deletion
+        $publicId = $image->cloudinary_public_id;
+
+        // Delete DB record first
+        $image->delete();
+
+        // Delete from Cloudinary if public ID exists (skip default placeholder)
+        if ($publicId && $publicId !== 'oxvsxogzu9koqhctnf7s') {
+            try {
+                Cloudinary::destroy($publicId);
+            } catch (\Exception $cloudinaryError) {
+                \Log::error('Cloudinary delete failed but continuing', [
+                    'error' => $cloudinaryError->getMessage(),
+                    'public_id' => $publicId
+                ]);
+                // Continue even if Cloudinary delete fails
+            }
         }
 
-        $image->delete();
+        // Reorder remaining images
         $this->reorderImageRecords($facility);
 
-        return redirect()->back()->with('success', 'Image deleted successfully!');
+        return response()->json(['message' => 'Image deleted successfully']);
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return response()->json(['message' => 'Image or facility not found'], 404);
+    } catch (\Exception $e) {
+        \Log::error('Error in deleteImage', [
+            'error' => $e->getMessage(),
+            'facilityId' => $facilityId,
+            'imageId' => $imageId
+        ]);
+        return response()->json([
+            'message' => 'Failed to delete image: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     private function reorderImageRecords(Facility $facility): void
     {

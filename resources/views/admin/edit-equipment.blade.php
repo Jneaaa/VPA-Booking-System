@@ -24,7 +24,6 @@
         overflow-y: auto;
         padding: 10px;
         border: none;
-        border-radius: 0 !important;
     }
 
     /* Toast notification styles */
@@ -71,11 +70,6 @@
         position: relative;
         width: 100px;
         height: 100px;
-    }
-
-    /* Add sharp edges to all elements */
-    * {
-        border-radius: 0 !important;
     }
 
     /* Layout fixes */
@@ -166,14 +160,6 @@
         <!-- Main Content -->
         <main id="main">
             <!-- Edit Equipment Page -->
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Edit Equipment</h1>
-                <a href="{{ url('/admin/manage-equipment') }}" class="btn btn-primary">
-                    <i class="bi bi-arrow-left me-2"></i>Back to Equipment
-                </a>
-            </div>
-
             <div class="card shadow mb-4">
                 <div class="card-body">
                     <form id="editEquipmentForm">

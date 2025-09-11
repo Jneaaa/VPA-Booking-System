@@ -14,6 +14,7 @@ use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\EquipmentItem;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCommentsController;
+use App\Http\Controllers\FeedbackController;
 
 use App\Http\Controllers\Dropdowns\FacilityCategoryController;
 use App\Http\Controllers\Dropdowns\FacilitySubcategoryController;
@@ -121,17 +122,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::post('admin/add-facility', [FacilityController::class, 'store']);
-    Route::get('facility/get-categories', [FacilityController::class, 'create']);
-});
+    Route::post('admin/add-facilities', [FacilityController::class, 'store']);
+    Route::put('admin/facilities/{facilityId}', [FacilityController::class, 'update']);
+    Route::delete('/admin/facilities/{facilityId}', [FacilityController::class, 'destroy']);
+    Route::get('facilities/get-categories', [FacilityController::class, 'create']);
 
+    // Facility Image Management
+    Route::post('/admin/upload', [FacilityController::class, 'uploadImage']);
+    Route::post('/admin/bulk-upload', [FacilityController::class, 'uploadMultipleImages']);
+    Route::delete('/admin/facilities/{facilityId}/images/{imageId}', [FacilityController::class, 'deleteImage']);
+    Route::post('/admin/reorder', [FacilityController::class, 'reorderImages']);
+    Route::post('/admin/facilities/{facilityId}/images/save', [FacilityController::class, 'saveImageReference']);
 
-// Facility Image Management
-Route::prefix('facilities/{facilityId}/images')->group(function () {
-    Route::post('/', [FacilityController::class, 'uploadImage']);
-    Route::post('/bulk', [FacilityController::class, 'uploadMultipleImages']);
-    Route::delete('/{imageId}', [FacilityController::class, 'deleteImage']);
-    Route::post('/reorder', [FacilityController::class, 'reorderImages']);
 });
 
 // ---------------- Lookup Tables ---------------- //
@@ -156,8 +158,15 @@ Route::get('/admin-role', [AdminController::class, 'adminRoles']);
 Route::get('/equipment', [EquipmentController::class, 'publicIndex']);
 Route::get('/facilities', [FacilityController::class, 'publicIndex']);
 
+// Submit Feedback
+
+Route::post('/feedback', [FeedbackController::class, 'store'])
+    ->name('feedback.store');
+    
+
 // Public cancellation route for requesters
 Route::post('/requester/requisition/{requestId}/cancel', [AdminApprovalController::class, 'cancelRequestPublic']);
+
 
 // Upload proof of payment receipt for a request
 Route::post('/requester/requisition/{requestId}/upload-receipt', [AdminApprovalController::class, 'uploadPaymentReceipt']);
@@ -274,3 +283,4 @@ Route::get('/test-email', function () {
         return 'Error: ' . $e->getMessage();
     }
 });
+
