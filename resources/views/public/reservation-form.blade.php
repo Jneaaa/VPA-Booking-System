@@ -823,28 +823,44 @@
         </div>
       </div>
 
-      <!-- Bottom 2-column grid -->
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-section-card">
-            <h5>Requested Facilities</h5>
-            <div id="facilityList" class="selected-items-container">
-              <!-- Facility items will be dynamically added here -->
-              <div class="text-muted empty-message">No facilities added yet.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-6">
-          <div class="form-section-card">
-            <h5>Requested Equipment</h5>
-            <div id="equipmentList" class="selected-items-container">
-              <!-- Equipment items will be dynamically added here -->
-              <div class="text-muted empty-message">No equipment added yet.</div>
-            </div>
-          </div>
-        </div>
+     <!-- Bottom 2-column grid -->
+<div class="row">
+  <div class="col-md-6">
+    <div class="form-section-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Requested Facilities</h5>
+<button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" 
+        style="width: 36px; height: 36px;" 
+        type="button"
+        onclick="navigateToCatalog('facility')">
+    <i class="bi bi-plus fs-4"></i>
+</button>
       </div>
+      <div id="facilityList" class="selected-items-container">
+        <!-- Facility items will be dynamically added here -->
+        <div class="text-muted empty-message">No facilities added yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="form-section-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Requested Equipment</h5>
+<button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" 
+        style="width: 36px; height: 36px;" 
+        type="button"
+        onclick="navigateToCatalog('equipment')">
+    <i class="bi bi-plus fs-4"></i>
+</button>
+      </div>
+      <div id="equipmentList" class="selected-items-container">
+        <!-- Equipment items will be dynamically added here -->
+        <div class="text-muted empty-message">No equipment added yet.</div>
+      </div>
+    </div>
+  </div>
+</div>
 
       <!-- Fee Breakdown Section -->
       <div class="row">
@@ -866,6 +882,71 @@
         <button type="reset" class="btn btn-secondary">Cancel</button>
       </div>
     </form>
+  </div>
+
+    <!-- Success Modal -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="successModalLabel">Submission Successful</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+          <h5 class="mt-3">Request Submitted Successfully!</h5>
+          <p id="successDetails" class="text-muted"></p>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-primary" onclick="window.location.href='{{ asset('index') }}'">
+            Back to Home
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="terms-content mb-4" style="max-height: 50vh; overflow-y: auto;">
+            <h6>Booking Terms and Conditions</h6>
+            <ol>
+              <li>All bookings are subject to approval by CPU Administration.</li>
+              <li>Payment must be made within 3 business days after approval.</li>
+              <li>Cancellations must be made at least 5 days before the event.</li>
+              <li>Damage to facilities/equipment will incur additional charges.</li>
+              <li>Alcohol and smoking are strictly prohibited on campus.</li>
+              <li>External users must provide valid identification.</li>
+              <li>CPU reserves the right to cancel bookings for violations.</li>
+            </ol>
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" id="agreeTerms">
+              <label class="form-check-label" for="agreeTerms">
+                I agree to the terms and conditions
+              </label>
+            </div>
+          </div>
+          <div id="submitStatus" class="d-none">
+            <div class="d-flex justify-content-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <p class="text-center mt-2">Processing your request...</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="confirmSubmitBtn" class="btn btn-primary" disabled>Submit Request</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="facilityPopup" class="popup">
@@ -900,6 +981,35 @@
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+          // Add this function to handle catalog navigation without triggering validation
+function navigateToCatalog(type) {
+    // Store current form data in sessionStorage to preserve it
+    const formData = new FormData(document.getElementById('reservationForm'));
+    const formObject = Object.fromEntries(formData.entries());
+    sessionStorage.setItem('reservationFormData', JSON.stringify(formObject));
+    
+    // Navigate to the appropriate catalog
+    if (type === 'facility') {
+        window.location.href = '{{ asset("facility-catalog") }}';
+    } else {
+        window.location.href = '{{ asset("equipment-catalog") }}';
+    }
+}
+
+// Add this code to restore form data when returning to the page
+document.addEventListener('DOMContentLoaded', function() {
+    const savedFormData = sessionStorage.getItem('reservationFormData');
+    if (savedFormData) {
+        const formData = JSON.parse(savedFormData);
+        for (const [key, value] of Object.entries(formData)) {
+            const field = document.querySelector(`[name="${key}"]`);
+            if (field) {
+                field.value = value;
+            }
+        }
+        sessionStorage.removeItem('reservationFormData');
+    }
+});
     
     // Cloudinary direct upload implementation
     async function uploadToCloudinary(input) {
@@ -1172,16 +1282,44 @@
       }
     };
 
-    window.openTermsModal = function (event) {
-      if (event) event.preventDefault();
+window.openTermsModal = function (event) {
+  if (event) event.preventDefault();
 
-      // Check if modal already exists
-      let modalEl = document.getElementById('termsModal');
-      let modalInstance = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+  // Check if modal already exists
+  let modalEl = document.getElementById('termsModal');
+  let modalInstance = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
 
-      if (!modalEl) {
-        // Create modal HTML (same as before)
-        const modalHTML = `
+  // Function to attach event listeners
+  const attachModalEventListeners = () => {
+    const agreeTerms = document.getElementById('agreeTerms');
+    const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+    
+    if (agreeTerms && confirmSubmitBtn) {
+      // Remove any existing listeners first to avoid duplicates
+      agreeTerms.replaceWith(agreeTerms.cloneNode(true));
+      confirmSubmitBtn.replaceWith(confirmSubmitBtn.cloneNode(true));
+      
+      // Re-get references after cloning
+      const newAgreeTerms = document.getElementById('agreeTerms');
+      const newConfirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+      
+      // Attach new listeners
+      newAgreeTerms.addEventListener('change', function () {
+        newConfirmSubmitBtn.disabled = !this.checked;
+      });
+
+      newConfirmSubmitBtn.addEventListener('click', async function () {
+        await submitForm();
+      });
+      
+      // Ensure button starts disabled
+      newConfirmSubmitBtn.disabled = true;
+    }
+  };
+
+  if (!modalEl) {
+    // Create modal HTML
+    const modalHTML = `
     <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -1216,12 +1354,6 @@
               </div>
               <p class="text-center mt-2">Processing your request...</p>
             </div>
-            <div id="successStatus" class="d-none text-center">
-              <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
-              <h5 class="mt-3">Request Submitted Successfully!</h5>
-              <p id="successDetails" class="text-muted"></p>
-              <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -1231,36 +1363,57 @@
       </div>
     </div>
     `;
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        modalEl = document.getElementById('termsModal');
 
-        // Initialize new modal instance
-        modalInstance = new bootstrap.Modal(modalEl, {
-          backdrop: true, // Ensure backdrop works
-          keyboard: true, // Allow ESC key to close
-          focus: true    // Focus on modal when shown
-        });
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    modalEl = document.getElementById('termsModal');
 
-        // Add event listeners
-        modalEl.addEventListener('hidden.bs.modal', function () {
-          // Clean up when modal is closed
-          modalInstance.dispose();
-          modalEl.remove();
-        });
+    // Initialize new modal instance
+    modalInstance = new bootstrap.Modal(modalEl, {
+      backdrop: true,
+      keyboard: true,
+      focus: true
+    });
 
-        document.getElementById('agreeTerms')?.addEventListener('change', function () {
-          document.getElementById('confirmSubmitBtn').disabled = !this.checked;
-        });
+    // Add event listeners for modal lifecycle
+    modalEl.addEventListener('hidden.bs.modal', function () {
+      modalInstance.dispose();
+      modalEl.remove();
+    });
 
-        document.getElementById('confirmSubmitBtn')?.addEventListener('click', async function () {
-          await submitForm();
-        });
-      }
+    // Attach event listeners for checkbox and button
+    attachModalEventListeners();
 
-      // Show the modal
-      modalInstance.show();
-    };
+  } else if (!modalInstance) {
+    // If modal element exists but no instance, create one
+    modalInstance = new bootstrap.Modal(modalEl, {
+      backdrop: true,
+      keyboard: true,
+      focus: true
+    });
+    
+    // Attach event listeners since they might be missing
+    attachModalEventListeners();
+  } else {
+    // Modal exists and has instance, but ensure listeners are attached
+    attachModalEventListeners();
+  }
 
+  // Reset checkbox state each time modal opens
+  const agreeTerms = document.getElementById('agreeTerms');
+  const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+  if (agreeTerms && confirmSubmitBtn) {
+    agreeTerms.checked = false;
+    confirmSubmitBtn.disabled = true;
+  }
+
+  // Show the modal
+  if (modalInstance) {
+    modalInstance.show();
+  } else {
+    console.error('Modal instance could not be created');
+    showToast('Failed to open terms modal. Please try again.', 'error');
+  }
+};
     // Attach form submission handler
     document.getElementById('reservationForm')?.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -1268,117 +1421,128 @@
     });
 
     window.submitForm = async function () {
-      try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-        const modal = document.getElementById('termsModal');
-        const submitStatus = document.getElementById('submitStatus');
-        const confirmBtn = document.getElementById('confirmSubmitBtn');
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const modal = document.getElementById('termsModal');
+    const submitStatus = document.getElementById('submitStatus');
+    const confirmBtn = document.getElementById('confirmSubmitBtn');
+    
+    // Get or create modal instance
+    let termsModalInstance = bootstrap.Modal.getInstance(modal);
+    if (!termsModalInstance) {
+      termsModalInstance = new bootstrap.Modal(modal);
+    }
 
-        // Show loading state
-        submitStatus.classList.remove('d-none');
-        confirmBtn.disabled = true;
+    // Show loading state
+    submitStatus.classList.remove('d-none');
+    confirmBtn.disabled = true;
 
-        // Fix 2: Defensive checks for optional fields
-        const schoolIdInput = document.querySelector('input[name="school_id"]');
-        const numParticipantsInput = document.querySelector('input[name="num_participants"]');
-        const additionalRequestsInput = document.querySelector('textarea[name="additional_requests"]');
+    // Fix 2: Defensive checks for optional fields
+    const schoolIdInput = document.querySelector('input[name="school_id"]');
+    const numParticipantsInput = document.querySelector('input[name="num_participants"]');
+    const additionalRequestsInput = document.querySelector('textarea[name="additional_requests"]');
 
-        // Required fields
-        const firstNameInput = document.querySelector('input[name="first_name"]');
-        const lastNameInput = document.querySelector('input[name="last_name"]');
-        const emailInput = document.querySelector('input[name="email"]');
+    // Required fields
+    const firstNameInput = document.querySelector('input[name="first_name"]');
+    const lastNameInput = document.querySelector('input[name="last_name"]');
+    const emailInput = document.querySelector('input[name="email"]');
 
-        if (!firstNameInput || !lastNameInput || !emailInput) {
-          throw new Error('Required contact fields are missing in the form.');
-        }
+    if (!firstNameInput || !lastNameInput || !emailInput) {
+      throw new Error('Required contact fields are missing in the form.');
+    }
 
-        const formData = {
-          start_date: document.getElementById('startDateField').value,
-          end_date: document.getElementById('endDateField').value,
-          start_time: convertTo24Hour(document.getElementById('startTimeField').value),
-          end_time: convertTo24Hour(document.getElementById('endTimeField').value),
-          purpose_id: document.getElementById('activityPurposeField').value,
-          num_participants: numParticipantsInput ? numParticipantsInput.value : 1,
-          additional_requests: additionalRequestsInput ? additionalRequestsInput.value : '',
-          // Add these hidden fields to the submission
-          formal_letter_url: document.getElementById('formal_letter_url').value,
-          formal_letter_public_id: document.getElementById('formal_letter_public_id').value,
-          // Optional upload fields - explicitly set to null if not provided
-          facility_layout_url: document.getElementById('facility_layout_url')?.value || null,
-          facility_layout_public_id: document.getElementById('facility_layout_public_id')?.value || null,
-          // Include user info that was previously in session
-          first_name: firstNameInput.value,
-          last_name: lastNameInput.value,
-          email: emailInput.value,
-          contact_number: document.querySelector('input[name="contact_number"]')?.value || null,
-          organization_name: document.querySelector('input[name="organization_name"]')?.value || null,
-          user_type: document.getElementById('applicantType').value, // Use dropdown value directly
-          school_id: document.getElementById('applicantType').value === 'Internal'
-            ? (schoolIdInput ? schoolIdInput.value : null)
-            : null
-        };
-
-        // Validate file upload
-        if (!formData.formal_letter_url) {
-          throw new Error('Formal letter is required');
-        }
-
-        console.log('Submitting form data:', formData);
-
-        // Submit form with proper error handling
-        const submitResponse = await fetch('/requisition/submit', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include'
-        });
-
-        if (!submitResponse.ok) {
-          const errorData = await submitResponse.json().catch(() => ({}));
-          throw new Error(errorData.message || 'Submission failed');
-        }
-
-        const result = await submitResponse.json();
-
-        if (!result.success) {
-          throw new Error(result.message || 'Submission failed');
-        }
-
-        // Show success state
-        submitStatus.classList.add('d-none');
-        document.getElementById('successStatus').classList.remove('d-none');
-        document.getElementById('successDetails').textContent =
-          `Your request ID: ${result.data.request_id}\nAccess Code: ${result.data.access_code}`;
-
-        // Clear session data
-        await fetch('/requisition/clear-session', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': csrfToken
-          }
-        });
-
-        // Reset form
-        document.getElementById('reservationForm').reset();
-
-        // Clear selected items
-        await renderSelectedItems();
-        await calculateAndDisplayFees();
-
-      } catch (error) {
-        console.error('Error submitting form:', error);
-        showToast(error.message || 'Failed to submit form', 'error');
-
-        // Reset modal state
-        const submitStatus = document.getElementById('submitStatus');
-        if (submitStatus) submitStatus.classList.add('d-none');
-        const confirmBtn = document.getElementById('confirmSubmitBtn');
-        if (confirmBtn) confirmBtn.disabled = false;
-      }
+    const formData = {
+      start_date: document.getElementById('startDateField').value,
+      end_date: document.getElementById('endDateField').value,
+      start_time: convertTo24Hour(document.getElementById('startTimeField').value),
+      end_time: convertTo24Hour(document.getElementById('endTimeField').value),
+      purpose_id: document.getElementById('activityPurposeField').value,
+      num_participants: numParticipantsInput ? numParticipantsInput.value : 1,
+      additional_requests: additionalRequestsInput ? additionalRequestsInput.value : '',
+      // Add these hidden fields to the submission
+      formal_letter_url: document.getElementById('formal_letter_url').value,
+      formal_letter_public_id: document.getElementById('formal_letter_public_id').value,
+      // Optional upload fields - explicitly set to null if not provided
+      facility_layout_url: document.getElementById('facility_layout_url')?.value || null,
+      facility_layout_public_id: document.getElementById('facility_layout_public_id')?.value || null,
+      // Include user info that was previously in session
+      first_name: firstNameInput.value,
+      last_name: lastNameInput.value,
+      email: emailInput.value,
+      contact_number: document.querySelector('input[name="contact_number"]')?.value || null,
+      organization_name: document.querySelector('input[name="organization_name"]')?.value || null,
+      user_type: document.getElementById('applicantType').value, // Use dropdown value directly
+      school_id: document.getElementById('applicantType').value === 'Internal'
+        ? (schoolIdInput ? schoolIdInput.value : null)
+        : null
     };
+
+    // Validate file upload
+    if (!formData.formal_letter_url) {
+      throw new Error('Formal letter is required');
+    }
+
+    console.log('Submitting form data:', formData);
+
+    // Submit form with proper error handling
+    const submitResponse = await fetch('/requisition/submit', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+      credentials: 'include'
+    });
+
+    if (!submitResponse.ok) {
+      const errorData = await submitResponse.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Submission failed');
+    }
+
+    const result = await submitResponse.json();
+
+    if (!result.success) {
+      throw new Error(result.message || 'Submission failed');
+    }
+
+    // Hide the terms modal
+    termsModalInstance.hide();
+    
+    // Show success details in the success modal
+    document.getElementById('successDetails').textContent = 
+      `Your request ID: ${result.data.request_id}\nAccess Code: ${result.data.access_code}`;
+    
+    // Show the success modal
+    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+    successModal.show();
+
+    // Clear session data
+    await fetch('/requisition/clear-session', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': csrfToken
+      }
+    });
+
+    // Reset form
+    document.getElementById('reservationForm').reset();
+
+    // Clear selected items
+    await renderSelectedItems();
+    await calculateAndDisplayFees();
+
+  } catch (error) {
+    console.error('Error submitting form:', error);
+    showToast(error.message || 'Failed to submit form', 'error');
+
+    // Reset modal state
+    const submitStatus = document.getElementById('submitStatus');
+    if (submitStatus) submitStatus.classList.add('d-none');
+    const confirmBtn = document.getElementById('confirmSubmitBtn');
+    if (confirmBtn) confirmBtn.disabled = false;
+  }
+};
 
    window.convertTo24Hour = function (time12h) {
     if (!time12h) return '';
