@@ -264,83 +264,154 @@ class RequisitionFormController extends Controller
     }
 
     // ----- Add items to session ----- //
-    public function addToForm(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'facility_id' => 'required_without:equipment_id|exists:facilities,facility_id',
-            'equipment_id' => 'required_without:facility_id|exists:equipment,equipment_id',
-            'type' => 'required|in:facility,equipment',
-            'quantity' => 'required_if:type,equipment|integer|min:1|max:100'
+public function addToForm(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'facility_id' => 'required_without:equipment_id|exists:facilities,facility_id',
+        'equipment_id' => 'required_without:facility_id|exists:equipment,equipment_id',
+        'type' => 'required|in:facility,equipment',
+        'quantity' => 'required_if:type,equipment|integer|min:1|max:100'
+    ]);
+
+    if ($validator->fails()) {
+        return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
+    }
+
+    try {
+        $selectedItems = Session::get('selected_items', []);
+        $type = $request->type;
+        $idField = $type . '_id';
+        $id = $request->input($idField);
+        $quantity = $request->quantity ?? 1;
+
+        // Check for duplicate item
+        $existingIndex = collect($selectedItems)->search(function ($item) use ($id, $type, $idField) {
+            return isset($item[$idField]) && $item[$idField] == $id && $item['type'] === $type;
+        });
+
+        if ($existingIndex !== false) {
+            if ($type === 'equipment') {
+                $selectedItems[$existingIndex]['quantity'] = $quantity;
+                // Recalculate total fee for equipment
+                $selectedItems[$existingIndex]['total_fee'] = $selectedItems[$existingIndex]['external_fee'] * $quantity;
+                Session::put('selected_items', $selectedItems);
+                return $this->jsonResponse(true, 'Equipment quantity updated.', [
+                    'selected_items' => $selectedItems,
+                    'cart_count' => count($selectedItems)
+                ]);
+            }
+            return $this->jsonResponse(false, 'This item is already in your requisition.', [], 422);
+        }
+
+        if (count($selectedItems) >= 10) {
+            return $this->jsonResponse(false, 'Maximum item limit (10) reached.', [], 422);
+        }
+
+        // Get item details
+        if ($type === 'facility') {
+            $item = Facility::with(['images', 'category', 'status'])->find($id);
+        } else {
+            $item = Equipment::with(['images', 'category', 'status'])->find($id);
+        }
+
+        if (!$item) {
+            return $this->jsonResponse(false, 'Item not found.', [], 404);
+        }
+
+        $newItem = [
+            'type' => $type,
+            $idField => $id,
+            'quantity' => $quantity,
+            'name' => $type === 'facility' ? $item->facility_name : $item->equipment_name,
+            'description' => $item->description,
+            'external_fee' => $item->external_fee,
+            'total_fee' => $type === 'equipment' ? $item->external_fee * $quantity : $item->external_fee,
+            'rate_type' => $item->rate_type,
+            'images' => $item->images->toArray(),
+            'added_at' => now()->toDateTimeString()
+        ];
+
+        $selectedItems[] = $newItem;
+        Session::put('selected_items', $selectedItems);
+
+        return $this->jsonResponse(true, ucfirst($type) . ' added successfully.', [
+            'selected_items' => $selectedItems,
+            'cart_count' => count($selectedItems)
         ]);
 
-        if ($validator->fails()) {
-            return $this->jsonResponse(false, 'Validation failed.', ['errors' => $validator->errors()], 422);
-        }
-
-        try {
-            $selectedItems = Session::get('selected_items', []);
-            $type = $request->type;
-            $idField = $type . '_id';
-            $id = $request->input($idField);
-            $quantity = $request->quantity ?? 1;
-
-            // Check for duplicate item
-            $existingIndex = collect($selectedItems)->search(function ($item) use ($id, $type, $idField) {
-                return isset($item[$idField]) && $item[$idField] == $id && $item['type'] === $type;
-            });
-
-            if ($existingIndex !== false) {
-                if ($type === 'equipment') {
-                    $selectedItems[$existingIndex]['quantity'] = $quantity;
-                    Session::put('selected_items', $selectedItems);
-                    return $this->jsonResponse(true, 'Equipment quantity updated.', [
-                        'selected_items' => $selectedItems,
-                        'cart_count' => count($selectedItems)
-                    ]);
-                }
-                return $this->jsonResponse(false, 'This item is already in your requisition.', [], 422);
-            }
-
-            if (count($selectedItems) >= 10) {
-                return $this->jsonResponse(false, 'Maximum item limit (10) reached.', [], 422);
-            }
-
-            // Get item details
-            if ($type === 'facility') {
-                $item = Facility::with(['images', 'category', 'status'])->find($id);
-            } else {
-                $item = Equipment::with(['images', 'category', 'status'])->find($id);
-            }
-
-            if (!$item) {
-                return $this->jsonResponse(false, 'Item not found.', [], 404);
-            }
-
-            $newItem = [
-                'type' => $type,
-                $idField => $id,
-                'quantity' => $quantity,
-                'name' => $type === 'facility' ? $item->facility_name : $item->equipment_name,
-                'description' => $item->description,
-                'external_fee' => $item->external_fee,
-                'rate_type' => $item->rate_type,
-                'images' => $item->images->toArray(),
-                'added_at' => now()->toDateTimeString()
-            ];
-
-            $selectedItems[] = $newItem;
-            Session::put('selected_items', $selectedItems);
-
-            return $this->jsonResponse(true, ucfirst($type) . ' added successfully.', [
-                'selected_items' => $selectedItems,
-                'cart_count' => count($selectedItems)
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Add to form error: ' . $e->getMessage());
-            return $this->jsonResponse(false, 'An error occurred.', [], 500);
-        }
+    } catch (\Exception $e) {
+        Log::error('Add to form error: ' . $e->getMessage());
+        return $this->jsonResponse(false, 'An error occurred.', [], 500);
     }
+}
+
+// Add this method to your controller for fee calculation
+public function calculateFeeBreakdown(Request $request)
+{
+    try {
+        $selectedItems = Session::get('selected_items', []);
+        $requestInfo = Session::get('request_info', []);
+        
+        if (empty($selectedItems)) {
+            return $this->jsonResponse(false, 'No items in cart.', [], 400);
+        }
+
+        if (empty($requestInfo)) {
+            return $this->jsonResponse(false, 'Schedule information not found.', [], 400);
+        }
+
+        $totalFee = 0;
+        $breakdown = [];
+
+        foreach ($selectedItems as $item) {
+            $itemFee = $item['external_fee'];
+            
+            // Calculate duration in hours for hourly rates
+            if ($item['rate_type'] === 'Per Hour') {
+                $startDateTime = Carbon::createFromFormat('Y-m-d H:i', $requestInfo['start_date'] . ' ' . $requestInfo['start_time']);
+                $endDateTime = Carbon::createFromFormat('Y-m-d H:i', $requestInfo['end_date'] . ' ' . $requestInfo['end_time']);
+                $durationHours = $endDateTime->diffInHours($startDateTime);
+                
+                if ($item['type'] === 'equipment') {
+                    $itemFee = $item['external_fee'] * $item['quantity'] * $durationHours;
+                } else {
+                    $itemFee = $item['external_fee'] * $durationHours;
+                }
+            } else if ($item['type'] === 'equipment') {
+                // Per Event rate for equipment: multiply by quantity only
+                $itemFee = $item['external_fee'] * $item['quantity'];
+            }
+            
+            $breakdown[] = [
+                'name' => $item['name'],
+                'type' => $item['type'],
+                'quantity' => $item['quantity'] ?? 1,
+                'rate_type' => $item['rate_type'],
+                'fee_per_unit' => $item['external_fee'],
+                'total_fee' => $itemFee
+            ];
+            
+            $totalFee += $itemFee;
+        }
+
+        // Store fee summary in session for later use
+        Session::put('fee_summary', [
+            'breakdown' => $breakdown,
+            'total_fee' => $totalFee
+        ]);
+
+        return $this->jsonResponse(true, 'Fee breakdown calculated.', [
+            'breakdown' => $breakdown,
+            'total_fee' => $totalFee
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Fee calculation error: ' . $e->getMessage());
+        return $this->jsonResponse(false, 'Error calculating fees.', [], 500);
+    }
+}
+
+
     // ----- Remove items from session ----- //
     public function removeFromForm(Request $request)
     {
@@ -771,7 +842,6 @@ class RequisitionFormController extends Controller
                 } elseif ($item['type'] === 'equipment') {
                     $equipmentItems = \App\Models\EquipmentItem::where('equipment_id', $item['equipment_id'] ?? $item['id'])
                         ->whereIn('condition_id', [1, 2, 3])
-                        ->whereNull('deleted_at')
                         ->limit($item['quantity'] ?? 1)
                         ->get();
 
@@ -782,14 +852,14 @@ class RequisitionFormController extends Controller
                     foreach ($equipmentItems as $equipmentItem) {
                         RequestedEquipment::create([
                             'request_id' => $requisitionForm->request_id,
-                            'equipment_id' => $item['id'],
+                            'equipment_id' => $item['equipment_id'],
                             'item_id' => $equipmentItem->item_id,
                             'is_waived' => false,
                         ]);
 
                         DB::table('equipment_items')
                             ->where('item_id', $equipmentItem->item_id)
-                            ->update(['deleted_at' => now()]);
+                           ;
                     }
                 }
             }

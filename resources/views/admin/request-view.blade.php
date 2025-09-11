@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Manage Requisitions: View Request')
+@section('title', 'Request View')
 @section('content')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -405,7 +405,9 @@
         /* Custom styling for the fee items */
         .fee-item {
             background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
+            padding: 10px;
+            border-radius: 10px;;
+
         }
 
         /* Make the remark textarea resize automatically */
@@ -455,15 +457,8 @@
       
             <div class="card bg-transparent shadow-none pt-0" style="border: none !important; background-color: transparent !important">
                 <div class="card-body">
-                    <a href="{{ url('/admin/manage-requests') }}" class="btn btn-primary mb-4">
-                        ← Back to Requisitions
-                    </a>
                     <!-- Skeleton Loading -->
                     <div id="loadingState">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div class="skeleton skeleton-text" style="width: 200px; height: 30px;"></div>
-                            <div class="skeleton skeleton-text" style="width: 100px; height: 30px;"></div>
-                        </div>
                         <div class="row g-3">
                             <!-- User Information Skeleton -->
                             <div class="col-md-6">
@@ -2382,77 +2377,103 @@ function calculateRentalDuration(startDate, startTime, endDate, endTime) {
 }
 
           // Function to update base fees display
+// Function to update base fees display
 function updateBaseFees(requestedItems, schedule) {
     const facilitiesContainer = document.getElementById('facilitiesFees');
     const equipmentContainer = document.getElementById('equipmentFees');
     
-    // Calculate rental duration
-    const rentalDuration = calculateRentalDuration(
-        schedule.start_date, 
-        schedule.start_time, 
-        schedule.end_date, 
-        schedule.end_time
-    );
-
     // Clear existing content
     facilitiesContainer.innerHTML = '';
     equipmentContainer.innerHTML = '';
 
-    // Add rental duration at the top
-    // Add rental duration at the top - ABOVE the Base Fee header
-const baseFeesContainer = document.getElementById('baseFeesContainer');
-const durationElement = document.createElement('div');
-durationElement.className = 'mb-3 p-2 bg-light rounded';
-durationElement.innerHTML = `
-    <strong>Rental Duration</strong> - ${rentalDuration.formatted}
-`;
-baseFeesContainer.parentNode.insertBefore(durationElement, baseFeesContainer);
+    // Calculate rental duration for hourly rate calculations
+    const startDateTime = new Date(`${schedule.start_date}T${schedule.start_time}`);
+    const endDateTime = new Date(`${schedule.end_date}T${schedule.end_time}`);
+    const durationHours = Math.max(0, (endDateTime - startDateTime) / (1000 * 60 * 60));
 
-    // Add facilities
+    let totalBaseFees = 0;
+
+    // Add facilities with proper rate type logic
     if (requestedItems.facilities && requestedItems.facilities.length > 0) {
         requestedItems.facilities.forEach(facility => {
-            const facilityElement = document.createElement('div');
-            facilityElement.className = 'd-flex justify-content-between align-items-center mb-1';
+            if (facility.is_waived) return; // Skip waived items
             
-            // Determine rate type suffix
-            const rateSuffix = facility.rate_type === 'Per Hour' ? '/hour' : '/event';
+            const facilityElement = document.createElement('div');
+            facilityElement.className = 'fee-item d-flex justify-content-between mb-2';
+            
+            let feeAmount = parseFloat(facility.fee);
+            let itemTotal = 0;
+            let rateDescription = '';
+            
+            if (facility.rate_type === 'Per Hour' && durationHours > 0) {
+                itemTotal = feeAmount * durationHours;
+                rateDescription = `₱${feeAmount.toLocaleString()}/hr × ${durationHours.toFixed(1)} hrs`;
+                totalBaseFees += itemTotal;
+            } else {
+                itemTotal = feeAmount;
+                rateDescription = `₱${feeAmount.toLocaleString()}/event`;
+                totalBaseFees += itemTotal;
+            }
             
             facilityElement.innerHTML = `
-                <span class="item-name ${facility.is_waived ? 'waived' : ''}">
-                    ${facility.name}${facility.is_waived ? ' (Waived)' : ''}
+                <span class="item-name">
+                    ${facility.name}
                 </span>
-                <span class="item-price ${facility.is_waived ? 'waived' : ''}">
-                    ₱${facility.fee}${rateSuffix}
-                </span>
+                <div class="text-end">
+                    <small>${rateDescription}</small>
+                    <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                </div>
             `;
             facilitiesContainer.appendChild(facilityElement);
         });
     } else {
-        facilitiesContainer.innerHTML = '<p></p>';
+        facilitiesContainer.innerHTML = '<p class="text-muted">No facilities requested</p>';
     }
 
-    // Add equipment
+    // Add equipment with proper rate type logic
     if (requestedItems.equipment && requestedItems.equipment.length > 0) {
         requestedItems.equipment.forEach(equipment => {
-            const equipmentElement = document.createElement('div');
-            equipmentElement.className = 'd-flex justify-content-between align-items-center mb-1';
+            if (equipment.is_waived) return; // Skip waived items
             
-            // Determine rate type suffix
-            const rateSuffix = equipment.rate_type === 'Per Hour' ? '/hour' : '/event';
+            const equipmentElement = document.createElement('div');
+            equipmentElement.className = 'fee-item d-flex justify-content-between mb-2';
+            
+            let unitFee = parseFloat(equipment.fee);
+            const quantity = equipment.quantity || 1;
+            let itemTotal = 0;
+            let rateDescription = '';
+            
+            if (equipment.rate_type === 'Per Hour' && durationHours > 0) {
+                itemTotal = (unitFee * durationHours) * quantity;
+                rateDescription = `₱${unitFee.toLocaleString()}/hr × ${durationHours.toFixed(1)} hrs × ${quantity}`;
+                totalBaseFees += itemTotal;
+            } else {
+                itemTotal = unitFee * quantity;
+                rateDescription = `₱${unitFee.toLocaleString()}/event × ${quantity}`;
+                totalBaseFees += itemTotal;
+            }
             
             equipmentElement.innerHTML = `
-                <span class="item-name ${equipment.is_waived ? 'waived' : ''}">
-                    ${equipment.name}${equipment.is_waived ? ' (Waived)' : ''}
+                <span class="item-name">
+                    ${equipment.name} ${quantity > 1 ? `(×${quantity})` : ''}
                 </span>
-                <span class="item-price ${equipment.is_waived ? 'waived' : ''}">
-                    ₱${equipment.fee}${rateSuffix} × ${equipment.quantity}
-                </span>
+                <div class="text-end">
+                    <small>${rateDescription}</small>
+                    <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                </div>
             `;
             equipmentContainer.appendChild(equipmentElement);
         });
     } else {
-        equipmentContainer.innerHTML = '<p></p>';
+        equipmentContainer.innerHTML = '<p class="text-muted">No equipment requested</p>';
     }
+
+    // Update the total base fees display if you have one
+    console.log('Total Base Fees:', totalBaseFees);
+    console.log('Facilities:', requestedItems.facilities);
+console.log('Equipment:', requestedItems.equipment);
+console.log('Rate types - Facilities:', requestedItems.facilities.map(f => f.rate_type));
+console.log('Rate types - Equipment:', requestedItems.equipment.map(e => e.rate_type));
 }
 
             function formatDateTime(schedule) {

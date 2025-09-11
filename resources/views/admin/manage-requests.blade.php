@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Admin Dashboard • Manage Requisitions')
+@section('title', 'Review Submissions')
 
 @section('content')
   <style>
@@ -43,10 +43,17 @@
       min-height: 400px;
     }
 
-    .requisition-card {
-      margin-bottom: 1rem;
-      height: auto;
-    }
+.requisition-card {
+  margin-bottom: 1rem;
+  height: auto;
+  background-color: white;
+  transition: background-color 0.3s ease; /* smooth fade */
+}
+
+.requisition-card:hover {
+  background-color: #f6f8faff; /* slightly darker */
+}
+
 
     .compact-card {
       padding: 0.75rem;
@@ -571,6 +578,9 @@
                     <div>
                       <span class="card-label">Status:</span> 
                       <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
+                    </div>
+                    <div>
+                    <span class="card-label">Requester:</span> ${form.requester || 'N/A'}
                     </div>
                     <div>
                       <span class="card-label">Purpose:</span> ${form.purpose || 'N/A'}

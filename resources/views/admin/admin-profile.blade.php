@@ -21,7 +21,7 @@
             <div class="position-relative">
                 <div class="avatar-container rounded-circle border border-4 border-white" 
                      style="width: 150px; height: 150px; overflow: hidden;">
-                    <img id="profile-photo" src="{{ asset('images/default-admin.png') }}"
+                    <img id="profile-photo" src="{{ url('https://res.cloudinary.com/dn98ntlkd/image/upload/v1751033911/ksdmh4mmpxdtjogdgjmm.png') }}"
                         class="w-100 h-100 object-fit-cover">
                 </div>
                 <button class="btn btn-sm btn-light rounded-circle position-absolute bottom-0 end-0 shadow-sm" 

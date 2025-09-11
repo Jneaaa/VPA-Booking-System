@@ -237,18 +237,24 @@ class AdminApprovalController extends Controller
                             'requested_facility_id' => $facility->requested_facility_id,
                             'name' => $facility->facility->facility_name,
                             'fee' => $facility->facility->external_fee,
+                            'rate_type' => $facility->facility->rate_type,
                             'is_waived' => $facility->is_waived
                         ];
                     }),
-                        'equipment' => $form->requestedEquipment->map(function ($equipment) {
+                        'equipment' => $form->requestedEquipment->groupBy('equipment.equipment_id')->map(function ($group) {
+                        $firstItem = $group->first();
+                        $totalQuantity = $group->sum('quantity');
+
                         return [
-                            'requested_equipment_id' => $equipment->requested_equipment_id,
-                            'name' => $equipment->equipment->equipment_name,
-                            'quantity' => $equipment->quantity,
-                            'fee' => $equipment->equipment->external_fee,
-                            'is_waived' => $equipment->is_waived
+                            'requested_equipment_ids' => $group->pluck('requested_equipment_id')->toArray(),
+                            'name' => $firstItem->equipment->equipment_name,
+                            'quantity' => $totalQuantity,
+                            'fee' => $firstItem->equipment->external_fee,
+                            'rate_type' => $firstItem->equipment->rate_type,
+                            'is_waived' => $firstItem->is_waived,
+                            'total_fee' => $firstItem->equipment->external_fee * $totalQuantity
                         ];
-                    })
+                    })->values()
                     ],
                     'fees' => [
                         'tentative_fee' => $totalTentativeFee,
@@ -409,66 +415,73 @@ class AdminApprovalController extends Controller
     }
 
     public function getSimplifiedForms()
-{
-    // Get status IDs to exclude
-    $excludedStatuses = FormStatus::whereIn('status_name', [
-        'Returned',
-        'Late Return',
-        'Completed',
-        'Rejected',
-        'Cancelled'
-    ])->pluck('status_id');
+    {
+        // Get status IDs to exclude
+        $excludedStatuses = FormStatus::whereIn('status_name', [
+            'Returned',
+            'Late Return',
+            'Completed',
+            'Rejected',
+            'Cancelled'
+        ])->pluck('status_id');
 
-    // Get pending forms with necessary relationships
-    $forms = RequisitionForm::whereNotIn('status_id', $excludedStatuses)
-        ->with([
-            'purpose',
-            'formStatus',
-            'requestedFacilities.facility',
-            'requestedEquipment.equipment',
-            'requisitionApprovals'
-        ])
-        ->get()
-        ->map(function ($form) {
-            // Calculate tentative fee
-            $facilityFees = $form->requestedFacilities->sum(function ($facility) {
-                return $facility->is_waived ? 0 : $facility->facility->external_fee;
-            });
+        // Get pending forms with necessary relationships
+        $forms = RequisitionForm::whereNotIn('status_id', $excludedStatuses)
+            ->with([
+                'purpose',
+                'formStatus',
+                'requestedFacilities.facility',
+                'requestedEquipment.equipment',
+                'requisitionApprovals'
+            ])
+            ->get()
+            ->map(function ($form) {
+                // Calculate tentative fee
+                $facilityFees = $form->requestedFacilities->sum(function ($facility) {
+                    return $facility->is_waived ? 0 : $facility->facility->external_fee;
+                });
 
-            $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
-                return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
-            });
+                $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
+                    return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
+                });
 
-            $totalTentativeFee = $facilityFees + $equipmentFees + ($form->is_late ? $form->late_penalty_fee : 0);
+                $totalTentativeFee = $facilityFees + $equipmentFees + ($form->is_late ? $form->late_penalty_fee : 0);
 
-            // Format schedule
-            $startDateTime = date('F j, Y g:i A', strtotime($form->start_date . ' ' . $form->start_time));
-            $endDateTime = date('F j, Y g:i A', strtotime($form->end_date . ' ' . $form->end_time));
+                // Format schedule
+                $startDateTime = date('F j, Y g:i A', strtotime($form->start_date . ' ' . $form->start_time));
+                $endDateTime = date('F j, Y g:i A', strtotime($form->end_date . ' ' . $form->end_time));
 
-            // Format requested items
-            $requestedItems = collect([
-                ...$form->requestedFacilities->map(fn($rf) => $rf->facility->facility_name),
-                ...$form->requestedEquipment->map(fn($re) => $re->equipment->equipment_name . ' (×' . $re->quantity . ')')
-            ])->join(', ');
+                // Group equipment by name and sum quantities
+                $equipmentGroups = $form->requestedEquipment->groupBy('equipment.equipment_name')
+                    ->map(function ($group) {
+                    $totalQuantity = $group->sum('quantity');
+                    return $group->first()->equipment->equipment_name . ' (×' . $totalQuantity . ')';
+                });
 
-            return [
-                'request_id' => $form->request_id,
-                'purpose' => $form->purpose->purpose_name,
-                'schedule' => $startDateTime . ' to ' . $endDateTime,
-                'requester' => $form->first_name . ' ' . $form->last_name,
-                'status_id' => $form->status_id,
-                'requested_items' => $requestedItems,
-                'tentative_fee' => number_format($totalTentativeFee, 2),
-                'approvals' => $form->requisitionApprovals()->whereNotNull('approved_by')->count(),
-                'rejections' => $form->requisitionApprovals()->whereNotNull('rejected_by')->count(),
-                'date_submitted' => $form->created_at
-            ];
-        })
-        ->sortBy('status_id') // Sort ascending by status_id
-        ->values(); // Reset indexes
+                // Format requested items
+                $requestedItems = collect([
+                    ...$form->requestedFacilities->map(fn($rf) => $rf->facility->facility_name),
+                    ...$equipmentGroups->values()
+                ])->join(', ');
 
-    return response()->json($forms);
-}
+                return [
+                    'request_id' => $form->request_id,
+                    'purpose' => $form->purpose->purpose_name,
+                    'schedule' => $startDateTime . ' to ' . $endDateTime,
+                    'requester' => $form->first_name . ' ' . $form->last_name,
+                    'status_id' => $form->status_id,
+                    'requested_items' => $requestedItems,
+                    'tentative_fee' => number_format($totalTentativeFee, 2),
+                    'approvals' => $form->requisitionApprovals()->whereNotNull('approved_by')->count(),
+                    'rejections' => $form->requisitionApprovals()->whereNotNull('rejected_by')->count(),
+                    'date_submitted' => $form->created_at
+                ];
+            })
+            ->sortBy('status_id') // Sort ascending by status_id
+            ->values(); // Reset indexes
+
+        return response()->json($forms);
+    }
 
 
     public function getRequisitionFees($requestId)
@@ -878,258 +891,258 @@ class AdminApprovalController extends Controller
     }
 
 
-public function finalizeForm(Request $request, $requestId)
-{
-    try {
-        \Log::debug('Finalize form attempt', [
-            'request_id' => $requestId,
-            'admin_id' => auth()->id(),
-            'input_data' => $request->all()
-        ]);
-
-        $validatedData = $request->validate([
-            'calendar_title' => 'sometimes|string|max:50|nullable',
-            'calendar_description' => 'sometimes|string|max:100|nullable',
-            'remarks' => 'sometimes|string|max:500|nullable'
-        ]);
-
-        \Log::debug('Validation passed', ['validated_data' => $validatedData]);
-
-        $adminId = auth()->id();
-
-        if (!$adminId) {
-            \Log::warning('Admin not authenticated during finalization');
-            return response()->json(['error' => 'Admin not authenticated'], 401);
-        }
-
-        // Load the form with all necessary relationships
-        $form = RequisitionForm::with(['requestedFacilities.facility', 'requestedEquipment.equipment', 'requisitionFees'])
-            ->findOrFail($requestId);
-
-        \Log::debug('Form found', [
-            'current_status' => $form->status_id,
-            'is_finalized' => $form->is_finalized,
-            'current_approved_fee' => $form->approved_fee
-        ]);
-
-        // Update form fields
-        $form->is_finalized = true;
-        $form->finalized_at = now();
-        $form->finalized_by = $adminId;
-        $form->status_id = FormStatus::where('status_name', 'Awaiting Payment')->first()->status_id;
-
-        // Only update calendar fields if provided
-        if (!empty($validatedData['calendar_title'])) {
-            $form->calendar_title = $validatedData['calendar_title'];
-        }
-
-        if (!empty($validatedData['calendar_description'])) {
-            $form->calendar_description = $validatedData['calendar_description'];
-        }
-
-        // Recalculate the approved fee to ensure it's up to date
-        $approvedFee = $this->calculateApprovedFee($form);
-        $form->approved_fee = $approvedFee;
-
-        $form->save();
-
-        \Log::debug('Form finalized successfully', [
-            'new_status' => $form->status_id,
-            'calendar_title' => $form->calendar_title,
-            'approved_fee' => $form->approved_fee
-        ]);
-
-        // Add a comment if remarks are provided
-        if (!empty($validatedData['remarks'])) {
-            RequisitionComment::create([
+    public function finalizeForm(Request $request, $requestId)
+    {
+        try {
+            \Log::debug('Finalize form attempt', [
                 'request_id' => $requestId,
-                'admin_id' => $adminId,
-                'comment' => $validatedData['remarks']
+                'admin_id' => auth()->id(),
+                'input_data' => $request->all()
             ]);
 
-            \Log::debug('Comment added', ['remarks_length' => strlen($validatedData['remarks'])]);
-        }
+            $validatedData = $request->validate([
+                'calendar_title' => 'sometimes|string|max:50|nullable',
+                'calendar_description' => 'sometimes|string|max:100|nullable',
+                'remarks' => 'sometimes|string|max:500|nullable'
+            ]);
 
-        // Send email notification to requester
-        try {
-            $userName = $form->first_name . ' ' . $form->last_name;
-            $userEmail = $form->email;
+            \Log::debug('Validation passed', ['validated_data' => $validatedData]);
 
-            $emailData = [
-                'user_name' => $userName,
-                'request_id' => $requestId,
-                'approved_fee' => $form->approved_fee, // Use the updated value
-                'payment_deadline' => now()->addDays(5)->format('F j, Y')
-            ];
+            $adminId = auth()->id();
 
-            \Log::debug('Sending email with data', $emailData);
+            if (!$adminId) {
+                \Log::warning('Admin not authenticated during finalization');
+                return response()->json(['error' => 'Admin not authenticated'], 401);
+            }
 
-            \Mail::send('emails.booking-approved', $emailData, function ($message) use ($userEmail, $userName) {
-                $message->to($userEmail, $userName)
-                    ->subject('Your Booking Request Has Been Approved – Payment Required');
-            });
+            // Load the form with all necessary relationships
+            $form = RequisitionForm::with(['requestedFacilities.facility', 'requestedEquipment.equipment', 'requisitionFees'])
+                ->findOrFail($requestId);
 
-            \Log::debug('Approval email sent successfully', [
-                'recipient' => $userEmail,
-                'request_id' => $requestId,
+            \Log::debug('Form found', [
+                'current_status' => $form->status_id,
+                'is_finalized' => $form->is_finalized,
+                'current_approved_fee' => $form->approved_fee
+            ]);
+
+            // Update form fields
+            $form->is_finalized = true;
+            $form->finalized_at = now();
+            $form->finalized_by = $adminId;
+            $form->status_id = FormStatus::where('status_name', 'Awaiting Payment')->first()->status_id;
+
+            // Only update calendar fields if provided
+            if (!empty($validatedData['calendar_title'])) {
+                $form->calendar_title = $validatedData['calendar_title'];
+            }
+
+            if (!empty($validatedData['calendar_description'])) {
+                $form->calendar_description = $validatedData['calendar_description'];
+            }
+
+            // Recalculate the approved fee to ensure it's up to date
+            $approvedFee = $this->calculateApprovedFee($form);
+            $form->approved_fee = $approvedFee;
+
+            $form->save();
+
+            \Log::debug('Form finalized successfully', [
+                'new_status' => $form->status_id,
+                'calendar_title' => $form->calendar_title,
                 'approved_fee' => $form->approved_fee
             ]);
 
-        } catch (\Exception $emailError) {
-            \Log::error('Failed to send approval email', [
-                'request_id' => $requestId,
-                'error' => $emailError->getMessage(),
-                'recipient' => $form->email,
-                'trace' => $emailError->getTraceAsString()
-            ]);
-            // Don't throw error - email failure shouldn't prevent form finalization
-        }
+            // Add a comment if remarks are provided
+            if (!empty($validatedData['remarks'])) {
+                RequisitionComment::create([
+                    'request_id' => $requestId,
+                    'admin_id' => $adminId,
+                    'comment' => $validatedData['remarks']
+                ]);
 
-        return response()->json([
-            'message' => 'Form finalized successfully',
-            'new_status' => 'Awaiting Payment',
-            'approved_fee' => $form->approved_fee
-        ]);
+                \Log::debug('Comment added', ['remarks_length' => strlen($validatedData['remarks'])]);
+            }
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        \Log::error('Finalize form validation failed', [
-            'request_id' => $requestId,
-            'errors' => $e->errors(),
-            'input_data' => $request->all()
-        ]);
+            // Send email notification to requester
+            try {
+                $userName = $form->first_name . ' ' . $form->last_name;
+                $userEmail = $form->email;
 
-        return response()->json([
-            'error' => 'Validation failed',
-            'details' => $e->errors()
-        ], 422);
+                $emailData = [
+                    'user_name' => $userName,
+                    'request_id' => $requestId,
+                    'approved_fee' => $form->approved_fee, // Use the updated value
+                    'payment_deadline' => now()->addDays(5)->format('F j, Y')
+                ];
 
-    } catch (\Exception $e) {
-        \Log::error('Failed to finalize form', [
-            'request_id' => $requestId,
-            'admin_id' => auth()->id(),
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-            'input_data' => $request->all()
-        ]);
+                \Log::debug('Sending email with data', $emailData);
 
-        return response()->json([
-            'error' => 'Failed to finalize form',
-            'details' => $e->getMessage()
-        ], 500);
-    }
-}
+                \Mail::send('emails.booking-approved', $emailData, function ($message) use ($userEmail, $userName) {
+                    $message->to($userEmail, $userName)
+                        ->subject('Your Booking Request Has Been Approved – Payment Required');
+                });
 
-// Add this method to the AdminApprovalController class
-public function cancelRequestPublic($requestId)
-{
-    try {
-        \Log::info('Public cancellation request received', ['request_id' => $requestId]);
+                \Log::debug('Approval email sent successfully', [
+                    'recipient' => $userEmail,
+                    'request_id' => $requestId,
+                    'approved_fee' => $form->approved_fee
+                ]);
 
-        $form = RequisitionForm::findOrFail($requestId);
-        
-        // Check if the request can be cancelled (only certain statuses)
-        $cancellableStatuses = ['Pending Approval', 'Awaiting Payment', 'Scheduled'];
-        if (!in_array($form->formStatus->status_name, $cancellableStatuses)) {
+            } catch (\Exception $emailError) {
+                \Log::error('Failed to send approval email', [
+                    'request_id' => $requestId,
+                    'error' => $emailError->getMessage(),
+                    'recipient' => $form->email,
+                    'trace' => $emailError->getTraceAsString()
+                ]);
+                // Don't throw error - email failure shouldn't prevent form finalization
+            }
+
             return response()->json([
-                'error' => 'Cannot cancel request',
-                'details' => 'This request cannot be cancelled in its current status'
+                'message' => 'Form finalized successfully',
+                'new_status' => 'Awaiting Payment',
+                'approved_fee' => $form->approved_fee
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Finalize form validation failed', [
+                'request_id' => $requestId,
+                'errors' => $e->errors(),
+                'input_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'error' => 'Validation failed',
+                'details' => $e->errors()
             ], 422);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to finalize form', [
+                'request_id' => $requestId,
+                'admin_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'input_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to finalize form',
+                'details' => $e->getMessage()
+            ], 500);
         }
-
-        DB::beginTransaction();
-
-        // Update the requisition form
-        $form->status_id = FormStatus::where('status_name', 'Cancelled')->first()->status_id;
-        $form->is_closed = true;
-        $form->closed_by = null; // No admin since it's public cancellation
-        $form->closed_at = now();
-        $form->updated_at = now();
-        $form->save();
-
-        // Create completed transaction record
-        CompletedTransaction::create([
-            'request_id' => $requestId,
-            'official_receipt_no' => null,
-            'official_receipt_url' => null,
-            'official_receipt_public_id' => null
-        ]);
-
-        DB::commit();
-
-        \Log::info('Request cancelled successfully via public route', ['request_id' => $requestId]);
-
-        return response()->json([
-            'message' => 'Request cancelled successfully',
-            'request_id' => $requestId
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Failed to cancel request via public route', [
-            'request_id' => $requestId,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'error' => 'Failed to cancel request',
-            'details' => $e->getMessage()
-        ], 500);
     }
-}
 
-// Rename the existing cancel method for admin use
-public function cancelForm(Request $request, $requestId)
-{
-    try {
-        $adminId = auth()->id();
+    // Add this method to the AdminApprovalController class
+    public function cancelRequestPublic($requestId)
+    {
+        try {
+            \Log::info('Public cancellation request received', ['request_id' => $requestId]);
 
-        if (!$adminId) {
-            return response()->json(['error' => 'Admin not authenticated'], 401);
+            $form = RequisitionForm::findOrFail($requestId);
+
+            // Check if the request can be cancelled (only certain statuses)
+            $cancellableStatuses = ['Pending Approval', 'Awaiting Payment', 'Scheduled'];
+            if (!in_array($form->formStatus->status_name, $cancellableStatuses)) {
+                return response()->json([
+                    'error' => 'Cannot cancel request',
+                    'details' => 'This request cannot be cancelled in its current status'
+                ], 422);
+            }
+
+            DB::beginTransaction();
+
+            // Update the requisition form
+            $form->status_id = FormStatus::where('status_name', 'Cancelled')->first()->status_id;
+            $form->is_closed = true;
+            $form->closed_by = null; // No admin since it's public cancellation
+            $form->closed_at = now();
+            $form->updated_at = now();
+            $form->save();
+
+            // Create completed transaction record
+            CompletedTransaction::create([
+                'request_id' => $requestId,
+                'official_receipt_no' => null,
+                'official_receipt_url' => null,
+                'official_receipt_public_id' => null
+            ]);
+
+            DB::commit();
+
+            \Log::info('Request cancelled successfully via public route', ['request_id' => $requestId]);
+
+            return response()->json([
+                'message' => 'Request cancelled successfully',
+                'request_id' => $requestId
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to cancel request via public route', [
+                'request_id' => $requestId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to cancel request',
+                'details' => $e->getMessage()
+            ], 500);
         }
-
-        DB::beginTransaction();
-
-        $form = RequisitionForm::findOrFail($requestId);
-        
-        // Update the requisition form
-        $form->status_id = FormStatus::where('status_name', 'Cancelled')->first()->status_id;
-        $form->is_closed = true;
-        $form->closed_by = $adminId;
-        $form->closed_at = now();
-        $form->updated_at = now();
-        $form->save();
-
-        // Create completed transaction record
-        CompletedTransaction::create([
-            'request_id' => $requestId,
-            'official_receipt_no' => null,
-            'official_receipt_url' => null,
-            'official_receipt_public_id' => null
-        ]);
-
-        DB::commit();
-
-        return response()->json([
-            'message' => 'Form cancelled successfully',
-            'request_id' => $requestId
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Failed to cancel form as admin', [
-            'request_id' => $requestId,
-            'admin_id' => auth()->id(),
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'error' => 'Failed to cancel form',
-            'details' => $e->getMessage()
-        ], 500);
     }
-}
+
+    // Rename the existing cancel method for admin use
+    public function cancelForm(Request $request, $requestId)
+    {
+        try {
+            $adminId = auth()->id();
+
+            if (!$adminId) {
+                return response()->json(['error' => 'Admin not authenticated'], 401);
+            }
+
+            DB::beginTransaction();
+
+            $form = RequisitionForm::findOrFail($requestId);
+
+            // Update the requisition form
+            $form->status_id = FormStatus::where('status_name', 'Cancelled')->first()->status_id;
+            $form->is_closed = true;
+            $form->closed_by = $adminId;
+            $form->closed_at = now();
+            $form->updated_at = now();
+            $form->save();
+
+            // Create completed transaction record
+            CompletedTransaction::create([
+                'request_id' => $requestId,
+                'official_receipt_no' => null,
+                'official_receipt_url' => null,
+                'official_receipt_public_id' => null
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Form cancelled successfully',
+                'request_id' => $requestId
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to cancel form as admin', [
+                'request_id' => $requestId,
+                'admin_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to cancel form',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
 
 
     public function closeForm($requestId)
@@ -1204,144 +1217,201 @@ public function cancelForm(Request $request, $requestId)
     }
 
     public function updateStatus(Request $request, $requestId)
-{
-    try {
-        \Log::debug('Update status request received', [
-            'request_id' => $requestId,
-            'new_status' => $request->status_name,
-            'admin_id' => auth()->id()
-        ]);
+    {
+        try {
+            \Log::debug('Update status request received', [
+                'request_id' => $requestId,
+                'new_status' => $request->status_name,
+                'admin_id' => auth()->id()
+            ]);
 
-        $validatedData = $request->validate([
-            'status_name' => 'required|string|in:Scheduled,Ongoing,Returned,Late Return,Completed'
-        ]);
+            $validatedData = $request->validate([
+                'status_name' => 'required|string|in:Scheduled,Ongoing,Returned,Late Return,Completed'
+            ]);
 
-        $adminId = auth()->id();
-        if (!$adminId) {
-            \Log::warning('Admin not authenticated during status update');
-            return response()->json(['error' => 'Admin not authenticated'], 401);
-        }
-
-        $form = RequisitionForm::findOrFail($requestId);
-        
-        // Get the status ID for the selected status name
-        $status = FormStatus::where('status_name', $validatedData['status_name'])->first();
-        if (!$status) {
-            \Log::error('Status not found', ['status_name' => $validatedData['status_name']]);
-            return response()->json(['error' => 'Invalid status'], 422);
-        }
-
-        // Update the form status
-        $form->status_id = $status->status_id;
-        
-        // Additional logic based on status
-        if (in_array($validatedData['status_name'], ['Returned', 'Late Return', 'Completed', 'Rejected', 'Cancelled'])) {
-            $form->is_closed = true;
-            $form->closed_at = now();
-            $form->closed_by = $adminId;
-            
-            // Create completed transaction record for finalized statuses
-            if (!CompletedTransaction::where('request_id', $requestId)->exists()) {
-                CompletedTransaction::create([
-                    'request_id' => $requestId,
-                    'official_receipt_no' => $form->official_receipt_no,
-                    'official_receipt_url' => $form->official_receipt_url,
-                    'official_receipt_public_id' => $form->official_receipt_public_id
-                ]);
+            $adminId = auth()->id();
+            if (!$adminId) {
+                \Log::warning('Admin not authenticated during status update');
+                return response()->json(['error' => 'Admin not authenticated'], 401);
             }
+
+            $form = RequisitionForm::findOrFail($requestId);
+
+            // Get the status ID for the selected status name
+            $status = FormStatus::where('status_name', $validatedData['status_name'])->first();
+            if (!$status) {
+                \Log::error('Status not found', ['status_name' => $validatedData['status_name']]);
+                return response()->json(['error' => 'Invalid status'], 422);
+            }
+
+            // Update the form status
+            $form->status_id = $status->status_id;
+
+            // Additional logic based on status
+            if (in_array($validatedData['status_name'], ['Returned', 'Late Return', 'Completed', 'Rejected', 'Cancelled'])) {
+                $form->is_closed = true;
+                $form->closed_at = now();
+                $form->closed_by = $adminId;
+
+                // Create completed transaction record for finalized statuses
+                if (!CompletedTransaction::where('request_id', $requestId)->exists()) {
+                    CompletedTransaction::create([
+                        'request_id' => $requestId,
+                        'official_receipt_no' => $form->official_receipt_no,
+                        'official_receipt_url' => $form->official_receipt_url,
+                        'official_receipt_public_id' => $form->official_receipt_public_id
+                    ]);
+                }
+            }
+
+            $form->save();
+
+            \Log::info('Status updated successfully', [
+                'request_id' => $requestId,
+                'old_status' => $form->getOriginal('status_id'),
+                'new_status' => $form->status_id,
+                'admin_id' => $adminId
+            ]);
+
+            return response()->json([
+                'message' => 'Status updated successfully',
+                'new_status' => $validatedData['status_name'],
+                'status_id' => $status->status_id,
+                'color_code' => $status->color_code
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Status update validation failed', [
+                'request_id' => $requestId,
+                'errors' => $e->errors(),
+                'input_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'error' => 'Validation failed',
+                'details' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to update status', [
+                'request_id' => $requestId,
+                'admin_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to update status',
+                'details' => $e->getMessage()
+            ], 500);
         }
-        
-        $form->save();
-
-        \Log::info('Status updated successfully', [
-            'request_id' => $requestId,
-            'old_status' => $form->getOriginal('status_id'),
-            'new_status' => $form->status_id,
-            'admin_id' => $adminId
-        ]);
-
-        return response()->json([
-            'message' => 'Status updated successfully',
-            'new_status' => $validatedData['status_name'],
-            'status_id' => $status->status_id,
-            'color_code' => $status->color_code
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        \Log::error('Status update validation failed', [
-            'request_id' => $requestId,
-            'errors' => $e->errors(),
-            'input_data' => $request->all()
-        ]);
-
-        return response()->json([
-            'error' => 'Validation failed',
-            'details' => $e->errors()
-        ], 422);
-
-    } catch (\Exception $e) {
-        \Log::error('Failed to update status', [
-            'request_id' => $requestId,
-            'admin_id' => auth()->id(),
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'error' => 'Failed to update status',
-            'details' => $e->getMessage()
-        ], 500);
     }
-}
 
     // Calculate & Finalize fees //
 
-private function calculateBaseFees($form)
-{
-    // Calculate facility fees with rate_type logic
-    $facilityFees = $form->requestedFacilities->sum(function ($facility) use ($form) {
-        if ($facility->is_waived) {
-            return 0;
-        }
-        
-        $fee = $facility->facility->external_fee;
-        
-        // Check if rate_type is "Per Hour" and calculate based on duration
-        if ($facility->facility->rate_type === 'Per Hour') {
-            $startDateTime = Carbon::parse($form->start_date . ' ' . $form->start_time);
-            $endDateTime = Carbon::parse($form->end_date . ' ' . $form->end_time);
-            $durationInHours = $startDateTime->diffInHours($endDateTime);
-            
-            return $fee * $durationInHours;
-        }
-        
-        // For "Per Event" or any other rate type, return the base fee
-        return $fee;
-    });
+    // Add better error logging to the calculateBaseFees method
+    private function calculateBaseFees($form)
+    {
+        try {
+            \Log::debug('Calculating base fees', [
+                'request_id' => $form->request_id,
+                'facilities_count' => $form->requestedFacilities->count(),
+                'equipment_count' => $form->requestedEquipment->count()
+            ]);
 
-    // Calculate equipment fees with rate_type logic
-    $equipmentFees = $form->requestedEquipment->sum(function ($equipment) use ($form) {
-        if ($equipment->is_waived) {
-            return 0;
-        }
-        
-        $fee = $equipment->equipment->external_fee;
-        
-        // Check if rate_type is "Per Hour" and calculate based on duration
-        if ($equipment->equipment->rate_type === 'Per Hour') {
-            $startDateTime = Carbon::parse($form->start_date . ' ' . $form->start_time);
-            $endDateTime = Carbon::parse($form->end_date . ' ' . $form->end_time);
-            $durationInHours = $startDateTime->diffInHours($endDateTime);
-            
-            return ($fee * $durationInHours) * $equipment->quantity;
-        }
-        
-        // For "Per Event" or any other rate type, return the base fee multiplied by quantity
-        return $fee * $equipment->quantity;
-    });
+            // Calculate facility fees with rate_type logic
+            $facilityFees = $form->requestedFacilities->sum(function ($facility) use ($form) {
+                if ($facility->is_waived) {
+                    return 0;
+                }
 
-    return $facilityFees + $equipmentFees;
-}
+                $fee = $facility->facility->external_fee;
+
+                // Check if rate_type is "Per Hour" and calculate based on duration
+                if ($facility->facility->rate_type === 'Per Hour') {
+                    try {
+                        $startDateTime = Carbon::parse($form->start_date . ' ' . $form->start_time);
+                        $endDateTime = Carbon::parse($form->end_date . ' ' . $form->end_time);
+                        $durationInHours = $startDateTime->diffInHours($endDateTime);
+
+                        \Log::debug('Per Hour facility calculation', [
+                            'facility_id' => $facility->facility_id,
+                            'base_fee' => $fee,
+                            'duration_hours' => $durationInHours,
+                            'total' => $fee * $durationInHours
+                        ]);
+
+                        return $fee * $durationInHours;
+                    } catch (\Exception $e) {
+                        \Log::error('Error calculating per hour facility fee', [
+                            'facility_id' => $facility->facility_id,
+                            'error' => $e->getMessage()
+                        ]);
+                        return $fee; // Fallback to base fee
+                    }
+                }
+
+                // For "Per Event" or any other rate type, return the base fee
+                return $fee;
+            });
+
+            // Calculate equipment fees with rate_type logic
+            $equipmentFees = $form->requestedEquipment->sum(function ($equipment) use ($form) {
+                if ($equipment->is_waived) {
+                    return 0;
+                }
+
+                $fee = $equipment->equipment->external_fee;
+
+                // Check if rate_type is "Per Hour" and calculate based on duration
+                if ($equipment->equipment->rate_type === 'Per Hour') {
+                    try {
+                        $startDateTime = Carbon::parse($form->start_date . ' ' . $form->start_time);
+                        $endDateTime = Carbon::parse($form->end_date . ' ' . $form->end_time);
+                        $durationInHours = $startDateTime->diffInHours($endDateTime);
+
+                        \Log::debug('Per Hour equipment calculation', [
+                            'equipment_id' => $equipment->equipment_id,
+                            'base_fee' => $fee,
+                            'quantity' => $equipment->quantity,
+                            'duration_hours' => $durationInHours,
+                            'total' => ($fee * $durationInHours) * $equipment->quantity
+                        ]);
+
+                        return ($fee * $durationInHours) * $equipment->quantity;
+                    } catch (\Exception $e) {
+                        \Log::error('Error calculating per hour equipment fee', [
+                            'equipment_id' => $equipment->equipment_id,
+                            'error' => $e->getMessage()
+                        ]);
+                        return $fee * $equipment->quantity; // Fallback to base fee
+                    }
+                }
+
+                // For "Per Event" or any other rate type, return the base fee multiplied by quantity
+                return $fee * $equipment->quantity;
+            });
+
+            $total = $facilityFees + $equipmentFees;
+
+            \Log::debug('Base fees calculation completed', [
+                'request_id' => $form->request_id,
+                'facility_fees' => $facilityFees,
+                'equipment_fees' => $equipmentFees,
+                'total_base_fees' => $total
+            ]);
+
+            return $total;
+
+        } catch (\Exception $e) {
+            \Log::error('Error in calculateBaseFees', [
+                'request_id' => $form->request_id ?? 'unknown',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return 0; // Return 0 on error to prevent calculation issues
+        }
+    }
 
     private function calculateTentativeFee($requestId)
     {
@@ -1495,16 +1565,20 @@ private function calculateBaseFees($form)
                     'requested_items' => [
                         'facilities' => $form->requestedFacilities->map(function ($facility) {
                         return [
+                            'requested_facility_id' => $facility->requested_facility_id,
                             'name' => $facility->facility->facility_name,
                             'fee' => $facility->facility->external_fee,
+                            'rate_type' => $facility->facility->rate_type,
                             'is_waived' => $facility->is_waived
                         ];
                     }),
                         'equipment' => $form->requestedEquipment->map(function ($equipment) {
                         return [
+                            'requested_equipment_id' => $equipment->requested_equipment_id,
                             'name' => $equipment->equipment->equipment_name,
                             'quantity' => $equipment->quantity,
                             'fee' => $equipment->equipment->external_fee,
+                            'rate_type' => $equipment->equipment->rate_type,
                             'is_waived' => $equipment->is_waived
                         ];
                     })
@@ -1559,126 +1633,126 @@ private function calculateBaseFees($form)
         return response()->json($forms);
     }
 
-// Get form by access code (Requester side)
-public function getFormByAccessCode($accessCode)
-{
-    try {
-        $form = RequisitionForm::with([
-            'formStatus:status_id,status_name,color_code',
-            'requestedFacilities.facility:facility_id,facility_name',
-            'requestedEquipment.equipment:equipment_id,equipment_name',
-            'purpose:purpose_id,purpose_name',
-            'requisitionFees'
-        ])->where('access_code', $accessCode)->firstOrFail();
+    // Get form by access code (Requester side)
+    public function getFormByAccessCode($accessCode)
+    {
+        try {
+            $form = RequisitionForm::with([
+                'formStatus:status_id,status_name,color_code',
+                'requestedFacilities.facility:facility_id,facility_name',
+                'requestedEquipment.equipment:equipment_id,equipment_name',
+                'purpose:purpose_id,purpose_name',
+                'requisitionFees'
+            ])->where('access_code', $accessCode)->firstOrFail();
 
-        // Transform response
-        $result = [
-            'request_id' => $form->request_id,
-            'user_type' => $form->user_type,
-            'first_name' => $form->first_name,
-            'last_name' => $form->last_name,
-            'email' => $form->email,
-            'organization_name' => $form->organization_name,
-            'contact_number' => $form->contact_number,
-            'access_code' => $form->access_code,
-            'num_participants' => $form->num_participants,
-            'start_date' => $form->start_date,
-            'end_date' => $form->end_date,
-            'start_time' => $form->start_time,
-            'end_time' => $form->end_time,
-            'calendar_title' => $form->calendar_title,
-            'calendar_description' => $form->calendar_description,
+            // Transform response
+            $result = [
+                'request_id' => $form->request_id,
+                'user_type' => $form->user_type,
+                'first_name' => $form->first_name,
+                'last_name' => $form->last_name,
+                'email' => $form->email,
+                'organization_name' => $form->organization_name,
+                'contact_number' => $form->contact_number,
+                'access_code' => $form->access_code,
+                'num_participants' => $form->num_participants,
+                'start_date' => $form->start_date,
+                'end_date' => $form->end_date,
+                'start_time' => $form->start_time,
+                'end_time' => $form->end_time,
+                'calendar_title' => $form->calendar_title,
+                'calendar_description' => $form->calendar_description,
 
-            // Only names
-            'requested_facilities' => $form->requestedFacilities->map(fn($rf) => [
-                'facility_name' => $rf->facility->facility_name
-            ]),
+                // Only names
+                'requested_facilities' => $form->requestedFacilities->map(fn($rf) => [
+                    'facility_name' => $rf->facility->facility_name
+                ]),
 
-            'requested_equipment' => $form->requestedEquipment->map(fn($re) => [
-                'equipment_name' => $re->equipment->equipment_name
-            ]),
+                'requested_equipment' => $form->requestedEquipment->map(fn($re) => [
+                    'equipment_name' => $re->equipment->equipment_name
+                ]),
 
-            'form_status' => $form->formStatus,
-            'purpose' => $form->purpose,
+                'form_status' => $form->formStatus,
+                'purpose' => $form->purpose,
 
-            // Use the approved fee
-            'total_fee' => $form->approved_fee
-        ];
+                // Use the approved fee
+                'total_fee' => $form->approved_fee
+            ];
 
-        return response()->json($result);
+            return response()->json($result);
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => 'Form not found',
-            'details' => $e->getMessage()
-        ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Form not found',
+                'details' => $e->getMessage()
+            ], 404);
+        }
     }
-}
 
-public function uploadPaymentReceipt(Request $request, $requestId)
-{
-    try {
-        \Log::info('Payment receipt upload attempt', [
-            'request_id' => $requestId,
-            'has_receipt_url' => !empty($request->receipt_url),
-            'has_public_id' => !empty($request->public_id)
-        ]);
+    public function uploadPaymentReceipt(Request $request, $requestId)
+    {
+        try {
+            \Log::info('Payment receipt upload attempt', [
+                'request_id' => $requestId,
+                'has_receipt_url' => !empty($request->receipt_url),
+                'has_public_id' => !empty($request->public_id)
+            ]);
 
-        $validatedData = $request->validate([
-            'receipt_url' => 'required|url',
-            'public_id' => 'required|string'
-        ]);
+            $validatedData = $request->validate([
+                'receipt_url' => 'required|url',
+                'public_id' => 'required|string'
+            ]);
 
-        $form = RequisitionForm::findOrFail($requestId);
+            $form = RequisitionForm::findOrFail($requestId);
 
-        // Check if form is in correct status for payment
-        if ($form->status_id !== FormStatus::where('status_name', 'Awaiting Payment')->first()->status_id) {
+            // Check if form is in correct status for payment
+            if ($form->status_id !== FormStatus::where('status_name', 'Awaiting Payment')->first()->status_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This request is not awaiting payment.'
+                ], 422);
+            }
+
+            // Update the form with receipt details
+            $form->proof_of_payment_url = $validatedData['receipt_url'];
+            $form->proof_of_payment_public_id = $validatedData['public_id'];
+            $form->save();
+
+            \Log::info('Payment receipt uploaded successfully', [
+                'request_id' => $requestId,
+                'receipt_url' => $validatedData['receipt_url']
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Receipt uploaded successfully'
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Receipt upload validation failed', [
+                'request_id' => $requestId,
+                'errors' => $e->errors()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'This request is not awaiting payment.'
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
             ], 422);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to upload payment receipt', [
+                'request_id' => $requestId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload receipt: ' . $e->getMessage()
+            ], 500);
         }
-
-        // Update the form with receipt details
-        $form->proof_of_payment_url = $validatedData['receipt_url'];
-        $form->proof_of_payment_public_id = $validatedData['public_id'];
-        $form->save();
-
-        \Log::info('Payment receipt uploaded successfully', [
-            'request_id' => $requestId,
-            'receipt_url' => $validatedData['receipt_url']
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Receipt uploaded successfully'
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        \Log::error('Receipt upload validation failed', [
-            'request_id' => $requestId,
-            'errors' => $e->errors()
-        ]);
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Validation failed',
-            'errors' => $e->errors()
-        ], 422);
-
-    } catch (\Exception $e) {
-        \Log::error('Failed to upload payment receipt', [
-            'request_id' => $requestId,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to upload receipt: ' . $e->getMessage()
-        ], 500);
     }
-}
 
 
 

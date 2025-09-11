@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Admin Dashboard')
+@section('title', 'Events Calendar')
 
 @section('content')
   <!-- Combined CSS resources -->
