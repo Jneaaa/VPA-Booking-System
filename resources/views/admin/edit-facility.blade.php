@@ -4,6 +4,8 @@
 
 @section('content')
     <style>
+
+
         /* Toast notification styles */
         .toast {
             z-index: 1100;
@@ -143,7 +145,7 @@
                     <!-- Facility Photos and Details Section -->
                     <div class="row mb-4 align-items-stretch">
                         <!-- Left Column: Photos + New Card stacked -->
-                    <div class="col-md-6 d-flex flex-column h-100">
+                        <div class="col-md-6 d-flex flex-column h-100">
                             <!-- Facility Photos Card -->
                             <div class="card flex-fill mb-4">
                                 <div class="card-header d-flex justify-content-between align-items-center"
@@ -299,21 +301,25 @@
 
                                                 <!-- Location Type: narrower (4 of 12 columns) -->
                                                 <div class="col-md-4">
-                                                    <label for="locationType" class="form-label fw-bold">Location
-                                                        Type</label>
-                                                    <select class="form-select" id="locationType" required>
+                                                    <label for="locationType"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Location Type
+                                                    </label>
+                                                    <select class="form-select text-secondary" id="locationType" required>
                                                         <option value="Indoors">Indoors</option>
                                                         <option value="Outdoors">Outdoors</option>
                                                     </select>
                                                 </div>
                                             </div>
 
-
                                             <!-- Category row -->
                                             <div class="row mb-3">
                                                 <div class="col-12">
-                                                    <label for="category" class="form-label fw-bold">Category</label>
-                                                    <select class="form-select w-100" id="category" required>
+                                                    <label for="category"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Category
+                                                    </label>
+                                                    <select class="form-select w-100 text-secondary" id="category" required>
                                                         <option value="">Select Category</option>
                                                         <!-- Categories populated dynamically -->
                                                     </select>
@@ -323,33 +329,55 @@
                                             <!-- Subcategory row -->
                                             <div class="row mb-3">
                                                 <div class="col-12">
-                                                    <label for="subcategory" class="form-label fw-bold">Subcategory</label>
-                                                    <select class="form-select w-100" id="subcategory">
+                                                    <label for="subcategory"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Subcategory
+                                                    </label>
+                                                    <select class="form-select w-100 text-secondary" id="subcategory">
                                                         <option value="">Select Subcategory</option>
                                                         <!-- Subcategories populated dynamically -->
                                                     </select>
                                                 </div>
                                             </div>
 
-
                                             <!-- Capacity & Location Section -->
                                             <div class="row mb-3">
                                                 <div class="col-md-4">
-                                                    <label for="capacity" class="form-label fw-bold">Capacity</label>
-                                                    <input type="number" class="form-control" id="capacity" min="1"
-                                                        value="1" required>
+                                                    <label for="capacity"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Capacity
+                                                    </label>
+                                                    <input type="number" class="form-control text-secondary" id="capacity"
+                                                        min="1" value="1" required>
                                                 </div>
 
                                                 <div class="col-md-4">
-                                                    <label for="floorLevel" class="form-label fw-bold">Floor Level</label>
-                                                    <input type="number" class="form-control" id="floorLevel" min="1"
-                                                        placeholder="Floor level">
+                                                    <label for="floorLevel"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Floor Level
+                                                    </label>
+                                                    <input type="number" class="form-control text-secondary" id="floorLevel"
+                                                        min="1" placeholder="Floor level">
                                                 </div>
 
                                                 <div class="col-md-4">
-                                                    <label for="roomCode" class="form-label fw-bold">Room Code</label>
-                                                    <input type="text" class="form-control" id="roomCode"
-                                                        placeholder="Room code">
+                                                    <label for="roomCode"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Room Code
+                                                        <i class="bi bi-pencil text-secondary ms-2 edit-icon"
+                                                            data-field="roomCode" style="cursor: pointer;"></i>
+                                                        <div class="edit-actions ms-2 d-none" data-field="roomCode">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-success me-1 save-btn">
+                                                                <i class="bi bi-check"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-sm btn-danger cancel-btn">
+                                                                <i class="bi bi-x"></i>
+                                                            </button>
+                                                        </div>
+                                                    </label>
+                                                    <input type="text" class="form-control text-secondary" id="roomCode"
+                                                        placeholder="Room code" readonly>
                                                 </div>
                                             </div>
 
@@ -357,73 +385,89 @@
                                             <div class="row mb-3">
                                                 <!-- Rental Fee -->
                                                 <div class="col-md-6">
-                                                    <label for="rentalFee" class="form-label fw-bold">Rental Fee (₱)</label>
+                                                    <label for="rentalFee"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Rental Fee (₱)
+                                                    </label>
                                                     <div class="input-group">
                                                         <span class="input-group-text">₱</span>
-                                                        <input type="number" class="form-control" id="rentalFee" min="0"
-                                                            step="0.01" required placeholder="0.00">
+                                                        <input type="number" class="form-control text-secondary"
+                                                            id="rentalFee" min="0" step="0.01" required placeholder="0.00">
                                                     </div>
                                                 </div>
 
                                                 <!-- Rate Type -->
                                                 <div class="col-md-6">
-                                                    <label for="rateType" class="form-label fw-bold">Rate Type</label>
-                                                    <select class="form-select" id="rateType" required>
+                                                    <label for="rateType"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Rate Type
+                                                    </label>
+                                                    <select class="form-select text-secondary" id="rateType" required>
                                                         <option value="Per Hour">Per Hour</option>
                                                         <option value="Per Event">Per Event</option>
                                                     </select>
                                                 </div>
+                                            </div>
 
+                                            <!-- Building Details Section -->
+                                            <div class="row mb-1 g-2">
+                                                <div class="col-md-6">
+                                                    <label for="totalLevels"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Total Levels
 
-                                                <!-- Building Details Section -->
-                                                <div class="row mb-1 g-2">
-                                                    <div class="col-md-6">
-                                                        <label for="totalLevels" class="form-label fw-bold">Total
-                                                            Levels</label>
-                                                        <input type="number" class="form-control" id="totalLevels" min="1"
-                                                            placeholder="Total building levels">
-                                                    </div>
-
-                                                    <div class="col-md-6">
-                                                        <label for="totalRooms" class="form-label fw-bold">Total
-                                                            Rooms</label>
-                                                        <input type="number" class="form-control" id="totalRooms" min="1"
-                                                            placeholder="Total rooms in building">
-                                                    </div>
+                                                    </label>
+                                                    <input type="number" class="form-control text-secondary"
+                                                        id="totalLevels" min="1" placeholder="Total building levels">
                                                 </div>
 
-                                                <!-- Department & Availability Section -->
-                                                <div class="row mb-1 g-2">
-                                                    <div class="col-md-6">
-                                                        <label for="department" class="form-label fw-bold">Owning
-                                                            Department</label>
-                                                        <select class="form-select" id="department" required>
-                                                            <!-- Departments will be populated dynamically -->
-                                                        </select>
-                                                    </div>
+                                                <div class="col-md-6">
+                                                    <label for="totalRooms"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Total Rooms
 
-                                                    <div class="col-md-6">
-                                                        <label for="availabilityStatus"
-                                                            class="form-label fw-bold">Availability Status</label>
-                                                        <select class="form-select" id="availabilityStatus" required>
-                                                            <!-- Statuses will be populated dynamically -->
-                                                        </select>
-                                                    </div>
+                                                    </label>
+                                                    <input type="number" class="form-control text-secondary" id="totalRooms"
+                                                        min="1" placeholder="Total rooms in building">
+                                                </div>
+                                            </div>
+
+                                            <!-- Department & Availability Section -->
+                                            <div class="row mb-1 g-2">
+                                                <div class="col-md-6">
+                                                    <label for="department"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Owning Department
+
+                                                    </label>
+                                                    <select class="form-select text-secondary" id="department" required>
+                                                        <!-- Departments will be populated dynamically -->
+                                                    </select>
                                                 </div>
 
+                                                <div class="col-md-6">
+                                                    <label for="availabilityStatus"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Availability Status
 
-
+                                                    </label>
+                                                    <select class="form-select text-secondary" id="availabilityStatus"
+                                                        required>
+                                                        <!-- Statuses will be populated dynamically -->
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Form Actions -->
-                            <div class="d-flex justify-content-end gap-2 mt-4">
-                                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Update Facility</button>
-                            </div>
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Update Facility</button>
+                        </div>
                 </form>
             </div>
         </div>
@@ -481,6 +525,8 @@
     @section('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+                window.pendingImageUploads = [];
+                window.facilityCategories = [];
                 // Authentication check
                 const token = localStorage.getItem('adminToken');
                 if (!token) {
@@ -513,18 +559,18 @@
                     toast.style.borderRadius = '0.3rem';
 
                     toast.innerHTML = `
-                                                <div class="d-flex align-items-center px-3 py-1"> 
-                                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                                </div>
-                                                <div class="loading-bar" style="
-                                                    height: 3px;
-                                                    background: rgba(255,255,255,0.7);
-                                                    width: 100%;
-                                                    transition: width ${duration}ms linear;
-                                                "></div>
-                                            `;
+                                                            <div class="d-flex align-items-center px-3 py-1"> 
+                                                                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                                                <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                                                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="loading-bar" style="
+                                                                height: 3px;
+                                                                background: rgba(255,255,255,0.7);
+                                                                width: 100%;
+                                                                transition: width ${duration}ms linear;
+                                                            "></div>
+                                                        `;
 
                     document.body.appendChild(toast);
 
@@ -998,7 +1044,6 @@
                         document.getElementById('roomCode').value = facility.room_code || '';
                         document.getElementById('rentalFee').value = facility.external_fee || '0.00';
                         document.getElementById('rateType').value = facility.rate_type || 'Per Hour';
-                        document.getElementById('maximumRentalDuration').value = facility.maximum_rental_hour || '';
                         document.getElementById('totalLevels').value = facility.total_levels || '';
                         document.getElementById('totalRooms').value = facility.total_rooms || '';
 
@@ -1006,13 +1051,6 @@
                         if (descriptionWordCount) {
                             descriptionWordCount.textContent = `${facility.description?.length || 0}/250 characters`;
                         }
-
-                        // Populate details card
-                        document.getElementById('categoryDisplay').textContent = facility.category?.category_name || 'N/A';
-                        document.getElementById('subcategoryDisplay').textContent = facility.subcategory?.subcategory_name || 'N/A';
-                        document.getElementById('capacityDisplay').textContent = facility.capacity || 'N/A';
-                        document.getElementById('locationTypeDisplay').textContent = facility.location_type || 'N/A';
-                        document.getElementById('locationNoteDisplay').textContent = facility.location_note || 'N/A';
 
                         // Load existing images
                         if (facility.images && facility.images.length > 0) {
@@ -1043,183 +1081,173 @@
                         }
 
                         // Fetch and populate dropdowns
-                        await fetchCategories();
-                        await fetchSubcategories(facility.category_id);
+                        await fetchCategoriesWithSubcategories();
                         await fetchDepartments();
                         await fetchStatuses();
-                        await fetchParentFacilities();
 
-                        // Set dropdown values
-                        if (facility.category_id) document.getElementById('category').value = facility.category_id;
-                        if (facility.subcategory_id) document.getElementById('subcategory').value = facility.subcategory_id;
-                        if (facility.department_id) document.getElementById('department').value = facility.department_id;
-                        if (facility.status_id) document.getElementById('availabilityStatus').value = facility.status_id;
-                        if (facility.parent_facility_id) document.getElementById('parentFacility').value = facility.parent_facility_id;
+                        // Set dropdown values after they are populated
+                        setTimeout(() => {
+                            if (facility.category_id) document.getElementById('category').value = facility.category_id;
+                            if (facility.subcategory_id) document.getElementById('subcategory').value = facility.subcategory_id;
+                            if (facility.department_id) document.getElementById('department').value = facility.department_id;
+                            if (facility.status_id) document.getElementById('availabilityStatus').value = facility.status_id;
+
+                            // Trigger category change to load subcategories if needed
+                            if (facility.category_id) {
+                                document.getElementById('category').dispatchEvent(new Event('change'));
+                            }
+                        }, 100);
 
                     } catch (error) {
-                        console.error('Error fetching facility data:', error);
+                        console.error('Error fetching facility data:', {
+                            error: error.message,
+                            facilityId: facilityId,
+                            endpoint: `facilities/${facilityId}`
+                        });
                         showToast('Failed to load facility data: ' + error.message, 'error');
                     }
                 }
 
-                // Fetch categories
-                async function fetchCategories() {
+                async function fetchCategoriesWithSubcategories() {
                     try {
                         const response = await fetch('http://127.0.0.1:8000/api/facility-categories/index', {
-                            method: 'GET',
                             headers: {
                                 'Accept': 'application/json'
                             }
                         });
 
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch categories');
+                        if (response.ok) {
+                            const categoriesData = await response.json();
+                            window.facilityCategories = categoriesData;
+                            populateCategoryDropdown(categoriesData);
+                        } else {
+                            console.error('Failed to fetch categories with subcategories:', response.status);
+                            showToast('Failed to load categories', 'error');
                         }
-
-                        const result = await response.json();
-                        const categorySelect = document.getElementById('category');
-                        categorySelect.innerHTML = '<option value="">Select Category</option>';
-
-                        result.forEach(category => {
-                            const option = document.createElement('option');
-                            option.value = category.category_id;
-                            option.textContent = category.category_name;
-                            categorySelect.appendChild(option);
-                        });
-
-                        return result; // Return categories for subcategory handling
                     } catch (error) {
                         console.error('Error fetching categories:', error);
-                        showToast('Failed to load categories: ' + error.message, 'error');
+                        showToast('Error loading categories', 'error');
                     }
                 }
 
+                function populateCategoryDropdown(categories) {
+                    const categoryDropdown = document.getElementById('category');
+                    if (!categoryDropdown) return;
 
-                // Fetch subcategories based on selected category
-                async function fetchSubcategories(categoryId = null, categoriesData = null) {
-                    try {
-                        const subcategorySelect = document.getElementById('subcategory');
-                        subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-
-                        if (!categoryId || !categoriesData) {
-                            return;
-                        }
-
-                        // Find the selected category in the categories data
-                        const selectedCategory = categoriesData.find(cat => cat.category_id == categoryId);
-
-                        if (selectedCategory && selectedCategory.subcategories) {
-                            selectedCategory.subcategories.forEach(subcategory => {
-                                const option = document.createElement('option');
-                                option.value = subcategory.subcategory_id;
-                                option.textContent = subcategory.subcategory_name;
-                                subcategorySelect.appendChild(option);
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error fetching subcategories:', error);
-                        showToast('Failed to load subcategories: ' + error.message, 'error');
+                    // Clear existing options except the first one
+                    while (categoryDropdown.options.length > 1) {
+                        categoryDropdown.remove(1);
                     }
+
+                    // Add new options
+                    categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.category_id;
+                        option.textContent = category.category_name;
+                        categoryDropdown.appendChild(option);
+                    });
                 }
 
-                // Fetch departments
                 async function fetchDepartments() {
                     try {
                         const response = await fetch('http://127.0.0.1:8000/api/departments', {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json'
-                            }
-                        });
-
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch departments');
-                        }
-
-                        const result = await response.json();
-                        const departmentSelect = document.getElementById('department');
-                        departmentSelect.innerHTML = '<option value="">Select Department</option>';
-
-                        result.forEach(department => {
-                            const option = document.createElement('option');
-                            option.value = department.department_id;
-                            option.textContent = department.department_name;
-                            departmentSelect.appendChild(option);
-                        });
-                    } catch (error) {
-                        console.error('Error fetching departments:', error);
-                        showToast('Failed to load departments: ' + error.message, 'error');
-                    }
-                }
-
-                // Fetch statuses
-                async function fetchStatuses() {
-                    try {
-                        const response = await fetch('http://127.0.0.1:8000/api/availability-statuses', {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json'
-                            }
-                        });
-
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch statuses');
-                        }
-
-                        const result = await response.json();
-                        const statusSelect = document.getElementById('availabilityStatus');
-                        statusSelect.innerHTML = '<option value="">Select Status</option>';
-
-                        result.forEach(status => {
-                            const option = document.createElement('option');
-                            option.value = status.status_id;
-                            option.textContent = status.status_name;
-                            statusSelect.appendChild(option);
-                        });
-                    } catch (error) {
-                        console.error('Error fetching statuses:', error);
-                        showToast('Failed to load statuses: ' + error.message, 'error');
-                    }
-                }
-                // Fetch parent facilities
-                async function fetchParentFacilities() {
-                    try {
-                        const response = await fetch('http://127.0.0.1:8000/api/facilities', {
-                            method: 'GET',
                             headers: {
                                 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
                                 'Accept': 'application/json'
                             }
                         });
 
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch facilities');
+                        if (response.ok) {
+                            const departmentsData = await response.json();
+                            populateDropdown('department', departmentsData, null, 'department_id', 'department_name');
+                        } else {
+                            console.error('Failed to fetch departments:', response.status);
+                            showToast('Failed to load departments', 'error');
                         }
-
-                        const result = await response.json();
-                        const parentSelect = document.getElementById('parentFacility');
-                        parentSelect.innerHTML = '<option value="">None</option>';
-
-                        result.data.forEach(facility => {
-                            // Don't include the current facility as a parent option
-                            if (facility.facility_id != facilityId) {
-                                const option = document.createElement('option');
-                                option.value = facility.facility_id;
-                                option.textContent = facility.facility_name;
-                                parentSelect.appendChild(option);
-                            }
-                        });
                     } catch (error) {
-                        console.error('Error fetching facilities:', error);
-                        showToast('Failed to load facilities: ' + error.message, 'error');
+                        console.error('Error fetching departments:', error);
+                        showToast('Error loading departments', 'error');
                     }
                 }
 
-                // Category change event
-                document.getElementById('category').addEventListener('change', function () {
-                    const categoryId = this.value;
-                    fetchSubcategories(categoryId);
-                });
+                async function fetchStatuses() {
+                    try {
+                        const response = await fetch('http://127.0.0.1:8000/api/availability-statuses', {
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            const statusesData = await response.json();
+                            populateDropdown('availabilityStatus', statusesData, null, 'status_id', 'status_name');
+                        } else {
+                            console.error('Failed to fetch statuses:', response.status);
+                            showToast('Failed to load statuses', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching statuses:', error);
+                        showToast('Error loading statuses', 'error');
+                    }
+                }
+
+                function populateDropdown(elementId, data, selectedValue = null, idKey, nameKey) {
+                    const dropdown = document.getElementById(elementId);
+                    if (!dropdown) {
+                        console.error('Dropdown element not found:', elementId);
+                        return;
+                    }
+
+                    // Clear existing options except the first one
+                    while (dropdown.options.length > 1) {
+                        dropdown.remove(1);
+                    }
+
+                    // Add new options
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item[idKey];
+                        option.textContent = item[nameKey];
+                        dropdown.appendChild(option);
+                    });
+
+                    // Set selected value if provided
+                    if (selectedValue !== null) {
+                        dropdown.value = selectedValue;
+                    }
+                }
+
+                // Setup category change handler
+                function setupCategoryChangeHandler() {
+                    const categoryDropdown = document.getElementById('category');
+                    const subcategoryDropdown = document.getElementById('subcategory');
+
+                    if (!categoryDropdown || !subcategoryDropdown) return;
+
+                    categoryDropdown.addEventListener('change', function () {
+                        const categoryId = this.value;
+                        const selectedCategory = window.facilityCategories.find(cat =>
+                            cat.category_id.toString() === categoryId
+                        );
+
+                        // Clear subcategory dropdown
+                        while (subcategoryDropdown.options.length > 1) {
+                            subcategoryDropdown.remove(1);
+                        }
+
+                        // Populate subcategories if category has them
+                        if (selectedCategory && selectedCategory.subcategories && selectedCategory.subcategories.length > 0) {
+                            selectedCategory.subcategories.forEach(subcategory => {
+                                const option = document.createElement('option');
+                                option.value = subcategory.subcategory_id;
+                                option.textContent = subcategory.subcategory_name;
+                                subcategoryDropdown.appendChild(option);
+                            });
+                        }
+                    });
+                }
+
+
 
                 // Form submission
                 document.getElementById('editFacilityForm').addEventListener('submit', async function (e) {
@@ -1229,50 +1257,74 @@
                         const formData = {
                             facility_name: document.getElementById('facilityName').value,
                             building_code: document.getElementById('buildingCode').value,
-                            description: document.getElementById('description').value,
+                            description: document.getElementById('description').value.trim() || 'No description provided for this facility.',
                             location_note: document.getElementById('locationNote').value,
                             category_id: document.getElementById('category').value,
                             subcategory_id: document.getElementById('subcategory').value,
-                            capacity: document.getElementById('capacity').value,
+                            capacity: parseInt(document.getElementById('capacity').value),
                             location_type: document.getElementById('locationType').value,
-                            floor_level: document.getElementById('floorLevel').value || null,
+                            floor_level: document.getElementById('floorLevel').value ? parseInt(document.getElementById('floorLevel').value) : null,
                             room_code: document.getElementById('roomCode').value || null,
-                            external_fee: document.getElementById('rentalFee').value,
+                            external_fee: parseFloat(document.getElementById('rentalFee').value),
                             rate_type: document.getElementById('rateType').value,
+                            total_levels: document.getElementById('totalLevels').value ? parseInt(document.getElementById('totalLevels').value) : null,
+                            total_rooms: document.getElementById('totalRooms').value ? parseInt(document.getElementById('totalRooms').value) : null,
                             department_id: document.getElementById('department').value,
-                            maximum_rental_hour: document.getElementById('maximumRentalDuration').value || null,
-                            status_id: document.getElementById('availabilityStatus').value,
-                            total_levels: document.getElementById('totalLevels').value || null,
-                            total_rooms: document.getElementById('totalRooms').value || null,
-                            parent_facility_id: document.getElementById('parentFacility').value || null
+                            status_id: document.getElementById('availabilityStatus').value
                         };
 
                         // Validate required fields
-                        if (!formData.facility_name || !formData.building_code || !formData.category_id ||
-                            !formData.capacity || !formData.location_type || !formData.internal_fee ||
-                            !formData.external_fee || !formData.rate_type || !formData.department_id ||
-                            !formData.status_id) {
-                            showToast('Please fill in all required fields', 'error');
-                            return;
-                        }
+                        const requiredFields = [
+                            'facility_name', 'location_note', 'capacity', 'category_id', 'subcategory_id',
+                            'department_id', 'location_type', 'external_fee', 'rate_type', 'status_id'
+                        ];
 
+                        for (const field of requiredFields) {
+                            if (!formData[field]) {
+                                showToast(`Please fill in the ${field.replace(/_/g, ' ')} field`, 'error');
+                                return;
+                            }
+                        }
                         const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}`, {
                             method: 'PUT',
                             headers: {
                                 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
                                 'Content-Type': 'application/json',
-                                'Accept': 'application/json'
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
                             },
                             body: JSON.stringify(formData)
                         });
 
                         if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.message || 'Failed to update facility');
+                            const errorText = await response.text();
+                            console.error('Facility update failed:', {
+                                status: response.status,
+                                error: errorText,
+                                facilityId: facilityId
+                            });
+                            throw new Error(`Failed to update facility: ${response.status}`);
                         }
 
                         const result = await response.json();
-                        showToast('Facility updated successfully!', 'success');
+                        showToast(result.message || 'Facility updated successfully!', 'success');
+
+                        // Process any new image uploads
+                        if (pendingImageUploads.length > 0) {
+                            showToast('Uploading new images...', 'info');
+                            for (const upload of pendingImageUploads) {
+                                try {
+                                    const cloudinaryData = await uploadToCloudinary(upload.file, facilityId);
+                                    await saveImageToDatabase(facilityId, cloudinaryData.secure_url, cloudinaryData.public_id);
+                                } catch (error) {
+                                    console.error('Error uploading facility image:', {
+                                        facilityId: facilityId,
+                                        error: error.message
+                                    });
+                                    showToast('Warning: Failed to upload some images', 'warning');
+                                }
+                            }
+                        }
 
                         // Redirect after a short delay
                         setTimeout(() => {
@@ -1280,13 +1332,19 @@
                         }, 1500);
 
                     } catch (error) {
-                        console.error('Error updating facility:', error);
+                        console.error('Error updating facility:', {
+                            error: error.message,
+                            facilityId: facilityId,
+                            endpoint: `admin/facility/${facilityId}`
+                        });
                         showToast('Failed to update facility: ' + error.message, 'error');
                     }
                 });
 
                 // Initialize the page
-                fetchFacilityData();
+                fetchFacilityData().then(() => {
+                    setupCategoryChangeHandler();
+                });
             });
         </script>
     @endsection
