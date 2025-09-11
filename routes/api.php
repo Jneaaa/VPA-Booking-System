@@ -119,11 +119,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // ---------------- Facility Management ---------------- //
 
-Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
 
+    Route::post('admin/add-facility', [FacilityController::class, 'store']);
     Route::get('facility/get-categories', [FacilityController::class, 'create']);
-
 });
+
 
 // Facility Image Management
 Route::prefix('facilities/{facilityId}/images')->group(function () {

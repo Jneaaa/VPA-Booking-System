@@ -105,8 +105,9 @@ public function create()
 }
 
     // ----- Store - Save new facility ----- //
-    public function store(Request $request)
-    {
+public function store(Request $request)
+{
+    try {
         $data = $request->validate([
             'facility_name' => 'required|string|max:50',
             'description' => 'nullable|string|max:250',
@@ -116,26 +117,28 @@ public function create()
             'subcategory_id' => 'nullable|exists:facility_subcategories,subcategory_id',
             'department_id' => 'required|exists:departments,department_id',
             'location_type' => 'required|in:Indoors,Outdoors',
-            'internal_fee' => 'required|numeric|min:0',
             'external_fee' => 'required|numeric|min:0',
             'rate_type' => 'required|in:Per Hour,Per Event',
             'status_id' => 'required|exists:availability_statuses,status_id',
-            'maximum_rental_hour' => 'nullable|integer',
+            // 'maximum_rental_hour' => 'nullable|integer',
             'parent_facility_id' => 'nullable|exists:facilities,facility_id',
             'room_code' => 'nullable|string|max:50',
             'floor_level' => 'nullable|integer|min:1',
             'building_code' => 'nullable|string|max:20',
             'total_levels' => 'nullable|integer|min:1',
             'total_rooms' => 'nullable|integer|min:1',
+            'created_by' => 'required|exists:admins,admin_id'
         ]);
 
         $user = auth()->user();
 
         if (!$user->departments->pluck('department_id')->contains($data['department_id'])) {
-            return redirect()->back()->with('error', 'You do not manage this department.');
+            return response()->json([
+                'message' => 'You do not manage this department.'
+            ], 403);
         }
 
-        Facility::create([
+        $facility = Facility::create([
             'facility_name' => $data['facility_name'],
             'description' => $data['description'] ?? null,
             'location_note' => $data['location_note'],
@@ -144,11 +147,10 @@ public function create()
             'subcategory_id' => $data['subcategory_id'] ?? null,
             'department_id' => $data['department_id'],
             'location_type' => $data['location_type'],
-            'internal_fee' => $data['internal_fee'],
             'external_fee' => $data['external_fee'],
             'rate_type' => $data['rate_type'],
             'status_id' => $data['status_id'],
-            'maximum_rental_hour' => $data['maximum_rental_hour'],
+            // 'maximum_rental_hour' => $data['maximum_rental_hour'],
             'parent_facility_id' => $data['parent_facility_id'] ?? null,
             'room_code' => $data['room_code'] ?? null,
             'floor_level' => $data['floor_level'] ?? null,
@@ -158,9 +160,33 @@ public function create()
             'created_by' => $user->admin_id
         ]);
 
-        return redirect()->route('admin.manage-facilities')
-            ->with('success', 'Facility created successfully!');
+        \Log::info('Facility created successfully', [
+            'facility_id' => $facility->facility_id,
+            'created_by' => $user->admin_id
+        ]);
+
+        return response()->json([
+            'message' => 'Facility created successfully!',
+            'data' => [
+                'facility_id' => $facility->facility_id,
+                'facility_name' => $facility->facility_name
+            ]
+        ], 201);
+
+    } catch (\Exception $e) {
+        \Log::error('Error creating facility', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'user_id' => auth()->check() ? auth()->user()->admin_id : 'unknown',
+            'request_data' => $request->except(['password', 'token']) // Exclude sensitive data
+        ]);
+        
+        return response()->json([
+            'message' => 'Failed to create facility',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
 
     // ----- Edit - Show edit form ----- //

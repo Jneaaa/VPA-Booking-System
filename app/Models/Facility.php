@@ -32,6 +32,7 @@ class Facility extends Model
         'external_fee',
         'rate_type',
         'status_id',
+        'created_by'
     ];
 
     // Relationships
