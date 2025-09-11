@@ -71,8 +71,8 @@ return new class extends Migration
             $table->timestamps();
 
             // calendar event details
-            $table->string('calendar_title', 50)->default('Pending Request');
-            $table->string('calendar_description', 100)->default('This form is still awaiting approval.');
+            $table->string('calendar_title', 50)->nullable();
+            $table->string('calendar_description', 100)->nullable();
 
             // Foreign Keys
             $table->foreign('purpose_id')->references('purpose_id')->on('requisition_purposes')->onDelete('restrict');

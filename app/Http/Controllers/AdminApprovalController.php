@@ -1296,18 +1296,52 @@ public function cancelForm(Request $request, $requestId)
 
     // Calculate & Finalize fees //
 
-    private function calculateBaseFees($form)
-    {
-        $facilityFees = $form->requestedFacilities->sum(function ($facility) {
-            return $facility->is_waived ? 0 : $facility->facility->external_fee;
-        });
+private function calculateBaseFees($form)
+{
+    // Calculate facility fees with rate_type logic
+    $facilityFees = $form->requestedFacilities->sum(function ($facility) use ($form) {
+        if ($facility->is_waived) {
+            return 0;
+        }
+        
+        $fee = $facility->facility->external_fee;
+        
+        // Check if rate_type is "Per Hour" and calculate based on duration
+        if ($facility->facility->rate_type === 'Per Hour') {
+            $startDateTime = Carbon::parse($form->start_date . ' ' . $form->start_time);
+            $endDateTime = Carbon::parse($form->end_date . ' ' . $form->end_time);
+            $durationInHours = $startDateTime->diffInHours($endDateTime);
+            
+            return $fee * $durationInHours;
+        }
+        
+        // For "Per Event" or any other rate type, return the base fee
+        return $fee;
+    });
 
-        $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
-            return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
-        });
+    // Calculate equipment fees with rate_type logic
+    $equipmentFees = $form->requestedEquipment->sum(function ($equipment) use ($form) {
+        if ($equipment->is_waived) {
+            return 0;
+        }
+        
+        $fee = $equipment->equipment->external_fee;
+        
+        // Check if rate_type is "Per Hour" and calculate based on duration
+        if ($equipment->equipment->rate_type === 'Per Hour') {
+            $startDateTime = Carbon::parse($form->start_date . ' ' . $form->start_time);
+            $endDateTime = Carbon::parse($form->end_date . ' ' . $form->end_time);
+            $durationInHours = $startDateTime->diffInHours($endDateTime);
+            
+            return ($fee * $durationInHours) * $equipment->quantity;
+        }
+        
+        // For "Per Event" or any other rate type, return the base fee multiplied by quantity
+        return $fee * $equipment->quantity;
+    });
 
-        return $facilityFees + $equipmentFees;
-    }
+    return $facilityFees + $equipmentFees;
+}
 
     private function calculateTentativeFee($requestId)
     {

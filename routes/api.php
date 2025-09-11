@@ -13,6 +13,7 @@ use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\EquipmentItem;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminCommentsController;
 
 use App\Http\Controllers\Dropdowns\FacilityCategoryController;
 use App\Http\Controllers\Dropdowns\FacilitySubcategoryController;
@@ -36,9 +37,9 @@ Route::delete('/admins/{admin}', [AdminController::class, 'deleteAdmin']);
 Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']);
 Route::put('/admins/{admin}', [AdminController::class, 'update']);
 
-// --- Equipment and Facility Management Routes --- //
 
-// Equipment Image Management
+
+// ---------------- Equipment Management ---------------- //
 
 // Cloudinary delete route
 Route::post('/admin/cloudinary/delete', function (Request $request) {
@@ -46,11 +47,11 @@ Route::post('/admin/cloudinary/delete', function (Request $request) {
         $request->validate([
             'public_id' => 'required|string'
         ]);
-        
+
         $publicId = $request->public_id;
-        
+
         \Log::info('Attempting Cloudinary delete', ['public_id' => $publicId]);
-        
+
         // Use Cloudinary API directly for more control
         $cloudinary = new \Cloudinary\Cloudinary([
             'cloud' => [
@@ -59,22 +60,22 @@ Route::post('/admin/cloudinary/delete', function (Request $request) {
                 'api_secret' => env('CLOUDINARY_API_SECRET'),
             ],
         ]);
-        
+
         $result = $cloudinary->adminApi()->deleteAssets($publicId, [
             'resource_type' => 'image',
             'type' => 'upload'
         ]);
-        
+
         \Log::info('Cloudinary delete successful', [
             'public_id' => $publicId,
             'result' => json_encode($result)
         ]);
-        
+
         return response()->json([
-            'message' => 'Image deleted from Cloudinary', 
+            'message' => 'Image deleted from Cloudinary',
             'result' => $result
         ]);
-        
+
     } catch (\Illuminate\Validation\ValidationException $e) {
         \Log::error('Cloudinary delete validation error', [
             'error' => $e->getMessage(),
@@ -84,7 +85,7 @@ Route::post('/admin/cloudinary/delete', function (Request $request) {
             'message' => 'Validation failed',
             'error' => $e->getMessage()
         ], 422);
-        
+
     } catch (\Exception $e) {
         \Log::error('Cloudinary delete error', [
             'error' => $e->getMessage(),
@@ -92,13 +93,11 @@ Route::post('/admin/cloudinary/delete', function (Request $request) {
             'trace' => $e->getTraceAsString()
         ]);
         return response()->json([
-            'message' => 'Failed to delete image', 
+            'message' => 'Failed to delete image',
             'error' => $e->getMessage()
         ], 500);
     }
 })->middleware('auth:sanctum');
-
-
 
 Route::middleware('auth:sanctum')->group(function () {
     // Equipment Image Management
@@ -107,17 +106,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/admin/equipment/{equipmentId}/images/{imageId}', [EquipmentController::class, 'deleteImage']);
     Route::post('/admin/reorder', [EquipmentController::class, 'reorderImages']);
     Route::post('/admin/equipment/{equipmentId}/images/save', [EquipmentController::class, 'saveImageReference']);
-
     // Equipment Item Management Routes
     Route::get('admin/equipment/{equipmentId}/items', [EquipmentController::class, 'getItems']);
     Route::post('admin/equipment/{equipmentId}/items', [EquipmentController::class, 'storeItem']);
     Route::put('admin/equipment/{equipmentId}/items/{itemId}', [EquipmentController::class, 'updateItem']);
     Route::delete('admin/equipment/{equipmentId}/items/{itemId}', [EquipmentController::class, 'deleteItem']);
-
     // Update One Equipment
     Route::put('admin/equipment/{equipmentId}', [EquipmentController::class, 'update']);
     Route::delete('/admin/equipment/{equipmentId}', [EquipmentController::class, 'destroy']);
     Route::post('admin/equipment', [EquipmentController::class, 'store']);
+});
+
+// ---------------- Facility Management ---------------- //
+
+Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
+
+    Route::get('facility/get-categories', [FacilityController::class, 'create']);
+
 });
 
 // Facility Image Management
@@ -208,7 +213,7 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware
 
 Route::middleware('auth:sanctum')->group(function () {
 
-        
+
 
     // ---- Admin Approval Routes ---- //
     Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'pendingRequests']);
@@ -236,9 +241,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Change request status
         Route::post('/{requestId}/update-status', [AdminApprovalController::class, 'updateStatus']);
 
-        // Add and get comments
-        Route::post('/{requestId}/comment', [AdminApprovalController::class, 'addComment']);
-        Route::get('/{requestId}/comments', [AdminApprovalController::class, 'getComments']);
+        // Comments routes
+        Route::post('/{requestId}/comment', [AdminCommentsController::class, 'addComment']);
+        Route::get('/{requestId}/comments', [AdminCommentsController::class, 'getComments']);
 
         // Approving and rejecting forms
         Route::post('/{requestId}/approve', [AdminApprovalController::class, 'approveRequest']);
@@ -258,9 +263,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-Route::get('/test-email', function() {
+Route::get('/test-email', function () {
     try {
-        \Mail::raw('Test email', function($message) {
+        \Mail::raw('Test email', function ($message) {
             $message->to('test@example.com')->subject('Test Email');
         });
         return 'Email sent successfully!';
