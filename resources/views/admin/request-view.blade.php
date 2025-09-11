@@ -1141,7 +1141,7 @@ async function loadComments() {
             commentsContainer.innerHTML = `
                 <div class="empty-comments">
                     <i class="bi bi-chat"></i>
-                    <p>No comments yet. Start the conversation!</p>
+                    <p>No comments added to this form yet.</p>
                 </div>
             `;
         }
