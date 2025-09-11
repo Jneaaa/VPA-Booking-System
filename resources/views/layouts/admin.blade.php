@@ -281,6 +281,56 @@
             padding-top: 70px;
             /* Match topbar height + some spacing */
         }
+        /* Preserve your original three dots style */
+.three-dots-icon {
+    background: rgba(255, 255, 255, 0);
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #ffffffff !important;
+    font-size: 1.5rem;
+    line-height: 1;
+    display: inline-flex;
+}
+
+.three-dots-icon:hover {
+    background: rgba(190, 201, 211, 0.3);
+    transform: scale(1.05);
+}
+
+.three-dots-icon:active {
+    transform: scale(0.95);
+    background: rgba(190, 201, 211, 0.5);
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: white;
+}
+
+.back-button:hover {
+    background: rgba(190, 201, 211, 0.3);
+    transform: scale(1.05);
+}
+
+.back-button:active {
+    transform: scale(0.95);
+    background: rgba(190, 201, 211, 0.5);
+}
+
+
     </style>
 </head>
 
@@ -289,66 +339,39 @@
         <i class="bi bi-list"></i>
     </button>
     {{-- Header --}}
-    <header id="topbar" class="d-flex justify-content-between align-items-center fixed-top transition-all">
-        <!-- Display the current page title in the header -->
-        <div class="d-flex align-items-center">
-            <span class="fw brand-text"">
+<header id="topbar" class="d-flex justify-content-between align-items-center fixed-top transition-all">
+
+    <!-- Left side: back button + current page title -->
+    <div class="d-flex align-items-center gap-2">
+
+{{-- Back button --}}
+<a href="{{ url()->previous() }}" class="back-button me-0">
+    <i class="bi bi-caret-left-fill"></i>
+</a>
+
+
+        {{-- Current page title --}}
+        <span class="fw-bold brand-text">
             @yield('title', 'CPU Facilities and Equipment Management')
-            </span>
+        </span>
+    </div>
+
+    <!-- Right side: dropdown menu -->
+    <div class="d-flex align-items-center">
+        <div class="dropdown">
+            <button class="btn btn-link p-0 text-white" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-three-dots three-dots-icon"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{{ url('/admin/admin-login') }}" id="logoutLink"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+            </ul>
         </div>
-    <div class=" d-flex align-items-center">
-                <!-- Dropdown Menu -->
-                <div class="dropdown">
-                    <button class="btn btn-link p-0 text-white" id="dropdownMenuButton" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        <i class="bi bi-three-dots three-dots-icon"></i>
+    </div>
 
-                        <style>
-                            .three-dots-icon {
-                                background: rgba(255, 255, 255, 0);
-                                width: 2rem;
-                                height: 2rem;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
+</header>
 
-                                border-radius: 50%;
-                                cursor: pointer;
-                                transition: all 0.2s ease;
-                                color: #ffffffff !important;
-
-                                font-size: 1.5rem;
-                                /* adjust size so dots are sharp */
-                                line-height: 1;
-                                /* prevent ghost line below */
-                                display: inline-flex;
-                                /* fixes rendering artifacts */
-                            }
-
-                            .three-dots-icon:hover {
-                                background: rgba(190, 201, 211, 0.3);
-                                transform: scale(1.05);
-                            }
-
-                            .three-dots-icon:active {
-                                transform: scale(0.95);
-                                /* press-down effect */
-                                background: rgba(190, 201, 211, 0.5);
-                            }
-                        </style>
-
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" style='color: darkred' href="{{ url('/admin/admin-login') }}" id="logoutLink"><i
-                                    class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                    </ul>
-                </div>
-        </div>
-    </header>
 
     {{-- Sidebar + Main Content --}}
 

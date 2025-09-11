@@ -388,19 +388,17 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label for="companyFee" class="form-label fw-bold">Company Fee
-                                                        (₱)</label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text">₱</span>
-                                                        <input type="number" class="form-control" id="companyFee"
-                                                            min="0" step="0.01" placeholder="0.00">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
                                                     <label for="rateType" class="form-label fw-bold">Rate Type</label>
                                                     <select class="form-select" id="rateType" required>
                                                         <!-- Rate types will be populated dynamically -->
                                                     </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="minRentalHours" class="form-label fw-bold">Min.
+                                                        Rental
+                                                        Duration</label>
+                                                    <input type="number" class="form-control" id="minRentalHours"
+                                                        min="1" value="1" required>
                                                 </div>
                                             </div>
                                             <!-- Department & Availability Section -->
@@ -411,13 +409,6 @@
                                                     <select class="form-select" id="department" required>
                                                         <!-- Departments will be populated dynamically -->
                                                     </select>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="minRentalHours" class="form-label fw-bold">Minimum
-                                                        Rental
-                                                        Duration (hours)</label>
-                                                    <input type="number" class="form-control" id="minRentalHours"
-                                                        min="1" value="1" required>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label for="availabilityStatus"
@@ -1587,7 +1578,6 @@
                         document.getElementById('storageLocation').value = equipment.storage_location;
                         document.getElementById('totalQuantity').value = equipment.total_quantity;
                         document.getElementById('rentalFee').value = equipment.external_fee;
-                        document.getElementById('companyFee').value = equipment.internal_fee;
                         document.getElementById('minRentalHours').value = equipment.maximum_rental_hour || 1;
 
                         // Update word count
@@ -1932,7 +1922,6 @@
                             storage_location: document.getElementById('storageLocation').value,
                             category_id: document.getElementById('category').value,
                             total_quantity: document.getElementById('totalQuantity').value,
-                            internal_fee: document.getElementById('companyFee').value,
                             external_fee: document.getElementById('rentalFee').value,
                             rate_type: document.getElementById('rateType').value,
                             status_id: document.getElementById('availabilityStatus').value,

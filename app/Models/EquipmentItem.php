@@ -25,7 +25,9 @@ class EquipmentItem extends Model
         'item_notes',
         'created_by',
         'updated_by',
-        'deleted_by'
+        'deleted_by',
+        'created_at',
+        'deleted_at'
             // the migration also includes laravel timestamps() in the table (created_at and updated_at)
     ];
 

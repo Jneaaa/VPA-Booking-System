@@ -900,6 +900,7 @@
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    
     // Cloudinary direct upload implementation
     async function uploadToCloudinary(input) {
       const file = input.files[0];
@@ -1379,23 +1380,30 @@
       }
     };
 
-    window.convertTo24Hour = function (time12h) {
-      if (!time12h) return '';
-      const [time, modifier] = time12h.split(' ');
-      let [hours, minutes] = time.split(':');
+   window.convertTo24Hour = function (time12h) {
+    if (!time12h) return '';
+    
+    // Handle case where time might already be in 24-hour format
+    if (time12h.includes(':')) {
+        const [timePart, modifier] = time12h.split(' ');
+        
+        // If no modifier (AM/PM), assume it's already 24-hour
+        if (!modifier) return timePart;
+        
+        let [hours, minutes] = timePart.split(':');
+        hours = parseInt(hours, 10);
 
-      if (hours === '12') {
-        hours = '00';
-      }
+        if (modifier === 'PM' && hours !== 12) {
+            hours += 12;
+        } else if (modifier === 'AM' && hours === 12) {
+            hours = 0;
+        }
 
-      if (modifier === 'PM') {
-        hours = parseInt(hours, 10) + 12;
-      }
-
-      // Ensure two-digit format and remove seconds
-      hours = hours.toString().padStart(2, '0');
-      return `${hours}:${minutes}`; // Remove seconds
-    };
+        return `${hours.toString().padStart(2, '0')}:${minutes}`;
+    }
+    
+    return time12h; // Return as-is if format is unexpected
+};
 
     document.addEventListener('DOMContentLoaded', function () {
       // DOM Elements
@@ -1404,6 +1412,7 @@
       const feeDisplay = document.getElementById('feeDisplay');
       const submitBtn = document.getElementById('submitFormBtn');
       const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
 
       // --- Helper function: pluralizeType ---
       function pluralizeType(type) {
@@ -1502,20 +1511,35 @@
         }
       };
 
-      window.calculateAndDisplayFees = async function () {
-        try {
-          const response = await fetch('/api/requisition/get-items', {
-            headers: {
-              'X-CSRF-TOKEN': csrfToken,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            }
+       window.calculateAndDisplayFees = async function () {
+      try {
+          const response = await fetch('/requisition/get-items', {
+              headers: {
+                  'X-CSRF-TOKEN': csrfToken,
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+              }
           });
 
           if (!response.ok) throw new Error('Failed to fetch items');
 
           const data = await response.json();
           const items = data.data?.selected_items || [];
+
+          // Get schedule information
+          const startDate = document.getElementById('startDateField').value;
+          const endDate = document.getElementById('endDateField').value;
+          const startTime = document.getElementById('startTimeField').value;
+          const endTime = document.getElementById('endTimeField').value;
+
+          // Calculate duration in hours if schedule is selected
+          let durationHours = 0;
+          if (startDate && endDate && startTime && endTime) {
+              const startDateTime = new Date(`${startDate}T${convertTo24Hour(startTime)}:00`);
+              const endDateTime = new Date(`${endDate}T${convertTo24Hour(endTime)}:00`);
+              durationHours = (endDateTime - startDateTime) / (1000 * 60 * 60); // Convert ms to hours
+              durationHours = Math.max(0, durationHours); // Ensure positive value
+          }
 
           let facilityTotal = 0;
           let equipmentTotal = 0;
@@ -1524,80 +1548,124 @@
           // Facilities breakdown
           const facilityItems = items.filter(i => i.type === 'facility');
           if (facilityItems.length > 0) {
-            htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
+              htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
 
-            facilityItems.forEach(item => {
-              const fee = parseFloat(item.external_fee);
-              facilityTotal += fee;
+              facilityItems.forEach(item => {
+                  let fee = parseFloat(item.external_fee);
+                  
+                  // Calculate fee based on rate type and duration
+                  if (item.rate_type === 'Per Hour' && durationHours > 0) {
+                      fee = fee * durationHours;
+                      htmlContent += `
+                          <div class="fee-item d-flex justify-content-between mb-2">
+                              <span>${item.name} (${durationHours.toFixed(1)} hrs)</span>
+                              <div class="text-end">
+                                  <small>₱${parseFloat(item.external_fee).toLocaleString()}/hr</small>
+                                  <div><strong>₱${fee.toLocaleString()}</strong></div>
+                              </div>
+                          </div>
+                      `;
+                  } else {
+                      htmlContent += `
+                          <div class="fee-item d-flex justify-content-between mb-2">
+                              <span>${item.name}</span>
+                              <span>₱${fee.toLocaleString()}</span>
+                          </div>
+                      `;
+                  }
+                  
+                  facilityTotal += fee;
+              });
 
               htmlContent += `
-                  <div class="fee-item d-flex justify-content-between mb-2">
-                      <span>${item.name}</span>
-                      <span>₱${fee.toLocaleString()}</span>
+                  <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                      <strong>Subtotal</strong>
+                      <strong>₱${facilityTotal.toLocaleString()}</strong>
                   </div>
-              `;
-            });
-
-            htmlContent += `
-              <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                  <strong>Subtotal</strong>
-                  <strong>₱${facilityTotal.toLocaleString()}</strong>
-              </div>
-          </div>`;
+              </div>`;
           }
 
           // Equipment breakdown
           const equipmentItems = items.filter(i => i.type === 'equipment');
           if (equipmentItems.length > 0) {
-            htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
+              htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
 
-            equipmentItems.forEach(item => {
-              const unitFee = parseFloat(item.external_fee);
-              const quantity = item.quantity || 1;
-              const itemTotal = unitFee * quantity;
-              equipmentTotal += itemTotal;
+              equipmentItems.forEach(item => {
+                  let unitFee = parseFloat(item.external_fee);
+                  const quantity = item.quantity || 1;
+                  let itemTotal = unitFee * quantity;
+                  
+                  // Calculate fee based on rate type and duration
+                  if (item.rate_type === 'Per Hour' && durationHours > 0) {
+                      itemTotal = itemTotal * durationHours;
+                      htmlContent += `
+                          <div class="fee-item d-flex justify-content-between mb-2">
+                              <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''} (${durationHours.toFixed(1)} hrs)</span>
+                              <div class="text-end">
+                                  <small>₱${unitFee.toLocaleString()}/hr × ${quantity}</small>
+                                  <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                              </div>
+                          </div>
+                      `;
+                  } else {
+                      htmlContent += `
+                          <div class="fee-item d-flex justify-content-between mb-2">
+                              <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
+                              <div class="text-end">
+                                  <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
+                                  <strong>₱${itemTotal.toLocaleString()}</strong>
+                              </div>
+                          </div>
+                      `;
+                  }
+                  
+                  equipmentTotal += itemTotal;
+              });
 
               htmlContent += `
-                  <div class="fee-item d-flex justify-content-between mb-2">
-                      <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
-                      <div class="text-end">
-                          <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
-                          <strong>₱${itemTotal.toLocaleString()}</strong>
-                      </div>
+                  <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                      <strong>Subtotal</strong>
+                      <strong>₱${equipmentTotal.toLocaleString()}</strong>
                   </div>
-              `;
-            });
-
-            htmlContent += `
-              <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                  <strong>Subtotal</strong>
-                  <strong>₱${equipmentTotal.toLocaleString()}</strong>
-              </div>
-          </div>`;
+              </div>`;
           }
 
           // Total
           const total = facilityTotal + equipmentTotal;
           if (total > 0) {
-            htmlContent += `
-              <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
-                  <h6 class="mb-0">Total Amount</h6>
-                  <h6 class="mb-0">₱${total.toLocaleString()}</h6>
-              </div>
-          `;
+              htmlContent += `
+                  <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
+                      <h6 class="mb-0">Total Amount</h6>
+                      <h6 class="mb-0">₱${total.toLocaleString()}</h6>
+                  </div>
+              `;
           } else {
-            htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
+              htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
           }
 
           htmlContent += '</div>';
           feeDisplay.innerHTML = htmlContent;
 
-        } catch (error) {
+      } catch (error) {
           console.error('Error calculating fees:', error);
           showToast('Failed to calculate fees', 'error');
           feeDisplay.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
-        }
-      };
+      }
+  };
+
+  // Add event listeners to schedule fields to recalculate fees when they change
+  const scheduleFields = [
+      'startDateField', 'endDateField', 'startTimeField', 'endTimeField'
+  ];
+  
+  scheduleFields.forEach(fieldId => {
+      const field = document.getElementById(fieldId);
+      if (field) {
+          field.addEventListener('change', function() {
+              calculateAndDisplayFees();
+          });
+      }
+  });
 
       // --- Remove items from selection ---
       window.removeSelectedItem = async function (id, type) {
