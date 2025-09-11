@@ -4,6 +4,73 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
 
+        /* Messenger-style chat bubbles */
+.message-bubble {
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    word-wrap: break-word;
+    background-color: #dce6eeff !important; /* Your custom color */
+    color: black !important;
+    border-top-left-radius: 0% !important;
+}
+
+.message-bubble::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 0;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-right: 8px solid #dce6eeff;
+    border-bottom: 8px solid transparent;
+}
+
+/* Smooth scrolling for comments container */
+.comments-container {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for comments */
+.card-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.card-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.card-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.card-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Loading animation */
+.comment-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+/* Empty state styling */
+.empty-comments {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-comments i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
         #main {
             background-color: none !important;
         }
@@ -524,25 +591,34 @@
             </div>
             
             <!-- Form Remarks Container -->
-            <div class="card flex-grow-1" style="min-height: 300px !important;">
-                <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Form Comments</h5>
-                    
-                </div>
-                <div class="card-body">
-                    <div id="formRemarks">
-                        <p style="text-align: center;">No comments added yet.</p>
-                    </div>
-                </div>
-                <div class="card-footer bg-white p-2">
-                    <div class="input-group">
-                        <textarea class="form-control" rows="1" placeholder="Leave a remark..." aria-label="Leave a remark"></textarea>
-                        <button class="btn btn-outline-secondary" type="button">
-                            <i class="bi bi-send-fill" style="border: none !important; border-color: none !important;"></i>
-                        </button>
-                    </div>
+<div class="card flex-grow-1" style="min-height: 300px !important;">
+    <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            Form Comments
+        </h5>
+        <span class="badge bg-primary" id="commentCount">0</span>
+    </div>
+    <div class="card-body p-3 comments-container" style="overflow-y: auto; max-height: 250px;">
+        <div id="formRemarks">
+            <div class="comment-loading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading comments...</span>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="card-footer bg-white p-3 border-top">
+        <div class="input-group">
+            <textarea class="form-control" rows="1" placeholder="Type a message..." 
+                     aria-label="Type a message" id="commentTextarea" 
+                     style="resize: none; border-radius: 20px;"></textarea>
+            <button class="btn btn-primary rounded-circle ms-2" type="button" id="sendCommentBtn" 
+                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-send"></i>
+            </button>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 </div>
@@ -982,6 +1058,9 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 
+             const commentsContainer = document.getElementById('formRemarks');
+            const commentTextarea = document.querySelector('.card-footer textarea');
+            const commentSendBtn = document.querySelector('.card-footer button');
             const requestId = window.location.pathname.split('/').pop();
             const adminToken = localStorage.getItem('adminToken');
             let allRequests = [];
@@ -1027,6 +1106,260 @@
             showStatusUpdateModal(selectedStatus);
         });
     });
+
+     // Load existing comments
+   // Load comments
+async function loadComments() {
+    try {
+        commentsContainer.innerHTML = `
+            <div class="comment-loading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading comments...</span>
+                </div>
+            </div>
+        `;
+
+        const response = await fetch(`/api/admin/requisition/${requestId}/comments`, {
+            headers: {
+                'Authorization': `Bearer ${adminToken}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error('Failed to load comments');
+
+        const result = await response.json();
+        
+        // Update comment count badge
+        document.getElementById('commentCount').textContent = result.comments?.length || 0;
+        
+        if (result.success && result.comments.length > 0) {
+            displayComments(result.comments);
+            // Auto-scroll to bottom to show newest messages
+            scrollToBottom();
+        } else {
+            commentsContainer.innerHTML = `
+                <div class="empty-comments">
+                    <i class="bi bi-chat"></i>
+                    <p>No comments yet. Start the conversation!</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading comments:', error);
+        commentsContainer.innerHTML = `
+            <div class="empty-comments text-danger">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p>Failed to load comments.</p>
+            </div>
+        `;
+    }
+}
+
+function scrollToBottom() {
+    const container = document.querySelector('.comments-container');
+    if (container) {
+        container.scrollTop = container.scrollHeight;
+    }
+}
+    
+    // Display comments in the container
+
+function displayComments(comments) {
+    if (comments.length === 0) {
+        commentsContainer.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 2rem;">No comments yet. Start the conversation!</p>';
+        return;
+    }
+
+    commentsContainer.innerHTML = comments.map(comment => `
+        <div class="comment mb-3">
+            <div class="d-flex align-items-start">
+                <!-- Admin Profile Picture -->
+                <div class="me-2 flex-shrink-0">
+                    ${comment.admin.photo_url ? 
+                        `<img src="${comment.admin.photo_url}" class="rounded-circle" width="40" height="40" alt="${comment.admin.first_name}'s profile picture" style="object-fit: cover;">` :
+                        `<div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width: 40px; height: 40px; font-size: 1rem;">
+                            ${comment.admin.first_name.charAt(0)}${comment.admin.last_name.charAt(0)}
+                        </div>`
+                    }
+                </div>
+                
+                <!-- Message Bubble -->
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-1">
+                        <strong class="me-2">${comment.admin.first_name} ${comment.admin.last_name}</strong>
+                        <small class="text-muted">${formatTimeAgo(comment.created_at)}</small>
+                    </div>
+                    <div class="message-bubble bg-primary text-white p-3 rounded-3" style="max-width: 80%; border-bottom-left-radius: 4px !important;">
+                        <p class="mb-0" style="white-space: pre-wrap; line-height: 1.4;">${escapeHtml(comment.comment)}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+// Helper function to format time ago (e.g., "2 minutes ago")
+function formatTimeAgo(timestamp) {
+    const now = new Date();
+    const commentTime = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - commentTime) / 1000);
+    
+    if (diffInSeconds < 60) {
+        return 'just now';
+    } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 604800) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days} day${days !== 1 ? 's' : ''} ago`;
+    } else {
+        return commentTime.toLocaleDateString();
+    }
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+    // Auto-resize textarea
+    commentTextarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    // Send comment
+    commentSendBtn.addEventListener('click', async function() {
+        const commentText = commentTextarea.value.trim();
+        
+        if (!commentText) {
+            alert('Please enter a comment');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/admin/requisition/${requestId}/comment`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${adminToken}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    comment: commentText
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to add comment');
+            }
+
+            if (result.success) {
+                // Clear textarea and reset height
+                commentTextarea.value = '';
+                commentTextarea.style.height = 'auto';
+                
+                // Reload comments to show the new one
+                loadComments();
+                
+                // Show success message
+                showToast('Comment added successfully', 'success');
+            }
+
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            alert('Failed to add comment: ' + error.message);
+        }
+    });
+
+    // Allow sending with Enter key (but allow Shift+Enter for new lines)
+    commentTextarea.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            commentSendBtn.click();
+        }
+    });
+
+     // Simple toast notification function
+    window.showToast = function (message, type = 'success', duration = 3000) {
+                    const toast = document.createElement('div');
+
+                    // Toast base styles
+                    toast.className = `toast align-items-center border-0 position-fixed start-0 mb-2`;
+                    toast.style.zIndex = '1100';
+                    toast.style.bottom = '0';
+                    toast.style.left = '0';
+                    toast.style.margin = '1rem';
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(20px)';
+                    toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+                    toast.setAttribute('role', 'alert');
+                    toast.setAttribute('aria-live', 'assertive');
+                    toast.setAttribute('aria-atomic', 'true');
+
+                    // Colors
+                    const bgColor = type === 'success' ? '#004183ff' : '#dc3545';
+                    toast.style.backgroundColor = bgColor;
+                    toast.style.color = '#fff';
+                    toast.style.minWidth = '250px';
+                    toast.style.borderRadius = '0.3rem';
+
+                    toast.innerHTML = `
+                                    <div class="d-flex align-items-center px-3 py-1"> 
+                                        <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                        <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                    </div>
+                                    <div class="loading-bar" style="
+                                        height: 3px;
+                                        background: rgba(255,255,255,0.7);
+                                        width: 100%;
+                                        transition: width ${duration}ms linear;
+                                    "></div>
+                                `;
+
+                    document.body.appendChild(toast);
+
+                    // Bootstrap toast instance
+                    const bsToast = new bootstrap.Toast(toast, { autohide: false });
+                    bsToast.show();
+
+                    // Float up appear animation
+                    requestAnimationFrame(() => {
+                        toast.style.opacity = '1';
+                        toast.style.transform = 'translateY(0)';
+                    });
+
+                    // Start loading bar animation
+                    const loadingBar = toast.querySelector('.loading-bar');
+                    requestAnimationFrame(() => {
+                        loadingBar.style.width = '0%';
+                    });
+
+                    // Remove after duration
+                    setTimeout(() => {
+                        // Float down disappear animation
+                        toast.style.opacity = '0';
+                        toast.style.transform = 'translateY(20px)';
+
+                        setTimeout(() => {
+                            bsToast.hide();
+                            toast.remove();
+                        }, 400);
+                    }, duration);
+                };
+
+
+    // Load comments when page loads
+    loadComments();
+
 
       // Function to show status update modal
     function showStatusUpdateModal(status) {
@@ -1861,35 +2194,35 @@ statusBadge.style.backgroundColor = request.form_details.status.color;
                                                                                                                                         <h6>Facilities:</h6>
                                                                                                                                         ${request.requested_items.facilities.length > 0 ?
                             request.requested_items.facilities.map(f =>
-                                `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${f.is_waived ? 'waived' : ''}">
-                                                                                                                                                    <div class="d-flex align-items-center">
-                                                                                                                                                        <div class="form-check me-2">
-                                                                                                                                                            <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                                                                                                                                data-type="facility" 
-                                                                                                                                                                data-id="${f.requested_facility_id}"  // CHANGED: Use pivot ID
-                                                                                                                                                                ${f.is_waived ? 'checked' : ''}>
-                                                                                                                                                        </div>
-                                                                                                                                                        <span class="item-name">${f.name}</span>
-                                                                                                                                                    </div>
-                                                                                                                                                    <span class="item-price">₱${f.fee}</span>
-                                                                                                                                                </div>`
+`<div class="d-flex justify-content-between align-items-center mb-2 item-row ${f.is_waived ? 'waived' : ''}">
+    <div class="d-flex align-items-center">
+        <div class="form-check me-2">
+            <input class="form-check-input waiver-checkbox" type="checkbox" 
+                data-type="facility" 
+                data-id="${f.requested_facility_id}"
+                ${f.is_waived ? 'checked' : ''}>
+        </div>
+        <span class="item-name">${f.name}</span>
+    </div>
+    <span class="item-price">₱${f.fee}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
+</div>`
                             ).join('') : '<p>No facilities requested</p>'}
 
                                                                                                                                         <h6 class="mt-3">Equipment:</h6>
                                                                                                                                         ${request.requested_items.equipment.length > 0 ?
                             request.requested_items.equipment.map(e =>
-                                `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${e.is_waived ? 'waived' : ''}">
-                                                                                                                                                    <div class="d-flex align-items-center">
-                                                                                                                                                        <div class="form-check me-2">
-                                                                                                                                                            <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                                                                                                                                data-type="equipment" 
-                                                                                                                                                                data-id="${e.requested_equipment_id}"  // CHANGED: Use pivot ID
-                                                                                                                                                                ${e.is_waived ? 'checked' : ''}>
-                                                                                                                                                        </div>
-                                                                                                                                                        <span class="item-name">• ${e.name}</span>
-                                                                                                                                                    </div>
-                                                                                                                                                    <span class="item-price">₱${e.fee}</span>
-                                                                                                                                                </div>`
+                              `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${e.is_waived ? 'waived' : ''}">
+    <div class="d-flex align-items-center">
+        <div class="form-check me-2">
+            <input class="form-check-input waiver-checkbox" type="checkbox" 
+                data-type="equipment" 
+                data-id="${e.requested_equipment_id}"
+                ${e.is_waived ? 'checked' : ''}>
+        </div>
+        <span class="item-name">• ${e.name}</span>
+    </div>
+    <span class="item-price">₱${e.fee}${e.rate_type === 'Per Hour' ? '/hour' : '/event'} × ${e.quantity}</span>
+</div>`
                             ).join('') : '<p>No equipment requested</p>'}
                                                                                                                                     </div>
                                                                                                                                     <div class="d-flex justify-content-end mb-2">
@@ -2015,7 +2348,7 @@ statusBadge.style.backgroundColor = request.form_details.status.color;
                     document.getElementById('contentState').style.display = 'block';
 
                     loadFees();
-                    updateBaseFees(request.requested_items);
+                    updateBaseFees(request.requested_items, request.schedule);
                     updateAdditionalFees(request.fees.requisition_fees);
 
 
@@ -2033,53 +2366,94 @@ statusBadge.style.backgroundColor = request.form_details.status.color;
                 }
             }
 
-            // Function to update base fees display
-            function updateBaseFees(requestedItems) {
-                const facilitiesContainer = document.getElementById('facilitiesFees');
-                const equipmentContainer = document.getElementById('equipmentFees');
+            // Add this function to calculate rental duration
+function calculateRentalDuration(startDate, startTime, endDate, endTime) {
+    const start = new Date(`${startDate}T${startTime}`);
+    const end = new Date(`${endDate}T${endTime}`);
+    
+    const durationInHours = Math.round((end - start) / (1000 * 60 * 60) * 100) / 100;
+    const formattedStart = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const formattedEnd = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    return {
+        hours: durationInHours,
+        formatted: `${durationInHours} hours (${formattedStart} – ${formattedEnd})`
+    };
+}
 
-                // Clear existing content
-                facilitiesContainer.innerHTML = '';
-                equipmentContainer.innerHTML = '';
+          // Function to update base fees display
+function updateBaseFees(requestedItems, schedule) {
+    const facilitiesContainer = document.getElementById('facilitiesFees');
+    const equipmentContainer = document.getElementById('equipmentFees');
+    
+    // Calculate rental duration
+    const rentalDuration = calculateRentalDuration(
+        schedule.start_date, 
+        schedule.start_time, 
+        schedule.end_date, 
+        schedule.end_time
+    );
 
-                // Add facilities
-                if (requestedItems.facilities && requestedItems.facilities.length > 0) {
-                    requestedItems.facilities.forEach(facility => {
-                        const facilityElement = document.createElement('div');
-                        facilityElement.className = 'd-flex justify-content-between align-items-center mb-1';
-                        facilityElement.innerHTML = `
-                                                                                                                                                                                                                                                            <span class="item-name ${facility.is_waived ? 'waived' : ''}">
-                                                                                                                                                                                                                                                                ${facility.name}${facility.is_waived ? ' (Waived)' : ''}
-                                                                                                                                                                                                                                                            </span>
-                                                                                                                                                                                                                                                            <span class="item-price ${facility.is_waived ? 'waived' : ''}">
-                                                                                                                                                                                                                                                                ₱${facility.fee}
-                                                                                                                                                                                                                                                            </span>
-                                                                                                                                                                                                                                                        `;
-                        facilitiesContainer.appendChild(facilityElement);
-                    });
-                } else {
-                    facilitiesContainer.innerHTML = '<p></p>';
-                }
+    // Clear existing content
+    facilitiesContainer.innerHTML = '';
+    equipmentContainer.innerHTML = '';
 
-                // Add equipment
-                if (requestedItems.equipment && requestedItems.equipment.length > 0) {
-                    requestedItems.equipment.forEach(equipment => {
-                        const equipmentElement = document.createElement('div');
-                        equipmentElement.className = 'd-flex justify-content-between align-items-center mb-1';
-                        equipmentElement.innerHTML = `
-                                                                                                                                                                                                                                                            <span class="item-name ${equipment.is_waived ? 'waived' : ''}">
-                                                                                                                                                                                                                                                                ${equipment.name}${equipment.is_waived ? ' (Waived)' : ''}
-                                                                                                                                                                                                                                                            </span>
-                                                                                                                                                                                                                                                            <span class="item-price ${equipment.is_waived ? 'waived' : ''}">
-                                                                                                                                                                                                                                                                ₱${equipment.fee} × ${equipment.quantity}
-                                                                                                                                                                                                                                                            </span>
-                                                                                                                                                                                                                                                        `;
-                        equipmentContainer.appendChild(equipmentElement);
-                    });
-                } else {
-                    equipmentContainer.innerHTML = '<p></p>';
-                }
-            }
+    // Add rental duration at the top
+    // Add rental duration at the top - ABOVE the Base Fee header
+const baseFeesContainer = document.getElementById('baseFeesContainer');
+const durationElement = document.createElement('div');
+durationElement.className = 'mb-3 p-2 bg-light rounded';
+durationElement.innerHTML = `
+    <strong>Rental Duration</strong> - ${rentalDuration.formatted}
+`;
+baseFeesContainer.parentNode.insertBefore(durationElement, baseFeesContainer);
+
+    // Add facilities
+    if (requestedItems.facilities && requestedItems.facilities.length > 0) {
+        requestedItems.facilities.forEach(facility => {
+            const facilityElement = document.createElement('div');
+            facilityElement.className = 'd-flex justify-content-between align-items-center mb-1';
+            
+            // Determine rate type suffix
+            const rateSuffix = facility.rate_type === 'Per Hour' ? '/hour' : '/event';
+            
+            facilityElement.innerHTML = `
+                <span class="item-name ${facility.is_waived ? 'waived' : ''}">
+                    ${facility.name}${facility.is_waived ? ' (Waived)' : ''}
+                </span>
+                <span class="item-price ${facility.is_waived ? 'waived' : ''}">
+                    ₱${facility.fee}${rateSuffix}
+                </span>
+            `;
+            facilitiesContainer.appendChild(facilityElement);
+        });
+    } else {
+        facilitiesContainer.innerHTML = '<p></p>';
+    }
+
+    // Add equipment
+    if (requestedItems.equipment && requestedItems.equipment.length > 0) {
+        requestedItems.equipment.forEach(equipment => {
+            const equipmentElement = document.createElement('div');
+            equipmentElement.className = 'd-flex justify-content-between align-items-center mb-1';
+            
+            // Determine rate type suffix
+            const rateSuffix = equipment.rate_type === 'Per Hour' ? '/hour' : '/event';
+            
+            equipmentElement.innerHTML = `
+                <span class="item-name ${equipment.is_waived ? 'waived' : ''}">
+                    ${equipment.name}${equipment.is_waived ? ' (Waived)' : ''}
+                </span>
+                <span class="item-price ${equipment.is_waived ? 'waived' : ''}">
+                    ₱${equipment.fee}${rateSuffix} × ${equipment.quantity}
+                </span>
+            `;
+            equipmentContainer.appendChild(equipmentElement);
+        });
+    } else {
+        equipmentContainer.innerHTML = '<p></p>';
+    }
+}
 
             function formatDateTime(schedule) {
                 const startDate = new Date(schedule.start_date + 'T' + schedule.start_time);

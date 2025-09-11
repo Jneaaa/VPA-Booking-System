@@ -11,6 +11,7 @@ use App\Models\LookupTables\FacilitySubcategory;
 use Illuminate\Http\Request;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Http;
 
 
 
@@ -90,15 +91,18 @@ class FacilityController extends Controller
     }
 
     // ----- Create - Show add facility form ----- //
-    public function create()
-    {
-        $categories = FacilityCategory::all();
-        $subcategories = FacilitySubcategory::all();
-        $departments = Department::all();
-        $statuses = AvailabilityStatus::all();
-
-        return view('admin.add-facility', compact('categories', 'subcategories', 'departments', 'statuses'));
-    }
+public function create()
+{
+    // Just get departments and statuses first
+    $departments = Department::all();
+    $statuses = AvailabilityStatus::all();
+    
+    // Return with empty categories for now
+    $categories = [];
+    $subcategories = [];
+    
+    return view('admin.add-facility', compact('categories', 'subcategories', 'departments', 'statuses'));
+}
 
     // ----- Store - Save new facility ----- //
     public function store(Request $request)
@@ -347,4 +351,6 @@ class FacilityController extends Controller
             $image->update(['sort_order' => $index + 1]);
         }
     }
+
+
 }

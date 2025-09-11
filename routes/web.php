@@ -39,11 +39,10 @@ Route::middleware('web')->group(function () {
     Route::view('/admin/calendar', 'admin.calendar');
     Route::view('/admin/dashboard', 'admin.dashboard');
     Route::view('/admin/manage-equipment', 'admin.manage-equipment');
+    Route::view('/admin/manage-facilities', 'admin.manage-facilities');
     Route::get('/admin/edit-equipment', [EquipmentController::class, 'edit'])->name('admin.edit-equipment');
     Route::get('/admin/edit-facility', [FacilityController::class, 'edit'])->name('admin.edit-facility');
     Route::view('/admin/scan-equipment', 'admin.scan-equipment');
-    Route::view('/admin/manage-facilities', 'admin.manage-facilities');
-    Route::view('/admin/manage-facilities', 'admin.manage-facilities');
     Route::view('/admin/manage-requests', 'admin.manage-requests');
     Route::get('/admin/requisition/{requestId}', function ($requestId) {
         return view('admin.request-view', ['requestId' => $requestId]);
