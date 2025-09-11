@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('storage_location', 50)->default('No storage location specified.');
             $table->unsignedTinyInteger('category_id');
             $table->unsignedInteger('total_quantity')->default(1);
-            $table->decimal('internal_fee', 10, 2);
+            $table->decimal('internal_fee', 10, 2)->nullable();
             $table->decimal('external_fee', 10, 2);
             $table->enum('rate_type', ['Per Hour', 'Per Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');

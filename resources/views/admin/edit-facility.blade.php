@@ -3,208 +3,203 @@
 @section('title', 'Edit Facility')
 
 @section('content')
-<style>
-    /* Toast notification styles */
-    .toast {
-        z-index: 1100;
-        bottom: 0;
-        left: 0;
-        margin: 1rem;
-        opacity: 0;
-        transform: translateY(20px);
-        transition: transform 0.4s ease, opacity 0.4s ease;
-        min-width: 250px;
-        border-radius: 0.3rem;
-    }
+    <style>
+        /* Toast notification styles */
+        .toast {
+            z-index: 1100;
+            bottom: 0;
+            left: 0;
+            margin: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            min-width: 250px;
+            border-radius: 0.3rem;
+        }
 
-    .toast .loading-bar {
-        height: 3px;
-        background: rgba(255, 255, 255, 0.7);
-        width: 100%;
-        transition: width 3000ms linear;
-    }
+        .toast .loading-bar {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.7);
+            width: 100%;
+            transition: width 3000ms linear;
+        }
 
-    input[readonly],
-    textarea[readonly] {
-        pointer-events: none;
-        /* disables clicking/selection */
-        user-select: none;
-        /* prevents highlighting */
-        background-color: #fff;
-        /* optional: removes gray "disabled" look */
-        cursor: default;
-        /* arrow cursor instead of I-beam */
-    }
+        input[readonly],
+        textarea[readonly] {
+            pointer-events: none;
+            /* disables clicking/selection */
+            user-select: none;
+            /* prevents highlighting */
+            background-color: #fff;
+            /* optional: removes gray "disabled" look */
+            cursor: default;
+            /* arrow cursor instead of I-beam */
+        }
 
-    /* Add this to your existing styles */
-    #photosPreview {
-        min-height: 110px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
+        /* Add this to your existing styles */
+        #photosPreview {
+            min-height: 110px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-    .photo-preview {
-        position: relative;
-        width: 100px;
-        height: 100px;
-    }
+        .photo-preview {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
 
-    /* Add sharp edges to all elements */
-    * {
-        border-radius: 0 !important;
-    }
+        /* Layout fixes */
+        .dropzone {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
 
-    /* Layout fixes */
-    .dropzone {
-        min-height: 300px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
+        .card-body {
+            padding: 1.5rem;
+        }
 
-    .card-body {
-        padding: 1.5rem;
-    }
+        #photosPreview {
+            min-height: 110px;
+        }
 
-    #photosPreview {
-        min-height: 110px;
-    }
+        .form-control,
+        .form-select {
+            padding: 0.5rem 0.75rem;
+        }
 
-    .form-control,
-    .form-select {
-        padding: 0.5rem 0.75rem;
-    }
+        textarea.form-control {
+            min-height: 100px;
+        }
 
-    textarea.form-control {
-        min-height: 100px;
-    }
+        .row.mb-4 {
+            margin-bottom: 1.5rem !important;
+        }
 
-    .row.mb-4 {
-        margin-bottom: 1.5rem !important;
-    }
+        #itemsContainer {
+            min-height: 100px;
+        }
 
-    #itemsContainer {
-        min-height: 100px;
-    }
+        .amenity-item,
+        .facility-item {
+            margin-bottom: 0.75rem;
+        }
 
-    .amenity-item,
-    .facility-item {
-        margin-bottom: 0.75rem;
-    }
+        .modal-body .dropzone {
+            min-height: 150px;
+        }
 
-    .modal-body .dropzone {
-        min-height: 150px;
-    }
+        .photo-container {
+            position: relative;
+        }
 
-    .photo-container {
-        position: relative;
-    }
+        .photo-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+        }
 
-    .photo-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: none;
-    }
+        .change-photo-btn {
+            z-index: 1;
+        }
 
-    .change-photo-btn {
-        z-index: 1;
-    }
+        .facility-item img {
+            max-width: 100px;
+            /* Restrict photo width */
+            max-height: 100px;
+            /* Restrict photo height */
+            object-fit: cover;
+            /* Ensure photo fits within bounds */
+        }
 
-    .facility-item img {
-        max-width: 100px;
-        /* Restrict photo width */
-        max-height: 100px;
-        /* Restrict photo height */
-        object-fit: cover;
-        /* Ensure photo fits within bounds */
-    }
+        .facility-item .card-body {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            /* Add spacing between elements */
+        }
 
-    .facility-item .card-body {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        /* Add spacing between elements */
-    }
+        .facility-item .flex-grow-1 {
+            flex: 1;
+            /* Allow details section to take remaining space */
+        }
+    </style>
+    <!-- Main Content -->
+    <main id="main">
+        <!-- Edit Facility Page -->
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <form id="editFacilityForm">
+                    <input type="hidden" id="facilityId" value="{{ request()->get('id') }}">
 
-    .facility-item .flex-grow-1 {
-        flex: 1;
-        /* Allow details section to take remaining space */
-    }
-</style>
-<div class="container-fluid px-4">
-    <!-- Main Layout -->
-    <div id="layout">
-        <!-- Main Content -->
-        <main id="main">
-            <!-- Edit Facility Page -->
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Edit Facility</h1>
-                <a href="{{ url('/admin/manage-facilities') }}" class="btn btn-primary">
-                    <i class="bi bi-arrow-left me-2"></i>Back to Facilities
-                </a>
-            </div>
-
-            <div class="card shadow mb-4">
-                <div class="card-body">
-                    <form id="editFacilityForm">
-                        <input type="hidden" id="facilityId" value="{{ request()->get('id') }}">
-
-                        <!-- Facility Photos and Details Section -->
-                        <div class="row mb-4">
+                    <!-- Facility Photos and Details Section -->
+                    <div class="row mb-4 align-items-stretch">
+                        <!-- Left Column: Photos + New Card stacked -->
+                    <div class="col-md-6 d-flex flex-column h-100">
                             <!-- Facility Photos Card -->
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-header d-flex justify-content-between align-items-center"
-                                        style="height: 56px;">
-                                        <h5 class="fw-bold mb-0">Facility Photos</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="photo-section">
-                                            <div class="dropzone border p-4 text-center" id="facilityPhotosDropzone"
-                                                style="cursor: pointer;">
-                                                <i class="bi bi-images fs-1 text-muted"></i>
-                                                <p class="mt-2">Drag & drop facility photos here or click to browse</p>
-                                                <input type="file" id="facilityPhotos" class="d-none" multiple
-                                                    accept="image/*">
-                                            </div>
-                                            <small class="text-muted mt-2 d-block">Upload at least one photo of the
-                                                facility (max 5
-                                                photos)</small>
-                                            <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
-                                        </div>
-                                    </div>
+                            <div class="card flex-fill mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center"
+                                    style="height: 56px;">
+                                    <h5 class="fw-bold mb-0">Facility Photos</h5>
                                 </div>
-                            </div>
-                            <!-- Image Deletion Confirmation Modal -->
-                            <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Confirm Image Deletion</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
+                                <div class="card-body">
+                                    <div class="photo-section">
+                                        <div class="dropzone border p-4 text-center" id="facilityPhotosDropzone"
+                                            style="cursor: pointer;">
+                                            <i class="bi bi-images fs-1 text-muted"></i>
+                                            <p class="mt-2">Drag & drop facility photos here or click to browse</p>
+                                            <input type="file" id="facilityPhotos" class="d-none" multiple accept="image/*">
                                         </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete this photo? This action cannot be undone.
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                            <button type="button" class="btn btn-danger"
-                                                id="confirmDeleteImageBtn">Delete Photo</button>
-                                        </div>
+                                        <small class="text-muted mt-2 d-block">
+                                            Upload at least one photo of the facility (max 5 photos)
+                                        </small>
+                                        <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
                                     </div>
                                 </div>
                             </div>
 
-                              <!-- Facility Details Section -->
+
+                            <!-- Facility Amenities -->
+                            <div class="card flex-fill">
+                                <div class="card-header">
+                                    <h5 class="fw-bold mb-0">Amenities</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-0">No amenities added yet.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Image Deletion Confirmation Modal -->
+                        <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirm Image Deletion</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete this photo? This action cannot be undone.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Cancel</button>
+                                        <button type="button" class="btn btn-danger" id="confirmDeleteImageBtn">Delete
+                                            Photo</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Facility Details Section -->
                         <div class="col-md-6">
                             <div class="col-12">
                                 <div class="card">
@@ -214,7 +209,7 @@
                                     <div class="card-body">
                                         <div class="details-section">
                                             <!-- Basic Information Section -->
-                                            <div class="row mb-4">
+                                            <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label for="facilityName"
                                                         class="form-label fw-bold d-flex align-items-center">
@@ -226,14 +221,13 @@
                                                                 class="btn btn-sm btn-success me-1 save-btn">
                                                                 <i class="bi bi-check"></i>
                                                             </button>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-danger cancel-btn">
+                                                            <button type="button" class="btn btn-sm btn-danger cancel-btn">
                                                                 <i class="bi bi-x"></i>
                                                             </button>
                                                         </div>
                                                     </label>
-                                                    <input type="text" class="form-control text-secondary"
-                                                        id="facilityName" value="" readonly>
+                                                    <input type="text" class="form-control text-secondary" id="facilityName"
+                                                        value="" readonly>
                                                 </div>
 
                                                 <div class="col-md-6">
@@ -247,18 +241,17 @@
                                                                 class="btn btn-sm btn-success me-1 save-btn">
                                                                 <i class="bi bi-check"></i>
                                                             </button>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-danger cancel-btn">
+                                                            <button type="button" class="btn btn-sm btn-danger cancel-btn">
                                                                 <i class="bi bi-x"></i>
                                                             </button>
                                                         </div>
                                                     </label>
-                                                    <input type="text" class="form-control text-secondary"
-                                                        id="buildingCode" value="" readonly>
+                                                    <input type="text" class="form-control text-secondary" id="buildingCode"
+                                                        value="" readonly>
                                                 </div>
                                             </div>
 
-                                            <div class="row mb-4">
+                                            <div class="row mb-3">
                                                 <div class="col-12 position-relative">
                                                     <label for="description"
                                                         class="form-label fw-bold d-flex align-items-center">
@@ -270,21 +263,21 @@
                                                                 class="btn btn-sm btn-success me-1 save-btn">
                                                                 <i class="bi bi-check"></i>
                                                             </button>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-danger cancel-btn">
+                                                            <button type="button" class="btn btn-sm btn-danger cancel-btn">
                                                                 <i class="bi bi-x"></i>
                                                             </button>
                                                         </div>
                                                     </label>
-                                                    <textarea class="form-control text-secondary" id="description"
-                                                        rows="3" readonly></textarea>
+                                                    <textarea class="form-control text-secondary" id="description" rows="3"
+                                                        readonly></textarea>
                                                     <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1"
                                                         id="descriptionWordCount">0/250 characters</small>
                                                 </div>
                                             </div>
 
-                                            <div class="row mb-4">
-                                                <div class="col-md-4">
+                                            <div class="row mb-3">
+                                                <!-- Location Note: wider (8 of 12 columns) -->
+                                                <div class="col-md-8">
                                                     <label for="locationNote"
                                                         class="form-label fw-bold d-flex align-items-center">
                                                         Location Note
@@ -295,42 +288,17 @@
                                                                 class="btn btn-sm btn-success me-1 save-btn">
                                                                 <i class="bi bi-check"></i>
                                                             </button>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-danger cancel-btn">
+                                                            <button type="button" class="btn btn-sm btn-danger cancel-btn">
                                                                 <i class="bi bi-x"></i>
                                                             </button>
                                                         </div>
                                                     </label>
-                                                    <input type="text" class="form-control text-secondary"
-                                                        id="locationNote" value="" readonly>
+                                                    <input type="text" class="form-control text-secondary" id="locationNote"
+                                                        value="" readonly>
                                                 </div>
 
+                                                <!-- Location Type: narrower (4 of 12 columns) -->
                                                 <div class="col-md-4">
-                                                    <label for="category" class="form-label fw-bold">Category</label>
-                                                    <select class="form-select" id="category" required>
-                                                        <option value="">Select Category</option>
-                                                        <!-- Categories will be populated dynamically -->
-                                                    </select>
-                                                </div>
-
-                                                <div class="col-md-4">
-                                                    <label for="subcategory"
-                                                        class="form-label fw-bold">Subcategory</label>
-                                                    <select class="form-select" id="subcategory">
-                                                        <option value="">Select Subcategory</option>
-                                                        <!-- Subcategories will be populated dynamically -->
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <!-- Capacity & Location Section -->
-                                            <div class="row mb-4">
-                                                <div class="col-md-3">
-                                                    <label for="capacity" class="form-label fw-bold">Capacity</label>
-                                                    <input type="number" class="form-control" id="capacity" min="1"
-                                                        value="1" required>
-                                                </div>
-                                                <div class="col-md-3">
                                                     <label for="locationType" class="form-label fw-bold">Location
                                                         Type</label>
                                                     <select class="form-select" id="locationType" required>
@@ -338,13 +306,47 @@
                                                         <option value="Outdoors">Outdoors</option>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-3">
-                                                    <label for="floorLevel" class="form-label fw-bold">Floor
-                                                        Level</label>
+                                            </div>
+
+
+                                            <!-- Category row -->
+                                            <div class="row mb-3">
+                                                <div class="col-12">
+                                                    <label for="category" class="form-label fw-bold">Category</label>
+                                                    <select class="form-select w-100" id="category" required>
+                                                        <option value="">Select Category</option>
+                                                        <!-- Categories populated dynamically -->
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Subcategory row -->
+                                            <div class="row mb-3">
+                                                <div class="col-12">
+                                                    <label for="subcategory" class="form-label fw-bold">Subcategory</label>
+                                                    <select class="form-select w-100" id="subcategory">
+                                                        <option value="">Select Subcategory</option>
+                                                        <!-- Subcategories populated dynamically -->
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <!-- Capacity & Location Section -->
+                                            <div class="row mb-3">
+                                                <div class="col-md-4">
+                                                    <label for="capacity" class="form-label fw-bold">Capacity</label>
+                                                    <input type="number" class="form-control" id="capacity" min="1"
+                                                        value="1" required>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <label for="floorLevel" class="form-label fw-bold">Floor Level</label>
                                                     <input type="number" class="form-control" id="floorLevel" min="1"
                                                         placeholder="Floor level">
                                                 </div>
-                                                <div class="col-md-3">
+
+                                                <div class="col-md-4">
                                                     <label for="roomCode" class="form-label fw-bold">Room Code</label>
                                                     <input type="text" class="form-control" id="roomCode"
                                                         placeholder="Room code">
@@ -352,146 +354,129 @@
                                             </div>
 
                                             <!-- Pricing Section -->
-                                            <div class="row mb-4">
-                                                <div class="col-md-4">
-                                                    <label for="internalFee" class="form-label fw-bold">Internal Fee
-                                                        (₱)</label>
+                                            <div class="row mb-3">
+                                                <!-- Rental Fee -->
+                                                <div class="col-md-6">
+                                                    <label for="rentalFee" class="form-label fw-bold">Rental Fee (₱)</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text">₱</span>
-                                                        <input type="number" class="form-control" id="internalFee"
-                                                            min="0" step="0.01" required placeholder="0.00">
+                                                        <input type="number" class="form-control" id="rentalFee" min="0"
+                                                            step="0.01" required placeholder="0.00">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <label for="externalFee" class="form-label fw-bold">External Fee
-                                                        (₱)</label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text">₱</span>
-                                                        <input type="number" class="form-control" id="externalFee"
-                                                            min="0" step="0.01" required placeholder="0.00">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
+
+                                                <!-- Rate Type -->
+                                                <div class="col-md-6">
                                                     <label for="rateType" class="form-label fw-bold">Rate Type</label>
                                                     <select class="form-select" id="rateType" required>
                                                         <option value="Per Hour">Per Hour</option>
                                                         <option value="Per Event">Per Event</option>
                                                     </select>
                                                 </div>
-                                            </div>
 
-                                            <!-- Department & Availability Section -->
-                                            <div class="row mb-4">
-                                                <div class="col-md-4">
-                                                    <label for="department" class="form-label fw-bold">Owning
-                                                        Department</label>
-                                                    <select class="form-select" id="department" required>
-                                                        <!-- Departments will be populated dynamically -->
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="maximumRentalHour" class="form-label fw-bold">Maximum
-                                                        Rental Duration (hours)</label>
-                                                    <input type="number" class="form-control" id="maximumRentalHour"
-                                                        min="1" placeholder="Maximum rental hours">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="availabilityStatus"
-                                                        class="form-label fw-bold">Availability
-                                                        Status</label>
-                                                    <select class="form-select" id="availabilityStatus" required>
-                                                        <!-- Statuses will be populated dynamically -->
-                                                    </select>
-                                                </div>
-                                            </div>
 
-                                            <!-- Building Details Section -->
-                                            <div class="row mb-4">
-                                                <div class="col-md-4">
-                                                    <label for="totalLevels" class="form-label fw-bold">Total
-                                                        Levels</label>
-                                                    <input type="number" class="form-control" id="totalLevels" min="1"
-                                                        placeholder="Total building levels">
+                                                <!-- Building Details Section -->
+                                                <div class="row mb-1 g-2">
+                                                    <div class="col-md-6">
+                                                        <label for="totalLevels" class="form-label fw-bold">Total
+                                                            Levels</label>
+                                                        <input type="number" class="form-control" id="totalLevels" min="1"
+                                                            placeholder="Total building levels">
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label for="totalRooms" class="form-label fw-bold">Total
+                                                            Rooms</label>
+                                                        <input type="number" class="form-control" id="totalRooms" min="1"
+                                                            placeholder="Total rooms in building">
+                                                    </div>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <label for="totalRooms" class="form-label fw-bold">Total
-                                                        Rooms</label>
-                                                    <input type="number" class="form-control" id="totalRooms" min="1"
-                                                        placeholder="Total rooms in building">
+
+                                                <!-- Department & Availability Section -->
+                                                <div class="row mb-1 g-2">
+                                                    <div class="col-md-6">
+                                                        <label for="department" class="form-label fw-bold">Owning
+                                                            Department</label>
+                                                        <select class="form-select" id="department" required>
+                                                            <!-- Departments will be populated dynamically -->
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label for="availabilityStatus"
+                                                            class="form-label fw-bold">Availability Status</label>
+                                                        <select class="form-select" id="availabilityStatus" required>
+                                                            <!-- Statuses will be populated dynamically -->
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <label for="parentFacility" class="form-label fw-bold">Parent
-                                                        Facility</label>
-                                                    <select class="form-select" id="parentFacility">
-                                                        <option value="">None</option>
-                                                        <!-- Parent facilities will be populated dynamically -->
-                                                    </select>
-                                                </div>
+
+
+
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Form Actions -->
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Update Facility</button>
-                        </div>
-                    </form>
-                </div>
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Update Facility</button>
+                            </div>
+                </form>
             </div>
-    </div>
-    <!-- Event Modal -->
-    <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Event Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <strong>Title:</strong> <span id="eventTitle"></span>
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Date:</strong> <span id="eventDate"></span>
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Time:</strong> <span id="eventTime">10:00 AM - 12:00 PM</span>
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Description:</strong> <span id="eventDescription"></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+
+        <!-- Event Modal -->
+        <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Event Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>Title:</strong> <span id="eventTitle"></span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Date:</strong> <span id="eventDate"></span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Time:</strong> <span id="eventTime">10:00 AM - 12:00 PM</span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Description:</strong> <span id="eventDescription"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- Reset Confirmation Modal -->
-    <div class="modal fade" id="cancelConfirmationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Discard Changes</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to cancel? Unsaved changes will be lost.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmCancelBtn">Confirm</button>
+        <!-- Reset Confirmation Modal -->
+        <div class="modal fade" id="cancelConfirmationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Discard Changes</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to cancel? Unsaved changes will be lost.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmCancelBtn">Confirm</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    @endsection
+@endsection
 
     @section('scripts')
         <script>
@@ -528,18 +513,18 @@
                     toast.style.borderRadius = '0.3rem';
 
                     toast.innerHTML = `
-                            <div class="d-flex align-items-center px-3 py-1"> 
-                                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                            </div>
-                            <div class="loading-bar" style="
-                                height: 3px;
-                                background: rgba(255,255,255,0.7);
-                                width: 100%;
-                                transition: width ${duration}ms linear;
-                            "></div>
-                        `;
+                                                <div class="d-flex align-items-center px-3 py-1"> 
+                                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                </div>
+                                                <div class="loading-bar" style="
+                                                    height: 3px;
+                                                    background: rgba(255,255,255,0.7);
+                                                    width: 100%;
+                                                    transition: width ${duration}ms linear;
+                                                "></div>
+                                            `;
 
                     document.body.appendChild(toast);
 
@@ -1011,10 +996,9 @@
                         document.getElementById('locationType').value = facility.location_type || 'Indoors';
                         document.getElementById('floorLevel').value = facility.floor_level || '';
                         document.getElementById('roomCode').value = facility.room_code || '';
-                        document.getElementById('internalFee').value = facility.internal_fee || '0.00';
-                        document.getElementById('externalFee').value = facility.external_fee || '0.00';
+                        document.getElementById('rentalFee').value = facility.external_fee || '0.00';
                         document.getElementById('rateType').value = facility.rate_type || 'Per Hour';
-                        document.getElementById('maximumRentalHour').value = facility.maximum_rental_hour || '';
+                        document.getElementById('maximumRentalDuration').value = facility.maximum_rental_hour || '';
                         document.getElementById('totalLevels').value = facility.total_levels || '';
                         document.getElementById('totalRooms').value = facility.total_rooms || '';
 
@@ -1253,11 +1237,10 @@
                             location_type: document.getElementById('locationType').value,
                             floor_level: document.getElementById('floorLevel').value || null,
                             room_code: document.getElementById('roomCode').value || null,
-                            internal_fee: document.getElementById('internalFee').value,
-                            external_fee: document.getElementById('externalFee').value,
+                            external_fee: document.getElementById('rentalFee').value,
                             rate_type: document.getElementById('rateType').value,
                             department_id: document.getElementById('department').value,
-                            maximum_rental_hour: document.getElementById('maximumRentalHour').value || null,
+                            maximum_rental_hour: document.getElementById('maximumRentalDuration').value || null,
                             status_id: document.getElementById('availabilityStatus').value,
                             total_levels: document.getElementById('totalLevels').value || null,
                             total_rooms: document.getElementById('totalRooms').value || null,

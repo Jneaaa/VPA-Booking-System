@@ -37,7 +37,7 @@ return new class extends Migration
             $table->enum('location_type', ['Indoors', 'Outdoors']);
 
             // fees and rates
-            $table->decimal('internal_fee', 10, 2);
+            $table->decimal('internal_fee', 10, 2)->nullable();
             $table->decimal('external_fee', 10, 2);
             $table->enum('rate_type', ['Per Hour', 'Per Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');
