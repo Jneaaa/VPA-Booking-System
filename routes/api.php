@@ -116,6 +116,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('admin/equipment/{equipmentId}', [EquipmentController::class, 'update']);
     Route::delete('/admin/equipment/{equipmentId}', [EquipmentController::class, 'destroy']);
     Route::post('admin/equipment', [EquipmentController::class, 'store']);
+
+
+    Route::post('/scanner/scan', [ScannerController::class, 'scan']);
+    Route::post('/scanner/borrow', [ScannerController::class, 'borrow']);
+    Route::post('/scanner/confirm-borrow', [ScannerController::class, 'confirmBorrow']);
+    Route::post('/scanner/return', [ScannerController::class, 'returnItem']);
+    Route::post('/scanner/confirm-return', [ScannerController::class, 'confirmReturn']);
+    Route::get('/scanner/history', [ScannerController::class, 'getHistory']);
+    Route::get('/scanner/status', [ScannerController::class, 'status']);
 });
 
 // ---------------- Facility Management ---------------- //
