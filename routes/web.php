@@ -5,11 +5,17 @@ use App\Http\Controllers\RequisitionFormController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\FacilityController;
+use App\Http\Controllers\FeedbackController;
+
 
 Route::middleware('web')->group(function () {
     Route::get('/', function () {
         return view('welcome');
     });
+
+    Route::get('/admin/feedback-data', [FeedbackController::class, 'getFeedbackData'])->name('admin.feedback.data');
+    Route::get('/admin/feedback-stats', [FeedbackController::class, 'getFeedbackStats'])->name('admin.feedback.stats');
+
 
     // ----- Public Views ----- //
     Route::view('/facility-catalog', 'public.facility-catalog');

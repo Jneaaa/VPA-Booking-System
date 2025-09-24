@@ -100,7 +100,7 @@
             --cpu-primary: #003366;
             --cpu-primary-hover: #004a94;
             --btn-primary: #135ba3;
-            --btn-primary-hover: #2673c0;
+            --btn-primary-hover: #0f4c8aff;
             --cpu-secondary: #f2b123;
             --cpu-text-dark: #333333;
             --light-gray: #f8f9fa;

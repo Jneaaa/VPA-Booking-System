@@ -1158,6 +1158,16 @@ class AdminApprovalController extends Controller
             $form->status_id = FormStatus::where('status_name', 'Completed')->first()->status_id;
             $form->save();
 
+              // Create completed transaction record
+            CompletedTransaction::create([
+                'request_id' => $requestId,
+                'official_receipt_no' => null,
+                'official_receipt_url' => null,
+                'official_receipt_public_id' => null
+            ]);
+
+            DB::commit();
+
             return response()->json([
                 'message' => 'Form closed successfully',
                 'form' => $form

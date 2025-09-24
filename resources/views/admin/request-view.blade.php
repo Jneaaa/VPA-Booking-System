@@ -578,7 +578,7 @@
         <div class="dropdown status-selector-container" id="moreDropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false">
-                Finalize
+                More Actions
             </button>
             <div class="dropdown-menu status-dropdown-menu shadow">
                 <div class="status-option" data-value="Finalize Form">
@@ -593,6 +593,10 @@
                 <i class="bi bi-x-circle"></i>
                 <span>Cancel Form</span>
                 </div>
+                <div class="status-option" data-value="Close">
+            <i class="bi bi-check-circle"></i>
+            <span>Close Form</span>
+        </div>
             </div>
         </div>
     </div>
@@ -1127,25 +1131,27 @@ function handleStatusAction(action) {
             }
             break;
             
-       case 'Set Penalty Fee':
-    // Prompt user for penalty amount
-    const penaltyAmount = prompt('Enter late penalty amount:');
-    if (penaltyAmount !== null && penaltyAmount !== '') {
-        const amount = parseFloat(penaltyAmount);
-        if (!isNaN(amount) && amount >= 0) { // allow 0
-            addLatePenalty(amount);
-        } else {
-            alert('Please enter a valid penalty amount (0 or greater).');
-        }
-    }
-    break;
-
+        case 'Set Penalty Fee':
+            // Prompt user for penalty amount
+            const penaltyAmount = prompt('Enter late penalty amount:');
+            if (penaltyAmount !== null && penaltyAmount !== '') {
+                const amount = parseFloat(penaltyAmount);
+                if (!isNaN(amount) && amount >= 0) { // allow 0
+                    addLatePenalty(amount);
+                } else {
+                    alert('Please enter a valid penalty amount (0 or greater).');
+                }
+            }
+            break;
+            
+        case 'Close':
+            closeForm();
+            break;
             
         default:
             console.log('Unknown action:', action);
     }
 }
-
 
             // Load existing comments
             // Load comments
@@ -1564,9 +1570,12 @@ async function closeForm() {
             throw new Error(errorData.details || 'Failed to close form');
         }
 
-        showToast('Form closed successfully!', 'success');
-        // Refresh the page to show updated status
-        fetchRequestDetails();
+        showToast('Form closed successfully! Redirecting to manage requests...', 'success');
+        
+        // Redirect to manage requests page after a short delay
+        setTimeout(() => {
+            window.location.href = '/admin/manage-requests';
+        }, 1500);
 
     } catch (error) {
         console.error('Error closing form:', error);

@@ -26,13 +26,13 @@ return new class extends Migration
             $table->unsignedTinyInteger('department_id');
             $table->unsignedInteger('maximum_rental_hour')->nullable();
             $table->timestamps();
-            $table->unsignedBigInteger('created_by');
+            $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();
             $table->dateTime('last_booked_at')->nullable();
         
             // Foreign key constraints
-            $table->foreign('created_by')->references('admin_id')->on('admins')->onDelete('restrict');
+            $table->foreign('created_by')->references('admin_id')->on('admins')->onDelete('set null');
             $table->foreign('updated_by')->references('admin_id')->on('admins')->onDelete('set null');
             $table->foreign('deleted_by')->references('admin_id')->on('admins')->onDelete('set null');
 
