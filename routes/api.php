@@ -26,6 +26,7 @@ use App\Http\Controllers\Dropdowns\ConditionController;
 use App\Http\Controllers\Dropdowns\RequisitionPurposeController;
 
 
+
 // ---------------- Admin Routes ---------------- //
 
 Route::get('/admins', [AdminController::class, 'getAllAdmins']);
@@ -37,6 +38,7 @@ Route::post('/admins', [AdminController::class, 'store']);
 Route::delete('/admins/{admin}', [AdminController::class, 'deleteAdmin']);
 Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']);
 Route::put('/admins/{admin}', [AdminController::class, 'update']);
+Route::post('/admin/update/{admin}', [AdminController::class, 'update']);
 
 
 
@@ -162,7 +164,7 @@ Route::get('/facilities', [FacilityController::class, 'publicIndex']);
 
 Route::post('/feedback', [FeedbackController::class, 'store'])
     ->name('feedback.store');
-    
+
 
 // Public cancellation route for requesters
 Route::post('/requester/requisition/{requestId}/cancel', [AdminApprovalController::class, 'cancelRequestPublic']);
@@ -224,7 +226,6 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware
 Route::middleware('auth:sanctum')->group(function () {
 
 
-
     // ---- Admin Approval Routes ---- //
     Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'pendingRequests']);
     Route::get('/admin/simplified-forms', [AdminApprovalController::class, 'getSimplifiedForms']);
@@ -235,6 +236,8 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json($user);
     });
     Route::post('/admin/update-photo', [AdminController::class, 'updatePhoto']);
+    Route::post('/admin/update-photo-records', [AdminController::class, 'updatePhotoRecords']);
+    Route::post('/admin/delete-cloudinary-image', [AdminController::class, 'deleteCloudinaryImage']);
 
     // --- Form Management Routes --- //
     Route::prefix('admin/requisition')->group(function () {

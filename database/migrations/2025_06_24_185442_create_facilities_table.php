@@ -44,7 +44,7 @@ return new class extends Migration
 
             // Timestamps
             $table->timestamps();
-            $table->unsignedBigInteger('created_by');
+            $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();
             $table->dateTime('last_booked_at')->nullable();
@@ -55,9 +55,9 @@ return new class extends Migration
             $table->foreign('subcategory_id')->references('subcategory_id')->on('facility_subcategories');
             $table->foreign('department_id')->references('department_id')->on('departments');
             $table->foreign('status_id')->references('status_id')->on('availability_statuses');
-            $table->foreign('created_by')->references('admin_id')->on('admins');
-            $table->foreign('updated_by')->references('admin_id')->on('admins');
-            $table->foreign('deleted_by')->references('admin_id')->on('admins');
+            $table->foreign('created_by')->references('admin_id')->on('admins')->onDelete('set null');
+            $table->foreign('updated_by')->references('admin_id')->on('admins')->onDelete('set null');
+            $table->foreign('deleted_by')->references('admin_id')->on('admins')->onDelete('set null');
 
             // Composite indexes for queries 
             $table->index(['category_id', 'subcategory_id']);

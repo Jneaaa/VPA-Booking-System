@@ -16,10 +16,6 @@ class AdminSeeder extends Seeder
     {
         DB::table('admins')->insert([
             [
-                'photo_url' => 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1751050880/ppcqunrpfuyf2fqos4y9.jpg',
-                'photo_public_id' => 'ppcqunrpfuyf2fqos4y9',
-                'wallpaper_url' => '',
-                'wallpaper_public_id' => '',
                 'first_name' => 'Hannah',
                 'last_name' => 'Escosar',
                 'middle_name' => 'O.',
@@ -32,10 +28,6 @@ class AdminSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
-                'photo_url' => 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1751050882/wsqs9eysc0jbrvydsssr.jpg',
-                'photo_public_id' => 'wsqs9eysc0jbrvydsssr',
-                'wallpaper_url' => '',
-                'wallpaper_public_id' => '',
                 'first_name' => 'Janea',
                 'last_name' => 'Geresola',
                 'middle_name' => '',
@@ -48,10 +40,6 @@ class AdminSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
-                'photo_url' => 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1751050879/rbt2ftf4ovwcj7awyugd.jpg',
-                'photo_public_id' => 'rbt2ftf4ovwcj7awyugd',
-                'wallpaper_url' => '',
-                'wallpaper_public_id' => '',
                 'first_name' => 'Chin',
                 'last_name' => 'Dasal',
                 'middle_name' => '',
