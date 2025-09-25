@@ -151,6 +151,11 @@
             background-color: rgba(80, 128, 206, 0.1);
         }
 
+        /* Hidden nav items */
+        .nav-item.hidden {
+            display: none !important;
+        }
+
 
         /* Topbar Styles */
         #topbar {
@@ -281,56 +286,55 @@
             padding-top: 70px;
             /* Match topbar height + some spacing */
         }
+
         /* Preserve your original three dots style */
-.three-dots-icon {
-    background: rgba(255, 255, 255, 0);
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: #ffffffff !important;
-    font-size: 1.5rem;
-    line-height: 1;
-    display: inline-flex;
-}
+        .three-dots-icon {
+            background: rgba(255, 255, 255, 0);
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #ffffffff !important;
+            font-size: 1.5rem;
+            line-height: 1;
+            display: inline-flex;
+        }
 
-.three-dots-icon:hover {
-    background: rgba(190, 201, 211, 0.3);
-    transform: scale(1.05);
-}
+        .three-dots-icon:hover {
+            background: rgba(190, 201, 211, 0.3);
+            transform: scale(1.05);
+        }
 
-.three-dots-icon:active {
-    transform: scale(0.95);
-    background: rgba(190, 201, 211, 0.5);
-}
+        .three-dots-icon:active {
+            transform: scale(0.95);
+            background: rgba(190, 201, 211, 0.5);
+        }
 
-.back-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: white;
-}
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: white;
+        }
 
-.back-button:hover {
-    background: rgba(190, 201, 211, 0.3);
-    transform: scale(1.05);
-}
+        .back-button:hover {
+            background: rgba(190, 201, 211, 0.3);
+            transform: scale(1.05);
+        }
 
-.back-button:active {
-    transform: scale(0.95);
-    background: rgba(190, 201, 211, 0.5);
-}
-
-
+        .back-button:active {
+            transform: scale(0.95);
+            background: rgba(190, 201, 211, 0.5);
+        }
     </style>
 </head>
 
@@ -339,38 +343,42 @@
         <i class="bi bi-list"></i>
     </button>
     {{-- Header --}}
-<header id="topbar" class="d-flex justify-content-between align-items-center fixed-top transition-all">
+    <header id="topbar" class="d-flex justify-content-between align-items-center fixed-top transition-all">
 
-    <!-- Left side: back button + current page title -->
-    <div class="d-flex align-items-center gap-2">
+        <!-- Left side: back button + current page title -->
+        <div class="d-flex align-items-center gap-2">
 
-{{-- Back button --}}
-<a href="{{ url()->previous() }}" class="back-button me-0">
-    <i class="bi bi-caret-left-fill"></i>
-</a>
+            {{-- Back button --}}
+            <a href="{{ url()->previous() }}" class="back-button me-0">
+                <i class="bi bi-caret-left-fill"></i>
+            </a>
 
 
-        {{-- Current page title --}}
-        <span class="fw-bold brand-text">
-            @yield('title', 'CPU Facilities and Equipment Management')
-        </span>
-    </div>
-
-    <!-- Right side: dropdown menu -->
-    <div class="d-flex align-items-center">
-        <div class="dropdown">
-            <button class="btn btn-link p-0 text-white" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-three-dots three-dots-icon"></i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="{{ url('/admin/admin-login') }}" id="logoutLink"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-            </ul>
+            {{-- Current page title --}}
+            <span class="fw-bold brand-text">
+                @yield('title', 'CPU Facilities and Equipment Management')
+            </span>
         </div>
-    </div>
 
-</header>
+        <!-- Right side: dropdown menu -->
+        <div class="d-flex align-items-center">
+            <div class="dropdown">
+                <button class="btn btn-link p-0 text-white" id="dropdownMenuButton" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="bi bi-three-dots three-dots-icon"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item text-danger" href="{{ url('/admin/admin-login') }}" id="logoutLink"><i
+                                class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+
+    </header>
 
 
     {{-- Sidebar + Main Content --}}
@@ -384,8 +392,7 @@
                 <div id="profile-img-container" class="position-relative">
                     <div id="profile-skeleton" class="skeleton skeleton-circle" style="width: 80px; height: 80px;">
                     </div>
-                    <img id="admin-profile-img"
-                        class="rounded-circle border border-3 border-white shadow-sm"
+                    <img id="admin-profile-img" class="rounded-circle border border-3 border-white shadow-sm"
                         style="width: 80px; height: 80px; object-fit: cover; display: none;">
                     <div class="status-indicator bg-success"></div>
                 </div>
@@ -399,7 +406,13 @@
         </div>
 
         <ul class="nav flex-column px-2 flex-grow-1">
-            <li class="nav-item mb-1">
+            <li class="nav-item mb-1 nav-link-skeleton" id="dashboard-nav-skeleton">
+                <div class="d-flex align-items-center py-1 px-2">
+                    <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
+                    <div class="skeleton skeleton-text" style="width: 85px; height: 16px;"></div>
+                </div>
+            </li>
+            <li class="nav-item mb-1" id="dashboard-nav-item" style="display: none;">
                 <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/dashboard*') ? 'active' : '' }}"
                     href="{{ url('/admin/dashboard') }}">
                     <div class="d-flex align-items-center">
@@ -410,7 +423,14 @@
                     </div>
                 </a>
             </li>
-            <li class="nav-item mb-1">
+
+            <li class="nav-item mb-1 nav-link-skeleton" id="calendar-nav-skeleton">
+                <div class="d-flex align-items-center py-1 px-2">
+                    <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
+                    <div class="skeleton skeleton-text" style="width: 70px; height: 16px;"></div>
+                </div>
+            </li>
+            <li class="nav-item mb-1" id="calendar-nav-item" style="display: none;">
                 <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/calendar*') ? 'active' : '' }}"
                     href="{{ url('/admin/calendar') }}">
                     <div class="d-flex align-items-center">
@@ -421,7 +441,14 @@
                     </div>
                 </a>
             </li>
-            <li class="nav-item mb-1">
+
+            <li class="nav-item mb-1 nav-link-skeleton" id="requisitions-nav-skeleton">
+                <div class="d-flex align-items-center py-1 px-2">
+                    <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
+                    <div class="skeleton skeleton-text" style="width: 80px; height: 16px;"></div>
+                </div>
+            </li>
+            <li class="nav-item mb-1" id="requisitions-nav-item" style="display: none;">
                 <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/manage-requests*') ? 'active' : '' }}"
                     href="{{ url('/admin/manage-requests') }}">
                     <div class="d-flex align-items-center">
@@ -432,7 +459,14 @@
                     </div>
                 </a>
             </li>
-            <li class="nav-item mb-1">
+
+            <li class="nav-item mb-1 nav-link-skeleton" id="facilities-nav-skeleton">
+                <div class="d-flex align-items-center py-1 px-2">
+                    <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
+                    <div class="skeleton skeleton-text" style="width: 70px; height: 16px;"></div>
+                </div>
+            </li>
+            <li class="nav-item mb-1" id="facilities-nav-item" style="display: none;">
                 <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/manage-facilities*') ? 'active' : '' }}"
                     href="{{ url('/admin/manage-facilities') }}">
                     <div class="d-flex align-items-center">
@@ -443,7 +477,14 @@
                     </div>
                 </a>
             </li>
-            <li class="nav-item mb-1">
+
+            <li class="nav-item mb-1 nav-link-skeleton" id="equipment-nav-skeleton">
+                <div class="d-flex align-items-center py-1 px-2">
+                    <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
+                    <div class="skeleton skeleton-text" style="width: 75px; height: 16px;"></div>
+                </div>
+            </li>
+            <li class="nav-item mb-1" id="equipment-nav-item" style="display: none;">
                 <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/manage-equipment*') ? 'active' : '' }}"
                     href="{{ url('/admin/manage-equipment') }}">
                     <div class="d-flex align-items-center">
@@ -454,7 +495,14 @@
                     </div>
                 </a>
             </li>
-            <li class="nav-item mb-1">
+
+            <li class="nav-item mb-1 nav-link-skeleton" id="administrators-nav-skeleton">
+                <div class="d-flex align-items-center py-1 px-2">
+                    <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
+                    <div class="skeleton skeleton-text" style="width: 100px; height: 16px;"></div>
+                </div>
+            </li>
+            <li class="nav-item mb-1" id="administrators-nav-item" style="display: none;">
                 <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/admin-roles*') ? 'active' : '' }}"
                     href="{{ url('/admin/admin-roles') }}">
                     <div class="d-flex align-items-center">
@@ -513,6 +561,9 @@
                     const roleElement = document.getElementById('admin-role');
                     roleElement.textContent = data.role ? data.role.role_title : 'Admin';
                     roleElement.style.display = 'block';
+
+                    // Hide sidebar items based on role
+                    hideSidebarItemsBasedOnRole(data.role ? data.role.role_id : null);
                 })
                 .catch(error => {
                     console.error('Error fetching profile:', error);
@@ -523,8 +574,87 @@
                     document.getElementById('admin-profile-img').style.display = 'block';
                     document.getElementById('admin-name').style.display = 'block';
                     document.getElementById('admin-role').style.display = 'block';
+
+                    // If there's an error, show all nav items by default
+                    showAllNavItems();
                 });
         });
+
+        function hideSidebarItemsBasedOnRole(roleId) {
+            // Hide all skeletons first
+            hideAllSkeletons();
+
+            const dashboardNavItem = document.getElementById('dashboard-nav-item');
+            const calendarNavItem = document.getElementById('calendar-nav-item');
+            const requisitionsNavItem = document.getElementById('requisitions-nav-item');
+            const facilitiesNavItem = document.getElementById('facilities-nav-item');
+            const equipmentNavItem = document.getElementById('equipment-nav-item');
+            const administratorsNavItem = document.getElementById('administrators-nav-item');
+
+            // Show Dashboard and Calendar for all roles (they're always visible)
+            if (dashboardNavItem) dashboardNavItem.style.display = 'block';
+            if (calendarNavItem) calendarNavItem.style.display = 'block';
+
+            // Show all other items first
+            if (requisitionsNavItem) requisitionsNavItem.style.display = 'block';
+            if (facilitiesNavItem) facilitiesNavItem.style.display = 'block';
+            if (equipmentNavItem) equipmentNavItem.style.display = 'block';
+            if (administratorsNavItem) administratorsNavItem.style.display = 'block';
+
+            // Hide items based on role
+            switch (roleId) {
+                case 2: // Vice President of Administration
+                case 3: // Approving Officer
+                    if (facilitiesNavItem) facilitiesNavItem.style.display = 'none';
+                    if (equipmentNavItem) equipmentNavItem.style.display = 'none';
+                    if (administratorsNavItem) administratorsNavItem.style.display = 'none';
+                    break;
+                case 4: // Inventory Manager
+                    if (requisitionsNavItem) requisitionsNavItem.style.display = 'none';
+                    if (administratorsNavItem) administratorsNavItem.style.display = 'none';
+                    break;
+                // Head Admin (roleId 1) and any other roles get full access
+                default:
+                    // All items remain visible
+                    break;
+            }
+        }
+
+        function hideAllSkeletons() {
+            const skeletons = [
+                'dashboard-nav-skeleton',
+                'calendar-nav-skeleton',
+                'requisitions-nav-skeleton',
+                'facilities-nav-skeleton',
+                'equipment-nav-skeleton',
+                'administrators-nav-skeleton'
+            ];
+
+            skeletons.forEach(id => {
+                const skeleton = document.getElementById(id);
+                if (skeleton) skeleton.style.display = 'none';
+            });
+        }
+
+        function showAllNavItems() {
+            // Hide skeletons
+            hideAllSkeletons();
+
+            // Show all nav items
+            const navItems = [
+                'dashboard-nav-item',
+                'calendar-nav-item',
+                'requisitions-nav-item',
+                'facilities-nav-item',
+                'equipment-nav-item',
+                'administrators-nav-item'
+            ];
+
+            navItems.forEach(id => {
+                const item = document.getElementById(id);
+                if (item) item.style.display = 'block';
+            });
+        }
     </script>
 
     <main style="margin-left: 250px; padding: 20px; width: calc(100% - 250px);">
