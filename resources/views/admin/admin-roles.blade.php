@@ -3,314 +3,312 @@
 @section('title', 'Manage Administrators')
 
 @section('content')
-<style>
+  <style>
+    #confirmDeleteBtn {
+      min-width: 120px;
+    }
 
 
-#confirmDeleteBtn {
-    min-width: 120px;
-}
+    /* Spinner for delete button */
+    .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+    }
 
-
-/* Spinner for delete button */
-.spinner-border-sm {
-    width: 1rem;
-    height: 1rem;
-}
     /* Shared card-like styling for both sections */
-  .form-section,
-  .table-section {
-    background-color: #fff;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-  }
+    .form-section,
+    .table-section {
+      background-color: #fff;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
 
-  .table-section .table-responsive {
-    overflow-x: auto;
-  }
+    .table-section .table-responsive {
+      overflow-x: auto;
+    }
 
-  .table-section table {
-    table-layout: fixed;
-    width: 100%;
-    font-size: 0.875rem; /* Slightly smaller text for better fit */
-  }
+    .table-section table {
+      table-layout: fixed;
+      width: 100%;
+      font-size: 0.875rem;
+      /* Slightly smaller text for better fit */
+    }
 
-  .table-section table th,
-  .table-section table td {
-    vertical-align: middle;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+    .table-section table th,
+    .table-section table td {
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  .table-section table th {
-    background-color: #f8f9fa;
-  }
+    .table-section table th {
+      background-color: #f8f9fa;
+    }
 
-  /* Column width adjustments */
-  .table-section table th:nth-child(1), /* Admin ID */
-  .table-section table td:nth-child(1) {
-    width: 80px;
-    min-width: 80px;
-    max-width: 80px;
-  }
+    /* Column width adjustments */
+    .table-section table th:nth-child(1),
+    /* Admin ID */
+    .table-section table td:nth-child(1) {
+      width: 80px;
+      min-width: 80px;
+      max-width: 80px;
+    }
 
-  .table-section table th:nth-child(2), /* School ID */
-  .table-section table td:nth-child(2) {
-    width: 110px;
-    min-width: 110px;
-    max-width: 110px;
-  }
+    .table-section table th:nth-child(2),
+    /* School ID */
+    .table-section table td:nth-child(2) {
+      width: 110px;
+      min-width: 110px;
+      max-width: 110px;
+    }
 
-  .table-section table th:nth-child(3), /* Full Name */
-  .table-section table td:nth-child(3) {
-    width: 110px;
-    min-width: 110px;
-    white-space: normal; /* Allow name wrapping */
-    word-wrap: break-word;
-  }
+    .table-section table th:nth-child(3),
+    /* Full Name */
+    .table-section table td:nth-child(3) {
+      width: 110px;
+      min-width: 110px;
+      white-space: normal;
+      /* Allow name wrapping */
+      word-wrap: break-word;
+    }
 
-  .table-section table th:nth-child(4), /* Email */
-  .table-section table td:nth-child(4) {
-    width: 200px;
-    min-width: 200px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+    .table-section table th:nth-child(4),
+    /* Email */
+    .table-section table td:nth-child(4) {
+      width: 200px;
+      min-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  .table-section table th:nth-child(5), /* Phone Number */
-  .table-section table td:nth-child(5) {
-    width: 120px;
-    min-width: 120px;
-    max-width: 120px;
-  }
+    .table-section table th:nth-child(5),
+    /* Phone Number */
+    .table-section table td:nth-child(5) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
 
-  .table-section table th:nth-child(6), /* Role */
-  .table-section table td:nth-child(6) {
-    width: 120px;
-    min-width: 120px;
-    white-space: normal; /* Allow role name wrapping */
-  }
+    .table-section table th:nth-child(6),
+    /* Role */
+    .table-section table td:nth-child(6) {
+      width: 120px;
+      min-width: 120px;
+      white-space: normal;
+      /* Allow role name wrapping */
+    }
 
-  /* Department column - ensure header doesn't break */
-  .table-section table th:nth-child(7) {
-    width: auto;
-    min-width: 150px;
-    white-space: nowrap; /* Prevent header from breaking */
-    overflow: visible;
-  }
+    /* Department column - ensure header doesn't break */
+    .table-section table th:nth-child(7) {
+      width: auto;
+      min-width: 150px;
+      white-space: nowrap;
+      /* Prevent header from breaking */
+      overflow: visible;
+    }
 
-  .table-section table td:nth-child(7) {
-    width: auto;
-    min-width: 150px;
-    white-space: normal; /* Allow department badges to wrap */
-    word-wrap: break-word;
-  }
+    .table-section table td:nth-child(7) {
+      width: auto;
+      min-width: 150px;
+      white-space: normal;
+      /* Allow department badges to wrap */
+      word-wrap: break-word;
+    }
 
-  /* Actions column - ensure buttons stay side by side */
-  .table-section table th:nth-child(8) {
-    width: 120px;
-    min-width: 120px;
-    max-width: 120px;
-    white-space: nowrap;
-    overflow: visible;
-  }
+    /* Actions column - ensure buttons stay side by side */
+    .table-section table th:nth-child(8) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: visible;
+    }
 
-  .table-section table td:nth-child(8) {
-    width: 120px;
-    min-width: 120px;
-    max-width: 120px;
-    white-space: nowrap;
-    overflow: visible;
-  }
+    .table-section table td:nth-child(8) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: visible;
+    }
 
-  /* Ensure action buttons container doesn't wrap */
-  .table-section table td:nth-child(8) .btn {
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
+    /* Ensure action buttons container doesn't wrap */
+    .table-section table td:nth-child(8) .btn {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
 
-  /* Department button styles */
- .department-btn {
-  background-color: #6c757d !important; /* solid gray */
-  color: #fff !important;
-  border-color: #6c757d !important;
-  transition: background-color 0.2s ease;
-}
+    /* Department button styles */
+    .department-btn {
+      background-color: #6c757d !important;
+      /* solid gray */
+      color: #fff !important;
+      border-color: #6c757d !important;
+      transition: background-color 0.2s ease;
+    }
 
-/* Darker gray on hover if NOT selected */
-.department-btn:hover:not(.selected) {
-  background-color: #5a6268 !important; /* darker gray */
-  border-color: #5a6268 !important;
-}
+    /* Darker gray on hover if NOT selected */
+    .department-btn:hover:not(.selected) {
+      background-color: #5a6268 !important;
+      /* darker gray */
+      border-color: #5a6268 !important;
+    }
 
-.department-btn.selected {
-  background-color: var(--btn-primary) !important; /* custom blue */
-  color: #fff !important;
-  border-color: var(--btn-primary) !important;
-}
+    .department-btn.selected {
+      background-color: var(--btn-primary) !important;
+      /* custom blue */
+      color: #fff !important;
+      border-color: var(--btn-primary) !important;
+    }
 
-/* Optional: keep same blue on hover when selected */
-.department-btn.selected:hover {
-  background-color: var(--btn-primary-hover) !important; /* slightly darker blue */
-  border-color: var(--btn-primary-hover) !important;
-}
+    /* Optional: keep same blue on hover when selected */
+    .department-btn.selected:hover {
+      background-color: var(--btn-primary-hover) !important;
+      /* slightly darker blue */
+      border-color: var(--btn-primary-hover) !important;
+    }
 
-  /* Department buttons styling */
-  #department-buttons-container button,
-  #add-department-buttons-container button {
-    display: inline-flex !important;
-    width: auto !important;
-  }
+    /* Department buttons styling */
+    #department-buttons-container button,
+    #add-department-buttons-container button {
+      display: inline-flex !important;
+      width: auto !important;
+    }
 
-  /* Make badges in department column more compact */
-  .table-section .badge {
-    font-size: 0.75rem;
-    margin-bottom: 2px;
-    display: inline-block;
-  }
-</style>
+    /* Make badges in department column more compact */
+    .table-section .badge {
+      font-size: 0.75rem;
+      margin-bottom: 2px;
+      display: inline-block;
+    }
+  </style>
 
-<div id="layout">
-  <main id="main">
-    <div class="container my-4">
+  <div id="layout">
+    <main id="main">
+      <div class="container my-4">
 
-      <!-- Add New Admin card -->
-      <section class="form-section card p-4 mb-4">
-        <h3 class="mb-4 fw-bold">Add New Admin</h3>
-        <form id="addAdminForm" novalidate>
-          @csrf
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label for="first_name" class="form-label">First Name</label>
-              <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+        <!-- Add New Admin card -->
+        <section class="form-section card p-4 mb-4">
+          <h3 class="mb-4 fw-bold">Add New Admin</h3>
+          <form id="addAdminForm" novalidate>
+            @csrf
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="first_name" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name"
+                  required>
+              </div>
+              <div class="col-md-4">
+                <label for="middle_name" class="form-label">Middle Name</label>
+                <input type="text" class="form-control" id="middle_name" name="middle_name" placeholder="Middle Name">
+              </div>
+              <div class="col-md-4">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+              </div>
+              <div class="col-md-6">
+                <label for="school_id" class="form-label d-flex align-items-center">
+                  School ID
+                  <small class="text-muted ms-2">(Format: 00-0000-00)</small>
+                </label>
+                <input type="text" class="form-control" id="school_id" name="school_id" placeholder="00-0000-00"
+                  pattern="\d{2}-\d{4}-\d{2}" maxlength="10" minlength="10">
+              </div>
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="samplemail@gmail.com"
+                  required minlength="6" maxlength="150" autocomplete="off">
+              </div>
+
+              <div class="col-md-6">
+                <label for="contact_number" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="contact_number" name="contact_number"
+                  placeholder="e.g. 09123456789" pattern="\d{11,20}" minlength="11" maxlength="20">
+              </div>
+
+              <div class="col-md-6">
+                <label for="role_id" class="form-label">Role</label>
+                <select class="form-select" id="role_id" name="role_id" required>
+                  <option value="">Select a role</option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label for="password" class="form-label d-flex align-items-center">
+                  Temporary Password
+                  <small class="text-muted ms-2">(Admin will be prompted to change this upon first login.)</small>
+                </label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Temporary Password"
+                  required minlength="8" maxlength="12">
+              </div>
+
+
+
+              <!-- Departments Section for Add Form -->
+              <div class="col-12" id="add-departments-section-container">
+                <label class="form-label d-flex align-items-center">
+                  Departments
+                  <small class="text-muted ms-2">(Click to select/deselect departments.)</small>
+                </label>
+
+                <div id="add-department-buttons-container" class="d-flex flex-wrap gap-2"
+                  style="flex-direction: row !important; align-items: flex-start;">
+                  <!-- Bootstrap loading spinner -->
+                  <div class="d-flex align-items-center text-muted">
+                    <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+                    Loading departments...
+                  </div>
+                </div>
+
+                <input type="hidden" id="add-selected-departments" name="department_ids">
+              </div>
+
+
+              <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary">Add Admin</button>
+              </div>
             </div>
-            <div class="col-md-4">
-              <label for="middle_name" class="form-label">Middle Name</label>
-              <input type="text" class="form-control" id="middle_name" name="middle_name" placeholder="Middle Name">
-            </div>
-            <div class="col-md-4">
-              <label for="last_name" class="form-label">Last Name</label>
-              <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
-            </div>
-            <div class="col-md-6">
-              <label for="school_id" class="form-label d-flex align-items-center">
-                School ID
-                <small class="text-muted ms-2">(Format: 00-0000-00)</small>
-              </label>
-              <input type="text" class="form-control" id="school_id" name="school_id"
-                     placeholder="00-0000-00"
-                     pattern="\d{2}-\d{4}-\d{2}" maxlength="10" minlength="10">
-            </div>
-<div class="col-md-6">
-  <label for="email" class="form-label">Email</label>
- <input
-  type="email"
-  class="form-control"
-  id="email"
-  name="email"
-  placeholder="samplemail@gmail.com"
-  required
-  minlength="6"
-  maxlength="150"
-  autocomplete="off"
->
-</div>
+          </form>
+        </section>
 
-<div class="col-md-6">
-  <label for="contact_number" class="form-label">Phone Number</label>
-  <input
-    type="tel"
-    class="form-control"
-    id="contact_number"
-    name="contact_number"
-    placeholder="e.g. 09123456789"
-    pattern="\d{11,20}"
-    minlength="11"
-    maxlength="20"
-  >
-</div>
+        <!-- Existing Admins card -->
+        <section class="table-section card p-4">
+          <h3 class="mb-4 fw-bold">Existing Admins</h3>
 
-<div class="col-md-6">
-  <label for="role_id" class="form-label">Role</label>
-  <select class="form-select" id="role_id" name="role_id" required>
-    <option value="">Select a role</option>
-  </select>
-</div>
-
-<div class="col-12">
-  <label for="password" class="form-label d-flex align-items-center">
-    Temporary Password
-    <small class="text-muted ms-2">(Admin will be prompted to change this upon first login.)</small>
-  </label>
-  <input
-    type="password"
-    class="form-control"
-    id="password"
-    name="password"
-    placeholder="Temporary Password"
-    required
-    minlength="8"
-    maxlength="12"
-  >
-</div>
-
-
-
-<!-- Departments Section for Add Form -->
-<div class="col-12" id="add-departments-section-container">
-  <label class="form-label d-flex align-items-center">
-    Departments
-    <small class="text-muted ms-2">(Click to select/deselect departments.)</small>
-  </label>
-
-  <div id="add-department-buttons-container"
-       class="d-flex flex-wrap gap-2"
-       style="flex-direction: row !important; align-items: flex-start;">
-    <!-- Bootstrap loading spinner -->
-    <div class="d-flex align-items-center text-muted">
-      <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
-      Loading departments...
-    </div>
-  </div>
-
-  <input type="hidden" id="add-selected-departments" name="department_ids">
-</div>
-
-
-            <div class="col-12 mt-4">
-              <button type="submit" class="btn btn-primary">Add Admin</button>
+          <!-- Loading indicator -->
+          <div id="adminLoading" class="text-center my-4">
+            <p class="mb-2">Loading admins...</p>
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
           </div>
-        </form>
-      </section>
 
-      <!-- Existing Admins card -->
-      <section class="table-section card p-4">
-        <h3 class="mb-4 fw-bold">Existing Admins</h3>
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead>
-              <tr>
-                <th>Admin ID</th>
-                <th>School ID</th>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Phone Number</th>
-                <th>Role</th>
-                <th class="allow-wrap">Departments</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="adminListBody">
-              <!-- Dynamic content will be loaded here -->
-            </tbody>
-          </table>
-        </div>
-      </section>
+          <div class="table-responsive" id="adminTableWrapper" style="display: none;">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Admin ID</th>
+                  <th>School ID</th>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Phone Number</th>
+                  <th>Role</th>
+                  <th class="allow-wrap">Departments</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminListBody">
+                <!-- Dynamic content will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-    </div><!-- /.container -->
-  </main>
-</div>
+
+      </div><!-- /.container -->
+    </main>
+  </div>
 
 
   <!-- Edit Admin Modal -->
@@ -391,36 +389,37 @@
       </div>
     </div>
   </div>
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-hidden="true">
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <i class="bi bi-exclamation-triangle-fill text-danger mb-3" style="font-size: 2rem;"></i>
-                <p class="mb-1 fw-bold">Are you sure you want to delete this admin?</p>
-                <p class="mb-3 text-muted">This action cannot be undone. All associated data will be permanently removed.</p>
-                
-                <div id="deleteAdminDetails" class="bg-light p-3 rounded">
-                    <!-- Admin details will be populated here -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Admin</button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        <div class="modal-body text-center">
+          <i class="bi bi-exclamation-triangle-fill text-danger mb-3" style="font-size: 2rem;"></i>
+          <p class="mb-1 fw-bold">Are you sure you want to delete this admin?</p>
+          <p class="mb-3 text-muted">This action cannot be undone. All associated data will be permanently removed.</p>
+
+          <div id="deleteAdminDetails" class="bg-light p-3 rounded">
+            <!-- Admin details will be populated here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Admin</button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
 @endsection
 
 @section('scripts')
-<script src="{{ asset('js/admin/toast.js') }}"></script>
-<script>
+  <script src="{{ asset('js/admin/toast.js') }}"></script>
+  <script>
+
     // School ID formatting function
     function formatSchoolId(input) {
       input.addEventListener('input', function (e) {
@@ -510,7 +509,7 @@
         if (!deptContainer) return;
 
         const allButtons = deptContainer.querySelectorAll('.department-btn');
-        
+
         if (autoSelectRoleIds.includes(selectedRoleId)) {
           console.log('Auto-selecting all departments for role:', selectedRoleId);
           allButtons.forEach(button => {
@@ -575,6 +574,13 @@
 
       // Function to render admin list with departments
       async function loadAdminList() {
+        const loadingEl = document.getElementById('adminLoading');
+        const tableWrapper = document.getElementById('adminTableWrapper');
+
+        // Show spinner and hide table at start
+        loadingEl.style.display = 'block';
+        tableWrapper.style.display = 'none';
+
         try {
           const response = await fetch('/api/admins', {
             headers: {
@@ -591,154 +597,162 @@
           if (admins.length === 0) {
             adminListBody.innerHTML =
               '<tr><td colspan="8" class="text-center">No other admins found</td></tr>';
-            return;
+          } else {
+            admins.forEach(admin => {
+              const currentAdminId = localStorage.getItem('adminId');
+              if (currentAdminId && admin.admin_id == currentAdminId) return;
+
+              let departmentsHtml = 'N/A';
+              if (admin.departments?.length) {
+                departmentsHtml = admin.departments.map(dept => {
+                  return `<span class="badge bg-light text-dark me-1 mb-1" title="${dept.department_name}">
+                        ${dept.department_code}
+                      </span>`;
+                }).join('');
+              }
+
+              const row = document.createElement('tr');
+              row.innerHTML = `
+            <td>${admin.admin_id}</td>
+            <td>${admin.school_id || 'N/A'}</td>
+            <td>${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</td>
+            <td title="${admin.email}">${admin.email}</td>
+            <td>${admin.contact_number || 'N/A'}</td>
+            <td>${admin.role ? admin.role.role_title : 'N/A'}</td>
+            <td>${departmentsHtml}</td>
+            <td>
+              <button class="btn btn-sm btn-info me-1" onclick="openEditModal(${admin.admin_id})" title="Edit">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-danger" onclick="deleteAdmin(${admin.admin_id})" title="Delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          `;
+              adminListBody.appendChild(row);
+            });
           }
 
-          admins.forEach(admin => {
-            const currentAdminId = localStorage.getItem('adminId');
-            if (currentAdminId && admin.admin_id == currentAdminId) return;
+          // Show table & hide spinner when done
+          loadingEl.style.display = 'none';
+          tableWrapper.style.display = 'block';
 
-            // Format departments - more compact display without (P) indicator
-            let departmentsHtml = 'N/A';
-            if (admin.departments?.length) {
-              departmentsHtml = admin.departments.map(dept => {
-                return `<span class="badge bg-light text-dark me-1 mb-1" title="${dept.department_name}">
-                          ${dept.department_code}
-                        </span>`;
-              }).join('');
-            }
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${admin.admin_id}</td>
-              <td>${admin.school_id || 'N/A'}</td>
-              <td>${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</td>
-              <td title="${admin.email}">${admin.email}</td>
-              <td>${admin.contact_number || 'N/A'}</td>
-              <td>${admin.role ? admin.role.role_title : 'N/A'}</td>
-              <td>${departmentsHtml}</td>
-              <td>
-                <button class="btn btn-sm btn-info me-1" onclick="openEditModal(${admin.admin_id})" title="Edit">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteAdmin(${admin.admin_id})" title="Delete">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </td>
-            `;
-            adminListBody.appendChild(row);
-          });
         } catch (error) {
           console.error('Error loading admin list:', error);
           adminListBody.innerHTML =
             '<tr><td colspan="8" class="text-center">Error loading admin list</td></tr>';
+
+          // Hide spinner even on error
+          loadingEl.style.display = 'none';
+          tableWrapper.style.display = 'block';
         }
       }
 
-      // Delete admin function - UPDATED to use modal
-let adminToDelete = null;
 
-window.deleteAdmin = function (adminId) {
-    adminToDelete = adminId;
-    
-    // Fetch admin details to show in confirmation modal
-    fetch(`/api/admins/${adminId}`, {
-        headers: {
+      // Delete admin function - UPDATED to use modal
+      let adminToDelete = null;
+
+      window.deleteAdmin = function (adminId) {
+        adminToDelete = adminId;
+
+        // Fetch admin details to show in confirmation modal
+        fetch(`/api/admins/${adminId}`, {
+          headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`
-        }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Failed to fetch admin details');
-        return response.json();
-    })
-    .then(admin => {
-        // Populate admin details in modal
-        document.getElementById('deleteAdminDetails').innerHTML = `
-            <div class="row">
-                <div class="col-4 fw-bold">School ID:</div>
-                <div class="col-8">${admin.school_id}</div>
-                <div class="col-4 fw-bold">Name:</div>
-                <div class="col-8">${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</div>
-                <div class="col-4 fw-bold">Email:</div>
-                <div class="col-8">${admin.email}</div>
-                <div class="col-4 fw-bold">Role:</div>
-                <div class="col-8">${admin.role ? admin.role.role_title : 'N/A'}</div>
-            </div>
-        `;
-        
-        // Show the modal
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
-        deleteModal.show();
-    })
-    .catch(error => {
-        console.error('Error fetching admin details:', error);
-        // Fallback: show modal with basic info if details fetch fails
-        document.getElementById('deleteAdminDetails').innerHTML = `
-            <div class="text-center">
-                <p class="mb-0">Admin ID: ${adminId}</p>
-                <p class="text-muted">Unable to load full details</p>
-            </div>
-        `;
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
-        deleteModal.show();
-    });
-};
+          }
+        })
+          .then(response => {
+            if (!response.ok) throw new Error('Failed to fetch admin details');
+            return response.json();
+          })
+          .then(admin => {
+            // Populate admin details in modal
+            document.getElementById('deleteAdminDetails').innerHTML = `
+              <div class="row">
+                  <div class="col-4 fw-bold">School ID:</div>
+                  <div class="col-8">${admin.school_id}</div>
+                  <div class="col-4 fw-bold">Name:</div>
+                  <div class="col-8">${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</div>
+                  <div class="col-4 fw-bold">Email:</div>
+                  <div class="col-8">${admin.email}</div>
+                  <div class="col-4 fw-bold">Role:</div>
+                  <div class="col-8">${admin.role ? admin.role.role_title : 'N/A'}</div>
+              </div>
+          `;
 
-// Confirm delete button handler
-document.getElementById('confirmDeleteBtn').addEventListener('click', async function () {
-    if (!adminToDelete) return;
+            // Show the modal
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+            deleteModal.show();
+          })
+          .catch(error => {
+            console.error('Error fetching admin details:', error);
+            // Fallback: show modal with basic info if details fetch fails
+            document.getElementById('deleteAdminDetails').innerHTML = `
+              <div class="text-center">
+                  <p class="mb-0">Admin ID: ${adminId}</p>
+                  <p class="text-muted">Unable to load full details</p>
+              </div>
+          `;
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+            deleteModal.show();
+          });
+      };
 
-    const deleteBtn = this;
-    const originalText = deleteBtn.innerHTML;
-    
-    // Show loading state
-    deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
-    deleteBtn.disabled = true;
+      // Confirm delete button handler
+      document.getElementById('confirmDeleteBtn').addEventListener('click', async function () {
+        if (!adminToDelete) return;
 
-    try {
-        const response = await fetch(`/api/admins/${adminToDelete}`, {
+        const deleteBtn = this;
+        const originalText = deleteBtn.innerHTML;
+
+        // Show loading state
+        deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
+        deleteBtn.disabled = true;
+
+        try {
+          const response = await fetch(`/api/admins/${adminToDelete}`, {
             method: 'DELETE',
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-                'Authorization': `Bearer ${token}`
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+              'Authorization': `Bearer ${token}`
             }
-        });
+          });
 
-        if (!response.ok) {
+          if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to delete admin');
+          }
+
+          // Success - close modal and refresh list
+          bootstrap.Modal.getInstance(document.getElementById('deleteConfirmationModal')).hide();
+
+          // Show success message
+          showToast('Admin deleted successfully', 'success');
+
+          await loadAdminList();
+
+        } catch (error) {
+          console.error('Error:', error);
+
+          // Show error message
+          showToast('Failed to delete admin: ' + error.message, 'error');
+
+          // Reset button state
+          deleteBtn.innerHTML = originalText;
+          deleteBtn.disabled = false;
         }
+      });
 
-        // Success - close modal and refresh list
-        bootstrap.Modal.getInstance(document.getElementById('deleteConfirmationModal')).hide();
-        
-        // Show success message
-        showToast('Admin deleted successfully', 'success');
-        
-        await loadAdminList();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        
-        // Show error message
-        showToast('Failed to delete admin: ' + error.message, 'error');
-        
-        // Reset button state
-        deleteBtn.innerHTML = originalText;
+      // Reset modal state when hidden
+      document.getElementById('deleteConfirmationModal').addEventListener('hidden.bs.modal', function () {
+        adminToDelete = null;
+        const deleteBtn = document.getElementById('confirmDeleteBtn');
+        deleteBtn.innerHTML = 'Delete Admin';
         deleteBtn.disabled = false;
-    }
-});
-
-// Reset modal state when hidden
-document.getElementById('deleteConfirmationModal').addEventListener('hidden.bs.modal', function () {
-    adminToDelete = null;
-    const deleteBtn = document.getElementById('confirmDeleteBtn');
-    deleteBtn.innerHTML = 'Delete Admin';
-    deleteBtn.disabled = false;
-});
+      });
 
       // Fetch roles and populate dropdown
       async function loadRoles() {
@@ -794,12 +808,12 @@ document.getElementById('deleteConfirmationModal').addEventListener('hidden.bs.m
         }
 
         // Validate email format
-const email = document.getElementById('email').value.trim();
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-if (!emailPattern.test(email)) {
-  showToast('Please enter a valid email address');
-  return;
-}
+        const email = document.getElementById('email').value.trim();
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+          showToast('Please enter a valid email address');
+          return;
+        }
 
         // Get selected departments - FIXED: Check both classes
         const selectedDeptIds = JSON.parse(document.getElementById('add-selected-departments').value || '[]');
@@ -808,7 +822,7 @@ if (!emailPattern.test(email)) {
         // Validate department selection for certain roles
         const roleId = parseInt(document.getElementById('role_id').value);
         const noDeptRequiredRoleIds = [1, 2]; // Head Admin and Vice President
-        
+
         // For roles 1 and 2, auto-select all departments if none are selected
         if (selectedDeptIds.length === 0 && noDeptRequiredRoleIds.includes(roleId)) {
           selectAllDepartments('add-department-buttons-container');
@@ -816,7 +830,7 @@ if (!emailPattern.test(email)) {
           const updatedDeptIds = JSON.parse(document.getElementById('add-selected-departments').value || '[]');
           console.log('Auto-selected departments:', updatedDeptIds);
         }
-        
+
         // Final validation check
         const finalSelectedDeptIds = JSON.parse(document.getElementById('add-selected-departments').value || '[]');
         if (finalSelectedDeptIds.length === 0 && !noDeptRequiredRoleIds.includes(roleId)) {
@@ -941,7 +955,7 @@ if (!emailPattern.test(email)) {
         // Validate department selection for certain roles
         const roleId = parseInt(document.getElementById('edit_role_id').value);
         const noDeptRequiredRoleIds = [1, 2];
-        
+
         // For roles 1 and 2, auto-select all departments if none are selected
         if (selectedDeptIds.length === 0 && noDeptRequiredRoleIds.includes(roleId)) {
           selectAllDepartments('edit-department-buttons-container');
@@ -949,7 +963,7 @@ if (!emailPattern.test(email)) {
           const updatedDeptIds = JSON.parse(document.getElementById('edit-selected-departments').value || '[]');
           console.log('Auto-selected departments:', updatedDeptIds);
         }
-        
+
         // Final validation check
         const finalSelectedDeptIds = JSON.parse(document.getElementById('edit-selected-departments').value || '[]');
         if (finalSelectedDeptIds.length === 0 && !noDeptRequiredRoleIds.includes(roleId)) {
