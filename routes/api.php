@@ -11,10 +11,10 @@ use App\Http\Controllers\AdminApprovalController;
 use App\Http\Controllers\RequisitionFormController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\EquipmentController;
-use App\Http\Controllers\EquipmentItem;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCommentsController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ScannerController;
 
 use App\Http\Controllers\Dropdowns\FacilityCategoryController;
 use App\Http\Controllers\Dropdowns\FacilitySubcategoryController;

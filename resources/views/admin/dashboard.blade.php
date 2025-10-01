@@ -107,60 +107,46 @@
                 </div>
             </div>
 
-            <!-- Calendar Section -->
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3 class="fw-bold">Events Calendar</h3>
-                        <div class="d-flex gap-2">
-                            <div class="dropdown">
-                                <button class="btn btn-secondary dropdown-toggle" type="button" id="eventTypeDropdown"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-funnel me-1"></i> Filter Events
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="eventTypeDropdown">
-                                    <li>
-                                        <button class="dropdown-item" data-filter="facility">
-                                            <i class="bi bi-door-open me-2"></i> Facility Rentals
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button class="dropdown-item" data-filter="equipment">
-                                            <i class="bi bi-tools me-2"></i> Equipment Rentals
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button class="dropdown-item" data-filter="university">
-                                            <i class="bi bi-building me-2"></i> University Events
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button class="dropdown-item" data-filter="external">
-                                            <i class="bi bi-globe me-2"></i> External Events
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li>
-                                        <button class="dropdown-item" data-filter="all">
-                                            <i class="bi bi-eye me-2"></i> Show All
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                            <a href="calendar.html" class="btn btn-primary">
-                                <i class="bi bi-calendar-week me-1"></i> Open Calendar
-                            </a>
-                        </div>
-                    </div>
+<!-- Calendar Section -->
+<div class="card shadow-sm">
+  <!-- Card Header -->
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h5 class="card-title mb-0 fw-bold">Events Calendar</h5>
+    <div class="d-flex gap-2">
+      <!-- Filter Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="eventTypeDropdown"
+          data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-funnel me-1"></i> Filter
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="eventTypeDropdown">
+          <li><button class="dropdown-item" data-filter="facility"><i class="bi bi-door-open me-2"></i> Facility Rentals</button></li>
+          <li><button class="dropdown-item" data-filter="equipment"><i class="bi bi-tools me-2"></i> Equipment Rentals</button></li>
+          <li><button class="dropdown-item" data-filter="university"><i class="bi bi-building me-2"></i> University Events</button></li>
+          <li><button class="dropdown-item" data-filter="external"><i class="bi bi-globe me-2"></i> External Events</button></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><button class="dropdown-item" data-filter="all"><i class="bi bi-eye me-2"></i> Show All</button></li>
+        </ul>
+      </div>
+      <!-- Open Calendar Button -->
+      <a href="calendar.html" class="btn btn-sm btn-primary">
+        <i class="bi bi-calendar-week me-1"></i> Open
+      </a>
+    </div>
+  </div>
 
-                    <!-- Calendar container -->
-                    <div id="calendar" class="border rounded p-3 calendar-container" style="height: 600px;">
-                        <!-- Calendar will render here -->
-                    </div>
-                </div>
-            </div> <!-- ✅ Calendar card closes here -->
+  <!-- Card Body -->
+  <div class="card-body">
+    <!-- Inner Calendar Card -->
+    <div class="card border-0">
+      <div class="card-body p-2">
+        <div id="calendar" style="height: 600px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
             <!-- System Log Section -->
             <div class="card shadow-sm mt-3">
