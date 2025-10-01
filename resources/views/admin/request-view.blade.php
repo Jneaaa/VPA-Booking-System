@@ -1,8 +1,180 @@
 @extends('layouts.admin')
-@section('title', 'Request View')
+@section('title', 'Review Request')
 @section('content')
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
+
+#formDetails strong,
+#eventDetails strong {
+    display: block;
+    background-color: #e3e6e9b2;
+    color: #373e46ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    font-weight: 600;
+}
+
+#formDetails table,
+#eventDetails table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#formDetails table th,
+#formDetails table td,
+#eventDetails table th,
+#eventDetails table td {
+    font-size: 0.85rem;
+    white-space: normal;
+    word-wrap: break-word;
+    vertical-align: top; /* keeps header and value aligned vertically */
+}
+
+
+        #eventSchedule {
+            margin-top: -30px;
+            /* adjust as needed */
+            background-color: transparent !important;
+        }
+
+
+        .fc-event .fc-event-title {
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+            word-break: break-word !important;
+        }
+
+        .fc-event .fc-event-main-frame {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            height: auto !important;
+        }
+
+        .fc-col-header-cell-cushion {
+            font-size: 0.8rem;
+            /* smaller than default */
+            display: block;
+            /* prevents text from causing misalignment */
+        }
+
+        html,
+        body,
+        .calendar-container,
+        #calendar {
+            height: 100%;
+            min-height: 0;
+            /* important for flexbox children */
+        }
+
+        html body main#main {
+            margin-top: 0 !important;
+        }
+
+.documents-card small {
+  white-space: normal !important;   /* override Bootstrap */
+  word-break: break-word;
+  text-align: center;
+  display: block;
+  max-width: 100px; /* optional: keeps cards aligned */
+  margin: 0 auto;
+}
+
+
+
+
+        /* Only affects buttons inside the Documents card */
+        .documents-card .btn {
+            padding: 0.5em 0.75em;
+            font-size: 0.75rem;
+            line-height: 1;
+            border-radius: 0.3rem;
+            font-weight: 500;
+        }
+
+        /* remove bg, border, shadow ONLY for the small document cards */
+        .documents-card .row>.col-auto>.card {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* animate the part that changes color */
+        .documents-card .row>.col-auto>.card .card-body {
+            transition: background-color 0.2s, transform 0.2s;
+            border-radius: 0.5rem;
+            /* base radius so corners are already rounded */
+        }
+
+        /* hover effect */
+        .documents-card .row>.col-auto>.card:hover .card-body {
+            background-color: rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+            cursor: pointer;
+            border-radius: 0.75rem;
+            /* slightly softer/larger radius on hover */
+        }
+
+
+        .item-price {
+            margin-left: 1px;
+            /* adjust value as needed */
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-divider {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            margin: 1rem 0;
+        }
+
+        .card-header {
+            min-height: 56px;
+            width: 100%;
+        }
+
+
+        .card:not(.this-class-does-not-exist) {
+            border: none !important;
+            border-color: transparent !important;
+            outline: none !important;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+
+
+        .card-badge-btn {
+            display: inline-block;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: #0d6efd;
+            /* default primary look */
+            border: none;
+            border-radius: 50rem;
+            /* pill shape like badges */
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .card-badge-btn:hover {
+            background-color: #0b5ed7;
+            /* slightly darker on hover */
+        }
+
+
         /* Messenger-style chat bubbles */
         .message-bubble {
             position: relative;
@@ -49,6 +221,11 @@
         .card-body::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
+
+        .card-body small {
+            font-size: 0.75rem;
+        }
+
 
         /* Loading animation */
         .comment-loading {
@@ -237,27 +414,6 @@
             padding: 10px 0;
         }
 
-        .card {
-            border: 1px solid lightgray !important;
-        }
-
-        .card-title {
-            font-weight: 600;
-            color: var(--primary-color);
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .card-divider {
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            margin: 1rem 0;
-        }
-
-        .card-header {
-            min-height: 56px;
-            /* adjust as needed */
-        }
-
         .badge {
             font-weight: 500;
             padding: 0.5em 0.75em;
@@ -420,6 +576,7 @@
             resize: none;
             overflow-y: hidden;
             transition: height 0.2s ease-in-out;
+
         }
 
         /* Style for the icon-only remove button */
@@ -454,6 +611,41 @@
             to {
                 transform: rotate(360deg);
             }
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #003366;
+            color: white;
+            border: none;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 9999;
+            /* Increased z-index */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background-color: #002244;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
     </style>
 
@@ -525,549 +717,672 @@
                         </div>
                     </div>
                 </div>
-<!-- Actual Content (Initially Hidden) -->
-<div id="contentState" style="display: none;">
-    <!-- Form Status + Requester Details (same row) -->
-    <div class="row g-2">
-        <!-- Left column: Requester Details -->
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Requester Details</h5>
-                </div>
-                <div class="card-body">
-                    <div id="formDetails"></div>
-                </div>
-            </div>
-        </div>
+                <!-- Actual Content (Initially Hidden) -->
+                <div id="contentState" style="display: none;">
 
-        <!-- Right column: Requisition ID + Form Remarks -->
-        <div class="col-md-8 d-flex flex-column gap-2">
-            <!-- Requisition ID + Form Status card -->
-            <div class="card flex-grow-1">
-<div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center">
-        R-ID #<span id="requestIdTitle"></span>:
-        <span id="statusBadge" class="badge ms-1"></span>
-    </div>
+                    <!-- Request Status + Action Panel -->
+                    <div class="row g-2 mb-2">
+                        <!-- Status Summary -->
+                        <div class="col-md-10">
+                            <div class="card h-100">
+                                <div
+                                    class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        Currently Reviewing: Request #<span id="requestIdTitle"></span>
+                                    </div>
+                                    <span id="statusBadge" class="badge ms-1"></span>
+                                </div>
 
-    <div class="d-flex align-items-center">
-        <!-- Update Status Dropdown -->
-        <div class="dropdown status-selector-container me-2" id="statusDropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                Update Status
-            </button>
-            <div class="dropdown-menu status-dropdown-menu shadow">
-                <div class="status-option" data-value="Scheduled">
-                    <i class="bi bi-calendar-check"></i>
-                    <span>Mark as Scheduled</span>
-                </div>
-                <div class="status-option" data-value="Ongoing">
-                    <i class="bi bi-play-circle"></i>
-                    <span>Mark as Ongoing</span>
-                </div>
-                <div class="status-option" data-value="Late">
-                    <i class="bi bi-clock-history"></i>
-                    <span>Mark as Late</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- More... Dropdown Button -->
-        <div class="dropdown status-selector-container" id="moreDropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                More Actions
-            </button>
-            <div class="dropdown-menu status-dropdown-menu shadow">
-                <div class="status-option" data-value="Finalize Form">
-                    <i class="bi bi-check2-square"></i>
-                    <span>Finalize Form</span>
-                </div>
-                <div class="status-option" data-value="Set Penalty Fee">
-                    <i class="bi bi-cash-stack"></i>
-                    <span>Set Penalty Fee</span>
-                </div>
-                <div class="status-option" data-value="Cancel Form">
-                <i class="bi bi-x-circle"></i>
-                <span>Cancel Form</span>
-                </div>
-                <div class="status-option" data-value="Close">
-            <i class="bi bi-check-circle"></i>
-            <span>Close Form</span>
-        </div>
-            </div>
-        </div>
-    </div>
-</div>
+                                <div class="card-body d-flex flex-wrap gap-2 justify-content-start">
+                                    <div
+                                        class="px-3 py-1 bg-success-subtle text-success rounded-pill d-inline-flex align-items-center">
+                                        <i class="fa fa-thumbs-up me-1"></i>
+                                        <span class="small me-1">Approvals:</span>
+                                        <span class="fw-bold me-1" id="approvalsCount">0</span>
+                                    </div>
 
 
+                                    <div
+                                        class="px-3 py-1 bg-danger-subtle text-danger rounded-pill d-inline-flex align-items-center">
+                                        <i class="fa fa-thumbs-down me-1"></i>
+                                        <span class="small me-1">Rejections:</span>
+                                        <span class="fw-bold me-1" id="rejectionsCount">0</span>
 
-                <div class="card-body" style="padding: 40px !important;">
-                    <div id="formStatus"></div>
-                </div>
-            </div>
+                                    </div>
 
-            <!-- Form Comments card -->
-            <div class="card flex-grow-1" style="min-height: 300px !important;">
-                <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Form Comments</h5>
-                    <span class="badge bg-primary" id="commentCount">0</span>
-                </div>
-                <div class="card-body p-3 comments-container" style="overflow-y: auto; max-height: 250px;">
-                    <div id="formRemarks">
-                        <div class="comment-loading">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading comments...</span>
+                                    <div
+                                        class="px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
+                                        <i class="fa fa-hourglass-end me-1"></i>
+                                        <span class="small me-1">Late:</span>
+                                        <span class="fw-bold me-1" id="isLateStatus">No</span>
+                                    </div>
+
+                                    <!-- Approve Fee Pill -->
+                                    <div
+                                        class="px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
+                                        <i class="fa fa-money-bill me-1"></i>
+                                        <span class="small me-1">Fee:</span>
+                                        <span class="fw-bold me-1" id="totalApprovedFee">0</span>
+                                    </div>
+
+                                    <!-- Comments Pill -->
+                                    <div
+                                        class="px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
+                                        <i class="fa fa-commenting me-1"></i>
+                                        <span class="small me-1">Comments:</span>
+                                        <span class="fw-bold me-1" id="commentCount">0</span>
+                                    </div>
+
+
+                                </div>
                             </div>
                         </div>
+                        <!-- Action Panel -->
+                        <div class="col-md-2">
+                            <div class="card h-100 d-flex flex-column justify-content-center align-items-center p-3">
+
+                                <button class="btn btn-success w-100 mb-2" id="approveBtn">
+                                    <i class="bi bi-hand-thumbs-up me-1"></i> Approve
+                                </button>
+
+                                <button class="btn btn-danger w-100 mb-2" id="rejectBtn">
+                                    <i class="bi bi-hand-thumbs-down me-1"></i> Reject
+                                </button>
+
+                                <!-- Finalize Button (Hidden by default, shown for Head Admin) -->
+                                <button class="btn btn-primary w-100 mb-2" id="finalizeBtn" style="display: none;">
+                                    <i class="bi bi-check-circle me-1"></i> Finalize
+                                </button>
+
+                                <!-- More Actions Dropdown -->
+                                <div class="dropdown w-100" id="moreActionsDropdown">
+                                    <button class="btn btn-secondary bg-secondary-subtle text-dark w-100 dropdown-toggle"
+                                        type="button" id="moreActionsBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots me-1"></i> More
+                                    </button>
+
+                                    <ul class="dropdown-menu w-100" aria-labelledby="moreActionsBtn">
+                                        <li class="d-flex justify-content-center">
+                                            <a class="dropdown-item text-start w-100 status-option" id="statusScheduled"
+                                                data-value="Scheduled" href="#">
+                                                <i class="bi bi-calendar-event me-2"></i> Mark Scheduled
+                                            </a>
+                                        </li>
+                                        <li class="d-flex justify-content-center">
+                                            <a class="dropdown-item text-start w-100 status-option" id="statusOngoing"
+                                                data-value="Ongoing" href="#">
+                                                <i class="bi bi-play-circle me-2"></i> Mark Ongoing
+                                            </a>
+                                        </li>
+                                        <li class="d-flex justify-content-center">
+                                            <a class="dropdown-item text-start w-100 status-option" id="statusLate"
+                                                data-value="Late" href="#">
+                                                <i class="bi bi-exclamation-circle me-2"></i> Mark Late
+                                            </a>
+                                        </li>
+                                        <li class="d-flex justify-content-center">
+                                            <a class="dropdown-item text-start w-100" id="addLateFee" href="#">
+                                                <i class="bi bi-cash-coin me-2"></i> Add Late Fee
+                                            </a>
+                                        </li>
+                                        <li class="d-flex justify-content-center">
+                                            <a class="dropdown-item text-start w-100" id="closeRequest" href="#">
+                                                <i class="bi bi-x-circle me-2"></i> Close Request
+                                            </a>
+                                        </li>
+                                        <li class="d-flex justify-content-center">
+                                            <a class="dropdown-item text-start w-100" id="setPenaltyFee" href="#">
+                                                <i class="bi bi-cash-stack me-2"></i> Set Penalty Fee
+                                            </a>
+                                        </li>
+                                        <li class="d-flex justify-content-center">
+                                            <a class="dropdown-item text-start w-100" id="cancelForm" href="#">
+                                                <i class="bi bi-x-circle me-2"></i> Cancel Form
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-                </div>
-                <div class="card-footer bg-white p-3 border-top">
-                    <div class="input-group">
-                        <textarea class="form-control" rows="1" placeholder="Type a message..."
-                            aria-label="Type a message" id="commentTextarea"
-                            style="resize: none; border-radius: 20px;"></textarea>
-                        <button class="btn btn-primary rounded-circle ms-2" type="button"
-                            id="sendCommentBtn"
-                            style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-send"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
+                    <div class="row g-2">
+                        <!-- Left column: Contact Information -->
+                        <div class="col-md-6">
+                           <div class="card h-100">
+  <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+    <h5 class="card-title mb-0">Contact Information</h5>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div id="formDetails"></div>
+  </div>
 </div>
 
-                <!-- Status Update Confirmation Modal -->
-                <div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-hidden="true">
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card documents-card h-100">
+                                <div
+                                    class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">Documents</h5>
+                                </div>
+                                <div class="card-body p-2 d-flex align-items-center justify-content-center">
+                                    <div class="row g-1 justify-content-center w-100 flex-nowrap">
+                                        <!-- Formal Letter Card -->
+                                        <div class="col-auto">
+                                            <div class="card text-center">
+                                                <div class="card-body p-2 d-flex flex-column justify-content-center">
+                                                    <i id="formalLetterIcon"
+                                                        class="fas fa-file-alt fa-2x text-muted mb-1"></i>
+                                                    <small class="text-muted mb-1">Formal Letter <br>(Required)</small>
+                                                    <div id="formalLetterDocument"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Facility Setup Card -->
+                                        <div class="col-auto">
+                                            <div class="card text-center">
+                                                <div class="card-body p-2 d-flex flex-column justify-content-center">
+                                                    <i id="facilityLayoutIcon"
+                                                        class="fas fa-map-marked-alt fa-2x text-muted mb-1"></i>
+                                                    <small class="text-muted mb-1">Facility<br> Layout</small>
+                                                    <div id="facilityLayoutDocument"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Proof of Payment Card -->
+                                        <div class="col-auto">
+                                            <div class="card text-center">
+                                                <div class="card-body p-2 d-flex flex-column justify-content-center">
+                                                    <i id="proofOfPaymentIcon"
+                                                        class="fas fa-receipt fa-2x text-muted mb-1"></i>
+                                                    <small class="text-muted mb-1">Payment confirmation</small>
+                                                    <div id="proofOfPaymentDocument"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Official Receipt Card -->
+                                        <div class="col-auto">
+                                            <div class="card text-center">
+                                                <div class="card-body p-2 d-flex flex-column justify-content-center">
+                                                    <i id="officialReceiptIcon"
+                                                        class="fas fa-file-invoice-dollar fa-2x text-muted mb-1"></i>
+                                                    <small class="text-muted mb-1">Transaction record</small>
+                                                    <div id="officialReceiptDocument"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> <!-- end row -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-stretch g-2 mt-1">
+                            <!-- Left column: Requested Items + Schedule -->
+                            <div class="col-lg-5 d-flex flex-column gap-2">
+                            <!-- Event Details Card -->
+                            <div class="card flex-fill d-flex flex-column">
+                            <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">Event Details</h5>
+                            </div>
+
+
+                            <div class="card-body flex-fill p-0">
+                                <div id="eventDetails"></div>
+                            </div>
+                            </div>
+
+
+
+
+                                <!-- Requested Items Card -->
+                                <div class="card flex-fill">
+                                    <div
+                                        class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">Requested Items</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="requestedItems"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right column: Calendar -->
+                            <div class="col-lg-7 d-flex">
+                                <div class="card flex-fill d-flex flex-column">
+                                    <div class="card-body d-flex flex-column">
+                                        <div class="calendar-container flex-fill">
+                                            <div id="calendar" style="height:100%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Update Confirmation Modal -->
+                        <div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirm Status Change</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="statusModalContent">
+                                            <!-- Content will be dynamically populated -->
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Cancel</button>
+                                        <button type="button" class="btn btn-primary" id="confirmStatusUpdate">Confirm
+                                            Change</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Fee Modal -->
+                        <div class="modal fade" id="feeModal" tabindex="-1" aria-labelledby="feeModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="feeModalLabel">Add Fee or Discount</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="feeForm">
+                                            <input type="hidden" id="feeRequestId" value="{{ $requestId }}">
+                                            <div class="mb-2">
+                                                <label for="feeType" class="form-label">Fee Type</label>
+                                                <select id="feeType" class="form-select" required>
+                                                    <option value="">Select type...</option>
+                                                    <option value="additional">Additional Fee
+                                                    </option>
+                                                    <option value="discount">Discount</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-2" id="discountTypeSection" style="display: none;">
+                                                <label for="discountType" class="form-label">Discount Type</label>
+                                                <select id="discountType" class="form-select">
+                                                    <option value="Fixed">Fixed Amount</option>
+                                                    <option value="Percentage">Percentage</option>
+                                                </select>
+                                            </div>
+                                            <div class="row g-2 mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="feeLabel" class="form-label">Fee Label</label>
+                                                    <input type="text" id="feeLabel" class="form-control"
+                                                        placeholder="Fee Label" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="feeValue" class="form-label">Amount</label>
+                                                    <input type="number" id="feeValue" class="form-control" step="0.01"
+                                                        min="0.01" placeholder="Enter amount" required>
+                                                </div>
+                                            </div>
+
+
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Cancel</button>
+                                        <button type="button" id="saveFeeBtn" class="btn btn-primary">Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mt-1 align-items-stretch">
+                            <!-- Left Column: Combined Comments & Actions -->
+                            <div class="col-lg-5 d-flex flex-column">
+                                <div class="card flex-grow-1">
+                                    <div
+                                        class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">Activity Timeline</h5>
+                                    </div>
+
+                                    <!-- Combined Comments & Actions Container -->
+                                    <div class="card-body p-3 comments-container"
+                                        style="overflow-y: auto; max-height: 400px;">
+                                        <!-- Comments will be loaded here -->
+                                        <div id="formRemarks">
+                                            <div class="comment-loading">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading activity...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Additional Fees will be mixed in here -->
+                                        <div id="additionalFees" style="display: none;"></div>
+                                    </div>
+
+                                    <!-- Message Input Footer -->
+                                    <div class="card-footer bg-white p-3 border-top">
+                                        <div class="input-group">
+                                            <textarea class="form-control" rows="1" placeholder="Type a message..."
+                                                aria-label="Type a message" id="commentTextarea"
+                                                style="resize: none; border-radius: 20px;"></textarea>
+                                            <button class="btn btn-primary rounded-circle ms-2" type="button"
+                                                id="sendCommentBtn"
+                                                style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-send"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Fee Breakdown -->
+                            <div class="col-lg-7 d-flex">
+                                <div class="card flex-fill d-flex flex-column">
+                                    <div
+                                        class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">Fee Breakdown</h5>
+                                        <div class="form-check form-switch m-0">
+                                            <input class="form-check-input" type="checkbox" id="waiveAllSwitch">
+                                            <label class="form-check-label" for="waiveAllSwitch">Waive All Fees</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card body grows and scrolls if needed -->
+                                    <div class="card-body flex-fill overflow-auto">
+                                        <!-- Base Fees -->
+                                        <div class="mb-3">
+                                            <h6 class="fw-bold mb-2">Base Fees</h6>
+                                            <div id="baseFeesContainer">
+                                                <div id="facilitiesFees"></div>
+                                                <div id="equipmentFees"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Miscellaneous Fees -->
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h6 class="fw-bold mb-0">Miscellaneous Fees</h6>
+                                                <button id="addFeeBtn" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-plus-circle"></i> Add Fee
+                                                </button>
+                                            </div>
+                                            <div id="additionalFeesContainer"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Footer stays compact -->
+                                    <div
+                                        class="card-footer bg-white d-flex justify-content-between align-items-center fw-bold p-3 border-top">
+                                        <span>Total Approved Fee:</span>
+                                        <span id="totalApprovedFee">₱0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- FOR APPROVE/REJECT BUTTONS -->
+
+                        <style>
+                            .expand-btn {
+                                width: 50px;
+                                height: 50px;
+                                border-radius: 25px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: flex-start;
+                                padding: 2px 13px;
+                                font-size: 1.5rem;
+                                border: none;
+                                cursor: pointer;
+                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                                position: relative;
+                                overflow: hidden;
+                            }
+
+                            .expand-btn i {
+                                flex-shrink: 0;
+                                z-index: 2;
+                                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                            }
+
+                            .expand-btn .btn-text {
+                                font-size: 0.9rem;
+                                font-weight: 500;
+                                margin-left: 12px;
+                                opacity: 0;
+                                transform: translateX(-10px);
+                                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                                white-space: nowrap;
+                            }
+
+                            .expand-btn:hover {
+                                width: 130px;
+                                justify-content: flex-start;
+                                padding-left: 15px;
+                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                            }
+
+                            .expand-btn:hover .btn-text {
+                                opacity: 1;
+                                transform: translateX(0);
+                            }
+
+                            .expand-btn:hover i {
+                                transform: scale(1.1);
+                            }
+
+                            /* Button specific styles */
+                            .btn-danger.expand-btn {
+                                background-color: #dc3545;
+                                color: white;
+                            }
+
+                            .btn-danger.expand-btn:hover {
+                                background-color: #c82333;
+                            }
+
+                            .btn-success.expand-btn {
+                                background-color: #28a745;
+                                color: white;
+                            }
+
+                            .btn-success.expand-btn:hover {
+                                background-color: #218838;
+                            }
+
+                            .expand-btn:active {
+                                transform: scale(0.98);
+                            }
+                        </style>
+                        <div>
+                            <br><br><br><br><br>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Confirmation Modal for Approve Action -->
+                <div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">Confirm Status Change</h5>
+                                <h5 class="modal-title">Confirm Approval</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <div id="statusModalContent">
-                                    <!-- Content will be dynamically populated -->
+                                <p>Are you sure you want to approve this request? This action cannot be undone.</p>
+                                <p class="text-muted small">You will not be able to take further actions on this form
+                                    after
+                                    approval.</p>
+                                <div class="mb-3">
+                                    <label for="approveRemarks" class="form-label">Remarks (Optional)</label>
+                                    <textarea class="form-control" id="approveRemarks" rows="3"
+                                        placeholder="Add any remarks here..."></textarea>
                                 </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <button type="button" class="btn btn-primary" id="confirmStatusUpdate">Confirm
-                                    Change</button>
+                                <button type="button" class="btn btn-success" id="confirmApprove">Confirm
+                                    Approval</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row align-items-stretch g-2 mt-1">
-                    <!-- Left column: Fee Waivers + Additional Fees -->
-                    <div class="col-lg-5 d-flex flex-column">
-                        <!-- Fee Waivers -->
-                        <div class="card mb-2">
-                            <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0">Requested Items</h5>
-                                <!-- Toggle Switch -->
-                                <div class="form-check form-switch m-0">
-                                    <input class="form-check-input" type="checkbox" id="waiveAllSwitch">
-                                    <label class="form-check-label" for="waiveAllSwitch">
-                                        Waive All Fees
-                                    </label>
+                <!-- Confirmation Modal for Reject Action -->
+                <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Confirm Rejection</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to reject this request? This action cannot be undone.</p>
+                                <p class="text-muted small">You will not be able to take further actions on this form
+                                    after
+                                    rejection.</p>
+                                <div class="mb-3">
+                                    <label for="rejectRemarks" class="form-label">Remarks (Optional)</label>
+                                    <textarea class="form-control" id="rejectRemarks" rows="3"
+                                        placeholder="Add any remarks here..."></textarea>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div id="requestedItems"></div>
-                            </div>
-                            <!-- Card Footer (Tentative Fee) -->
-                            <div class="card-footer bg-white">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <strong>Tentative Fee:</strong>
-                                    <span id="tentativeFee"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Additional Fees & Discounts -->
-                        <div class="card flex-grow-1">
-                            <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0">Additional Fees & Discounts</h5>
-                                <button id="addFeeBtn" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-plus-circle"></i> Add Fee
-                                </button>
-                            </div>
-                            <div class="card-body" style="flex: 1 1 auto; overflow-y: auto;">
-                                <p id="feesPlaceholder" class="text-muted fst-italic text-center">
-                                    No additional fees have been added yet.
-                                </p>
-                                <div id="additionalFees">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right column: Calendar (reduced width) -->
-                    <div class="col-lg-7 d-flex">
-                        <div class="card flex-fill d-flex flex-column">
-                            <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0">Events Calendar</h5>
-                            </div>
-                            <div class="card-body d-flex flex-column">
-                                <div class="calendar-container flex-fill">
-                                    <div id="calendar" style="height:100%;"></div>
-                                </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-danger" id="confirmReject">Confirm
+                                    Rejection</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Add Fee Modal -->
-            <div class="modal fade" id="feeModal" tabindex="-1" aria-labelledby="feeModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="feeModalLabel">Add Fee or Discount</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <!-- Confirmation Modal for Finalize Action -->
+                <div class="modal fade" id="finalizeModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Finalize Request</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Current Status:</strong>
+                                    <span id="currentApprovalCount" class="fw-bold"></span> approvals,
+                                    <span id="currentRejectionCount" class="fw-bold"></span> rejections
+                                </div>
+                                <p>Finalizing this request will change its status from "Pending Approval" to "Awaiting
+                                    Payment".</p>
+                                <p class="text-muted small">This action cannot be undone and will prevent further
+                                    approvals/rejections.</p>
+
+                                <div class="mb-3">
+                                    <label for="calendarTitle" class="form-label">Event Title *</label>
+                                    <input type="text" class="form-control" id="calendarTitle"
+                                        placeholder="Enter calendar event title" required maxlength="50"
+                                        value="{{ $request->form_details->purpose ?? '' }}">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="calendarDescription" class="form-label">Event Description *</label>
+                                    <textarea class="form-control" id="calendarDescription" rows="3"
+                                        placeholder="Enter calendar event description" required maxlength="100"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="finalizeRemarks" class="form-label">Remarks (Optional)</label>
+                                    <textarea class="form-control" id="finalizeRemarks" rows="3"
+                                        placeholder="Add any remarks here..."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="confirmFinalize">Finalize
+                                    Request</button>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                            <form id="feeForm">
-                                <input type="hidden" id="feeRequestId" value="{{ $requestId }}">
-                                <div class="mb-2">
-                                    <label for="feeType" class="form-label">Fee Type</label>
-                                    <select id="feeType" class="form-select" required>
-                                        <option value="">Select type...</option>
-                                        <option value="additional">Additional Fee</option>
-                                        <option value="discount">Discount</option>
-                                    </select>
-                                </div>
-                                <div class="mb-2" id="discountTypeSection" style="display: none;">
-                                    <label for="discountType" class="form-label">Discount Type</label>
-                                    <select id="discountType" class="form-select">
-                                        <option value="Fixed">Fixed Amount</option>
-                                        <option value="Percentage">Percentage</option>
-                                    </select>
-                                </div>
-                                <div class="row g-2 mb-3">
+                    </div>
+                </div>
+
+
+                <!-- Event Details Modal -->
+                <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="eventModalTitle">Event Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="eventModalBody">
+                                <div class="row">
                                     <div class="col-md-6">
-                                        <label for="feeLabel" class="form-label">Fee Label</label>
-                                        <input type="text" id="feeLabel" class="form-control" placeholder="Fee Label"
-                                            required>
+                                        <p><strong>Requester:</strong> <span id="modalRequester"></span></p>
+                                        <p><strong>Purpose:</strong> <span id="modalPurpose"></span></p>
+                                        <p><strong>Participants:</strong> <span id="modalParticipants"></span></p>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="feeValue" class="form-label">Amount</label>
-                                        <input type="number" id="feeValue" class="form-control" step="0.01" min="0.01"
-                                            placeholder="Enter amount" required>
+                                        <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+                                        <p><strong>Tentative Fee:</strong> <span id="modalFee"></span></p>
+                                        <p><strong>Approvals:</strong> <span id="modalApprovals"></span></p>
                                     </div>
                                 </div>
-
-
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" id="saveFeeBtn" class="btn btn-primary">Add</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-2 mt-1">
-                <div class="col-12">
-                    <div class="card">
-
-                        <!-- Fee Breakdown Header -->
-                        <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">Fee Breakdown</h5>
-                        </div>
-
-                        <div class="card-body">
-                            <!-- Base Fees -->
-                            <div class="mb-3">
-                                <h6 class="fw-bold mb-2">Base Fees</h6>
-                                <div id="baseFeesContainer">
-                                    <!-- Facilities -->
-                                    <div id="facilitiesFees">
-                                        <!-- Populated by JS -->
-                                    </div>
-
-                                    <!-- Equipment -->
-                                    <div id="equipmentFees">
-                                        <!-- Populated by JS -->
-                                    </div>
+                                <div class="mt-3">
+                                    <h6>Requested Items:</h6>
+                                    <div id="modalItems"></div>
                                 </div>
                             </div>
-
-                            <!-- Additional Fees -->
-                            <div class="mb-3">
-                                <h6 class="fw-bold mb-2">Additional Fees & Discounts</h6>
-                                <div id="additionalFeesContainer">
-                                    <!-- Will be populated by JavaScript -->
-                                </div>
-                            </div>
-
-                            <!-- Total -->
-                            <div class="d-flex justify-content-between align-items-center fw-bold mt-3 border-top pt-2">
-                                <span>Total Approved Fee:</span>
-                                <span id="totalApprovedFee">₱0.00</span>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="modalViewDetails">View Full
+                                    Details</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- FOR APPROVE/REJECT BUTTONS -->
+                <!-- Back to Top Button -->
+                <button class="back-to-top" id="backToTop" title="Back to Top">
+                    <i class="bi bi-arrow-up"></i>
+                </button>
 
-            <style>
-                .expand-btn {
-                    width: 50px;
-                    height: 50px;
-                    border-radius: 25px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-start;
-                    padding: 2px 13px;
-                    font-size: 1.5rem;
-                    border: none;
-                    cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    position: relative;
-                    overflow: hidden;
-                }
-
-                .expand-btn i {
-                    flex-shrink: 0;
-                    z-index: 2;
-                    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                }
-
-                .expand-btn .btn-text {
-                    font-size: 0.9rem;
-                    font-weight: 500;
-                    margin-left: 12px;
-                    opacity: 0;
-                    transform: translateX(-10px);
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    white-space: nowrap;
-                }
-
-                .expand-btn:hover {
-                    width: 130px;
-                    justify-content: flex-start;
-                    padding-left: 15px;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                }
-
-                .expand-btn:hover .btn-text {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-
-                .expand-btn:hover i {
-                    transform: scale(1.1);
-                }
-
-                /* Button specific styles */
-                .btn-danger.expand-btn {
-                    background-color: #dc3545;
-                    color: white;
-                }
-
-                .btn-danger.expand-btn:hover {
-                    background-color: #c82333;
-                }
-
-                .btn-success.expand-btn {
-                    background-color: #28a745;
-                    color: white;
-                }
-
-                .btn-success.expand-btn:hover {
-                    background-color: #218838;
-                }
-
-                .expand-btn:active {
-                    transform: scale(0.98);
-                }
-            </style>
-
-            <div class="row mt-4">
-                <div class="col-12 text-center mb-3">
-                    <h5 class="demo-title fw-bold" style="color:#313131" ;>Approve Request?</h5>
-                </div>
-                <div class="col-12">
-                    <div class="d-flex flex-wrap gap-3 justify-content-center align-items-center">
-                        <!-- Reject button -->
-                        <button type="button" id="rejectBtn" class="btn btn-danger expand-btn">
-                            <i class="bi bi-x"></i>
-                            <span class="btn-text">Reject</span>
-                        </button>
-                        <!-- Accept button -->
-                        <button type="button" id="approveBtn" class="btn btn-success expand-btn">
-                            <i class="bi bi-check"></i>
-                            <span class="btn-text">Approve</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        </div>
-
-        <!-- Confirmation Modal for Approve Action -->
-        <div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirm Approval</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to approve this request? This action cannot be undone.</p>
-                        <p class="text-muted small">You will not be able to take further actions on this form
-                            after
-                            approval.</p>
-                        <div class="mb-3">
-                            <label for="approveRemarks" class="form-label">Remarks (Optional)</label>
-                            <textarea class="form-control" id="approveRemarks" rows="3"
-                                placeholder="Add any remarks here..."></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-success" id="confirmApprove">Confirm
-                            Approval</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Confirmation Modal for Reject Action -->
-        <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirm Rejection</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to reject this request? This action cannot be undone.</p>
-                        <p class="text-muted small">You will not be able to take further actions on this form
-                            after
-                            rejection.</p>
-                        <div class="mb-3">
-                            <label for="rejectRemarks" class="form-label">Remarks (Optional)</label>
-                            <textarea class="form-control" id="rejectRemarks" rows="3"
-                                placeholder="Add any remarks here..."></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirmReject">Confirm
-                            Rejection</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-<!-- Confirmation Modal for Finalize Action -->
-<div class="modal fade" id="finalizeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Finalize Request</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Current Status:</strong>
-                    <span id="currentApprovalCount" class="fw-bold"></span> approvals,
-                    <span id="currentRejectionCount" class="fw-bold"></span> rejections
-                </div>
-                <p>Finalizing this request will change its status from "Pending Approval" to "Awaiting
-                    Payment".</p>
-                <p class="text-muted small">This action cannot be undone and will prevent further
-                    approvals/rejections.</p>
-
-                <div class="mb-3">
-                    <label for="calendarTitle" class="form-label">Event Title *</label>
-                    <input type="text" class="form-control" id="calendarTitle"
-                        placeholder="Enter calendar event title" required maxlength="50"
-                        value="{{ $request->form_details->purpose ?? '' }}">
-                </div>
-
-                <div class="mb-3">
-                    <label for="calendarDescription" class="form-label">Event Description *</label>
-                    <textarea class="form-control" id="calendarDescription" rows="3"
-                        placeholder="Enter calendar event description" required maxlength="100"></textarea>
-                </div>
-
-                <div class="mb-3">
-                    <label for="finalizeRemarks" class="form-label">Remarks (Optional)</label>
-                    <textarea class="form-control" id="finalizeRemarks" rows="3"
-                        placeholder="Add any remarks here..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmFinalize">Finalize
-                    Request</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-        <!-- Event Details Modal -->
-        <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="eventModalTitle">Event Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" id="eventModalBody">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Requester:</strong> <span id="modalRequester"></span></p>
-                                <p><strong>Purpose:</strong> <span id="modalPurpose"></span></p>
-                                <p><strong>Participants:</strong> <span id="modalParticipants"></span></p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Status:</strong> <span id="modalStatus"></span></p>
-                                <p><strong>Tentative Fee:</strong> <span id="modalFee"></span></p>
-                                <p><strong>Approvals:</strong> <span id="modalApprovals"></span></p>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <h6>Requested Items:</h6>
-                            <div id="modalItems"></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="modalViewDetails">View Full
-                            Details</button>
-                    </div>
-                </div>
-            </div>
 
     </main>
 
 @endsection
 
-
-
-
-
 @section('scripts')
-    <script src="{{ asset('js/admin/calendar.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Back to Top Button
+            const backToTopButton = document.getElementById('backToTop');
+
+            window.addEventListener('scroll', function () {
+                if (window.pageYOffset > 300) {
+                    backToTopButton.classList.add('show');
+                } else {
+                    backToTopButton.classList.remove('show');
+                }
+            });
+
+            backToTopButton.addEventListener('click', function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
 
             const commentsContainer = document.getElementById('formRemarks');
             const commentTextarea = document.querySelector('.card-footer textarea');
@@ -1085,6 +1400,7 @@
             const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
             const finalizeModal = new bootstrap.Modal(document.getElementById('finalizeModal'));
 
+
             // Fee management elements
             const feesContainer = document.getElementById("additionalFees");
             const placeholder = document.getElementById("feesPlaceholder");
@@ -1095,108 +1411,348 @@
             const discountTypeSection = document.getElementById("discountTypeSection");
 
             // Status update functionality
-const statusDropdown = document.getElementById('statusDropdown');
-const moreDropdown = document.getElementById('moreDropdown');
-const statusOptions = document.querySelectorAll('.status-option');
-const updateStatusBtn = document.getElementById('updateStatusBtn');
-const statusUpdateModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
-let selectedStatus = '';
+            const statusDropdown = document.getElementById('statusDropdown');
+            const moreDropdown = document.getElementById('moreDropdown');
+            const statusOptions = document.querySelectorAll('.status-option');
+            const updateStatusBtn = document.getElementById('updateStatusBtn');
+            const statusUpdateModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+            let selectedStatus = '';
 
-// Handle status option clicks
-statusOptions.forEach(option => {
-    option.addEventListener('click', function() {
-        const action = this.dataset.value;
-        handleStatusAction(action);
-    });
-});
+            // Function to check admin role and update UI accordingly
 
-// Function to handle different status actions
-function handleStatusAction(action) {
-    const adminToken = localStorage.getItem('adminToken');
-    const statusBadge = document.getElementById('statusBadge');
-    const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
-
-    switch(action) {
-        case 'Scheduled':
-        case 'Ongoing':
-        case 'Late':
-            showStatusUpdateModal(action);
-            break;
-            
-        case 'Finalize Form':
-            if (currentStatusName === 'Pending Approval') {
-                finalizeModal.show();
-            } else {
-                alert('Form is already finalized or not in Pending Approval status.');
-            }
-            break;
-            
-        case 'Set Penalty Fee':
-            // Prompt user for penalty amount
-            const penaltyAmount = prompt('Enter late penalty amount:');
-            if (penaltyAmount !== null && penaltyAmount !== '') {
-                const amount = parseFloat(penaltyAmount);
-                if (!isNaN(amount) && amount >= 0) { // allow 0
-                    addLatePenalty(amount);
-                } else {
-                    alert('Please enter a valid penalty amount (0 or greater).');
-                }
-            }
-            break;
-            
-        case 'Close':
-            closeForm();
-            break;
-            
-        default:
-            console.log('Unknown action:', action);
-    }
-}
-
-            // Load existing comments
-            // Load comments
-            async function loadComments() {
+            async function checkAdminRoleAndUpdateUI() {
                 try {
-                    commentsContainer.innerHTML = `
-                <div class="comment-loading">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading comments...</span>
-                    </div>
-                </div>
-            `;
-
-                    const response = await fetch(`/api/admin/requisition/${requestId}/comments`, {
+                    const adminToken = localStorage.getItem('adminToken');
+                    const response = await fetch('http://127.0.0.1:8000/api/admin/profile', {
                         headers: {
                             'Authorization': `Bearer ${adminToken}`,
                             'Accept': 'application/json'
                         }
                     });
 
-                    if (!response.ok) throw new Error('Failed to load comments');
+                    if (!response.ok) {
+                        console.error('Failed to fetch admin profile. Status:', response.status);
+                        return;
+                    }
 
-                    const result = await response.json();
+                    const adminData = await response.json();
+                    console.log('Admin role data:', {
+                        adminId: adminData.admin_id,
+                        roleTitle: adminData.role?.role_title,
+                        departments: adminData.departments?.map(d => d.department_name)
+                    });
+
+                    const approveBtn = document.getElementById('approveBtn');
+                    const rejectBtn = document.getElementById('rejectBtn');
+                    const finalizeBtn = document.getElementById('finalizeBtn');
+                    const moreActionsDropdown = document.getElementById('moreActionsDropdown');
+                    const moreActionsBtn = document.getElementById('moreActionsBtn');
+                    const actionPanel = document.querySelector('.col-md-2 .card'); // The action panel container
+
+                    // Check if user is Approving Officer or Vice President of Administration
+                    const isApprovingOfficer = adminData.departments?.some(dept =>
+                        dept.department_name === 'Approving Officer'
+                    );
+                    const isVPA = adminData.departments?.some(dept =>
+                        dept.department_name === 'Vice President of Administration'
+                    );
+
+                    // Check if user is Head Admin
+                    const isHeadAdmin = adminData.role?.role_title === 'Head Admin';
+
+                    // First, check if this admin has already taken action on this request
+                    const hasTakenAction = await checkIfAdminHasTakenAction(adminData.admin_id);
+
+                    console.log('UI Update Decision:', {
+                        isApprovingOfficer: isApprovingOfficer,
+                        isVPA: isVPA,
+                        isHeadAdmin: isHeadAdmin,
+                        hasTakenAction: hasTakenAction
+                    });
+
+                    // Reset all elements to default state first
+                    if (moreActionsDropdown) moreActionsDropdown.style.display = 'block';
+                    if (moreActionsBtn) moreActionsBtn.style.display = 'block';
+                    if (approveBtn) approveBtn.style.display = 'block';
+                    if (rejectBtn) rejectBtn.style.display = 'block';
+                    if (finalizeBtn) finalizeBtn.style.display = 'none';
+
+                    // Remove any existing action taken message
+                    const existingMessage = actionPanel?.querySelector('.action-taken-message');
+                    if (existingMessage) {
+                        existingMessage.remove();
+                    }
+
+                    // If admin has already taken action and is Approving Officer/VPA, show message and hide buttons
+                    if (hasTakenAction && (isApprovingOfficer || isVPA)) {
+                        console.log('Hiding buttons - admin has already taken action');
+
+                        // Hide action buttons
+                        if (approveBtn) approveBtn.style.display = 'none';
+                        if (rejectBtn) rejectBtn.style.display = 'none';
+                        if (moreActionsDropdown) moreActionsDropdown.style.display = 'none';
+                        if (moreActionsBtn) moreActionsBtn.style.display = 'none';
+
+                        // Show action taken message
+                        if (actionPanel) {
+                            const actionMessage = document.createElement('div');
+                            actionMessage.className = 'action-taken-message text-center p-3';
+                            actionMessage.innerHTML = `
+                        <i class="bi bi-check-circle-fill text-success fs-4 d-block mb-2"></i>
+                        <p class="mb-0 small text-muted">You have already taken action for this request.</p>
+                    `;
+                            actionPanel.appendChild(actionMessage);
+                        }
+
+                        return; // Exit early since no further role-based changes needed
+                    }
+
+                    // Apply role-based rules if admin hasn't taken action yet
+                    if (isApprovingOfficer || isVPA) {
+                        // Hide More dropdown for Approving Officer and VPA
+                        if (moreActionsDropdown) moreActionsDropdown.style.display = 'none';
+                        if (moreActionsBtn) moreActionsBtn.style.display = 'none';
+                        console.log('Hiding More dropdown for Approving Officer/VPA');
+                    }
+
+                    if (isHeadAdmin) {
+                        // Hide Approve/Reject buttons for Head Admin
+                        if (approveBtn) approveBtn.style.display = 'none';
+                        if (rejectBtn) rejectBtn.style.display = 'none';
+
+                        // Show Finalize button for Head Admin
+                        if (finalizeBtn) finalizeBtn.style.display = 'block';
+
+                        // Ensure More dropdown is visible for Head Admin
+                        if (moreActionsDropdown) moreActionsDropdown.style.display = 'block';
+                        if (moreActionsBtn) moreActionsBtn.style.display = 'block';
+                        console.log('Showing Finalize button and More dropdown for Head Admin');
+                    }
+
+                } catch (error) {
+                    console.error('Error checking admin role:', error);
+                    // Fallback: show default UI if there's an error fetching role
+                    console.log('Using default UI due to error fetching admin role');
+                }
+            }
+
+
+
+            // Function to check if the current admin has already taken action on this request
+            async function checkIfAdminHasTakenAction(adminId) {
+                try {
+                    const adminToken = localStorage.getItem('adminToken');
+                    const requestId = window.location.pathname.split('/').pop();
+
+                    // Fetch the specific request details to check approvals/rejections
+                    const response = await fetch(`http://127.0.0.1:8000/api/admin/requisition-forms/${requestId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        console.error('Failed to fetch request details');
+                        return false;
+                    }
+
+                    const currentRequest = await response.json();
+
+                    if (!currentRequest) {
+                        console.error('Request not found');
+                        return false;
+                    }
+
+                    console.log('Checking admin action for request:', {
+                        requestId: requestId,
+                        adminId: adminId,
+                        approvals: currentRequest.approval_info?.approvals || [],
+                        rejections: currentRequest.approval_info?.rejections || []
+                    });
+
+                    // Check if this admin has approved the request
+                    const hasApproved = currentRequest.approval_info?.approvals?.some(approval =>
+                        approval.admin_id === adminId
+                    );
+
+                    // Check if this admin has rejected the request
+                    const hasRejected = currentRequest.approval_info?.rejections?.some(rejection =>
+                        rejection.admin_id === adminId
+                    );
+
+                    const hasTakenAction = hasApproved || hasRejected;
+
+                    console.log('Admin action result:', {
+                        hasApproved: hasApproved,
+                        hasRejected: hasRejected,
+                        hasTakenAction: hasTakenAction
+                    });
+
+                    return hasTakenAction;
+
+                } catch (error) {
+                    console.error('Error checking admin action:', error);
+                    return false;
+                }
+            }
+
+            // Add event listener for Finalize button (AFTER the function definition)
+            const finalizeBtn = document.getElementById('finalizeBtn');
+            if (finalizeBtn) {
+                finalizeBtn.addEventListener('click', function () {
+                    finalizeModal.show();
+                });
+            }
+
+            // Check admin role and update UI (AFTER event listeners are set up)
+            checkAdminRoleAndUpdateUI();
+
+
+            // Handle status option clicks
+            statusOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    const action = this.dataset.value;
+                    handleStatusAction(action);
+                });
+            });
+
+
+
+            document.getElementById('addLateFee').addEventListener('click', function () {
+                const penaltyAmount = prompt('Enter late fee amount:');
+                if (penaltyAmount !== null && penaltyAmount !== '') {
+                    const amount = parseFloat(penaltyAmount);
+                    if (!isNaN(amount) && amount >= 0) {
+                        addLatePenalty(amount);
+                    } else {
+                        alert('Please enter a valid late fee amount (0 or greater).');
+                    }
+                }
+            });
+
+            document.getElementById('setPenaltyFee').addEventListener('click', function () {
+                const penaltyAmount = prompt('Enter penalty fee amount:');
+                if (penaltyAmount !== null && penaltyAmount !== '') {
+                    const amount = parseFloat(penaltyAmount);
+                    if (!isNaN(amount) && amount >= 0) {
+                        addLatePenalty(amount);
+                    } else {
+                        alert('Please enter a valid penalty amount (0 or greater).');
+                    }
+                }
+            });
+
+            document.getElementById('closeRequest').addEventListener('click', function () {
+                closeForm();
+            });
+
+            document.getElementById('cancelForm').addEventListener('click', function () {
+                cancelForm();
+            });
+
+            // Add event listeners for status options in the More Actions dropdown
+            document.querySelectorAll('#moreActionsBtn + .dropdown-menu .status-option').forEach(option => {
+                option.addEventListener('click', function () {
+                    const action = this.dataset.value;
+                    handleStatusAction(action);
+                });
+            });
+
+
+            // Function to handle different status actions
+            function handleStatusAction(action) {
+                const adminToken = localStorage.getItem('adminToken');
+                const statusBadge = document.getElementById('statusBadge');
+                const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
+
+                switch (action) {
+                    case 'Scheduled':
+                    case 'Ongoing':
+                    case 'Late':
+                        showStatusUpdateModal(action);
+                        break;
+
+                    case 'Finalize Form':
+                        if (currentStatusName === 'Pending Approval') {
+                            finalizeModal.show();
+                        } else {
+                            alert('Form is already finalized or not in Pending Approval status.');
+                        }
+                        break;
+
+                    case 'Set Penalty Fee':
+                        // Prompt user for penalty amount
+                        const penaltyAmount = prompt('Enter late penalty amount:');
+                        if (penaltyAmount !== null && penaltyAmount !== '') {
+                            const amount = parseFloat(penaltyAmount);
+                            if (!isNaN(amount) && amount >= 0) { // allow 0
+                                addLatePenalty(amount);
+                            } else {
+                                alert('Please enter a valid penalty amount (0 or greater).');
+                            }
+                        }
+                        break;
+
+                    case 'Close':
+                        closeForm();
+                        break;
+
+                    default:
+                        console.log('Unknown action:', action);
+                }
+            }
+
+            // Update your loadComments function to load both comments and fees
+            async function loadMixedActivity() {
+                try {
+                    const commentsContainer = document.getElementById('formRemarks');
+                    commentsContainer.innerHTML = `
+                <div class="comment-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading activity...</span>
+                    </div>
+                </div>
+            `;
+
+                    // Load comments
+                    const commentsResponse = await fetch(`/api/admin/requisition/${requestId}/comments`, {
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    // Load fees
+                    const feesResponse = await fetch(`/api/admin/requisition/${requestId}/fees`, {
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!commentsResponse.ok) throw new Error('Failed to load comments');
+                    if (!feesResponse.ok) throw new Error('Failed to load fees');
+
+                    const commentsResult = await commentsResponse.json();
+                    const feesResult = await feesResponse.json();
 
                     // Update comment count badge
-                    document.getElementById('commentCount').textContent = result.comments?.length || 0;
+                    document.getElementById('commentCount').textContent = commentsResult.comments?.length || 0;
 
-                    if (result.success && result.comments.length > 0) {
-                        displayComments(result.comments);
-                        // Auto-scroll to bottom to show newest messages
-                        scrollToBottom();
-                    } else {
-                        commentsContainer.innerHTML = `
-                    <div class="empty-comments">
-                        <i class="bi bi-chat"></i>
-                        <p>No comments added to this form yet.</p>
-                    </div>
-                `;
-                    }
+                    // Display mixed timeline
+                    displayMixedActivity(commentsResult.comments || [], feesResult || []);
+
+                    // Auto-scroll to bottom to show newest messages
+                    scrollToBottom();
+
                 } catch (error) {
-                    console.error('Error loading comments:', error);
+                    console.error('Error loading activity:', error);
+                    const commentsContainer = document.getElementById('formRemarks');
                     commentsContainer.innerHTML = `
                 <div class="empty-comments text-danger">
                     <i class="bi bi-exclamation-triangle"></i>
-                    <p>Failed to load comments.</p>
+                    <p>Failed to load activity.</p>
                 </div>
             `;
                 }
@@ -1209,15 +1765,57 @@ function handleStatusAction(action) {
                 }
             }
 
-            // Display comments in the container
+            // Function to display mixed comments and actions
+            function displayMixedActivity(comments, fees) {
+                const container = document.getElementById('formRemarks');
 
-            function displayComments(comments) {
-                if (comments.length === 0) {
-                    commentsContainer.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 2rem;">No comments yet. Start the conversation!</p>';
+                if (comments.length === 0 && fees.length === 0) {
+                    container.innerHTML = `
+                <div class="empty-comments">
+                    <i class="bi bi-chat"></i>
+                    <p>No additional fee or comment has been added yet.</p>
+                </div>
+            `;
                     return;
                 }
 
-                commentsContainer.innerHTML = comments.map(comment => `
+                // Combine comments and fees into one array
+                const allActivities = [];
+
+                // Add comments
+                comments.forEach(comment => {
+                    allActivities.push({
+                        type: 'comment',
+                        data: comment,
+                        timestamp: new Date(comment.created_at)
+                    });
+                });
+
+                // Add fees (actions)
+                fees.forEach(fee => {
+                    allActivities.push({
+                        type: 'fee',
+                        data: fee,
+                        timestamp: new Date(fee.created_at)
+                    });
+                });
+
+                // Sort by timestamp (oldest first)
+                allActivities.sort((a, b) => a.timestamp - b.timestamp);
+
+                // Generate HTML for all activities
+                container.innerHTML = allActivities.map(activity => {
+                    if (activity.type === 'comment') {
+                        return generateCommentHTML(activity.data);
+                    } else {
+                        return generateFeeHTML(activity.data);
+                    }
+                }).join('');
+            }
+
+            // Function to generate comment HTML (using your existing format)
+            function generateCommentHTML(comment) {
+                return `
             <div class="comment mb-3">
                 <div class="d-flex align-items-start">
                     <!-- Admin Profile Picture -->
@@ -1242,7 +1840,43 @@ function handleStatusAction(action) {
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
+            }
+
+            // Function to generate fee/action HTML (using comment-style formatting)
+            function generateFeeHTML(fee) {
+                const amount = parseFloat(fee.type === 'discount' ? fee.discount_amount : fee.fee_amount);
+                const typeName = fee.type === 'discount' ? 'Discount' : 'Additional fee';
+                const adminName = fee.added_by?.name || 'Admin';
+                const timestamp = new Date(fee.created_at).toLocaleString('en-US', {
+                    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                return `
+            <div class="comment mb-3">
+                <div class="d-flex align-items-start">
+                    <!-- Admin Profile Picture -->
+                    <div class="me-2 flex-shrink-0">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-info text-white" style="width: 40px; height: 40px; font-size: 1rem;">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                    </div>
+
+                    <!-- Action Bubble -->
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-1">
+                            <strong class="me-2">${adminName}</strong>
+                            <small class="text-muted">${formatTimeAgo(fee.created_at)}</small>
+                        </div>
+                        <div class="message-bubble bg-info text-white p-3 rounded-3" style="max-width: 80%; border-bottom-left-radius: 4px !important;">
+                            <p class="mb-0" style="white-space: pre-wrap; line-height: 1.4;">
+                                Added ${typeName.toLowerCase()}: <strong>${fee.label}</strong> of ₱${amount.toFixed(2)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
             }
             // Helper function to format time ago (e.g., "2 minutes ago")
             function formatTimeAgo(timestamp) {
@@ -1313,7 +1947,7 @@ function handleStatusAction(action) {
                         commentTextarea.style.height = 'auto';
 
                         // Reload comments to show the new one
-                        loadComments();
+                        loadMixedActivity();
 
                         // Show success message
                         showToast('Comment added successfully', 'success');
@@ -1358,18 +1992,18 @@ function handleStatusAction(action) {
                 toast.style.borderRadius = '0.3rem';
 
                 toast.innerHTML = `
-                                        <div class="d-flex align-items-center px-3 py-1"> 
-                                            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                            <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                            <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                        </div>
-                                        <div class="loading-bar" style="
-                                            height: 3px;
-                                            background: rgba(255,255,255,0.7);
-                                            width: 100%;
-                                            transition: width ${duration}ms linear;
-                                        "></div>
-                                    `;
+                                                                                                                    <div class="d-flex align-items-center px-3 py-1"> 
+                                                                                                                        <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                                                                                                        <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                                                                                                        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                                                                                    </div>
+                                                                                                                    <div class="loading-bar" style="
+                                                                                                                        height: 3px;
+                                                                                                                        background: rgba(255,255,255,0.7);
+                                                                                                                        width: 100%;
+                                                                                                                        transition: width ${duration}ms linear;
+                                                                                                                    "></div>
+                                                                                                                `;
 
                 document.body.appendChild(toast);
 
@@ -1404,277 +2038,277 @@ function handleStatusAction(action) {
 
 
             // Load comments when page loads
-            loadComments();
+            loadMixedActivity();
 
 
-// Function to show status update modal
-function showStatusUpdateModal(status) {
-    const modalContent = document.getElementById('statusModalContent');
-    const statusBadge = document.getElementById('statusBadge');
-    const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
+            // Function to show status update modal
+            function showStatusUpdateModal(status) {
+                const modalContent = document.getElementById('statusModalContent');
+                const statusBadge = document.getElementById('statusBadge');
+                const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
 
-    if (currentStatusName === 'Pending Approval' && status !== 'Cancel Form') {
-        alert('Finalize the form first');
-        return;
-    }
+                if (currentStatusName === 'Pending Approval' && status !== 'Cancel Form') {
+                    alert('Finalize the form first');
+                    return;
+                }
 
-    // Set modal content based on selected status
-    switch (status) {
-        case 'Scheduled':
-            modalContent.innerHTML = `
-                <p>This will set the form's status to <strong>Scheduled</strong>.</p>
-                <p class="text-muted small">Note: The request can still be cancelled if an emergency happens. 
-                If such a situation occurs, contact the requester about refund details and settle it in the business office on campus.</p>
-            `;
-            break;
-        case 'Ongoing':
-            modalContent.innerHTML = `
-                <p>This will set the form's status to <strong>Ongoing</strong>.</p>
-                <p class="text-muted small">Note: The form cannot be cancelled now.</p>
-            `;
-            break;
-        case 'Late':
-            modalContent.innerHTML = `
-                <p>This will set the form's status to <strong>Late</strong>.</p>
-                <p class="text-muted small">Note: This may incur additional fees.</p>
-            `;
-            break;
-        case 'Cancel Form':
-            modalContent.innerHTML = `
-                <p>This will <strong class="text-danger">cancel</strong> the form and set its status to <strong>Cancelled</strong>.</p>
-                <p class="text-muted small">Note: This action cannot be undone. The requester will be notified about the cancellation.</p>
-            `;
-            break;
-    }
+                // Set modal content based on selected status
+                switch (status) {
+                    case 'Scheduled':
+                        modalContent.innerHTML = `
+                                                                                            <p>This will set the form's status to <strong>Scheduled</strong>.</p>
+                                                                                            <p class="text-muted small">Note: The request can still be cancelled if an emergency happens. 
+                                                                                            If such a situation occurs, contact the requester about refund details and settle it in the business office on campus.</p>
+                                                                                        `;
+                        break;
+                    case 'Ongoing':
+                        modalContent.innerHTML = `
+                                                                                            <p>This will set the form's status to <strong>Ongoing</strong>.</p>
+                                                                                            <p class="text-muted small">Note: The form cannot be cancelled now.</p>
+                                                                                        `;
+                        break;
+                    case 'Late':
+                        modalContent.innerHTML = `
+                                                                                            <p>This will set the form's status to <strong>Late</strong>.</p>
+                                                                                            <p class="text-muted small">Note: This may incur additional fees.</p>
+                                                                                        `;
+                        break;
+                    case 'Cancel Form':
+                        modalContent.innerHTML = `
+                                                                                            <p>This will <strong class="text-danger">cancel</strong> the form and set its status to <strong>Cancelled</strong>.</p>
+                                                                                            <p class="text-muted small">Note: This action cannot be undone. The requester will be notified about the cancellation.</p>
+                                                                                        `;
+                        break;
+                }
 
-    selectedStatus = status;
-    statusUpdateModal.show();
-}
-// Confirm status update
-document.getElementById('confirmStatusUpdate').addEventListener('click', async function() {
-    if (!selectedStatus) return;
-
-    const adminToken = localStorage.getItem('adminToken');
-
-    try {
-        const response = await fetch(`/api/admin/requisition/${requestId}/update-status`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${adminToken}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                status_name: selectedStatus
-            })
-        });
-
-        const contentType = response.headers.get('content-type');
-        let responseData;
-
-        if (contentType && contentType.includes('application/json')) {
-            responseData = await response.json();
-        } else {
-            const textResponse = await response.text();
-            throw new Error(textResponse || 'Non-JSON response from server');
-        }
-
-        if (!response.ok) {
-            const errorMessage = responseData.error ||
-                responseData.message ||
-                JSON.stringify(responseData) ||
-                'Failed to update status';
-            throw new Error(errorMessage);
-        }
-
-        showToast('Status updated successfully!', 'success');
-        statusUpdateModal.hide();
-        selectedStatus = '';
-
-        // Refresh the page to show updated status
-        fetchRequestDetails();
-
-    } catch (error) {
-        console.error('Error updating status:', error);
-        showToast('Error: ' + error.message, 'error');
-    }
-});
-
-// Function to handle form cancellation
-async function cancelForm() {
-    const adminToken = localStorage.getItem('adminToken');
-    
-    if (!confirm('Are you sure you want to cancel this form? This action cannot be undone.')) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/admin/requisition/${requestId}/cancel`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${adminToken}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                selectedStatus = status;
+                statusUpdateModal.show();
             }
-        });
+            // Confirm status update
+            document.getElementById('confirmStatusUpdate').addEventListener('click', async function () {
+                if (!selectedStatus) return;
 
-        const contentType = response.headers.get('content-type');
-        let responseData;
+                const adminToken = localStorage.getItem('adminToken');
 
-        if (contentType && contentType.includes('application/json')) {
-            responseData = await response.json();
-        } else {
-            const textResponse = await response.text();
-            throw new Error(textResponse || 'Non-JSON response from server');
-        }
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/update-status`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            status_name: selectedStatus
+                        })
+                    });
 
-        if (!response.ok) {
-            const errorMessage = responseData.error ||
-                responseData.message ||
-                JSON.stringify(responseData) ||
-                'Failed to cancel form';
-            throw new Error(errorMessage);
-        }
+                    const contentType = response.headers.get('content-type');
+                    let responseData;
 
-        showToast('Form cancelled successfully!', 'success');
-        // Refresh the page to show updated status
-        setTimeout(() => {
-            window.location.reload();
-        }, 1500);
+                    if (contentType && contentType.includes('application/json')) {
+                        responseData = await response.json();
+                    } else {
+                        const textResponse = await response.text();
+                        throw new Error(textResponse || 'Non-JSON response from server');
+                    }
 
-    } catch (error) {
-        console.error('Error cancelling form:', error);
-        showToast('Error: ' + error.message, 'error');
-    }
-}
+                    if (!response.ok) {
+                        const errorMessage = responseData.error ||
+                            responseData.message ||
+                            JSON.stringify(responseData) ||
+                            'Failed to update status';
+                        throw new Error(errorMessage);
+                    }
 
-// Function to handle form closure
-async function closeForm() {
-    const adminToken = localStorage.getItem('adminToken');
-    
-    if (!confirm('Are you sure you want to close this form? This will mark it as completed.')) {
-        return;
-    }
+                    showToast('Status updated successfully!', 'success');
+                    statusUpdateModal.hide();
+                    selectedStatus = '';
 
-    try {
-        const response = await fetch(`/api/admin/requisition/${requestId}/close`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${adminToken}`,
-                'Accept': 'application/json'
+                    // Refresh the page to show updated status
+                    fetchRequestDetails();
+
+                } catch (error) {
+                    console.error('Error updating status:', error);
+                    showToast('Error: ' + error.message, 'error');
+                }
+            });
+
+            // Function to handle form cancellation
+            async function cancelForm() {
+                const adminToken = localStorage.getItem('adminToken');
+
+                if (!confirm('Are you sure you want to cancel this form? This action cannot be undone.')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/cancel`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    let responseData;
+
+                    if (contentType && contentType.includes('application/json')) {
+                        responseData = await response.json();
+                    } else {
+                        const textResponse = await response.text();
+                        throw new Error(textResponse || 'Non-JSON response from server');
+                    }
+
+                    if (!response.ok) {
+                        const errorMessage = responseData.error ||
+                            responseData.message ||
+                            JSON.stringify(responseData) ||
+                            'Failed to cancel form';
+                        throw new Error(errorMessage);
+                    }
+
+                    showToast('Form cancelled successfully!', 'success');
+                    // Refresh the page to show updated status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Error cancelling form:', error);
+                    showToast('Error: ' + error.message, 'error');
+                }
             }
-        });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.details || 'Failed to close form');
-        }
+            // Function to handle form closure
+            async function closeForm() {
+                const adminToken = localStorage.getItem('adminToken');
 
-        showToast('Form closed successfully! Redirecting to manage requests...', 'success');
-        
-        // Redirect to manage requests page after a short delay
-        setTimeout(() => {
-            window.location.href = '/admin/manage-requests';
-        }, 1500);
+                if (!confirm('Are you sure you want to close this form? This will mark it as completed.')) {
+                    return;
+                }
 
-    } catch (error) {
-        console.error('Error closing form:', error);
-        showToast('Error: ' + error.message, 'error');
-    }
-}
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/close`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
 
-// Function to add late penalty
-async function addLatePenalty(penaltyAmount) {
-    const adminToken = localStorage.getItem('adminToken');
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.details || 'Failed to close form');
+                    }
 
-    try {
-        const response = await fetch(`/api/admin/requisition/${requestId}/late-penalty`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${adminToken}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                penalty_amount: penaltyAmount
-            })
-        });
+                    showToast('Form closed successfully! Redirecting to manage requests...', 'success');
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.details || 'Failed to add late penalty');
-        }
+                    // Redirect to manage requests page after a short delay
+                    setTimeout(() => {
+                        window.location.href = '/admin/manage-requests';
+                    }, 1500);
 
-        showToast('Late penalty added successfully!', 'success');
-        // Refresh the page to show updated fees
-        fetchRequestDetails();
+                } catch (error) {
+                    console.error('Error closing form:', error);
+                    showToast('Error: ' + error.message, 'error');
+                }
+            }
 
-    } catch (error) {
-        console.error('Error adding late penalty:', error);
-        showToast('Error: ' + error.message, 'error');
-    }
-}
+            // Function to add late penalty
+            async function addLatePenalty(penaltyAmount) {
+                const adminToken = localStorage.getItem('adminToken');
 
-document.getElementById('confirmFinalize').addEventListener('click', async function() {
-    const calendarTitle = document.getElementById('calendarTitle').value.trim();
-    const calendarDescription = document.getElementById('calendarDescription').value.trim();
-    const remarks = document.getElementById('finalizeRemarks').value.trim();
-    const adminToken = localStorage.getItem('adminToken');
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/late-penalty`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            penalty_amount: penaltyAmount
+                        })
+                    });
 
-    // Validate required fields
-    if (!calendarTitle || !calendarDescription) {
-        alert('Calendar title and description are required for finalization.');
-        return;
-    }
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.details || 'Failed to add late penalty');
+                    }
 
-    try {
-        const response = await fetch(`/api/admin/requisition/${requestId}/finalize`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${adminToken}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                calendar_title: calendarTitle,
-                calendar_description: calendarDescription,
-                remarks: remarks
-            })
-        });
+                    showToast('Late penalty added successfully!', 'success');
+                    // Refresh the page to show updated fees
+                    fetchRequestDetails();
 
-        const contentType = response.headers.get('content-type');
-        let responseData;
+                } catch (error) {
+                    console.error('Error adding late penalty:', error);
+                    showToast('Error: ' + error.message, 'error');
+                }
+            }
 
-        if (contentType && contentType.includes('application/json')) {
-            responseData = await response.json();
-        } else {
-            const textResponse = await response.text();
-            throw new Error(textResponse || 'Non-JSON response from server');
-        }
+            document.getElementById('confirmFinalize').addEventListener('click', async function () {
+                const calendarTitle = document.getElementById('calendarTitle').value.trim();
+                const calendarDescription = document.getElementById('calendarDescription').value.trim();
+                const remarks = document.getElementById('finalizeRemarks').value.trim();
+                const adminToken = localStorage.getItem('adminToken');
 
-        if (!response.ok) {
-            const errorMessage = responseData.error ||
-                responseData.message ||
-                (responseData.details ? JSON.stringify(responseData.details) : 'Failed to finalize form');
-            throw new Error(errorMessage);
-        }
+                // Validate required fields
+                if (!calendarTitle || !calendarDescription) {
+                    alert('Calendar title and description are required for finalization.');
+                    return;
+                }
 
-        showToast('Form finalized successfully! Status changed to Awaiting Payment.', 'success');
-        finalizeModal.hide();
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/finalize`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            calendar_title: calendarTitle,
+                            calendar_description: calendarDescription,
+                            remarks: remarks
+                        })
+                    });
 
-        // Clear modal fields
-        document.getElementById('calendarTitle').value = '';
-        document.getElementById('calendarDescription').value = '';
-        document.getElementById('finalizeRemarks').value = '';
+                    const contentType = response.headers.get('content-type');
+                    let responseData;
 
-        // Refresh the page to show updated status
-        fetchRequestDetails();
+                    if (contentType && contentType.includes('application/json')) {
+                        responseData = await response.json();
+                    } else {
+                        const textResponse = await response.text();
+                        throw new Error(textResponse || 'Non-JSON response from server');
+                    }
 
-    } catch (error) {
-        console.error('Error finalizing form:', error);
-        showToast('Error: ' + error.message, 'error');
-    }
-});
+                    if (!response.ok) {
+                        const errorMessage = responseData.error ||
+                            responseData.message ||
+                            (responseData.details ? JSON.stringify(responseData.details) : 'Failed to finalize form');
+                        throw new Error(errorMessage);
+                    }
+
+                    showToast('Form finalized successfully! Status changed to Awaiting Payment.', 'success');
+                    finalizeModal.hide();
+
+                    // Clear modal fields
+                    document.getElementById('calendarTitle').value = '';
+                    document.getElementById('calendarDescription').value = '';
+                    document.getElementById('finalizeRemarks').value = '';
+
+                    // Refresh the page to show updated status
+                    fetchRequestDetails();
+
+                } catch (error) {
+                    console.error('Error finalizing form:', error);
+                    showToast('Error: ' + error.message, 'error');
+                }
+            });
 
 
             // Handle individual waiver checkbox changes
@@ -1737,8 +2371,6 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
 
                     const result = await response.json();
 
-                    // Update fees display
-                    document.getElementById('tentativeFee').textContent = `₱${parseFloat(result.tentative_fee).toFixed(2)}`;
                     document.getElementById('totalApprovedFee').textContent = `₱${parseFloat(result.updated_approved_fee).toFixed(2)}`;
 
                     // Refresh the request details to get updated item waiver status
@@ -1797,7 +2429,6 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                     });
 
                     // Update fees display
-                    document.getElementById('tentativeFee').textContent = `₱${parseFloat(result.tentative_fee).toFixed(2)}`;
                     document.getElementById('totalApprovedFee').textContent = `₱${parseFloat(result.updated_approved_fee).toFixed(2)}`;
 
                     // Refresh the request details
@@ -1819,11 +2450,12 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
 
 
 
-            // Function to toggle the placeholder text
-            function togglePlaceholder() {
-                placeholder.style.display = feesContainer.children.length === 0 ? "block" : "none";
+            // Remove the togglePlaceholder function entirely and replace it with:
+            function updateFeesDisplay() {
+                const feesContainer = document.getElementById('additionalFeesContainer');
+                // This function can be used to update the fees display if needed
+                // But we don't need the placeholder logic anymore
             }
-            togglePlaceholder(); // Initial check
 
             // Show the modal when "Add Fee" is clicked
             addFeeBtn.addEventListener("click", function () {
@@ -2159,10 +2791,14 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                         center: 'title',
                         right: 'dayGridMonth,timeGridWeek,timeGridDay'
                     },
-                    height: 'auto',
+                    titleFormat: {
+                        year: 'numeric',
+                        month: 'short'
+                    },
+                    height: '100%',
                     handleWindowResize: true,
                     windowResizeDelay: 200,
-                    aspectRatio: 1.5,
+                    aspectRatio: null,
                     expandRows: true,
                     events: [],
                     eventClick: function (info) {
@@ -2194,12 +2830,12 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                         minute: '2-digit',
                         hour12: true
                     },
-                    slotMinTime: '06:00:00',
-                    slotMaxTime: '22:00:00',
+                    slotMinTime: '00:00:00',
+                    slotMaxTime: '24:00:00',
                     allDaySlot: false,
                     nowIndicator: true,
                     navLinks: true,
-                    dayHeaderFormat: { weekday: 'short', month: 'short', day: 'numeric' },
+                    dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric' },
                     eventDisplay: 'block'
                 });
 
@@ -2213,10 +2849,10 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                 document.getElementById('modalPurpose').textContent = request.form_details.purpose;
                 document.getElementById('modalParticipants').textContent = request.form_details.num_participants;
                 document.getElementById('modalStatus').innerHTML = `
-                    <span class="badge" style="background-color: ${request.form_details.status.color}">
-                        ${request.form_details.status.name}
-                    </span>
-                `;
+                                                                                                <span class="badge" style="background-color: ${request.form_details.status.color}">
+                                                                                                    ${request.form_details.status.name}
+                                                                                                </span>
+                                                                                            `;
                 document.getElementById('modalFee').textContent = `₱${request.fees.tentative_fee}`;
                 document.getElementById('modalApprovals').textContent = `${request.approval_info.approval_count}`;
 
@@ -2272,15 +2908,16 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                         }
 
                         feeElement.innerHTML = `
-                                                                                                                                                                                                                            <span class="item-name">${fee.label}</span>
-                                                                                                                                                                                                                            <span class="item-price">${amountText}</span>
-                                                                                                                                                                                                                        `;
+                                                                                                                                                                                                                                                                                                        <span class="item-name">${fee.label}</span>
+                                                                                                                                                                                                                                                                                                        <span class="item-price">${amountText}</span>
+                                                                                                                                                                                                                                                                                                    `;
                         additionalFeesContainer.appendChild(feeElement);
                     });
                 } else {
                     additionalFeesContainer.innerHTML = '<p class="text-muted">No additional fees or discounts</p>';
                 }
             }
+
 
             // Update the fetchRequestDetails function to initialize calendar after content is visible
             async function fetchRequestDetails() {
@@ -2352,107 +2989,116 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                     statusBadge.textContent = request.form_details.status.name;
                     statusBadge.style.backgroundColor = request.form_details.status.color;
 
-
-                    // Update user details
+                    // Contact information
                     document.getElementById('formDetails').innerHTML = `
-                                                                                                                                                                                                                                                                                                                    <p><strong>Name:</strong> ${request.user_details.first_name} ${request.user_details.last_name}</p>
-                                                                                                                                                                                                                                                                                                                    <p><strong>Email:</strong> ${request.user_details.email}</p>
-                                                                                                                                                                                                                                                                                                                    <p><strong>User Type:</strong> ${request.user_details.user_type}</p>
-                                                                                                                                                                                                                                                                                                                    <p><strong>School ID:</strong> ${request.user_details.school_id || 'N/A'}</p>
-                                                                                                                                                                                                                                                                                                                    <p><strong>Organization:</strong> ${request.user_details.organization_name || 'N/A'}</p>
-                                                                                                                                                                                                                                                                                                                    <p><strong>Contact:</strong> ${request.user_details.contact_number || 'N/A'}</p>
+      <table class="table table-borderless mb-0 small text-start align-top">
+        <tbody>
+          <tr>
+            <!-- Column 1 -->
+            <td>
+              <div><strong>Requester</strong></div>
+              <div>${request.user_details.first_name} ${request.user_details.last_name}</div>
+            </td>
+            <td>
+              <div><strong>School ID</strong></div>
+              <div>${request.user_details.school_id || 'N/A'}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div><strong>Email</strong></div>
+              <div>${request.user_details.email}</div>
+            </td>
+            <td>
+              <div><strong>Organization</strong></div>
+              <div>${request.user_details.organization_name || 'N/A'}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div><strong>User Type</strong></div>
+              <div>${request.user_details.user_type}</div>
+            </td>
+            <td>
+              <div><strong>Contact Number</strong></div>
+              <div>${request.user_details.contact_number || 'N/A'}</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    `;
 
-                                                                                                                                                                                                                                                                                                                    <p><strong>Endorser:</strong> ${request.documents.endorser || 'N/A'}</p>
-                                                                                                                                                                                                                                                                                                                    <p><strong>Date Endorsed:</strong> ${request.documents.date_endorsed || 'N/A'}</p>
-
-                                                                                                                                                                                                                                                                                                                      <p><strong>Purpose:</strong> ${request.form_details.purpose}</p>
-                  <p><strong>Participants:</strong> ${request.form_details.num_participants}</p>
-                  <p><strong>Schedule:</strong> ${formatDateTime(request.schedule)}</p>
-                  <p><strong>Additional Requests:</strong> ${request.form_details.additional_requests || 'None'}</p>                                                                                                                `;
-
+// Event details
+document.getElementById('eventDetails').innerHTML = `
+  <table class="table table-borderless mb-0 small text-start align-top">
+    <tbody>
+      <tr>
+        <td>
+          <div><strong>Endorser</strong></div>
+          <div>${request.documents.endorser || 'N/A'}</div>
+        </td>
+        <td>
+          <div><strong>Date Endorsed</strong></div>
+          <div>${request.documents.date_endorsed || 'N/A'}</div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div><strong>Rental Purpose</strong></div>
+          <div>${request.form_details.purpose}</div>
+        </td>
+        <td>
+          <div><strong>Participants</strong></div>
+          <div>${request.form_details.num_participants}</div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <div><strong>Additional Requests</strong></div>
+          <div>${request.form_details.additional_requests || 'None'}</div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div><strong>Start Schedule</strong></div>
+          <div>${formatStartDateTime(request.schedule)}</div>
+        </td>
+        <td>
+          <div><strong>End Schedule</strong></div>
+          <div>${formatEndDateTime(request.schedule)}</div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+`;
 
                     // Update requested items with fee breakdown and waiver checkboxes
                     document.getElementById('requestedItems').innerHTML = `
-                                                                                                                                                                                                                                                                        <div class="mb-3">
-                                                                                                                                                                                                                                                                            <h6>Facilities:</h6>
-                                                                                                                                                                                                                                                                            ${request.requested_items.facilities.length > 0 ?
-                            request.requested_items.facilities.map(f =>
-                                `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${f.is_waived ? 'waived' : ''}">
-                                                                                                                                                                                                                                                                                        <div class="d-flex align-items-center">
-                                                                                                                                                                                                                                                                                            <div class="form-check me-2">
-                                                                                                                                                                                                                                                                                                <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                                                                                                                                                                                                                                                                    data-type="facility" 
-                                                                                                                                                                                                                                                                                                    data-id="${f.id}"
-                                                                                                                                                                                                                                                                                                    ${f.is_waived ? 'checked' : ''}>
-                                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                                            <span class="item-name">${f.name}</span>
-                                                                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                                                                        <span class="item-price">₱${f.fee}</span>
-                                                                                                                                                                                                                                                                                    </div>`
-                            ).join('') : '<p>No facilities requested</p>'}
+        <div class="mb-3">
+            ${request.requested_items.facilities.length > 0 ? `
+                <h6 class="fw-bold">Facilities:</h6>
+                ${request.requested_items.facilities.map(f =>
+                        `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${f.is_waived ? 'waived' : ''}">
+                        <span class="item-name">${f.name}</span>
+                        <span class="item-price">₱${f.fee}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
+                    </div>`
+                    ).join('')}
+            ` : ''}
 
-                                                                                                                                                                                                                                                                            <h6 class="mt-3">Equipment:</h6>
-                                                                                                                                                                                                                                                                            ${request.requested_items.equipment.length > 0 ?
-                            request.requested_items.equipment.map(e =>
-                                `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${e.is_waived ? 'waived' : ''}">
-                                                                                                                                                                                                                                                                                        <div class="d-flex align-items-center">
-                                                                                                                                                                                                                                                                                            <div class="form-check me-2">
-                                                                                                                                                                                                                                                                                                <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                                                                                                                                                                                                                                                                    data-type="equipment" 
-                                                                                                                                                                                                                                                                                                    data-id="${e.id}"
-                                                                                                                                                                                                                                                                                                    ${e.is_waived ? 'checked' : ''}>
-                                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                                            <span class="item-name">• ${e.name}</span>
-                                                                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                                                                        <span class="item-price">₱${e.fee}</span>
-                                                                                                                                                                                                                                                                                    </div>`
-                            ).join('') : '<p>No equipment requested</p>'}
-                                                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                                                        <div class="d-flex justify-content-end mb-2">
 
-                                                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                                                    `;
 
-                    // Update requested items with fee breakdown and waiver checkboxes
-                    document.getElementById('requestedItems').innerHTML = `
-                                                                                                                                        <div class="mb-3">
-                                                                                                                                            <h6>Facilities:</h6>
-                                                                                                                                            ${request.requested_items.facilities.length > 0 ?
-                            request.requested_items.facilities.map(f =>
-                                `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${f.is_waived ? 'waived' : ''}">
-        <div class="d-flex align-items-center">
-            <div class="form-check me-2">
-                <input class="form-check-input waiver-checkbox" type="checkbox" 
-                    data-type="facility" 
-                    data-id="${f.requested_facility_id}"
-                    ${f.is_waived ? 'checked' : ''}>
-            </div>
-            <span class="item-name">${f.name}</span>
+            ${request.requested_items.equipment.length > 0 ? `
+                <h6 class="mt-3 fw-bold">Equipment:</h6>
+                ${request.requested_items.equipment.map(e =>
+                        `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${e.is_waived ? 'waived' : ''}">
+                        <span class="item-name">${e.name} × ${e.quantity || 1}</span>
+                        <span class="item-price">₱${e.fee}${e.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
+                    </div>`
+                    ).join('')}
+            ` : ''}
         </div>
-        <span class="item-price">₱${f.fee}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
-    </div>`
-                            ).join('') : '<p>No facilities requested</p>'}
+    `;
 
-                                                                                                                                            <h6 class="mt-3">Equipment:</h6>
-                                                                                                                                            ${request.requested_items.equipment.length > 0 ?
-                            request.requested_items.equipment.map(e =>
-                                `<div class="d-flex justify-content-between align-items-center mb-2 item-row ${e.is_waived ? 'waived' : ''}">
-        <div class="d-flex align-items-center">
-            <div class="form-check me-2">
-                <input class="form-check-input waiver-checkbox" type="checkbox" 
-                    data-type="equipment" 
-                    data-id="${e.requested_equipment_id}"
-                    ${e.is_waived ? 'checked' : ''}>
-            </div>
-            <span class="item-name">• ${e.name}</span>
-        </div>
-        <span class="item-price">₱${e.fee}${e.rate_type === 'Per Hour' ? '/hour' : '/event'} × ${e.quantity}</span>
-    </div>`
-                            ).join('') : '<p>No equipment requested</p>'}
-                                                                                                                                        </div>
-                                                                                                                                        <div class="d-flex justify-content-end mb-2">
-                                                                                                                                        </div>
-                                                                                                                                    `;
 
                     // Add event listeners to waiver checkboxes
                     document.querySelectorAll('.waiver-checkbox').forEach(checkbox => {
@@ -2468,105 +3114,72 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
 
 
 
-                    // Update footer fee dynamically
-                    document.getElementById('tentativeFee').textContent = `₱${request.fees.tentative_fee}`;
+                    // Update status cards
+                    document.getElementById('approvalsCount').textContent = request.approval_info.approval_count;
+                    document.getElementById('rejectionsCount').textContent = request.approval_info.rejection_count;
+                    document.getElementById('isLateStatus').textContent = request.status_tracking.is_late ? 'Yes' : 'No';
+                    document.getElementById
+                    // Inside fetchRequestDetails function, update the document cards:
 
+                    // Update document cards with icon color changes
+                    function updateDocumentIcons() {
+                        // Formal Letter
+                        const formalLetterIcon = document.getElementById('formalLetterIcon');
+                        if (request.documents.formal_letter.url) {
+                            formalLetterIcon.classList.remove('text-muted');
+                            formalLetterIcon.classList.add('text-primary');
+                        }
 
-                    // Update form status with Bootstrap Icons and card footers
-                    document.getElementById('formStatus').innerHTML = `
-    <!-- First row: Approvals / Rejections / Late / Penalty -->
-    <div class="d-flex flex-wrap justify-content-between gap-3 mb-4">
-      <div class="text-center small">
-        <div class="bg-success-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px;">
-          <i class="bi bi-check-circle text-success"></i>
-        </div>
-        <div class="card-label fw-bold">Approvals</div>
-        <div>${request.approval_info.approval_count}</div>
-      </div>
+                        // Facility Layout
+                        const facilityLayoutIcon = document.getElementById('facilityLayoutIcon');
+                        if (request.documents.facility_layout.url) {
+                            facilityLayoutIcon.classList.remove('text-muted');
+                            facilityLayoutIcon.classList.add('text-primary');
+                        }
 
-      <div class="text-center small">
-        <div class="bg-danger-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px;">
-          <i class="bi bi-x-circle text-danger"></i>
-        </div>
-        <div class="card-label fw-bold">Rejections</div>
-        <div>${request.approval_info.rejection_count}</div>
-      </div>
+                        // Proof of Payment
+                        const proofOfPaymentIcon = document.getElementById('proofOfPaymentIcon');
+                        if (request.documents.proof_of_payment.url) {
+                            proofOfPaymentIcon.classList.remove('text-muted');
+                            proofOfPaymentIcon.classList.add('text-primary');
+                        }
 
-      <div class="text-center small">
-        <div class="bg-warning-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px;">
-          <i class="bi bi-clock-history text-warning"></i>
-        </div>
-        <div class="card-label fw-bold">Is Late</div>
-        <div>${is_late ? 'Yes' : 'No'}</div>
-      </div>
+                        // Official Receipt
+                        const officialReceiptIcon = document.getElementById('officialReceiptIcon');
+                        if (request.documents.official_receipt.url) {
+                            officialReceiptIcon.classList.remove('text-muted');
+                            officialReceiptIcon.classList.add('text-primary');
+                        }
+                    }
 
-      <div class="text-center small">
-        <div class="bg-info-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px;">
-          <i class="bi bi-cash-coin text-info"></i>
-        </div>
-        <div class="card-label fw-bold">Late Penalty</div>
-        <div>${request.fees.late_penalty_fee ? `₱${request.fees.late_penalty_fee}` : 'N/A'}</div>
-      </div>
-    </div>
+                    // Update document cards
+                    document.getElementById('formalLetterDocument').innerHTML = request.documents.formal_letter.url ?
+                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                data-document-url="${request.documents.formal_letter.url}" data-document-title="Formal Letter">
+            Uploaded
+        </button>` :
+                        '<span class="badge bg-secondary">Not uploaded</span>';
 
+                    document.getElementById('facilityLayoutDocument').innerHTML = request.documents.facility_layout.url ?
+                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                data-document-url="${request.documents.facility_layout.url}" data-document-title="Facility Setup">
+            Uploaded
+        </button>` :
+                        '<span class="badge bg-secondary">Not uploaded</span>';
 
-    <div class="d-flex flex-wrap justify-content-between gap-3">
-      <div class="text-center small">
-        <div class="fw-bold">Formal Letter</div>
-        <div>
-          ${request.documents.formal_letter.url ?
-                            `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-              data-document-url="${request.documents.formal_letter.url}" data-document-title="Formal Letter">
-                View Document
-             </button>` :
-                            'Not uploaded'}
-        </div>
-      </div>
+                    document.getElementById('proofOfPaymentDocument').innerHTML = request.documents.proof_of_payment.url ?
+                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                data-document-url="${request.documents.proof_of_payment.url}" data-document-title="Proof of Payment">
+            Uploaded
+        </button>` :
+                        '<span class="badge bg-secondary">Not uploaded</span>';
 
-      <div class="text-center small">
-        <div class="fw-bold">Facility Setup</div>
-        <div>
-          ${request.documents.facility_layout.url ?
-                            `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-              data-document-url="${request.documents.facility_layout.url}" data-document-title="Facility Setup">
-                View Document
-             </button>` :
-                            'Not uploaded'}
-        </div>
-      </div>
-
-      <div class="text-center small">
-        <div class="fw-bold">Proof of Payment</div>
-        <div>
-          ${request.documents.proof_of_payment.url ?
-                            `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-              data-document-url="${request.documents.proof_of_payment.url}" data-document-title="Proof of Payment">
-                View Document
-             </button>` :
-                            'Not uploaded'}
-        </div>
-      </div>
-
-      <div class="text-center small">
-        <div class="fw-bold">Official Receipt</div>
-        <div>
-          ${request.documents.official_receipt.url ?
-                            `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-              data-document-url="${request.documents.official_receipt.url}" data-document-title="Official Receipt">
-                View Document
-             </button>` :
-                            'Not uploaded'}
-        </div>
-      </div>
-    </div>
-
-
-    `;
-
-
-
-
-
+                    document.getElementById('officialReceiptDocument').innerHTML = request.documents.official_receipt.url ?
+                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                data-document-url="${request.documents.official_receipt.url}" data-document-title="Official Receipt">
+            Uploaded
+        </button>` :
+                        '<span class="badge bg-secondary">Not uploaded</span>';
 
                     // After successful data fetch and updates, show content and hide loading state
                     document.getElementById('loadingState').style.display = 'none';
@@ -2583,10 +3196,10 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                     // Show error state
                     document.getElementById('loadingState').style.display = 'none';
                     document.getElementById('contentState').innerHTML = `
-                                                                                                                                                                                                                                                                                                                    <div class="alert alert-danger">
-                                                                                                                                                                                                                                                                                                                        Failed to load request details. Please try refreshing the page.
-                                                                                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                                                                                `;
+                                                                                                                                                                                                                                                                                                                                                                                                <div class="alert alert-danger">
+                                                                                                                                                                                                                                                                                                                                                                                                    Failed to load request details. Please try refreshing the page.
+                                                                                                                                                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                                                                                                                                                            `;
                     document.getElementById('contentState').style.display = 'block';
                 }
             }
@@ -2607,7 +3220,6 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
             }
 
             // Function to update base fees display
-            // Function to update base fees display
             function updateBaseFees(requestedItems, schedule) {
                 const facilitiesContainer = document.getElementById('facilitiesFees');
                 const equipmentContainer = document.getElementById('equipmentFees');
@@ -2623,13 +3235,11 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
 
                 let totalBaseFees = 0;
 
-                // Add facilities with proper rate type logic
+                // Add facilities with proper rate type logic and waiver checkboxes
                 if (requestedItems.facilities && requestedItems.facilities.length > 0) {
                     requestedItems.facilities.forEach(facility => {
-                        if (facility.is_waived) return; // Skip waived items
-
                         const facilityElement = document.createElement('div');
-                        facilityElement.className = 'fee-item d-flex justify-content-between mb-2';
+                        facilityElement.className = `fee-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ${facility.is_waived ? 'waived' : ''}`;
 
                         let feeAmount = parseFloat(facility.fee);
                         let itemTotal = 0;
@@ -2638,35 +3248,37 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                         if (facility.rate_type === 'Per Hour' && durationHours > 0) {
                             itemTotal = feeAmount * durationHours;
                             rateDescription = `₱${feeAmount.toLocaleString()}/hr × ${durationHours.toFixed(1)} hrs`;
-                            totalBaseFees += itemTotal;
+                            if (!facility.is_waived) totalBaseFees += itemTotal;
                         } else {
                             itemTotal = feeAmount;
                             rateDescription = `₱${feeAmount.toLocaleString()}/event`;
-                            totalBaseFees += itemTotal;
+                            if (!facility.is_waived) totalBaseFees += itemTotal;
                         }
 
                         facilityElement.innerHTML = `
-                    <span class="item-name">
-                        ${facility.name}
-                    </span>
-                    <div class="text-end">
-                        <small>${rateDescription}</small>
-                        <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
-                    </div>
-                `;
+                                                                                    <div class="d-flex align-items-center">
+                                                                                        <div class="form-check me-2">
+                                                                                            <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                                                                data-type="facility" 
+                                                                                                data-id="${facility.requested_facility_id}"
+                                                                                                ${facility.is_waived ? 'checked' : ''}>
+                                                                                        </div>
+                                                                                        <span class="item-name">${facility.name}</span>
+                                                                                    </div>
+                                                                                    <div class="text-end">
+                                                                                        <small>${rateDescription}</small>
+                                                                                        <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                                                                                    </div>
+                                                                                `;
                         facilitiesContainer.appendChild(facilityElement);
                     });
-                } else {
-                    facilitiesContainer.innerHTML = '<p class="text-muted">No facilities requested</p>';
                 }
 
-                // Add equipment with proper rate type logic
+                // Add equipment with proper rate type logic and waiver checkboxes
                 if (requestedItems.equipment && requestedItems.equipment.length > 0) {
                     requestedItems.equipment.forEach(equipment => {
-                        if (equipment.is_waived) return; // Skip waived items
-
                         const equipmentElement = document.createElement('div');
-                        equipmentElement.className = 'fee-item d-flex justify-content-between mb-2';
+                        equipmentElement.className = `fee-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ${equipment.is_waived ? 'waived' : ''}`;
 
                         let unitFee = parseFloat(equipment.fee);
                         const quantity = equipment.quantity || 1;
@@ -2676,41 +3288,79 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                         if (equipment.rate_type === 'Per Hour' && durationHours > 0) {
                             itemTotal = (unitFee * durationHours) * quantity;
                             rateDescription = `₱${unitFee.toLocaleString()}/hr × ${durationHours.toFixed(1)} hrs × ${quantity}`;
-                            totalBaseFees += itemTotal;
+                            if (!equipment.is_waived) totalBaseFees += itemTotal;
                         } else {
                             itemTotal = unitFee * quantity;
                             rateDescription = `₱${unitFee.toLocaleString()}/event × ${quantity}`;
-                            totalBaseFees += itemTotal;
+                            if (!equipment.is_waived) totalBaseFees += itemTotal;
                         }
 
                         equipmentElement.innerHTML = `
-                    <span class="item-name">
-                        ${equipment.name} ${quantity > 1 ? `(×${quantity})` : ''}
-                    </span>
-                    <div class="text-end">
-                        <small>${rateDescription}</small>
-                        <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
-                    </div>
-                `;
+                                                                                    <div class="d-flex align-items-center">
+                                                                                        <div class="form-check me-2">
+                                                                                            <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                                                                data-type="equipment" 
+                                                                                                data-id="${equipment.requested_equipment_id}"
+                                                                                                ${equipment.is_waived ? 'checked' : ''}>
+                                                                                        </div>
+                                                                                        <span class="item-name">
+                                                                                            ${equipment.name} ${quantity > 1 ? `(×${quantity})` : ''}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                    <div class="text-end">
+                                                                                        <small>${rateDescription}</small>
+                                                                                        <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                                                                                    </div>
+                                                                                `;
                         equipmentContainer.appendChild(equipmentElement);
                     });
-                } else {
-                    equipmentContainer.innerHTML = '<p class="text-muted">No equipment requested</p>';
                 }
 
-                // Update the total base fees display if you have one
-                console.log('Total Base Fees:', totalBaseFees);
-                console.log('Facilities:', requestedItems.facilities);
-                console.log('Equipment:', requestedItems.equipment);
-                console.log('Rate types - Facilities:', requestedItems.facilities.map(f => f.rate_type));
-                console.log('Rate types - Equipment:', requestedItems.equipment.map(e => e.rate_type));
+                // Add event listeners to waiver checkboxes in the Fee Breakdown
+                document.querySelectorAll('#baseFeesContainer .waiver-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function () {
+                        handleWaiverChange(this);
+                    });
+                });
+
+                // Debug logging for backend troubleshooting
+                console.log('Base Fees Update:', {
+                    facilities: requestedItems.facilities?.map(f => ({
+                        id: f.requested_facility_id,
+                        name: f.name,
+                        fee: f.fee,
+                        rate_type: f.rate_type,
+                        is_waived: f.is_waived
+                    })),
+                    equipment: requestedItems.equipment?.map(e => ({
+                        id: e.requested_equipment_id,
+                        name: e.name,
+                        fee: e.fee,
+                        rate_type: e.rate_type,
+                        quantity: e.quantity,
+                        is_waived: e.is_waived
+                    })),
+                    durationHours: durationHours,
+                    totalBaseFees: totalBaseFees
+                });
             }
 
-            function formatDateTime(schedule) {
+            function formatStartDateTime(schedule) {
                 const startDate = new Date(schedule.start_date + 'T' + schedule.start_time);
-                const endDate = new Date(schedule.end_date + 'T' + schedule.end_time);
-                return `${startDate.toLocaleString()} to ${endDate.toLocaleString()}`;
+                const dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+                const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+
+                return `${startDate.toLocaleDateString('en-US', dateOptions)} | ${startDate.toLocaleTimeString('en-US', timeOptions)}`;
             }
+
+            function formatEndDateTime(schedule) {
+                const endDate = new Date(schedule.end_date + 'T' + schedule.end_time);
+                const dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+                const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+
+                return `${endDate.toLocaleDateString('en-US', dateOptions)} | ${endDate.toLocaleTimeString('en-US', timeOptions)}`;
+            }
+
 
             // Function to load and display fees
 
@@ -2731,7 +3381,7 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                     feesContainer.innerHTML = '';
 
                     if (fees.length === 0) {
-                        togglePlaceholder();
+                        // No need for placeholder anymore since we're using mixed activity display
                         return;
                     }
 
@@ -2740,8 +3390,6 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                         const feeItem = await createFeeItem(fee);
                         feesContainer.appendChild(feeItem);
                     }
-
-                    togglePlaceholder();
 
                 } catch (error) {
                     console.error('Error loading fees:', error);
@@ -2790,27 +3438,27 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                 }
 
                 feeItem.innerHTML = `
-                                                                                                                                                                                                                                                                            ${adminPhoto ?
+                                                                                                                                                                                                                                                                                                                                                        ${adminPhoto ?
                         `<img src="${adminPhoto}" class="rounded-circle me-3" width="32" height="32" alt="Admin Photo">` :
                         `<i class="bi bi-person-circle fs-5 me-3 text-secondary"></i>`
                     }
-                                                                                                                                                                                                                                                                            <div class="flex-grow-1">
-                                                                                                                                                                                                                                                                                <div class="d-flex justify-content-between align-items-center">
-                                                                                                                                                                                                                                                                                    <div>
-                                                                                                                                                                                                                                                                                        <small class="text-muted fst-italic">
-                                                                                                                                                                                                                                                                                            ${fee.label} (${typeName}) of ₱${amount.toFixed(2)} added by <strong>${adminName}</strong>
-                                                                                                                                                                                                                                                                                        </small>
-                                                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                                                    <button class="btn btn-sm remove-btn text-secondary p-0 border-0">
-        <i class="bi bi-x-lg"></i>
-    </button>
+                                                                                                                                                                                                                                                                                                                                                        <div class="flex-grow-1">
+                                                                                                                                                                                                                                                                                                                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                                                                                                                                                                                                                                                                                                                <div>
+                                                                                                                                                                                                                                                                                                                                                                    <small class="text-muted fst-italic">
+                                                                                                                                                                                                                                                                                                                                                                        ${fee.label} (${typeName}) of ₱${amount.toFixed(2)} added by <strong>${adminName}</strong>
+                                                                                                                                                                                                                                                                                                                                                                    </small>
+                                                                                                                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                                                                                                                                <button class="btn btn-sm remove-btn text-secondary p-0 border-0">
+                                                                                    <i class="bi bi-x-lg"></i>
+                                                                                </button>
 
 
-                                                                                                                                                                                                                                                                                    </button>
-                                                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                                                                <small class="text-muted fst-italic">${timestamp}</small>
-                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                        `;
+                                                                                                                                                                                                                                                                                                                                                                </button>
+                                                                                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                                                                                            <small class="text-muted fst-italic">${timestamp}</small>
+                                                                                                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                                                                                                    `;
 
                 // Add remove functionality for regular fees
                 feeItem.querySelector(".remove-btn").addEventListener("click", async function () {
@@ -2828,7 +3476,7 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
                         }
 
                         feeItem.remove();
-                        togglePlaceholder();
+                        // Remove this line: togglePlaceholder();
                         fetchRequestDetails(); // Refresh fee breakdown
 
                     } catch (error) {
@@ -2860,11 +3508,6 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
             document.getElementById('rejectBtn').addEventListener('click', function () {
                 rejectModal.show();
             });
-
-            // Finalize button handler (from dropdown)
-            // document.getElementById('finalizeBtn').addEventListener('click', function () {
-            //     finalizeModal.show();
-            // });
 
             // Confirm approve action
             document.getElementById('confirmApprove').addEventListener('click', async function () {
@@ -3069,6 +3712,7 @@ document.getElementById('confirmFinalize').addEventListener('click', async funct
             });
 
             fetchRequestDetails();
+
         });
     </script>
 @endsection
