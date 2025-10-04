@@ -1,0 +1,641 @@
+/* Custom light red button */
+.btn-light-danger {
+    background-color: #f8d7da; /* pale red */
+    color: #842029; /* text color */
+    border: 1px solid #842029; /* dark border always visible */
+    transition: all 0.2s ease-in-out; /* smooth hover effect */
+}
+
+/* Hover effect */
+.btn-light-danger:hover {
+    background-color: #f5c2c7; /* slightly darker */
+    border-color: #842029; /* keep border consistent */
+    color: #842029;
+}
+
+        /* Add to your existing CSS */
+        .status-late {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+
+        .status-ongoing {
+            background-color: #1E90FF !important;
+            color: white !important;
+        }
+
+
+        #formDetails strong,
+        #eventDetails strong {
+            display: block;
+            background-color: #e3e6e9b2;
+            color: #373e46ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            font-weight: 600;
+        }
+
+        #formDetails table,
+        #eventDetails table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        #formDetails table th,
+        #formDetails table td,
+        #eventDetails table th,
+        #eventDetails table td {
+            font-size: 0.85rem;
+            white-space: normal;
+            word-wrap: break-word;
+            vertical-align: top;
+            /* keeps header and value aligned vertically */
+        }
+
+
+        #eventSchedule {
+            margin-top: -30px;
+            /* adjust as needed */
+            background-color: transparent !important;
+        }
+
+
+        .fc-event .fc-event-title {
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+            word-break: break-word !important;
+        }
+
+        .fc-event .fc-event-main-frame {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            height: auto !important;
+        }
+
+        .fc-col-header-cell-cushion {
+            font-size: 0.8rem;
+            /* smaller than default */
+            display: block;
+            /* prevents text from causing misalignment */
+        }
+
+        html,
+        body,
+        .calendar-container,
+        #calendar {
+            height: 100%;
+            min-height: 0;
+            /* important for flexbox children */
+        }
+
+        html body main#main {
+            margin-top: 0 !important;
+        }
+
+        .documents-card small {
+            white-space: normal !important;
+            /* override Bootstrap */
+            word-break: break-word;
+            text-align: center;
+            display: block;
+            max-width: 100px;
+            /* optional: keeps cards aligned */
+            margin: 0 auto;
+        }
+
+
+
+
+        /* Only affects buttons inside the Documents card */
+        .documents-card .btn {
+            padding: 0.5em 0.75em;
+            font-size: 0.75rem;
+            line-height: 1;
+            border-radius: 0.3rem;
+            font-weight: 500;
+        }
+
+        /* remove bg, border, shadow ONLY for the small document cards */
+        .documents-card .row>.col-auto>.card {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* animate the part that changes color */
+        .documents-card .row>.col-auto>.card .card-body {
+            transition: background-color 0.2s, transform 0.2s;
+            border-radius: 0.5rem;
+            /* base radius so corners are already rounded */
+        }
+
+        /* hover effect */
+        .documents-card .row>.col-auto>.card:hover .card-body {
+            background-color: rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+            cursor: pointer;
+            border-radius: 0.75rem;
+            /* slightly softer/larger radius on hover */
+        }
+
+
+        .item-price {
+            margin-left: 1px;
+            /* adjust value as needed */
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-divider {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            margin: 1rem 0;
+        }
+
+        .card-header {
+            min-height: 56px;
+            width: 100%;
+        }
+
+
+        .card:not(.this-class-does-not-exist) {
+            border: none !important;
+            border-color: transparent !important;
+            outline: none !important;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+
+
+        .card-badge-btn {
+            display: inline-block;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: #0d6efd;
+            /* default primary look */
+            border: none;
+            border-radius: 50rem;
+            /* pill shape like badges */
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .card-badge-btn:hover {
+            background-color: #0b5ed7;
+            /* slightly darker on hover */
+        }
+
+
+        /* Messenger-style chat bubbles */
+        .message-bubble {
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+            background-color: #dce6eeff !important;
+            /* Your custom color */
+            color: black !important;
+            border-top-left-radius: 0% !important;
+        }
+
+        /* Smooth scrolling for comments container */
+        .comments-container {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar for comments */
+        .card-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .card-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .card-body::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        .card-body::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .card-body small {
+            font-size: 0.75rem;
+        }
+
+
+        /* Loading animation */
+        .comment-loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        /* Empty state styling */
+        .empty-comments {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+
+        .empty-comments i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        #main {
+            background-color: none !important;
+        }
+
+        /* Modern Status Selector Styles */
+        .status-selector-container {
+            display: inline-block;
+            z-index: 1000;
+        }
+
+        .btn-status-expand {
+            width: 60px;
+            height: 40px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            font-size: 1.1rem;
+            border: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-status-expand:hover {
+            width: 200px;
+            justify-content: flex-start;
+            padding-left: 15px;
+            background-color: #fff;
+            border-color: #ced4da;
+        }
+
+        .btn-status-expand .btn-text {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-left: 10px;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        .btn-status-expand:hover .btn-text {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .status-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 215px;
+            background: white;
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin-top: 0.1rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            display: none;
+            /* hidden by default */
+        }
+
+        .status-selector-container:hover .status-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            display: block;
+            /* Bootstrap dropdown normally uses display:none */
+        }
+
+        .status-option {
+            display: flex;
+            align-items: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .status-option:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-option i {
+            margin-right: 10px;
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .status-option span {
+            font-size: 0.9rem;
+        }
+
+        /* Allow event text to wrap inside timeGrid events */
+        .fc-timegrid-event .fc-event-title,
+        .fc-timegrid-event .fc-event-time {
+            white-space: normal;
+            /* allow line breaks */
+            overflow-wrap: break-word;
+            /* break long words if necessary */
+            word-break: break-word;
+            /* extra safety for long words */
+        }
+
+        .fc-timegrid-event {
+            height: auto !important;
+            /* let the event grow with content */
+            min-height: 2.5em;
+            /* optional minimum height */
+        }
+
+        #formStatus .badge {
+            font-size: 0.85em;
+            padding: 0.35em 0.65em;
+            vertical-align: middle;
+            /* or top */
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            border: none !important;
+            color: inherit !important;
+            /* keeps text color same as parent */
+            padding: 0.375rem 0.75rem;
+            /* same as default btn padding */
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-ghost:hover {
+            background-color: #e0e0e0 !important;
+            /* light gray hover */
+            border: none !important;
+        }
+
+        :root {
+            --primary-color: #003366;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #0d6efd;
+            --light-bg: #f8f9fa;
+            --card-radius: 8px;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-switch .form-check-input:checked {
+            background-color: #eeaf01ff;
+            /* Bootstrap primary color */
+            border-color: #eeaf01ff;
+        }
+
+        .fc-header-toolbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 0;
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.75em;
+        }
+
+
+
+        /* Improved Skeleton Loading */
+        .skeleton {
+            background: #eee;
+            background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+            background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @keyframes shine {
+            to {
+                background-position-x: -200%;
+            }
+        }
+
+        .skeleton-circle {
+            border-radius: 50%;
+        }
+
+        .skeleton-text {
+            height: 1em;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .skeleton-card {
+            height: 100%;
+            min-height: 150px;
+            border-radius: 0.375rem;
+        }
+
+        .skeleton-card-title {
+            width: 70%;
+            height: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .skeleton-card-text {
+            width: 90%;
+            height: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .skeleton-card-text:last-child {
+            width: 80%;
+        }
+
+        .skeleton-img {
+            width: 100%;
+            height: 100%;
+            min-height: 120px;
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+
+        .item-row {
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .item-row:hover {
+            background-color: rgba(0, 51, 102, 0.05);
+        }
+
+        .item-row.waived,
+        .waived .item-name,
+        .waived .item-price {
+            opacity: 0.7;
+            text-decoration: line-through;
+            color: #999;
+        }
+
+
+        .admin-container .card {
+            border: none;
+            border-color: none;
+            background-color: none;
+        }
+
+        /* Calendar container adjustments */
+        .calendar-container {
+            height: 500px;
+            min-height: 350px;
+            overflow: hidden;
+        }
+
+        #calendar {
+            height: 100% !important;
+            font-size: 0.9rem;
+        }
+
+        /* Compact spacing */
+        .row.g-3 {
+            --bs-gutter-y: 0.75rem;
+            --bs-gutter-x: 0.75rem;
+        }
+
+        /* Breadcrumb adjustments */
+        .breadcrumb {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        /* Form elements */
+        .form-control,
+        .btn {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        /* Text sizes */
+        p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Modal adjustments */
+        .modal-body {
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .admin-container {
+                padding: 0.75rem;
+                max-width: 100%;
+            }
+
+            .calendar-container {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .admin-container {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Custom styling for the fee items */
+        .fee-item {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 10px;
+            ;
+
+        }
+
+        /* Make the remark textarea resize automatically */
+        .card-footer textarea {
+            resize: none;
+            overflow-y: hidden;
+            transition: height 0.2s ease-in-out;
+
+        }
+
+        /* Style for the icon-only remove button */
+        .btn-icon {
+            padding: 0.25rem 0.5rem;
+            line-height: 1;
+        }
+
+        .btn-light-danger {
+            background-color: #fbe9e9;
+            color: #dc3545;
+            border: none;
+        }
+
+        .btn-light-danger:hover {
+            background-color: #f8d7da;
+            color: #dc3545;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #003366;
+            color: white;
+            border: none;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 9999;
+            /* Increased z-index */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background-color: #002244;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }

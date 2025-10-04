@@ -47,7 +47,7 @@ return new class extends Migration
             $table->time('end_time');
 
             // late returns 
-            $table->decimal('late_penalty_fee', 10, 2)->nullable();
+            $table->decimal('late_penalty_fee', 10, 2)->default(0);
             $table->boolean('is_late')->default(false);
             $table->dateTime('returned_at')->nullable();
 
@@ -71,7 +71,7 @@ return new class extends Migration
             $table->timestamps();
 
             // calendar event details
-            $table->string('calendar_title', 50)->nullable();
+            $table->string('calendar_title', 50)->default('No Calendar Title');
             $table->string('calendar_description', 100)->nullable();
 
             // Foreign Keys
