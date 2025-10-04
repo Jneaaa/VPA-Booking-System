@@ -359,12 +359,6 @@
                                             <!-- Quantity & Pricing Section -->
                                             <div class="row mb-4">
                                                 <div class="col-md-3">
-                                                    <label for="totalQuantity" class="form-label fw-bold">Total
-                                                        Quantity</label>
-                                                    <input type="number" class="form-control" id="totalQuantity" min="1"
-                                                        value="1" required>
-                                                </div>
-                                                <div class="col-md-3">
                                                     <label for="rentalFee" class="form-label fw-bold">Rental Fee
                                                         (₱)</label>
                                                     <div class="input-group">
@@ -1562,7 +1556,7 @@
                         document.getElementById('description').value = equipment.description || '';
                         document.getElementById('brand').value = equipment.brand || '';
                         document.getElementById('storageLocation').value = equipment.storage_location;
-                        document.getElementById('totalQuantity').value = equipment.total_quantity;
+                       
                         document.getElementById('rentalFee').value = equipment.external_fee;
                         document.getElementById('minRentalHours').value = equipment.maximum_rental_hour || 1;
 
@@ -1907,7 +1901,7 @@
                             brand: document.getElementById('brand').value,
                             storage_location: document.getElementById('storageLocation').value,
                             category_id: document.getElementById('category').value,
-                            total_quantity: document.getElementById('totalQuantity').value,
+                           
                             external_fee: document.getElementById('rentalFee').value,
                             rate_type: document.getElementById('rateType').value,
                             status_id: document.getElementById('availabilityStatus').value,

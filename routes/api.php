@@ -205,6 +205,8 @@ Route::prefix('requisition')->middleware('web')->group(function () {
     Route::post('/clear-session', [RequisitionFormController::class, 'clearSession']);
 });
 
+    Route::post('/admin/requisition/auto-mark-late', [AdminApprovalController::class, 'autoMarkLateForms']);
+
 // ---------------- Admin Authentication ---------------- //
 
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->middleware('throttle:5,1');
@@ -234,9 +236,11 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware
 
 Route::middleware('auth:sanctum')->group(function () {
 
+    Route::get('/admin/requisition/{requestId}/approval-history', [AdminApprovalController::class, 'getApprovalHistory']);
 
     // ---- Admin Approval Routes ---- //
     Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'pendingRequests']);
+    Route::get('/admin/requisition-forms/{requestId}', [AdminApprovalController::class, 'getRequisitionFormById']);
     Route::get('/admin/simplified-forms', [AdminApprovalController::class, 'getSimplifiedForms']);
     Route::get('/admin/completed-requests', [AdminApprovalController::class, 'completedRequests']);
     Route::get('/admin/profile', function (Request $request) {

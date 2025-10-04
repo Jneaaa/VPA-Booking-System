@@ -65,10 +65,6 @@
             color: var(--cpu-text-dark);
         }
 
-        .fc-event {
-            color: var(--cpu-text-dark);
-        }
-
         .fc-day-today {
             background: #f3f4f7ff !important;
         }
