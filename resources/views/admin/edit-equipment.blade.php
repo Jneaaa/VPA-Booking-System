@@ -248,31 +248,23 @@
                                             <div class="row mb-4">
 
 
-                                                <div class="col-md-6">
-                                                    <label for="equipmentName"
-                                                        class="form-label fw-bold d-flex align-items-center">
-                                                        Equipment Name
+<div class="col-md-6">
+    <label for="equipmentName" class="form-label fw-bold d-flex align-items-center">
+        Equipment Name
+        <i class="bi bi-pencil text-secondary ms-2 edit-icon" data-field="equipmentName" style="cursor: pointer;"></i>
+        <div class="edit-actions ms-2 d-none" data-field="equipmentName">
+            <button type="button" class="btn btn-sm btn-success me-1 save-btn">
+                <i class="bi bi-check"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-danger cancel-btn">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </label>
 
-                                                        <!-- edit icon (default) -->
-                                                        <i class="bi bi-pencil text-secondary ms-2"
-                                                            id="editEquipmentName" style="cursor: pointer;"></i>
+    <input type="text" class="form-control text-secondary" id="equipmentName" value="HD Projector" readonly>
+</div>
 
-                                                        <!-- save + cancel buttons (hidden at first) -->
-                                                        <div id="editActions" class="ms-2 d-none">
-                                                            <button type="button" class="btn btn-sm btn-success me-1"
-                                                                id="saveEquipmentName">
-                                                                <i class="bi bi-check"></i>
-                                                            </button>
-                                                            <button type="button" class="btn btn-sm btn-danger"
-                                                                id="cancelEquipmentName">
-                                                                <i class="bi bi-x"></i>
-                                                            </button>
-                                                        </div>
-                                                    </label>
-
-                                                    <input type="text" class="form-control text-secondary"
-                                                        id="equipmentName" value="HD Projector" readonly>
-                                                </div>
 
 
                                                 <div class="col-md-6">

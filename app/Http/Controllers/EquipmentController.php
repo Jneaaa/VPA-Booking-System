@@ -87,8 +87,6 @@ class EquipmentController extends Controller
             'brand' => 'nullable|string|max:80',
             'storage_location' => 'required|string|max:50',
             'category_id' => 'required|exists:equipment_categories,category_id',
-            'total_quantity' => 'required|integer|min:1',
-            'internal_fee' => 'required|numeric|min:0',
             'external_fee' => 'required|numeric|min:0',
             'rate_type' => 'required|in:Per Hour,Per Event',
             'status_id' => 'required|exists:availability_statuses,status_id',
@@ -108,11 +106,6 @@ class EquipmentController extends Controller
             'images.*.image_type' => 'required|exists:image_types,image_type',
         ]);
 
-        $user = auth()->user();
-
-        if (!$user->departments->pluck('department_id')->contains($data['department_id'])) {
-            return response()->json(['message' => 'You do not manage this department.'], 403);
-        }
 
         $equipment = Equipment::create([
             'equipment_name' => $data['equipment_name'],
@@ -120,14 +113,12 @@ class EquipmentController extends Controller
             'brand' => $data['brand'] ?? null,
             'storage_location' => $data['storage_location'],
             'category_id' => $data['category_id'],
-            'total_quantity' => $data['total_quantity'],
-            'internal_fee' => $data['internal_fee'],
             'external_fee' => $data['external_fee'],
             'rate_type' => $data['rate_type'],
             'status_id' => $data['status_id'],
             'department_id' => $data['department_id'],
             'maximum_rental_hour' => $data['maximum_rental_hour'],
-            'created_by' => $user->admin_id
+            'created_by' => auth()->id()
         ]);
 
         // Optional: Handle items and images if provided
@@ -187,8 +178,6 @@ class EquipmentController extends Controller
             'brand' => 'nullable|string|max:255',
             'storage_location' => 'required|string|max:255',
             'category_id' => 'required|exists:equipment_categories,category_id',
-            'total_quantity' => 'required|integer|min:0',
-            'internal_fee' => 'required|numeric|min:0',
             'external_fee' => 'required|numeric|min:0',
             'rate_type' => 'required|in:Per Hour,Per Event',
             'status_id' => 'required|exists:availability_statuses,status_id',
@@ -198,13 +187,6 @@ class EquipmentController extends Controller
 
         $equipment = Equipment::findOrFail($id);
         
-        // Check if user has permission to update this equipment
-        $user = auth()->user();
-        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
-            return response()->json([
-                'message' => 'You do not manage this equipment.'
-            ], 403);
-        }
 
         $equipment->update($validated);
 
@@ -352,12 +334,6 @@ public function saveImageReference(Request $request, $equipmentId): JsonResponse
         // Find the equipment
         $equipment = Equipment::findOrFail($equipmentId);
 
-        // Check if the user is authorized to upload for this equipment
-        $user = auth()->user();
-        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
-            return response()->json(['message' => 'You do not manage this equipment.'], 403);
-        }
-
         // Upload to Cloudinary
         $uploaded = Cloudinary::upload(
             $request->file('image')->getRealPath(),
@@ -401,12 +377,6 @@ public function saveImageReference(Request $request, $equipmentId): JsonResponse
 
         // Find the equipment
         $equipment = Equipment::findOrFail($equipmentId);
-
-        // Authorization: ensure the admin manages this equipment's department
-        $user = auth()->user();
-        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
-            return response()->json(['message' => 'You do not manage this equipment.'], 403);
-        }
 
         $currentImageCount = $equipment->images()->count();
         $typeId = $validated['image_type'] ?? null;
@@ -472,22 +442,6 @@ public function saveImageReference(Request $request, $equipmentId): JsonResponse
         // Find the equipment
         $equipment = Equipment::findOrFail($equipmentId);
         \Log::info('Equipment found', ['equipment_id' => $equipment->equipment_id]);
-
-        // Check authorization
-        $user = auth()->user();
-        \Log::info('User info', [
-            'user_id' => $user->id,
-            'user_departments' => $user->departments->pluck('department_id'),
-            'equipment_department' => $equipment->department_id
-        ]);
-        
-        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
-            \Log::warning('Unauthorized delete attempt', [
-                'user_departments' => $user->departments->pluck('department_id'),
-                'equipment_department' => $equipment->department_id
-            ]);
-            return response()->json(['message' => 'You do not manage this equipment.'], 403);
-        }
 
         // Find the image
         $image = $equipment->images()->findOrFail($imageId);
@@ -568,12 +522,6 @@ public function saveImageReference(Request $request, $equipmentId): JsonResponse
         ]);
 
         $equipment = Equipment::findOrFail($equipmentId);
-        $user = auth()->user();
-
-        // Authorization check
-        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
-            return response()->json(['message' => 'You do not manage this equipment.'], 403);
-        }
 
         foreach ($request->input('order') as $position => $imageId) {
             $equipment->images()->where('image_id', $imageId)
@@ -600,8 +548,6 @@ public function saveImageReference(Request $request, $equipmentId): JsonResponse
                 'category_id' => $equipment->category_id,
                 'category_name' => $equipment->category->category_name,
             ],
-            'total_quantity' => $equipment->total_quantity,
-            'internal_fee' => $equipment->internal_fee,
             'external_fee' => $equipment->external_fee,
             'rate_type' => $equipment->rate_type,
             'status' => [
@@ -635,8 +581,6 @@ public function saveImageReference(Request $request, $equipmentId): JsonResponse
                 'category_id' => $equipment->category_id,
                 'category_name' => $equipment->category->category_name,
             ],
-            'total_quantity' => $equipment->total_quantity,
-            'internal_fee' => $equipment->internal_fee,
             'external_fee' => $equipment->external_fee,
             'rate_type' => $equipment->rate_type,
             'status' => [
@@ -750,18 +694,6 @@ public function updateItem(Request $request, $equipmentId, $itemId): JsonRespons
             'cloudinary_public_id' => 'nullable|string'
         ]);
 
-        $equipment = Equipment::findOrFail($equipmentId);
-        
-        // Authorization check
-        $user = auth()->user();
-        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
-            \Log::warning('Unauthorized update attempt for equipment item', [
-                'user_id' => $user->admin_id,
-                'equipment_id' => $equipmentId,
-                'item_id' => $itemId
-            ]);
-            return response()->json(['message' => 'You do not manage this equipment.'], 403);
-        }
 
         $item = EquipmentItem::where('equipment_id', $equipmentId)
             ->where('item_id', $itemId)
@@ -774,13 +706,13 @@ public function updateItem(Request $request, $equipmentId, $itemId): JsonRespons
             'item_notes' => $validated['item_notes'] ?? $item->item_notes,
             'image_url' => $validated['image_url'] ?? $item->image_url,
             'cloudinary_public_id' => $validated['cloudinary_public_id'] ?? $item->cloudinary_public_id,
-            'updated_by' => $user->admin_id
+            'updated_by' => auth()->id()
         ]);
 
         \Log::info('Equipment item updated successfully', [
             'item_id' => $itemId,
             'equipment_id' => $equipmentId,
-            'updated_by' => $user->admin_id
+            'updated_by' => auth()->id()
         ]);
 
         return response()->json([
@@ -810,18 +742,9 @@ public function deleteItem($equipmentId, $itemId)
             ->where('item_id', $itemId)
             ->firstOrFail();
 
-        // Authorization check - ensure user manages this equipment's department
-        $user = auth()->user();
-        $equipment = Equipment::findOrFail($equipmentId);
+
         
-        if (!$user->departments->pluck('department_id')->contains($equipment->department_id)) {
-            \Log::warning('Unauthorized delete attempt for equipment item', [
-                'user_id' => $user->admin_id,
-                'equipment_id' => $equipmentId,
-                'item_id' => $itemId
-            ]);
-            return response()->json(['message' => 'You do not manage this equipment.'], 403);
-        }
+
 
         // Store public ID before deletion
         $publicId = $item->cloudinary_public_id;

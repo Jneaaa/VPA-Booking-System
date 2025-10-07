@@ -18,8 +18,6 @@ return new class extends Migration
             $table->string('brand', 80)->default('Not applicable.');
             $table->string('storage_location', 50)->default('No storage location specified.');
             $table->unsignedTinyInteger('category_id');
-            $table->unsignedInteger('total_quantity')->default(1);
-            $table->decimal('internal_fee', 10, 2)->nullable();
             $table->decimal('external_fee', 10, 2);
             $table->enum('rate_type', ['Per Hour', 'Per Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');
@@ -52,11 +50,7 @@ return new class extends Migration
             $table->index(['category_id', 'status_id'], 'idx_equipment_category_status');
             $table->index(['department_id', 'status_id'], 'idx_equipment_dept_status');
             $table->index(['status_id', 'category_id'], 'idx_equipment_status_category');
-            $table->index(['internal_fee', 'status_id'], 'idx_equipment_fee_status');
-            
-            // Index for availability and quantity queries
-            $table->index(['status_id', 'total_quantity'], 'idx_equipment_availability');
-            
+
             // Text search optimization (if using MySQL/PostgreSQL full-text search)
             // $table->fullText(['equipment_name', 'description'], 'idx_equipment_fulltext');
         });

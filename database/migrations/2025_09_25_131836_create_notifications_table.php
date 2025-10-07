@@ -6,25 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('notifications', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('type');
-            $table->morphs('notifiable');
-            $table->text('data');
-            $table->timestamp('read_at')->nullable();
+            $table->id('notification_id');
+            $table->foreignId('admin_id')->constrained('admins', 'admin_id');
+            $table->string('type'); // 'new_requisition', 'status_update', etc.
+            $table->text('message');
+            $table->foreignId('request_id')->nullable()->constrained('requisition_forms', 'request_id');
+            $table->boolean('is_read')->default(false);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('notifications');
     }
