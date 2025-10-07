@@ -41,7 +41,6 @@ class FacilityFactory extends Factory
             'capacity'            => $this->faker->numberBetween(10, 300),
             'department_id'       => 1,
             'location_type' => $this->faker->randomElement(['Indoors', 'Outdoors']),
-            'internal_fee'         => $this->faker->randomFloat(2, 100, 1000),
             'external_fee'         => $this->faker->randomFloat(2, 100, 1000),
             'rate_type'           => $this->faker->randomElement(['Per Hour', 'Per Event']),
             'status_id'           => $this->faker->numberBetween(1, 3),

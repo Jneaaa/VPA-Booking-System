@@ -79,7 +79,6 @@ class FacilityController extends Controller
                 'color_code' => $facility->status->color_code,
             ],
             'parent_facility_id' => $facility->parent_facility_id,
-            'room_code' => $facility->room_code,
             'floor_level' => $facility->floor_level,
             'building_code' => $facility->building_code,
             'total_levels' => $facility->total_levels,
@@ -109,7 +108,7 @@ public function store(Request $request)
         $data = $request->validate([
             'facility_name' => 'required|string|max:50',
             'description' => 'nullable|string|max:250',
-            'location_note' => 'required|string|max:200',
+            'location_note' => 'nullable|string|max:200',
             'capacity' => 'required|integer|min:1',
             'category_id' => 'required|exists:facility_categories,category_id',
             'subcategory_id' => 'nullable|exists:facility_subcategories,subcategory_id',
@@ -119,7 +118,6 @@ public function store(Request $request)
             'rate_type' => 'required|in:Per Hour,Per Event',
             'status_id' => 'required|exists:availability_statuses,status_id',
             'parent_facility_id' => 'nullable|exists:facilities,facility_id',
-            'room_code' => 'nullable|string|max:50',
             'floor_level' => 'nullable|integer|min:1',
             'building_code' => 'nullable|string|max:20',
             'total_levels' => 'nullable|integer|min:1',
@@ -131,7 +129,7 @@ public function store(Request $request)
 
         $facility = Facility::create([
             'facility_name' => $data['facility_name'],
-            'description' => $data['description'] ?? null,
+            'description' => $data['description'],
             'location_note' => $data['location_note'],
             'capacity' => $data['capacity'],
             'category_id' => $data['category_id'],
@@ -142,7 +140,6 @@ public function store(Request $request)
             'rate_type' => $data['rate_type'],
             'status_id' => $data['status_id'],
             'parent_facility_id' => $data['parent_facility_id'] ?? null,
-            'room_code' => $data['room_code'] ?? null,
             'floor_level' => $data['floor_level'] ?? null,
             'building_code' => $data['building_code'] ?? null,
             'total_levels' => $data['total_levels'] ?? null,
@@ -209,7 +206,6 @@ public function update(Request $request, $id)
         'rate_type' => 'required|in:Per Hour,Per Event',
         'status_id' => 'required|exists:availability_statuses,status_id',
         'parent_facility_id' => 'nullable|exists:facilities,facility_id',
-        'room_code' => 'nullable|string|max:50',
         'floor_level' => 'nullable|integer|min:1',
         'building_code' => 'nullable|string|max:20',
         'total_levels' => 'nullable|integer|min:1',
@@ -220,7 +216,7 @@ public function update(Request $request, $id)
 
     $facility->update([
         'facility_name' => $data['facility_name'],
-        'description' => $data['description'] ?? null,
+        'description' => $data['description'],
         'location_note' => $data['location_note'],
         'capacity' => $data['capacity'],
         'category_id' => $data['category_id'],
@@ -231,7 +227,6 @@ public function update(Request $request, $id)
         'rate_type' => $data['rate_type'],
         'status_id' => $data['status_id'],
         'parent_facility_id' => $data['parent_facility_id'] ?? null,
-        'room_code' => $data['room_code'] ?? null,
         'floor_level' => $data['floor_level'] ?? null,
         'building_code' => $data['building_code'] ?? null,
         'total_levels' => $data['total_levels'] ?? null,
@@ -253,25 +248,29 @@ public function update(Request $request, $id)
 }
 
     // ----- Destroy - Delete facility ----- //
-    public function destroy($id)
-    {
-        $facility = Facility::findOrFail($id);
-        $user = auth()->user();
+   public function destroy($id)
+{
+    $facility = Facility::findOrFail($id);
+    $user = auth()->user();
 
-        // Soft delete tracking
-        $facility->update([
-            'deleted_by' => $user->admin_id,
-        ]);
+    // Track who deleted it
+    $facility->update([
+        'deleted_by' => $user->admin_id,
+    ]);
 
-        // Remove related records
-        $facility->images()->delete();
+    // Delete related images (if relationship exists)
+    $facility->images()->delete();
 
-        // Delete facility record
-        $facility->delete();
+    // Soft delete the facility
+    $facility->delete();
 
-        return redirect()->route('admin.manage-facilities')
-            ->with('success', 'Facility deleted successfully!');
-    }
+    // Return JSON for the frontend
+    return response()->json([
+        'message' => 'Facility deleted successfully!',
+        'facility_id' => $id
+    ], 200);
+}
+
 
     // ----- Show - View single facility (optional) ----- //
     public function show($id)
@@ -329,7 +328,7 @@ public function uploadImage(Request $request, $facilityId): JsonResponse
         'image_url' => $imageUrl,
         'type_id' => $imageType,
         'cloudinary_public_id' => $publicId,
-        'description' => $validated['description'] ?? null,
+        'description' => $validated['description'],
         'sort_order' => $facility->images()->count() + 1
     ]);
 

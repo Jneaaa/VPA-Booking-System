@@ -134,7 +134,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::post('admin/add-facilities', [FacilityController::class, 'store']);
+    Route::post('admin/add-facility', [FacilityController::class, 'store']);
     Route::put('admin/facilities/{facilityId}', [FacilityController::class, 'update']);
     Route::delete('/admin/facilities/{facilityId}', [FacilityController::class, 'destroy']);
     Route::get('facilities/get-categories', [FacilityController::class, 'create']);
