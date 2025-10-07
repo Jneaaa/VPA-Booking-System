@@ -380,16 +380,15 @@
                                 </div>
 
                                 <!-- Barcode Preview -->
-                                <div class="barcode-container d-none mt-3" id="barcodeContainer">
-                                    <div id="barcodePreview"></div>
-                                    <div class="barcode-number" id="barcodeNumberDisplay"></div>
-                                    <div class="mt-2">
-                                        <button type="button" class="btn btn-sm btn-outline-primary"
-                                            id="downloadBarcodeBtn">
-                                            <i class="bi bi-download"></i> Download
-                                        </button>
-                                    </div>
-                                </div>
+                               <div class="barcode-container d-none mt-3" id="barcodeContainer">
+    <img id="barcodePreview" class="barcode-preview" src="" alt="Barcode">
+    <div class="barcode-number" id="barcodeNumberDisplay"></div>
+    <div class="mt-2">
+        <button type="button" class="btn btn-sm btn-outline-primary" id="downloadBarcodeBtn">
+            <i class="bi bi-download"></i> Download
+        </button>
+    </div>
+</div>
                             </div>
 
                             <!-- Notes -->
@@ -431,7 +430,7 @@
                     return;
                 }
 
-                // 3. Delete item function (copied from edit-equipment)
+                // 3. Delete item function (needs to be defined before event handlers)
                 window.deleteItem = async function (itemId, cloudinaryPublicId, event) {
                     if (event) {
                         event.preventDefault();
@@ -458,7 +457,7 @@
                     }
                 };
 
-                // 4. Open edit item modal function (copied from edit-equipment)
+                // 4. Open edit item modal function (needs to be defined before event handlers)
                 window.openEditItemModal = function (itemId, event) {
                     if (event) {
                         event.preventDefault();
@@ -880,7 +879,7 @@
                     });
                 }
 
-                // 17. Initialize Inventory Item Modal
+                               // 18. Initialize Inventory Item Modal
                 const addItemBtn = document.getElementById('addItemBtn');
                 if (addItemBtn) {
                     const inventoryItemModal = new bootstrap.Modal('#inventoryItemModal');
@@ -897,34 +896,9 @@
                     const barcodePreview = document.getElementById('barcodePreview');
                     const downloadBarcodeBtn = document.getElementById('downloadBarcodeBtn');
                     const barcodeInput = document.getElementById('barcode');
-                    const barcodeNumberDisplay = document.getElementById('barcodeNumberDisplay');
 
                     let itemPhotoFile = null;
                     let itemCloudinaryPublicId = null;
-
-// Handle barcode generation
-if (generateBarcodeBtn && barcodeInput) {
-    generateBarcodeBtn.addEventListener('click', function () {
-        const barcodeValue = barcodeInput.value.trim() || 'EQ' + Date.now();
-        barcodeInput.value = barcodeValue;
-
-        // Generate barcode
-        try {
-            JsBarcode(barcodePreview, barcodeValue, {
-                format: "CODE128",
-                lineColor: "#000",
-                width: 2,
-                height: 40,
-                displayValue: true
-            });
-
-            barcodeContainer.classList.remove('d-none');
-        } catch (error) {
-            console.error('Barcode generation error:', error);
-            showToast('Failed to generate barcode', 'error');
-        }
-    });
-}
 
                     addItemBtn.addEventListener('click', () => {
                         document.getElementById('itemForm').reset();
@@ -933,63 +907,7 @@ if (generateBarcodeBtn && barcodeInput) {
                         itemCloudinaryPublicId = null;
                         if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'block';
                         if (removePhotoBtn) removePhotoBtn.classList.add('d-none');
-                        if (barcodeContainer) barcodeContainer.classList.add('d-none');
-                        currentEditingItemId = null;
-
-                        document.querySelector('#inventoryItemModal .modal-title').textContent = 'Add Inventory Item';
-                        document.getElementById('saveItemBtn').textContent = 'Save Item';
-
                         inventoryItemModal.show();
-                    });
-
-                    // Handle barcode generation
-                    if (generateBarcodeBtn && barcodeInput) {
-                        generateBarcodeBtn.addEventListener('click', function () {
-                            const newBarcode = generateValidBarcode();
-                            barcodeInput.value = newBarcode;
-
-                            // Generate barcode visual
-                            try {
-                                // Clear previous barcode
-                                barcodePreview.innerHTML = '';
-
-                                // Create canvas for barcode
-                                const canvas = document.createElement('canvas');
-                                JsBarcode(canvas, newBarcode, {
-                                    format: "CODE128",
-                                    lineColor: "#000",
-                                    width: 2,
-                                    height: 40,
-                                    displayValue: false
-                                });
-
-                                barcodePreview.appendChild(canvas);
-                                barcodeNumberDisplay.textContent = newBarcode;
-                                barcodeContainer.classList.remove('d-none');
-                            } catch (error) {
-                                console.error('Barcode generation error:', error);
-                                showToast('Failed to generate barcode', 'error');
-                            }
-                        });
-                    }
-
-                    // Handle barcode download
-                    if (downloadBarcodeBtn && barcodePreview) {
-                        downloadBarcodeBtn.addEventListener('click', function () {
-                            const canvas = barcodePreview.querySelector('canvas');
-                            if (!canvas) return;
-
-                            const link = document.createElement('a');
-                            link.download = 'barcode-' + (barcodeInput.value || 'equipment') + '.png';
-                            link.href = canvas.toDataURL('image/png');
-                            link.click();
-                        });
-                    }
-
-                    // Auto-generate barcode when modal opens
-                    document.getElementById('inventoryItemModal').addEventListener('show.bs.modal', function () {
-                        const newBarcode = generateValidBarcode();
-                        barcodeInput.value = newBarcode;
                     });
 
                     // Handle item photo upload
@@ -1003,8 +921,8 @@ if (generateBarcodeBtn && barcodeInput) {
                                     if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
                                     if (itemPhotoPreview) {
                                         itemPhotoPreview.innerHTML = `
-                                <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
-                            `;
+                                    <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
+                                `;
                                     }
 
                                     // Store the file for later processing
@@ -1104,106 +1022,141 @@ if (generateBarcodeBtn && barcodeInput) {
                         });
                     }
 
-                 // Save item functionality
-if (saveItemBtn) {
-    saveItemBtn.addEventListener('click', async function () {
-        const itemName = document.getElementById('itemName')?.value;
-        const itemCondition = document.getElementById('itemCondition')?.value;
-        const barcode = document.getElementById('barcode')?.value || '';
-        const notes = document.getElementById('itemNotes')?.value || '';
+                    // Handle barcode generation
+                    if (generateBarcodeBtn && barcodeInput) {
+                        generateBarcodeBtn.addEventListener('click', function () {
+                            const barcodeValue = barcodeInput.value.trim() || 'EQ' + Date.now();
+                            barcodeInput.value = barcodeValue;
 
-        if (!itemName || !itemCondition) {
-            showToast('Please fill in all required fields', 'error');
-            return;
-        }
+                            // Generate barcode
+                            try {
+                                JsBarcode(barcodePreview, barcodeValue, {
+                                    format: "CODE128",
+                                    lineColor: "#000",
+                                    width: 2,
+                                    height: 40,
+                                    displayValue: true
+                                });
 
-        try {
-            let imageUrl = 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp';
-            let publicId = 'oxvsxogzu9koqhctnf7s';
-
-            // Create a temporary item object
-            const tempItem = {
-                item_id: currentEditingItemId || 'temp-' + Date.now(),
-                item_name: itemName,
-                condition_id: itemCondition,
-                condition: { condition_name: document.getElementById('itemCondition').options[document.getElementById('itemCondition').selectedIndex].text },
-                barcode_number: barcode,
-                item_notes: notes,
-                image_url: imageUrl,
-                cloudinary_public_id: publicId
-            };
-
-            // Handle photo changes
-            if (itemPhotoFile) {
-                // Store file for processing on form submit
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    tempItem.image_url = e.target.result;
-
-                    // Update UI with temporary image
-                    if (currentEditingItemId) {
-                        updateItemInUI(tempItem);
-                    } else {
-                        addItemToUI(tempItem);
+                                barcodeContainer.classList.remove('d-none');
+                            } catch (error) {
+                                console.error('Barcode generation error:', error);
+                                showToast('Failed to generate barcode', 'error');
+                            }
+                        });
                     }
-                };
-                reader.readAsDataURL(itemPhotoFile);
 
-                // Store for processing on form submit
-                pendingItemPhotoChanges.set(tempItem.item_id, {
-                    action: currentEditingItemId ? 'update' : 'create',
-                    itemData: {
-                        item_name: itemName,
-                        condition_id: itemCondition,
-                        barcode_number: barcode,
-                        item_notes: notes
-                    },
-                    file: itemPhotoFile
-                });
-            } else if (currentEditingItemId) {
-                // Keep existing photo if not changed
-                const existingItem = equipmentItems.find(i => i.item_id === currentEditingItemId);
-                if (existingItem) {
-                    tempItem.image_url = existingItem.image_url;
-                    tempItem.cloudinary_public_id = existingItem.cloudinary_public_id;
-                }
-
-                // Mark for update (no photo change)
-                pendingItemPhotoChanges.set(currentEditingItemId, {
-                    action: 'update',
-                    itemData: {
-                        item_name: itemName,
-                        condition_id: itemCondition,
-                        barcode_number: barcode,
-                        item_notes: notes
+                    // Handle barcode download
+                    if (downloadBarcodeBtn && barcodePreview) {
+                        downloadBarcodeBtn.addEventListener('click', function () {
+                            const canvas = barcodePreview;
+                            const link = document.createElement('a');
+                            link.download = 'barcode-' + (barcodeInput.value || 'equipment') + '.png';
+                            link.href = canvas.toDataURL('image/png');
+                            link.click();
+                        });
                     }
-                });
 
-                updateItemInUI(tempItem);
-            } else {
-                // New item without photo
-                addItemToUI(tempItem);
-                pendingItemPhotoChanges.set(tempItem.item_id, {
-                    action: 'create',
-                    itemData: {
-                        item_name: itemName,
-                        condition_id: itemCondition,
-                        barcode_number: barcode,
-                        item_notes: notes
+                    // Save item functionality
+                    if (saveItemBtn) {
+                        saveItemBtn.addEventListener('click', async function () {
+                            const itemName = document.getElementById('itemName')?.value;
+                            const itemCondition = document.getElementById('itemCondition')?.value;
+                            const barcode = document.getElementById('barcode')?.value || '';
+                            const notes = document.getElementById('itemNotes')?.value || '';
+
+                            if (!itemName || !itemCondition) {
+                                showToast('Please fill in all required fields', 'error');
+                                return;
+                            }
+
+                            try {
+                                let imageUrl = 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp';
+                                let publicId = 'oxvsxogzu9koqhctnf7s';
+
+                                // Create a temporary item object
+                                const tempItem = {
+                                    item_id: currentEditingItemId || 'temp-' + Date.now(),
+                                    item_name: itemName,
+                                    condition_id: itemCondition,
+                                    condition: { condition_name: document.getElementById('itemCondition').options[document.getElementById('itemCondition').selectedIndex].text },
+                                    barcode_number: barcode,
+                                    item_notes: notes,
+                                    image_url: imageUrl,
+                                    cloudinary_public_id: publicId
+                                };
+
+                                // Handle photo changes
+                                if (itemPhotoFile) {
+                                    // Store file for processing on form submit
+                                    const reader = new FileReader();
+                                    reader.onload = (e) => {
+                                        tempItem.image_url = e.target.result;
+
+                                        // Update UI with temporary image
+                                        if (currentEditingItemId) {
+                                            updateItemInUI(tempItem);
+                                        } else {
+                                            addItemToUI(tempItem);
+                                        }
+                                    };
+                                    reader.readAsDataURL(itemPhotoFile);
+
+                                    // Store for processing on form submit
+                                    pendingItemPhotoChanges.set(tempItem.item_id, {
+                                        action: currentEditingItemId ? 'update' : 'create',
+                                        itemData: {
+                                            item_name: itemName,
+                                            condition_id: itemCondition,
+                                            barcode_number: barcode,
+                                            item_notes: notes
+                                        },
+                                        file: itemPhotoFile
+                                    });
+                                } else if (currentEditingItemId) {
+                                    // Keep existing photo if not changed
+                                    const existingItem = equipmentItems.find(i => i.item_id === currentEditingItemId);
+                                    if (existingItem) {
+                                        tempItem.image_url = existingItem.image_url;
+                                        tempItem.cloudinary_public_id = existingItem.cloudinary_public_id;
+                                    }
+
+                                    // Mark for update (no photo change)
+                                    pendingItemPhotoChanges.set(currentEditingItemId, {
+                                        action: 'update',
+                                        itemData: {
+                                            item_name: itemName,
+                                            condition_id: itemCondition,
+                                            barcode_number: barcode,
+                                            item_notes: notes
+                                        }
+                                    });
+
+                                    updateItemInUI(tempItem);
+                                } else {
+                                    // New item without photo
+                                    addItemToUI(tempItem);
+                                    pendingItemPhotoChanges.set(tempItem.item_id, {
+                                        action: 'create',
+                                        itemData: {
+                                            item_name: itemName,
+                                            condition_id: itemCondition,
+                                            barcode_number: barcode,
+                                            item_notes: notes
+                                        }
+                                    });
+                                }
+
+                                //  showToast(currentEditingItemId ? 'Item changes staged!' : 'Item staged for creation!', 'success');//
+                                inventoryItemModal.hide();
+                                currentEditingItemId = null;
+
+                            } catch (error) {
+                                console.error('Error saving item:', error);
+                                showToast('Failed to save item: ' + error.message, 'error');
+                            }
+                        });
                     }
-                });
-            }
-
-            inventoryItemModal.hide();
-            currentEditingItemId = null;
-
-        } catch (error) {
-            console.error('Error saving item:', error);
-            showToast('Failed to save item: ' + error.message, 'error');
-        }
-    });
-}
-
                     // Handle confirm delete button click
                     document.getElementById('confirmDeleteImageBtn').addEventListener('click', async function () {
                         try {
