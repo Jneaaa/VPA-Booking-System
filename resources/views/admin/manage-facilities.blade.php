@@ -159,11 +159,29 @@
           </div>
         </div>
       </div>
+      <!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this facility? This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Facility</button>
+      </div>
+    </div>
+  </div>
+</div>
   </main>
 </div>
 @endsection
 @section('scripts')
-  <!-- Combined JS resources -->
+  <script src="{{ asset('js/admin/toast.js') }}"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
 
@@ -453,57 +471,74 @@ card.innerHTML = `
         searchInput.addEventListener("input", filterFacilities);
       }
 
-      // Add event listeners to manage and delete buttons
+       // Add event listeners to manage and delete buttons
       function addButtonEventListeners() {
-        // Manage buttons
-        document.querySelectorAll(".btn-manage").forEach((button) => {
-          button.addEventListener("click", function () {
-            const facilitiesId = this.dataset.id;
-            window.location.href = `edit-facilities.html?id=${facilitiesId}`;
-          });
+      // Manage buttons
+      document.querySelectorAll(".btn-manage").forEach((button) => {
+        button.addEventListener("click", function () {
+          const facilitiesId = this.dataset.id;
+          window.location.href = `edit-facilities.html?id=${facilitiesId}`;
         });
+      });
 
-        // Delete buttons
-        document.querySelectorAll(".btn-delete").forEach((button) => {
-          button.addEventListener("click", async function () {
-            const facilitiesId = this.dataset.id;
-            if (confirm("Are you sure you want to delete this facilities?")) {
-              try {
-                await deleteFacilities(facilitiesId);
-                await fetchFacilities(); // Refresh the list
-              } catch (error) {
-                console.error("Error deleting facilities:", error);
-                alert("Failed to delete facilities");
-              }
-            }
-          });
+      // Delete buttons
+      document.querySelectorAll(".btn-delete").forEach((button) => {
+        button.addEventListener("click", function () {
+          const facilityId = this.dataset.id;
+          showDeleteConfirmation(facilityId);
         });
-      }
+      });
+    }
 
-      // Delete facilities
-      async function deleteFacilities(id) {
-        try {
-          const response = await fetch(
-            `http://127.0.0.1:8000/api/admin/facilities/${id}`,
-            {
-              method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: "application/json",
-              },
-            }
-          );
+    // Show delete confirmation modal
+    function showDeleteConfirmation(facilityId) {
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+      
+      // Set up the confirmation button
+      confirmDeleteBtn.onclick = async function() {
+        await handleDeleteFacility(facilityId);
+        // Hide modal after action
+        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmationModal'));
+        modal.hide();
+      };
+      
+      // Show the modal
+      const modal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+      modal.show();
+    }
 
-          if (!response.ok) {
-            throw new Error("Failed to delete facilities");
+     
+    // Handle facility deletion
+    async function handleDeleteFacility(id) {
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/api/admin/facilities/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+            },
           }
+        );
 
-          return true;
-        } catch (error) {
-          console.error("Error deleting facilities:", error);
-          throw error;
+        if (!response.ok) {
+          throw new Error("Failed to delete facility");
         }
+
+        // Show success message
+         showToast("Facility deleted successfully!", 'success');
+        
+        // Refresh the facilities list
+        await fetchFacilities();
+        
+        return true;
+      } catch (error) {
+        console.error("Error deleting facility:", error);
+        showToast("Failed to delete facility", 'error');
+        throw error;
       }
+    }
 
       // Filter Facilities based on all criteria
       function filterFacilities() {

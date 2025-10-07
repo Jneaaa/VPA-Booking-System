@@ -371,7 +371,6 @@ async function init() {
         });
       }
 
-    // Render equipment cards
 // Render equipment cards
 function renderEquipment(equipmentList) {
   loadingIndicator.classList.add("d-none");
@@ -410,79 +409,95 @@ function renderEquipment(equipmentList) {
   for (let i = startIndex; i < endIndex; i++) {
     const equipment = equipmentList[i];
     const statusClass = getStatusClass(equipment.status.status_name);
-    const primaryImage =
-      equipment.images?.find((img) => img.type_id === 1)?.image_url ||
-      "https://res.cloudinary.com/dn98ntlkd/image/upload/v1750895337/oxvsxogzu9koqhctnf7s.webp"
+    
+   // Find primary image - check if images array exists and has valid images
+let primaryImage = "https://res.cloudinary.com/dn98ntlkd/image/upload/v1759850278/t4fyv56wog6pglhwvwtn.png";
+
+if (equipment.images && equipment.images.length > 0) {
+  const validImages = equipment.images.filter(img => img.image_url && img.image_url.trim() !== '');
+  
+  if (validImages.length > 0) {
+    const sortOrder1Image = validImages.find(img => img.sort_order === 1);
+    const primaryTypeImage = validImages.find(img => img.image_type === "Primary");
+    
+    primaryImage = sortOrder1Image?.image_url || 
+                  primaryTypeImage?.image_url || 
+                  validImages[0]?.image_url || 
+                  primaryImage;
+  }
+}
 
     const card = document.createElement("div");
     card.dataset.status = equipment.status.status_id.toString();
     card.dataset.category = equipment.category.category_id.toString();
     card.dataset.title = equipment.equipment_name.toLowerCase();
 
-    if (layout === "list") {
-      // List layout
-      card.className = "col-12 equipment-card mb-3";
-      card.innerHTML = `
-        <div class="card h-100 shadow-sm rounded-3">
-          <div class="row g-0">
-            <div class="col-md-2" style="max-width: 120px; flex: 0 0 120px;">
-              <img src="${primaryImage}" 
-                   class="img-fluid rounded-start h-100 w-100" 
-                   style="object-fit: cover;" 
-                   alt="${equipment.equipment_name}">
-            </div>
-            <div class="col-md-8">
-              <div class="card-body py-3">
-                <h5 class="card-title fw-bold mb-2">${equipment.equipment_name}</h5>
-                <p class="card-text mb-2">
-                  <span class="badge ${statusClass} me-2">${equipment.status.status_name}</span>
-                  <small class="text-muted">
-                    <i class="bi bi-tag-fill text-primary me-1"></i>${equipment.category.category_name}
-                  </small>
-                </p>
-                <p class="card-text text-muted mb-0">
-                  ${equipment.description || "No description available"}
-                </p>
-              </div>
-            </div>
-            <div class="col-md-2 d-flex align-items-center justify-content-center">
-              <div class="d-grid gap-2 w-100 px-2">
-                <a href="/admin/edit-equipment?id=${equipment.equipment_id}" 
-                   class="btn btn-sm btn-primary">
-                   Manage
-                </a>
-                <button class="btn btn-sm btn-outline-danger btn-delete" 
-                        data-id="${equipment.equipment_id}">
-                  Delete
-                </button>
-              </div>
-            </div>
+  if (layout === "list") {
+  // List layout
+  card.className = "col-12 equipment-card mb-0";
+  card.innerHTML = `
+    <div class="card h-100 shadow-sm rounded-3">
+      <div class="row g-0">
+        <div class="col-md-2" style="max-width: 120px; flex: 0 0 120px;">
+          <img src="${primaryImage}" 
+               class="img-fluid rounded-start" 
+               style="width: 120px; height: 120px; object-fit: cover;" 
+               alt="${equipment.equipment_name}">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body py-3">
+            <h5 class="card-title fw-bold mb-2">${equipment.equipment_name}</h5>
+            <p class="card-text mb-2">
+              <span class="badge ${statusClass} me-2">${equipment.status.status_name}</span>
+<small class="text-muted">
+  <i class="bi bi-tag-fill text-primary me-1"></i>${equipment.category.category_name}
+  <i class="bi bi-box-fill text-primary ms-2 me-1"></i>${equipment.available_quantity}/${equipment.total_quantity} available
+</small>
+            </p>
+            <p class="card-text text-muted mb-0">
+              ${equipment.description || "No description available"}
+            </p>
           </div>
         </div>
-      `;
+        <div class="col-md-2 d-flex align-items-center justify-content-center">
+          <div class="d-grid gap-2 w-100 px-2">
+            <a href="/admin/edit-equipment?id=${equipment.equipment_id}" 
+               class="btn btn-sm btn-primary">
+               Manage
+            </a>
+            <button class="btn btn-sm btn-outline-danger btn-delete" 
+                    data-id="${equipment.equipment_id}">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
     } else {
-      // Grid layout
-      card.className = "col-md-4 col-lg-3 equipment-card mb-3";
-      card.innerHTML = `
-        <div class="card h-100">
-          <img src="${primaryImage}" class="card-img-top" style="height: 120px; object-fit: cover;" alt="${equipment.equipment_name}">
-          <div class="card-body d-flex flex-column p-2">
-            <div>
-              <h6 class="card-title mb-1 fw-bold">${equipment.equipment_name}</h6>
-              <p class="card-text text-muted mb-1 small">
-                <i class="bi bi-tag-fill text-primary me-1"></i>${equipment.category.category_name}
-              </p>
-              <span class="badge ${statusClass} mb-2">${equipment.status.status_name}</span>
-              <p class="card-text mb-2 small text-truncate">${equipment.description || "No description available"}</p>
-            </div>
-            <div class="equipment-actions mt-auto d-grid gap-1">
-              <a href="/admin/edit-equipment?id=${equipment.equipment_id}" class="btn btn-sm btn-primary btn-manage">Manage</a>
-              <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${equipment.equipment_id}">Delete</button>
-            </div>
-          </div>
+  // Grid layout
+  card.className = "col-md-4 col-lg-3 equipment-card mb-3";
+  card.innerHTML = `
+    <div class="card h-100">
+      <img src="${primaryImage}" class="card-img-top" style="height: 150px; object-fit: cover;" alt="${equipment.equipment_name}">
+      <div class="card-body d-flex flex-column p-2">
+        <div>
+          <h6 class="card-title mb-1 fw-bold">${equipment.equipment_name}</h6>
+<p class="card-text text-muted mb-1 small">
+  <i class="bi bi-tag-fill text-primary me-1"></i>${equipment.category.category_name}
+  <i class="bi bi-box-fill text-primary ms-2 me-1"></i>${equipment.available_quantity}/${equipment.total_quantity}
+</p>
+          <span class="badge ${statusClass} mb-2">${equipment.status.status_name}</span>
+          <p class="card-text mb-2 small text-truncate">${equipment.description || "No description available"}</p>
         </div>
-      `;
-    }
+        <div class="equipment-actions mt-auto d-grid gap-1">
+          <a href="/admin/edit-equipment?id=${equipment.equipment_id}" class="btn btn-sm btn-primary btn-manage">Manage</a>
+          <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${equipment.equipment_id}">Delete</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
     container.appendChild(card);
   }

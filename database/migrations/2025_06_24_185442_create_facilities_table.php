@@ -17,7 +17,6 @@ return new class extends Migration
             $table->unsignedBigInteger('parent_facility_id')->nullable();
 
             // for rooms
-            $table->string('room_code', 50)->nullable();
             $table->unsignedTinyInteger('floor_level')->default(1)->nullable();
 
             // for buildings 
@@ -37,7 +36,6 @@ return new class extends Migration
             $table->enum('location_type', ['Indoors', 'Outdoors']);
 
             // fees and rates
-            $table->decimal('internal_fee', 10, 2)->nullable();
             $table->decimal('external_fee', 10, 2);
             $table->enum('rate_type', ['Per Hour', 'Per Event'])->default('Per Hour');
             $table->unsignedTinyInteger('status_id');

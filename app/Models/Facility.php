@@ -16,7 +16,6 @@ class Facility extends Model
         'parent_facility_id',
         'facility_name',
         'description',
-        'room_code',
         'floor_level',
         'building_code',
         'total_levels',
