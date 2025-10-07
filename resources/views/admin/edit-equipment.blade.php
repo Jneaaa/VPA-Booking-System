@@ -4,6 +4,11 @@
 
 @section('content')
 <style>
+    #barcode[readonly] {
+    background-color: #e9ecef;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
     .barcode-container {
         margin-top: 10px;
         text-align: center;
@@ -248,23 +253,31 @@
                                             <div class="row mb-4">
 
 
-<div class="col-md-6">
-    <label for="equipmentName" class="form-label fw-bold d-flex align-items-center">
-        Equipment Name
-        <i class="bi bi-pencil text-secondary ms-2 edit-icon" data-field="equipmentName" style="cursor: pointer;"></i>
-        <div class="edit-actions ms-2 d-none" data-field="equipmentName">
-            <button type="button" class="btn btn-sm btn-success me-1 save-btn">
-                <i class="bi bi-check"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-danger cancel-btn">
-                <i class="bi bi-x"></i>
-            </button>
-        </div>
-    </label>
+                                                <div class="col-md-6">
+                                                    <label for="equipmentName"
+                                                        class="form-label fw-bold d-flex align-items-center">
+                                                        Equipment Name
 
-    <input type="text" class="form-control text-secondary" id="equipmentName" value="HD Projector" readonly>
-</div>
+                                                        <!-- edit icon (default) -->
+                                                        <i class="bi bi-pencil text-secondary ms-2"
+                                                            id="editEquipmentName" style="cursor: pointer;"></i>
 
+                                                        <!-- save + cancel buttons (hidden at first) -->
+                                                        <div id="editActions" class="ms-2 d-none">
+                                                            <button type="button" class="btn btn-sm btn-success me-1"
+                                                                id="saveEquipmentName">
+                                                                <i class="bi bi-check"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-sm btn-danger"
+                                                                id="cancelEquipmentName">
+                                                                <i class="bi bi-x"></i>
+                                                            </button>
+                                                        </div>
+                                                    </label>
+
+                                                    <input type="text" class="form-control text-secondary"
+                                                        id="equipmentName" value="HD Projector" readonly>
+                                                </div>
 
 
                                                 <div class="col-md-6">
@@ -600,6 +613,8 @@
                     document.getElementById('barcode').value = item.barcode_number || '';
                     document.getElementById('itemNotes').value = item.item_notes || '';
 
+                    document.getElementById('barcode').setAttribute('readonly', true);
+
                     // Set the photo preview
                     const itemPhotoPreview = document.getElementById('itemPhotoPreview');
                     const itemPhotoDropzone = document.getElementById('itemPhotoDropzone');
@@ -613,6 +628,12 @@
                         itemPhotoPreview.innerHTML = '';
                         itemPhotoDropzone.style.display = 'block';
                         removePhotoBtn.classList.add('d-none');
+                    }
+
+                      // HIDE the generate barcode button in edit mode
+                    const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
+                    if (generateBarcodeBtn) {
+                        generateBarcodeBtn.style.display = 'none';
                     }
 
                     // Store the current editing item ID
@@ -1129,6 +1150,11 @@
                         itemCloudinaryPublicId = null;
                         if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'block';
                         if (removePhotoBtn) removePhotoBtn.classList.add('d-none');
+                          // SHOW the generate barcode button in add mode
+    const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
+    if (generateBarcodeBtn) {
+        generateBarcodeBtn.style.display = 'block';
+    }
                         inventoryItemModal.show();
                     });
 
