@@ -37,6 +37,18 @@ class Admin extends Authenticatable
     protected $with = ['role'];  // Always load the role relationship
 
     // ----- Role Assignment ----- //
+
+public function notifications()
+{
+    return $this->hasMany(Notification::class, 'admin_id', 'admin_id');
+}
+
+public function unreadNotifications()
+{
+    return $this->notifications()->where('is_read', false);
+}
+
+
     public function role()
     {
         return $this->belongsTo(LookupTables\AdminRole::class, 'role_id', 'role_id');

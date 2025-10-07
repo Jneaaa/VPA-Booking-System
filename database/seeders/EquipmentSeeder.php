@@ -13,7 +13,6 @@ class EquipmentSeeder extends Seeder
             // --- SOUND SYSTEMS ---
             [
                 'equipment_name' => 'Sound System (Basic with 2 mics, Player)',
-                'internal_fee' => 200.00,
                 'external_fee' => 5000.00,
                 'rate_type' => 'Per Hour',
                 'category_id' => 1, // Please change to your actual category ID
@@ -25,7 +24,6 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Sound System (Large with Sub, Digital Mixer, Processors)',
-                'internal_fee' => 400.00,
                 'external_fee' => 10000.00,
                 'rate_type' => 'Per Hour',
                 'category_id' => 1,
@@ -37,7 +35,6 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Additional Speakers',
-                'internal_fee' => 50.00,
                 'external_fee' => 5000.00,
                 'rate_type' => 'Per Hour',
                 'category_id' => 1,
@@ -49,8 +46,7 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Additional Mics',
-                'internal_fee' => 50.00,
-                'external_fee' => 0.00, // Was null in image
+                'external_fee' => 700.00, // Was null in image
                 'rate_type' => 'Per Hour',
                 'category_id' => 1,
                 'status_id' => 1,
@@ -63,7 +59,6 @@ class EquipmentSeeder extends Seeder
             // --- LIGHTS & EFFECTS ---
             [
                 'equipment_name' => 'Lights (RGB Parled with Dimmer)',
-                'internal_fee' => 100.00,
                 'external_fee' => 600.00,
                 'rate_type' => 'Per Event', // Was 'Per Piece, Show'
                 'category_id' => 2, // Assuming new category
@@ -75,7 +70,6 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Moving Heads (with Controller)',
-                'internal_fee' => 600.00,
                 'external_fee' => 1200.00,
                 'rate_type' => 'Per Event', // Was 'Per Piece, Show'
                 'category_id' => 2,
@@ -87,7 +81,6 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Smoke Machine',
-                'internal_fee' => 500.00,
                 'external_fee' => 600.00,
                 'rate_type' => 'Per Event', // Was 'Piece, Show'
                 'category_id' => 2,
@@ -99,7 +92,6 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Follow Spot',
-                'internal_fee' => 800.00,
                 'external_fee' => 1500.00,
                 'rate_type' => 'Per Event', // Was 'Show'
                 'category_id' => 2,
@@ -113,7 +105,6 @@ class EquipmentSeeder extends Seeder
             // --- VISUAL & CONFERENCE ---
             [
                 'equipment_name' => 'Projector (3200 Ansi Lumens)',
-                'internal_fee' => 200.00,
                 'external_fee' => 5000.00,
                 'rate_type' => 'Per Hour', // Default
                 'category_id' => 3, // Assuming new category
@@ -125,7 +116,6 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'TV (65 inch)',
-                'internal_fee' => 200.00,
                 'external_fee' => 0.00, // Was null in image
                 'rate_type' => 'Per Hour', // Default
                 'category_id' => 3,
@@ -137,8 +127,7 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Conference System (16 Delegates)',
-                'internal_fee' => 1500.00,
-                'external_fee' => 0.00, // Was null in image
+                'external_fee' => 200.00, // Was null in image
                 'rate_type' => 'Per Event',
                 'category_id' => 3,
                 'status_id' => 1,
@@ -151,7 +140,6 @@ class EquipmentSeeder extends Seeder
             // --- MUSICAL INSTRUMENTS & ACCESSORIES ---
             [
                 'equipment_name' => 'Drum Set (Yamaha, 6 piece with throne)',
-                'internal_fee' => 800.00,
                 'external_fee' => 3500.00,
                 'rate_type' => 'Per Event', // Was 'Per Show'
                 'category_id' => 4, // Assuming new category
@@ -163,7 +151,6 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Guitar Amplifier (Base, Guitar, Keyboard)',
-                'internal_fee' => 400.00,
                 'external_fee' => 3000.00,
                 'rate_type' => 'Per Event', // Was 'Per Show'
                 'category_id' => 4,
@@ -175,7 +162,6 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'HDMI Splitter and Accessories',
-                'internal_fee' => 100.00,
                 'external_fee' => 0.00, // Was null in image
                 'rate_type' => 'Per Event',
                 'category_id' => 5, // Assuming new category
@@ -187,7 +173,6 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Capture Card/Sound Card',
-                'internal_fee' => 100.00,
                 'external_fee' => 0.00, // Was null in image
                 'rate_type' => 'Per Event',
                 'category_id' => 5,
@@ -199,8 +184,7 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Mic Stand',
-                'internal_fee' => 10.00,
-                'external_fee' => 0.00, // Was null in image
+                'external_fee' => 100.00, // Was null in image
                 'rate_type' => 'Per Event',
                 'category_id' => 5,
                 'status_id' => 1,
@@ -211,8 +195,7 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Keyboard',
-                'internal_fee' => 100.00,
-                'external_fee' => 0.00, // Was null in image
+                'external_fee' => 100.00, // Was null in image
                 'rate_type' => 'Per Event',
                 'category_id' => 4,
                 'status_id' => 1,
@@ -223,8 +206,7 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Lapel Mic/Hedworn Mic',
-                'internal_fee' => 0.00, // Was null in image
-                'external_fee' => 0.00, // Was null in image
+                'external_fee' => 100.00, // Was null in image
                 'rate_type' => 'Per Hour', // Default
                 'category_id' => 1,
                 'status_id' => 1,
@@ -235,8 +217,7 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Wireless Mic',
-                'internal_fee' => 0.00, // Was null in image
-                'external_fee' => 0.00, // Was null in image
+                'external_fee' => 100.00, // Was null in image
                 'rate_type' => 'Per Hour', // Default
                 'category_id' => 1,
                 'status_id' => 1,
@@ -247,7 +228,6 @@ class EquipmentSeeder extends Seeder
             ],
             [
                 'equipment_name' => 'Communication System',
-                'internal_fee' => 3500.00,
                 'external_fee' => 5000.00,
                 'rate_type' => 'Per Event', // Was 'Per Show'
                 'category_id' => 1,

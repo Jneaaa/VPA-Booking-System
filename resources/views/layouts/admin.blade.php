@@ -6,11 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'CPU Booking')</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <style>
+
+        #markAllAsRead {
+            color: #2664b6ff !important; 
+            text-decoration: none;    
+        }
+
+        #markAllAsRead:hover {
+            color: #14407aff !important; 
+        }
+
+
         .text-primary {
             color: var(--cpu-primary) !important;
         }
@@ -133,38 +145,44 @@
         }
 
         /* Global thin scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px; /* for horizontal scrollbars */
-}
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            /* for horizontal scrollbars */
+        }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
 
-::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-}
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
 
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.35);
-}
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 0, 0, 0.35);
+        }
 
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-}
+        /* Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        }
 
 
         #sidebar .nav-link {
             color: #5b6a7aff;
             margin-bottom: -1px;
             transition: all 0.2s ease;
-            
-
+            flex: 1;
+            text-align: left;
         }
+
+        #sidebar .badge {
+            margin-left: auto;
+        }
+
 
         #sidebar .nav-link:hover {
             background-color: rgba(80, 128, 206, 0.1);
@@ -172,12 +190,25 @@
 
         #sidebar .nav-link.active {
             background-color: rgba(80, 128, 206, 0.1);
+            font-weight: 500;
         }
 
         /* Hidden nav items */
         .nav-item.hidden {
             display: none !important;
+            margin-bottom: 4px;
         }
+
+        #sidebar .nav-link .nav-icon {
+            width: 24px;
+            text-align: center;
+        }
+
+        #sidebar .nav-link span {
+            flex: 1;
+            text-align: left;
+        }
+
 
 
         /* Topbar Styles */
@@ -383,8 +414,41 @@
             </span>
         </div>
 
-        <!-- Right side: dropdown menu -->
-        <div class="d-flex align-items-center">
+        <!-- Right side: notification bell + dropdown menu -->
+        <div class="d-flex align-items-center gap-3">
+            <!-- Notification Bell -->
+            <div class="dropdown">
+                <button class="btn btn-link p-0 text-white position-relative" id="notificationDropdownButton"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa-solid fa-inbox three-dots-icon"></i>
+                    <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end" id="notificationDropdown" style="width: 350px;">
+                    <li class="dropdown-header d-flex justify-content-between align-items-center">
+                        <span>Notifications</span>
+                        <button class="btn btn-sm btn-link p-0" id="markAllAsRead">Mark all as read</button>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <div id="notificationList" class="px-2" style="max-height: 300px; overflow-y: auto;">
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                            <span class="ms-2">Loading notifications...</span>
+                        </div>
+                    </div>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li class="text-center">
+                        <a href="{{ url('/admin/manage-requests') }}" class="dropdown-item text-primary">View All
+                            Requisitions</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- User Menu Dropdown -->
             <div class="dropdown">
                 <button class="btn btn-link p-0 text-white" id="dropdownMenuButton" data-bs-toggle="dropdown"
                     aria-expanded="false">
@@ -395,8 +459,9 @@
                     <li>
                         <hr class="dropdown-divider">
                     </li>
-                    <li><a class="dropdown-item text-danger" href="{{ url('/admin/admin-login') }}" id="logoutLink"><i
-                                class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    <li><a class="dropdown-item text-danger" href="{{ url('/admin/admin-login') }}" id="logoutLink">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        </a></li>
                 </ul>
             </div>
         </div>
@@ -440,7 +505,7 @@
                     href="{{ url('/admin/dashboard') }}">
                     <div class="d-flex align-items-center">
                         <div class="nav-icon p-1 rounded me-2">
-                            <i class="bi bi-speedometer2 me-2"></i>
+                            <i class="fa-solid fa-house me-2"></i>
                         </div>
                         <span>Dashboard</span>
                     </div>
@@ -458,7 +523,7 @@
                     href="{{ url('/admin/calendar') }}">
                     <div class="d-flex align-items-center">
                         <div class="nav-icon p-1 rounded me-2">
-                            <i class="bi bi-calendar-event me-1"></i>
+                            <i class="fa-solid fa-calendar me-1"></i>
                         </div>
                         <span>Calendar</span>
                     </div>
@@ -473,12 +538,16 @@
             </li>
             <li class="nav-item mb-1" id="requisitions-nav-item" style="display: none;">
                 <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/manage-requests*') ? 'active' : '' }}"
-                    href="{{ url('/admin/manage-requests') }}">
-                    <div class="d-flex align-items-center">
-                        <div class="nav-icon p-1 rounded me-2">
-                            <i class="bi bi-file-earmark-text me-2"></i>
+                    href="{{ url('/admin/manage-requests') }}" id="requisitionsNavLink">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="nav-icon p-1 rounded me-2">
+                                <i class="fa-solid fa-file-lines me-2"></i>
+                            </div>
+                            <span>Requisitions</span>
                         </div>
-                        <span>Requisitions</span>
+                        <span id="requisitionNotificationBadge" class="badge bg-danger ms-2"
+                            style="display: none;">0</span>
                     </div>
                 </a>
             </li>
@@ -494,7 +563,7 @@
                     href="{{ url('/admin/manage-facilities') }}">
                     <div class="d-flex align-items-center">
                         <div class="nav-icon p-1 rounded me-2">
-                            <i class="bi bi-building me-2"></i>
+                            <i class="fa-solid fa-landmark me-2"></i>
                         </div>
                         <span>Facilities</span>
                     </div>
@@ -512,7 +581,7 @@
                     href="{{ url('/admin/manage-equipment') }}">
                     <div class="d-flex align-items-center">
                         <div class="nav-icon p-1 rounded me-2">
-                            <i class="bi bi-tools me-2"></i>
+                            <i class="fa-solid fa-box-archive me-2"></i>
                         </div>
                         <span>Equipment</span>
                     </div>
@@ -530,7 +599,7 @@
                     href="{{ url('/admin/admin-roles') }}">
                     <div class="d-flex align-items-center">
                         <div class="nav-icon p-1 rounded me-2">
-                            <i class="bi bi-people me-2"></i>
+                            <i class="fa-solid fa-user-gear me-2"></i>
                         </div>
                         <span>Administrators</span>
                     </div>
@@ -545,6 +614,194 @@
     </nav>
 
     <script>
+
+        class NotificationManager {
+            constructor() {
+                this.pollingInterval = null;
+                this.isInitialized = false;
+                this.init();
+            }
+
+            init() {
+                if (this.isInitialized) return;
+
+                this.loadNotifications();
+                this.setupEventListeners();
+                this.startPolling();
+                this.isInitialized = true;
+            }
+
+            setupEventListeners() {
+                // Mark all as read
+                document.getElementById('markAllAsRead')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.markAllAsRead();
+                });
+
+                // Mark as read when clicking requisitions nav link
+                document.getElementById('requisitionsNavLink')?.addEventListener('click', () => {
+                    this.markAllAsRead();
+                });
+
+                // Mark as read when clicking notification bell
+                document.getElementById('notificationDropdownButton')?.addEventListener('click', () => {
+                    this.loadNotifications();
+                });
+
+                // Close notifications when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('#notificationDropdown') &&
+                        !e.target.closest('#notificationDropdownButton')) {
+                        const dropdown = document.getElementById('notificationDropdown');
+                        if (dropdown?.classList.contains('show')) {
+                            this.loadNotifications(); // Refresh count when closing
+                        }
+                    }
+                });
+            }
+
+            async loadNotifications() {
+                try {
+                    const token = localStorage.getItem('adminToken');
+                    if (!token) return;
+
+                    const response = await fetch('/api/admin/notifications', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to fetch notifications');
+
+                    const data = await response.json();
+                    this.updateNotificationUI(data);
+                } catch (error) {
+                    console.error('Error loading notifications:', error);
+                }
+            }
+
+            updateNotificationUI(data) {
+                const { notifications, unread_count } = data;
+
+                // Update badge counts
+                this.updateBadge('notificationBadge', unread_count);
+                this.updateBadge('requisitionNotificationBadge', unread_count);
+
+                // Update notification list
+                this.renderNotificationList(notifications);
+            }
+
+            updateBadge(elementId, count) {
+                const badge = document.getElementById(elementId);
+                if (!badge) return;
+
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            renderNotificationList(notifications) {
+                const container = document.getElementById('notificationList');
+                if (!container) return;
+
+                if (notifications.length === 0) {
+                    container.innerHTML = '<div class="text-center py-3 text-muted">No notifications</div>';
+                    return;
+                }
+
+                container.innerHTML = notifications.map(notification => `
+            <div class="notification-item mb-2 p-2 rounded ${notification.is_read ? '' : 'bg-light'}" 
+                 style="cursor: pointer; border-left: 3px solid ${notification.is_read ? 'transparent' : '#007bff'};"
+                 onclick="notificationManager.markAsRead(${notification.notification_id})">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="small text-muted">${this.formatTime(notification.created_at)}</div>
+                        <div class="fw-medium">${notification.message}</div>
+                        ${notification.request_id ?
+                        `<small class="text-primary">Request #${notification.request_id}</small>` : ''}
+                    </div>
+                    ${!notification.is_read ?
+                        '<span class="badge bg-primary ms-2">New</span>' : ''}
+                </div>
+            </div>
+        `).join('');
+            }
+
+            async markAsRead(notificationId = null) {
+                try {
+                    const token = localStorage.getItem('adminToken');
+                    if (!token) return;
+
+                    const url = notificationId ?
+                        `/api/admin/notifications/mark-read/${notificationId}` :
+                        '/api/admin/notifications/mark-all-read';
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        this.loadNotifications(); // Refresh notifications
+
+                        // If marking single notification and dropdown is open, refresh list
+                        if (notificationId) {
+                            const dropdown = document.getElementById('notificationDropdown');
+                            if (dropdown?.classList.contains('show')) {
+                                this.loadNotifications();
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error marking notification as read:', error);
+                }
+            }
+
+            async markAllAsRead() {
+                await this.markAsRead();
+            }
+
+            formatTime(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+                const diffDays = Math.floor(diffHours / 24);
+
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                if (diffDays < 7) return `${diffDays}d ago`;
+
+                return date.toLocaleDateString();
+            }
+
+            startPolling() {
+                // Poll every 30 seconds for new notifications
+                this.pollingInterval = setInterval(() => {
+                    this.loadNotifications();
+                }, 30000);
+            }
+
+            stopPolling() {
+                if (this.pollingInterval) {
+                    clearInterval(this.pollingInterval);
+                }
+            }
+        }
+
+        // Initialize notification manager
+        const notificationManager = new NotificationManager();
+
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('adminToken');
             if (!token) return;
@@ -587,6 +844,8 @@
 
                     // Hide sidebar items based on role
                     hideSidebarItemsBasedOnRole(data.role ? data.role.role_id : null);
+                    // Initialize notifications after profile is loaded
+                    notificationManager.init();
                 })
                 .catch(error => {
                     console.error('Error fetching profile:', error);

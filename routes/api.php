@@ -15,6 +15,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCommentsController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ScannerController;
+use App\Http\Controllers\NotificationController;
 
 use App\Http\Controllers\Dropdowns\FacilityCategoryController;
 use App\Http\Controllers\Dropdowns\FacilitySubcategoryController;
@@ -235,6 +236,12 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware
 // ---------------- Protected Admin Routes ---------------- //
 
 Route::middleware('auth:sanctum')->group(function () {
+
+
+    Route::get('/admin/notifications', [NotificationController::class, 'getNotifications']);
+    Route::post('/admin/notifications/mark-read/{notificationId?}', [NotificationController::class, 'markAsRead']);
+    Route::post('/admin/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+
 
     Route::get('/admin/requisition/{requestId}/approval-history', [AdminApprovalController::class, 'getApprovalHistory']);
 
