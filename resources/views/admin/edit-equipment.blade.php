@@ -514,21 +514,35 @@
                         <div class="mb-3">
                             <label for="barcode" class="form-label fw-bold">Barcode Number</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="barcode" placeholder="Enter barcode">
-                                <button class="btn btn-outline-secondary" type="button" id="generateBarcodeBtn">
-                                    <i class="bi bi-upc-scan"></i> Generate
-                                </button>
-                            </div>
-                            <div class="barcode-container d-none" id="barcodeContainer">
-                                <img id="barcodePreview" class="barcode-preview" src="" alt="Barcode">
-                                <div class="mt-2">
-                                    <button type="button" class="btn btn-sm btn-outline-primary"
-                                        id="downloadBarcodeBtn">
-                                        <i class="bi bi-download"></i> Download
-                                    </button>
-                                </div>
+                            <!-- Barcode input (read-only if already generated) -->
+                             <input type="text" 
+                            class="form-control" 
+                            id="barcode" 
+                            name="barcode"
+                            value="{{ $equipment->barcode ?? '' }}" 
+                            placeholder="No barcode assigned" 
+                            {{ isset($equipment->barcode) ? 'readonly' : '' }}>
+                            
+                            <!-- Show Generate button only if barcode doesn't exist -->
+                            @if(!isset($equipment->barcode))
+                            <button class="btn btn-outline-secondary" type="button" id="generateBarcodeBtn">
+                                <i class="bi bi-upc-scan"></i> Generate
+                            </button>
+                            @endif
+                        </div>
+
+                        <div class="barcode-container {{ isset($equipment->barcode) ? '' : 'd-none' }}" id="barcodeContainer">
+                            <svg id="barcodePreview"></svg>
+                            <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="downloadBarcodeBtn">
+                                <i class="bi bi-download"></i> Download
+                            </button>
                             </div>
                         </div>
+                    </div>
+
+
+
 
                         <!-- Notes -->
                         <div class="mb-3 position-relative">
@@ -634,6 +648,33 @@
                     const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
                     if (generateBarcodeBtn) {
                         generateBarcodeBtn.style.display = 'none';
+                    }
+
+                    // Show existing barcode preview if available
+                    if (item.barcode_number) {
+                        const barcodeContainer = document.getElementById('barcodeContainer');
+                        const canvas = document.getElementById('barcodePreview');
+                        
+                        try {
+                            JsBarcode(canvas, item.barcode_number, {
+                                format: "CODE128",
+                                lineColor: "#000",
+                                width: 2,
+                                height: 40,
+                                displayValue: true,
+                                fontSize: 14,
+                                margin: 10
+                            });
+                            
+                            const barcodeNumberDisplay = document.getElementById('barcodeNumberDisplay');
+                            if (barcodeNumberDisplay) {
+                                barcodeNumberDisplay.textContent = item.barcode_number;
+                            }
+                            
+                            barcodeContainer.classList.remove('d-none');
+                        } catch (error) {
+                            console.error('Barcode generation error:', error);
+                        }
                     }
 
                     // Store the current editing item ID
@@ -1271,39 +1312,190 @@
                     }
 
                     // Handle barcode generation
-                    if (generateBarcodeBtn && barcodeInput) {
-                        generateBarcodeBtn.addEventListener('click', function () {
-                            const barcodeValue = barcodeInput.value.trim() || 'EQ' + Date.now();
-                            barcodeInput.value = barcodeValue;
+                    // Handle barcode generation and display logic for edit-equipment
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const barcodeInput = document.getElementById('barcode');
+                        const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
+                        const barcodePreview = document.getElementById('barcodePreview');
+                        const barcodeContainer = document.getElementById('barcodeContainer');
+                        const downloadBarcodeBtn = document.getElementById('downloadBarcodeBtn');
 
-                            // Generate barcode
+                        // Check if a barcode already exists (from backend data)
+                        const existingBarcode = barcodeInput && barcodeInput.value.trim();
+
+                        // If barcode already exists, show it and disable editing/regeneration
+                        if (existingBarcode) {
+                            barcodeInput.readOnly = true; // prevent editing
+                            if (generateBarcodeBtn) generateBarcodeBtn.disabled = true; // prevent regenerating
+
                             try {
-                                JsBarcode(barcodePreview, barcodeValue, {
+                                JsBarcode(barcodePreview, existingBarcode, {
                                     format: "CODE128",
                                     lineColor: "#000",
-                                    width: 2,
-                                    height: 40,
+                                    width: 3,
+                                    height: 80,
+                                    margin: 12,
                                     displayValue: true
                                 });
-
                                 barcodeContainer.classList.remove('d-none');
                             } catch (error) {
-                                console.error('Barcode generation error:', error);
-                                showToast('Failed to generate barcode', 'error');
+                                console.error('Error displaying existing barcode:', error);
                             }
-                        });
-                    }
+                        }
 
-                    // Handle barcode download
-                    if (downloadBarcodeBtn && barcodePreview) {
-                        downloadBarcodeBtn.addEventListener('click', function () {
-                            const canvas = barcodePreview;
-                            const link = document.createElement('a');
-                            link.download = 'barcode-' + (barcodeInput.value || 'equipment') + '.png';
-                            link.href = canvas.toDataURL('image/png');
-                            link.click();
-                        });
-                    }
+                        // Handle barcode generation (only if no existing barcode)
+                        if (generateBarcodeBtn && barcodeInput && !existingBarcode) {
+                            generateBarcodeBtn.addEventListener('click', function () {
+                                const barcodeValue = barcodeInput.value.trim() || `EQ-${Date.now()}`;
+                                barcodeInput.value = barcodeValue;
+
+                                try {
+                                    JsBarcode(barcodePreview, barcodeValue, {
+                                        format: "CODE128",
+                                        lineColor: "#000",
+                                        width: 3,
+                                        height: 80,
+                                        margin: 12,
+                                        displayValue: true
+                                    });
+
+                                    barcodeContainer.classList.remove('d-none');
+                                    generateBarcodeBtn.disabled = true; // prevent duplicate generation
+                                    barcodeInput.readOnly = true; // lock field after generation
+                                } catch (error) {
+                                    console.error('Barcode generation error:', error);
+                                    if (typeof showToast === 'function') {
+                                        showToast('Failed to generate barcode', 'error');
+                                    } else {
+                                        alert('Failed to generate barcode.');
+                                    }
+                                }
+                            });
+                        }
+
+                        // Handle barcode download - FIXED VERSION
+                        if (downloadBarcodeBtn) {
+                            downloadBarcodeBtn.addEventListener('click', function () {
+                                const barcodeInput = document.getElementById('barcode');
+                                const barcodePreview = document.getElementById('barcodePreview');
+                                
+                                // Check if barcode exists
+                                if (!barcodeInput || !barcodeInput.value.trim()) {
+                                    showToast('Please generate a barcode first', 'error');
+                                    return;
+                                }
+
+                                // Check if barcode preview exists and has content
+                                if (!barcodePreview || !barcodePreview.innerHTML.trim()) {
+                                    showToast('Barcode preview not available. Please generate the barcode again.', 'error');
+                                    return;
+                                }
+
+                                try {
+                                    showToast('Preparing download...', 'info');
+
+                                    // Get the barcode value for filename
+                                    const barcodeValue = barcodeInput.value.trim();
+                                    
+                                    // Method 1: Try SVG to PNG conversion first
+                                    if (barcodePreview.tagName === 'svg') {
+                                        const svg = barcodePreview;
+                                        const serializer = new XMLSerializer();
+                                        const svgData = serializer.serializeToString(svg);
+                                        
+                                        // Create canvas with proper dimensions
+                                        const canvas = document.createElement('canvas');
+                                        const ctx = canvas.getContext('2d');
+                                        const img = new Image();
+                                        
+                                        // Set canvas dimensions based on SVG viewBox or estimated size
+                                        const viewBox = svg.getAttribute('viewBox');
+                                        if (viewBox) {
+                                            const dimensions = viewBox.split(' ');
+                                            canvas.width = parseInt(dimensions[2]) || 300;
+                                            canvas.height = parseInt(dimensions[3]) || 150;
+                                        } else {
+                                            // Default dimensions if no viewBox
+                                            canvas.width = 300;
+                                            canvas.height = 150;
+                                        }
+
+                                        img.onload = function () {
+                                            try {
+                                                // Clear and draw on canvas
+                                                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                                
+                                                // Create download
+                                                const pngDataUrl = canvas.toDataURL('image/png');
+                                                triggerDownload(pngDataUrl, `barcode-${barcodeValue}.png`);
+                                                
+                                            } catch (drawError) {
+                                                console.error('Canvas drawing error:', drawError);
+                                                // Fallback: Try direct SVG download
+                                                fallbackSvgDownload(svgData, barcodeValue);
+                                            }
+                                        };
+
+                                        img.onerror = function () {
+                                            console.error('Image loading failed');
+                                            // Fallback: Try direct SVG download
+                                            fallbackSvgDownload(svgData, barcodeValue);
+                                        };
+
+                                        // Start loading the image
+                                        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+                                        
+                                    } 
+                                    // Method 2: If it's already a canvas (better approach)
+                                    else if (barcodePreview.tagName === 'CANVAS') {
+                                        const pngDataUrl = barcodePreview.toDataURL('image/png');
+                                        triggerDownload(pngDataUrl, `barcode-${barcodeValue}.png`);
+                                    } 
+                                    else {
+                                        showToast('Unsupported barcode format', 'error');
+                                    }
+
+                                } catch (error) {
+                                    console.error('Barcode download error:', error);
+                                    showToast('Failed to download barcode: ' + error.message, 'error');
+                                }
+                            });
+                        }
+
+                        // Helper function to trigger download
+                        function triggerDownload(dataUrl, filename) {
+                            try {
+                                const link = document.createElement('a');
+                                link.download = filename;
+                                link.href = dataUrl;
+                                
+                                // Append to body, click, and remove
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                
+                                showToast('Barcode downloaded successfully!', 'success');
+                            } catch (error) {
+                                console.error('Download trigger error:', error);
+                                showToast('Download failed. Please try again.', 'error');
+                            }
+                        }
+
+                        // Fallback function for SVG download
+                        function fallbackSvgDownload(svgData, barcodeValue) {
+                            try {
+                                const blob = new Blob([svgData], { type: 'image/svg+xml' });
+                                const url = URL.createObjectURL(blob);
+                                triggerDownload(url, `barcode-${barcodeValue}.svg`);
+                                // Clean up the URL object after download
+                                setTimeout(() => URL.revokeObjectURL(url), 100);
+                            } catch (svgError) {
+                                console.error('SVG download fallback failed:', svgError);
+                                showToast('Download failed in all methods. Please try generating the barcode again.', 'error');
+                            }
+                        }
+                    });
 
                     // Save item functionality
                     if (saveItemBtn) {
