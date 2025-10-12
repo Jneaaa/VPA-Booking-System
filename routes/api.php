@@ -27,7 +27,11 @@ use App\Http\Controllers\Dropdowns\ConditionController;
 use App\Http\Controllers\Dropdowns\RequisitionPurposeController;
 
 
-
+// Add this temporary route
+Route::get('/debug-facility-images/{facilityId}', [FacilityController::class, 'debugCloudinaryImages']);
+// Change to POST route in routes/api.php
+Route::get('/test-delete', [FacilityController::class, 'testCloudinaryDelete']);
+Route::get('/test-cloudinary-connection', [FacilityController::class, 'testCloudinaryConnection']);
 // ---------------- Admin Routes ---------------- //
 
 Route::get('/admins', [AdminController::class, 'getAllAdmins']);

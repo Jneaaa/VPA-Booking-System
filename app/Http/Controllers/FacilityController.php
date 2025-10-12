@@ -4,16 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
-use App\Models\LookupTables\FacilityCategory;
 use App\Models\Department;
 use App\Models\LookupTables\AvailabilityStatus;
-use App\Models\LookupTables\FacilitySubcategory;
 use Illuminate\Http\Request;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Http;
-
-
 
 class FacilityController extends Controller
 {
@@ -248,9 +243,11 @@ public function update(Request $request, $id)
 }
 
     // ----- Destroy - Delete facility ----- //
-   public function destroy($id)
+
+public function destroy($facilityId)
 {
-    $facility = Facility::findOrFail($id);
+    $facility = Facility::with(['images'])->findOrFail($facilityId);
+    
     $user = auth()->user();
 
     // Track who deleted it
@@ -258,18 +255,179 @@ public function update(Request $request, $id)
         'deleted_by' => $user->admin_id,
     ]);
 
-    // Delete related images (if relationship exists)
-    $facility->images()->delete();
+    \Log::info('Starting facility deletion', [
+        'facility_id' => $facilityId,
+        'image_count' => $facility->images->count(),
+        'all_images' => $facility->images->pluck('cloudinary_public_id')
+    ]);
 
-    // Soft delete the facility
+    // Delete images from Cloudinary and DB
+    foreach ($facility->images as $image) {
+        \Log::info('Processing image for deletion', [
+            'image_id' => $image->image_id,
+            'cloudinary_public_id' => $image->cloudinary_public_id
+        ]);
+
+        // Only delete from Cloudinary if it's a real Cloudinary image (not the default placeholder)
+        if (!empty($image->cloudinary_public_id) && $image->cloudinary_public_id !== 'oxvsxogzu9koqhctnf7s') {
+            try {
+                \Log::info('Attempting Cloudinary deletion', [
+                    'public_id' => $image->cloudinary_public_id
+                ]);
+                
+                // Use the public ID AS-IS from the database (it already includes the full path)
+                $result = Cloudinary::uploadApi()->destroy($image->cloudinary_public_id);
+                
+                \Log::info('Cloudinary deletion successful', [
+                    'public_id' => $image->cloudinary_public_id,
+                    'result' => $result['result']
+                ]);
+                
+            } catch (\Exception $e) {
+                \Log::error("Failed to delete Cloudinary image", [
+                    'public_id' => $image->cloudinary_public_id,
+                    'error' => $e->getMessage(),
+                    'facility_id' => $facilityId
+                ]);
+            }
+        } else {
+            \Log::info('Skipping Cloudinary deletion - default placeholder or empty public_id', [
+                'public_id' => $image->cloudinary_public_id
+            ]);
+        }
+
+        // Delete image record from DB
+        $image->delete();
+        \Log::info('Database image record deleted', ['image_id' => $image->image_id]);
+    }
+
+    // Delete the facility
     $facility->delete();
 
-    // Return JSON for the frontend
+    \Log::info('Facility deletion completed', ['facility_id' => $facilityId]);
+
     return response()->json([
-        'message' => 'Facility deleted successfully!',
-        'facility_id' => $id
+        'message' => 'Facility and associated Cloudinary images deleted successfully!',
+        'facility_id' => $facilityId
     ], 200);
 }
+
+public function testCloudinaryDelete(Request $request)
+{
+    $publicId = $request->query('public_id');
+    
+    if (!$publicId) {
+        return response()->json([
+            'success' => false,
+            'error' => 'No public_id provided'
+        ], 400);
+    }
+
+    try {
+        \Log::info('Testing Cloudinary deletion', ['public_id' => $publicId]);
+        
+        // Use the correct Cloudinary destruction method with error handling
+        $result = Cloudinary::uploadApi()->destroy($publicId);
+        
+        \Log::info('Cloudinary test deletion response', [
+            'public_id' => $publicId,
+            'result' => $result,
+            'result_type' => gettype($result)
+        ]);
+        
+        // Check if result is valid
+        if (!$result || !is_array($result)) {
+            throw new \Exception('Invalid response from Cloudinary: ' . json_encode($result));
+        }
+        
+        // Check the actual result status
+        $success = isset($result['result']) && $result['result'] === 'ok';
+        
+        return response()->json([
+            'success' => $success,
+            'result' => $result,
+            'public_id_used' => $publicId,
+            'message' => $success ? 'Deletion successful' : 'Deletion may have failed'
+        ]);
+        
+    } catch (\Exception $e) {
+        \Log::error('Cloudinary test deletion failed', [
+            'public_id' => $publicId,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'public_id_used' => $publicId
+        ], 500);
+    }
+}
+
+public function testCloudinaryConnection()
+{
+    try {
+        // Test basic Cloudinary connectivity
+        $ping = Cloudinary::uploadApi()->ping();
+        
+        \Log::info('Cloudinary ping test', ['result' => $ping]);
+        
+        return response()->json([
+            'success' => true,
+            'ping_result' => $ping,
+            'message' => 'Cloudinary connection successful'
+        ]);
+        
+    } catch (\Exception $e) {
+        \Log::error('Cloudinary connection test failed', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'message' => 'Cloudinary connection failed - check credentials'
+        ], 500);
+    }
+}
+
+public function checkCloudinaryConfig()
+{
+    try {
+        // Check if Cloudinary configuration is loaded
+        $cloudName = config('cloudinary.cloud_name');
+        $apiKey = config('cloudinary.api_key');
+        $apiSecret = config('cloudinary.api_secret');
+        
+        \Log::info('Cloudinary Configuration Check', [
+            'cloud_name' => $cloudName ? 'SET' : 'MISSING',
+            'api_key' => $apiKey ? 'SET' : 'MISSING', 
+            'api_secret' => $apiSecret ? 'SET' : 'MISSING',
+        ]);
+        
+        return response()->json([
+            'cloud_name_set' => !empty($cloudName),
+            'api_key_set' => !empty($apiKey),
+            'api_secret_set' => !empty($apiSecret),
+            'cloudinary_url_set' => !empty(env('CLOUDINARY_URL')),
+            'config' => [
+                'cloud_name' => $cloudName,
+                'api_key' => $apiKey ? '***' . substr($apiKey, -4) : null,
+                'api_secret' => $apiSecret ? '***' . substr($apiSecret, -4) : null,
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
 
 
     // ----- Show - View single facility (optional) ----- //

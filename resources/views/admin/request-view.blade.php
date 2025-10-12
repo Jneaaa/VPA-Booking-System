@@ -2259,6 +2259,10 @@ case 4: // Ongoing (status ID 4)
                 }
             }
 
+            document.getElementById('waiveAllSwitch').addEventListener('change', function() {
+                handleWaiveAll(this);
+            });
+
             // Handle "Waive All" toggle switch
             async function handleWaiveAll(switchElement) {
                 const waiveAll = switchElement.checked;
