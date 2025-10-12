@@ -75,7 +75,6 @@
   }
 </style>
 
-<link rel="stylesheet" href="{{ asset('css/admin/facilities.css') }}">
 <div id="layout">
   <!-- Main Content -->
   <main id="main">

@@ -43,6 +43,7 @@ Route::middleware('web')->group(function () {
     Route::view('/admin/admin-login', 'admin.admin-login');
     Route::view('/admin/admins', 'admin.admins');
     Route::view('/admin/calendar', 'admin.calendar');
+    Route::view('/admin/archives', 'admin.archives');
     Route::view('/admin/dashboard', 'admin.dashboard');
     Route::view('/admin/manage-equipment', 'admin.manage-equipment');
     Route::view('/admin/manage-facilities', 'admin.manage-facilities');

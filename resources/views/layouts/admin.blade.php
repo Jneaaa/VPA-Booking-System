@@ -12,14 +12,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <style>
-
         #markAllAsRead {
-            color: #2664b6ff !important; 
-            text-decoration: none;    
+            color: #2664b6ff !important;
+            text-decoration: none;
         }
 
         #markAllAsRead:hover {
-            color: #14407aff !important; 
+            color: #14407aff !important;
         }
 
 
@@ -525,7 +524,7 @@
                         <div class="nav-icon p-1 rounded me-2">
                             <i class="fa-solid fa-calendar me-1"></i>
                         </div>
-                        <span>Calendar</span>
+                        <span>Bookings</span>
                     </div>
                 </a>
             </li>
@@ -544,14 +543,13 @@
                             <div class="nav-icon p-1 rounded me-2">
                                 <i class="fa-solid fa-file-lines me-2"></i>
                             </div>
-                            <span>Requisitions</span>
+                            <span>Requests</span>
                         </div>
                         <span id="requisitionNotificationBadge" class="badge bg-danger ms-2"
                             style="display: none;">0</span>
                     </div>
                 </a>
             </li>
-
             <li class="nav-item mb-1 nav-link-skeleton" id="facilities-nav-skeleton">
                 <div class="d-flex align-items-center py-1 px-2">
                     <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
@@ -593,6 +591,26 @@
                     <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
                     <div class="skeleton skeleton-text" style="width: 100px; height: 16px;"></div>
                 </div>
+            </li>
+            <!-- Archive Skeleton -->
+            <li class="nav-item mb-1 nav-link-skeleton" id="archive-nav-skeleton">
+                <div class="d-flex align-items-center py-1 px-2">
+                    <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
+                    <div class="skeleton skeleton-text" style="width: 65px; height: 16px;"></div>
+                </div>
+            </li>
+
+            <!-- Archive Nav Item -->
+            <li class="nav-item mb-1" id="archive-nav-item" style="display: none;">
+                <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/archives*') ? 'active' : '' }}"
+                    href="{{ url('/admin/archives') }}">
+                    <div class="d-flex align-items-center">
+                        <div class="nav-icon p-1 rounded me-2">
+                            <i class="fa-solid fa-box-archive me-2"></i>
+                        </div>
+                        <span>Archives</span>
+                    </div>
+                </a>
             </li>
             <li class="nav-item mb-1" id="administrators-nav-item" style="display: none;">
                 <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/admin-roles*') ? 'active' : '' }}"
@@ -871,6 +889,7 @@
             const requisitionsNavItem = document.getElementById('requisitions-nav-item');
             const facilitiesNavItem = document.getElementById('facilities-nav-item');
             const equipmentNavItem = document.getElementById('equipment-nav-item');
+            const archiveNavItem = document.getElementById('archive-nav-item'); // NEW
             const administratorsNavItem = document.getElementById('administrators-nav-item');
 
             // Show Dashboard and Calendar for all roles (they're always visible)
@@ -881,6 +900,7 @@
             if (requisitionsNavItem) requisitionsNavItem.style.display = 'block';
             if (facilitiesNavItem) facilitiesNavItem.style.display = 'block';
             if (equipmentNavItem) equipmentNavItem.style.display = 'block';
+            if (archiveNavItem) archiveNavItem.style.display = 'block'; // NEW
             if (administratorsNavItem) administratorsNavItem.style.display = 'block';
 
             // Hide items based on role
@@ -889,6 +909,7 @@
                 case 3: // Approving Officer
                     if (facilitiesNavItem) facilitiesNavItem.style.display = 'none';
                     if (equipmentNavItem) equipmentNavItem.style.display = 'none';
+                    if (archiveNavItem) archiveNavItem.style.display = 'none'; // NEW
                     if (administratorsNavItem) administratorsNavItem.style.display = 'none';
                     break;
                 case 4: // Inventory Manager
@@ -902,6 +923,7 @@
             }
         }
 
+
         function hideAllSkeletons() {
             const skeletons = [
                 'dashboard-nav-skeleton',
@@ -909,6 +931,7 @@
                 'requisitions-nav-skeleton',
                 'facilities-nav-skeleton',
                 'equipment-nav-skeleton',
+                'archive-nav-skeleton', // NEW
                 'administrators-nav-skeleton'
             ];
 
@@ -917,6 +940,7 @@
                 if (skeleton) skeleton.style.display = 'none';
             });
         }
+
 
         function showAllNavItems() {
             // Hide skeletons
@@ -929,6 +953,7 @@
                 'requisitions-nav-item',
                 'facilities-nav-item',
                 'equipment-nav-item',
+                'archive-nav-item', // NEW
                 'administrators-nav-item'
             ];
 
