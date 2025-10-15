@@ -16,6 +16,71 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
     rel="stylesheet" />
   <style>
+    /* Add this to your existing CSS */
+    #school_id:disabled {
+      background-color: #f8f9fa;
+      color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    #confirmSubmitBtn .btn-text {
+      display: inline-block;
+    }
+
+    #confirmSubmitBtn .btn-loading {
+      display: none;
+    }
+
+    #confirmSubmitBtn.loading .btn-text {
+      display: none;
+    }
+
+    #confirmSubmitBtn.loading .btn-loading {
+      display: inline-block;
+    }
+
+    .modal-header {
+      border-bottom: none !important;
+    }
+
+    /* Center header visually with modal body */
+    .modal-title {
+      margin: 0 auto;
+      font-weight: 600;
+    }
+
+    /* Add spacing and highlight for each term number */
+    .terms-content ol li {
+      margin-bottom: 1rem;
+    }
+
+    .terms-content ol li strong {
+      color: var(--bs-primary);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Make all scrollbars thin and subtle across browsers */
+    * {
+      scrollbar-width: thin;
+      /* Firefox */
+      scrollbar-color: #adb5bd transparent;
+    }
+
+    *::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      background-color: #adb5bd;
+      border-radius: 10px;
+    }
+
     /* Add to your existing styles */
     .card {
       border-radius: 8px;
@@ -392,6 +457,33 @@
     .delete-item-btn:hover {
       color: #bd2130;
     }
+
+    .btn-outline-secondary {
+      background-color: #ffdc95;
+      color: #aa7400;
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .btn-outline-secondary:hover,
+    .btn-outline-secondary:focus {
+      background-color: #f5c26a;
+      color: #7a5500;
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .btn-outline-secondary:active,
+    .btn-outline-secondary.active,
+    .btn-outline-secondary:focus:not(:hover) {
+      background-color: #e0aa3d !important;
+      /* deeper gold/orange */
+      color: #5a3900 !important;
+      /* even darker text for contrast */
+      border-color: transparent !important;
+      box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      /* subtle pressed effect */
+    }
   </style>
 </head>
 
@@ -545,7 +637,7 @@
                 to your registered email address once your submission is reviewed and approved.
               </p>
               <div class="d-flex justify-content-start gap-2 mb-4">
-                <a href="policies" class="btn btn-primary">Read Policies</a>
+                <a href="policies" class="btn btn-primary">Reservation Policies</a>
               </div>
             </div>
           </div>
@@ -749,7 +841,6 @@
             <p class="text-muted mt-4" style="font-size: 0.875rem;">
               In case of emergency, please ensure to cancel reservations at least 5 days before the scheduled date to
               avoid complications.
-              A 1-hour interval is required after each booking to allow for facility cleaning and preparation.
             </p>
 
           </div>
@@ -823,44 +914,40 @@
         </div>
       </div>
 
-     <!-- Bottom 2-column grid -->
-<div class="row">
-  <div class="col-md-6">
-    <div class="form-section-card">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Requested Facilities</h5>
-<button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" 
-        style="width: 36px; height: 36px;" 
-        type="button"
-        onclick="navigateToCatalog('facility')">
-    <i class="bi bi-plus fs-4"></i>
-</button>
-      </div>
-      <div id="facilityList" class="selected-items-container">
-        <!-- Facility items will be dynamically added here -->
-        <div class="text-muted empty-message">No facilities added yet.</div>
-      </div>
-    </div>
-  </div>
+      <!-- Bottom 2-column grid -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-section-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Requested Facilities</h5>
+              <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 36px; height: 36px;" type="button" onclick="navigateToCatalog('facility')">
+                <i class="bi bi-plus fs-4"></i>
+              </button>
+            </div>
+            <div id="facilityList" class="selected-items-container">
+              <!-- Facility items will be dynamically added here -->
+              <div class="text-muted empty-message">No facilities added yet.</div>
+            </div>
+          </div>
+        </div>
 
-  <div class="col-md-6">
-    <div class="form-section-card">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Requested Equipment</h5>
-<button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" 
-        style="width: 36px; height: 36px;" 
-        type="button"
-        onclick="navigateToCatalog('equipment')">
-    <i class="bi bi-plus fs-4"></i>
-</button>
+        <div class="col-md-6">
+          <div class="form-section-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Requested Equipment</h5>
+              <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 36px; height: 36px;" type="button" onclick="navigateToCatalog('equipment')">
+                <i class="bi bi-plus fs-4"></i>
+              </button>
+            </div>
+            <div id="equipmentList" class="selected-items-container">
+              <!-- Equipment items will be dynamically added here -->
+              <div class="text-muted empty-message">No equipment added yet.</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div id="equipmentList" class="selected-items-container">
-        <!-- Equipment items will be dynamically added here -->
-        <div class="text-muted empty-message">No equipment added yet.</div>
-      </div>
-    </div>
-  </div>
-</div>
 
       <!-- Fee Breakdown Section -->
       <div class="row">
@@ -879,23 +966,28 @@
         <button id="submitFormBtn" type="button" class="btn btn-primary me-2">
           Submit Form
         </button>
-        <button type="reset" class="btn btn-secondary">Cancel</button>
       </div>
     </form>
   </div>
 
-    <!-- Success Modal -->
+  <!-- Success Modal -->
   <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="successModalLabel">Submission Successful</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header" style="padding: 0.25rem 1rem;">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            style="width: 1rem; height: 1rem; margin-top: 0.2rem;"></button>
         </div>
         <div class="modal-body text-center">
           <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
           <h5 class="mt-3">Request Submitted Successfully!</h5>
-          <p id="successDetails" class="text-muted"></p>
+          <small class="text-muted d-block mt-2">
+            A confirmation email has been sent to <span id="userEmail" class="fw-bold"></span>.
+          </small>
+          <small class="text-muted d-block">
+            Please monitor your email for updates on your request status.
+          </small>
+          <p id="successDetails" class="text-muted mt-3 mb-0"></p>
         </div>
         <div class="modal-footer justify-content-center">
           <button type="button" class="btn btn-primary" onclick="window.location.href='{{ asset('index') }}'">
@@ -907,73 +999,123 @@
   </div>
 
   <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered modal-md">
+      <div class="modal-content text-center">
+        <div class="modal-header" style="padding: 0.25rem 1rem;">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            style="width: 1rem; height: 1rem; margin-top: 0.2rem;"></button>
         </div>
+
+
+
         <div class="modal-body">
-          <div class="terms-content mb-4" style="max-height: 50vh; overflow-y: auto;">
-            <h6>Booking Terms and Conditions</h6>
-            <ol>
-              <li>All bookings are subject to approval by CPU Administration.</li>
-              <li>Payment must be made within 3 business days after approval.</li>
-              <li>Cancellations must be made at least 5 days before the event.</li>
-              <li>Damage to facilities/equipment will incur additional charges.</li>
-              <li>Alcohol and smoking are strictly prohibited on campus.</li>
-              <li>External users must provide valid identification.</li>
-              <li>CPU reserves the right to cancel bookings for violations.</li>
+          <div class="terms-content mb-0 mx-auto" style="max-height: 50vh; overflow-y: auto; text-align: center;">
+
+            <!-- Centered Logo -->
+            <img src="{{ asset('assets/cpu-logo.png') }}" alt="CPU Logo" class="mx-auto d-block mb-3"
+              style="width: 75px; height: auto;">
+
+            <div class="d-flex align-items-center my-2">
+              <hr class="flex-grow-1 me-2" style="height:1px;">
+              <h5 class="text-center text-primary mb-0">Terms and Conditions</h5>
+              <hr class="flex-grow-1 ms-2" style="height:1px;">
+            </div>
+
+            <small class="d-block text-start mb-3" style="padding-left: 17px;">
+              By using our booking service, you agree to comply with the following terms and conditions, as well as all
+              campus policies set by Central Philippine University (CPU):
+            </small>
+
+
+            <ol class="text-start">
+              <li>
+                <strong class="text-primary">Approval Process</strong>
+                <small>All booking requests are subject to review and approval by the CPU Administration. Submission of
+                  a
+                  requisition form does not guarantee approval.</small>
+              </li>
+
+              <li>
+                <strong class="text-primary">Confirmation and Payment</strong>
+                <small>
+                  Requesters will receive a confirmation email after submitting their form. Once the booking has been
+                  reviewed and approved, a follow-up notification will be sent containing finalized booking details and
+                  payment instructions. All payments must be settled
+                  <span class="fw-bold">in person</span> at the CPU Business Office within
+                  <span class="fw-bold">three (3) business days</span> after approval.
+                </small>
+              </li>
+
+              <li>
+                <strong class="text-primary">Cancellations</strong>
+                <small>
+                  Requesters may cancel their booking <span class="fw-bold">up to five (5) days before the scheduled
+                    event</span>
+                  through the system using the access code provided via email after submission. Cancellations made
+                  beyond
+                  this period may not be honored.
+                </small>
+              </li>
+
+
+              <li>
+                <strong class="text-primary">Facility and Equipment Responsibility</strong>
+                <small>Requesters are responsible for the proper use and care of all facilities and equipment. Any
+                  damage,
+                  loss, or misuse may incur corresponding repair or replacement fees.</small>
+              </li>
+
+              <li>
+                <strong class="text-primary">Return Policy and Penalties</strong>
+                <small>
+                  All borrowed equipment must be returned within the specified booking period. A
+                  <span class="fw-bold">grace period of up to 4 hours</span> after the event may be allowed for clean-up
+                  or coordination.
+                  Failure to return items within this timeframe may result in <span class="fw-bold">late penalty
+                    fees</span> or temporary suspension of booking privileges.
+                </small>
+              </li>
+
+
+
+              <li>
+                <strong class="text-primary">Prohibited Acts</strong>
+                <small> Alcohol consumption and smoking are strictly prohibited within the campus premises. External
+                  users must
+                  present valid identification when required. </small>
+              </li>
+
+              <li>
+                <strong class="text-primary">Administrative Rights</strong>
+                <small> CPU reserves the right to cancel or revoke bookings for policy violations or non-compliance with
+                  these
+                  terms and conditions. </small>
+              </li>
             </ol>
-            <div class="form-check mt-3">
-              <input class="form-check-input" type="checkbox" id="agreeTerms">
+            <div class="form-check mt-4 d-flex justify-content-center">
+              <input class="form-check-input me-2" type="checkbox" id="agreeTerms">
               <label class="form-check-label" for="agreeTerms">
-                I agree to the terms and conditions
+                I have read and agree to the terms and conditions.
               </label>
             </div>
           </div>
-          <div id="submitStatus" class="d-none">
-            <div class="d-flex justify-content-center">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
-            <p class="text-center mt-2">Processing your request...</p>
-          </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" id="confirmSubmitBtn" class="btn btn-primary" disabled>Submit Request</button>
+
+        <div class="modal-footer justify-content-end">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="confirmSubmitBtn" class="btn btn-primary" disabled>
+            <span class="btn-text">Accept & Submit</span>
+            <span class="btn-loading">
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              Submitting Request...
+            </span>
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <div id="facilityPopup" class="popup">
-    <h5>Select Available Facilities</h5>
-    <p>
-      This is a placeholder for facility selection content. Here you would
-      list available facilities, possibly with a date/time filter.
-    </p>
-    <div class="d-flex justify-content-end">
-      <button onclick="togglePopup('facilityPopup')" class="btn btn-danger">
-        Close
-      </button>
-    </div>
-  </div>
 
-  <div id="equipmentPopup" class="popup">
-    <h5>Select Equipment</h5>
-    <p>
-      This is a placeholder for equipment selection content. Here you would
-      list available equipment based on the selected date/time.
-    </p>
-    <div class="d-flex justify-content-end">
-      <button onclick="togglePopup('equipmentPopup')" class="btn btn-danger">
-        Close
-      </button>
-    </div>
-  </div>
   <footer class="footer-container">
     <div class="container text-center">
       <p class="mb-0">&copy; 2025 Central Philippine University | All Rights Reserved</p>
@@ -981,36 +1123,95 @@
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-          // Add this function to handle catalog navigation without triggering validation
-function navigateToCatalog(type) {
-    // Store current form data in sessionStorage to preserve it
-    const formData = new FormData(document.getElementById('reservationForm'));
-    const formObject = Object.fromEntries(formData.entries());
-    sessionStorage.setItem('reservationFormData', JSON.stringify(formObject));
-    
-    // Navigate to the appropriate catalog
-    if (type === 'facility') {
-        window.location.href = '{{ asset("facility-catalog") }}';
-    } else {
-        window.location.href = '{{ asset("equipment-catalog") }}';
-    }
-}
+    // School ID required logic
+    const applicantType = document.getElementById('applicantType');
+    const schoolIdInput = document.getElementById('school_id');
+    const schoolIdRequired = document.getElementById('schoolIdRequired');
 
-// Add this code to restore form data when returning to the page
-document.addEventListener('DOMContentLoaded', function() {
-    const savedFormData = sessionStorage.getItem('reservationFormData');
-    if (savedFormData) {
+    applicantType.addEventListener('change', function () {
+      if (this.value === 'Internal') {
+        schoolIdInput.required = true;
+        schoolIdInput.disabled = false;
+        schoolIdRequired.style.display = '';
+        schoolIdInput.placeholder = 'Student ID';
+      } else {
+        schoolIdInput.required = false;
+        schoolIdInput.disabled = true;
+        schoolIdRequired.style.display = 'none';
+        schoolIdInput.value = '';
+        schoolIdInput.placeholder = 'Student ID';
+      }
+    });
+    // Add this function to handle catalog navigation without triggering validation
+    function navigateToCatalog(type) {
+      // Store current form data in sessionStorage to preserve it
+      const formData = new FormData(document.getElementById('reservationForm'));
+      const formObject = Object.fromEntries(formData.entries());
+      sessionStorage.setItem('reservationFormData', JSON.stringify(formObject));
+
+      // Navigate to the appropriate catalog
+      if (type === 'facility') {
+        window.location.href = '{{ asset("facility-catalog") }}';
+      } else {
+        window.location.href = '{{ asset("equipment-catalog") }}';
+      }
+    }
+
+    // Clear selection button functionality
+    document.getElementById('clearSelectionBtn').addEventListener('click', function (e) {
+      e.preventDefault();
+
+      // Clear date fields
+      document.getElementById('startDateField').value = '';
+      document.getElementById('endDateField').value = '';
+
+      // Clear time fields (reset to first option or empty)
+      document.getElementById('startTimeField').selectedIndex = 0;
+      document.getElementById('endTimeField').selectedIndex = 0;
+
+      // Clear availability result
+      document.getElementById('availabilityResult').textContent = '';
+      document.getElementById('availabilityResult').style.color = '';
+
+      // Update the selected date time display
+      document.getElementById('selectedDateTime').textContent = 'No date and time selected.';
+
+      // Recalculate fees (since schedule affects pricing)
+      if (typeof calculateAndDisplayFees === 'function') {
+        calculateAndDisplayFees();
+      }
+
+      // Show confirmation toast
+      showToast('Booking schedule cleared successfully', 'success');
+    });
+
+    // Add this code to restore form data when returning to the page
+    document.addEventListener('DOMContentLoaded', function () {
+      // Set initial state based on current selection
+      if (applicantType.value === 'Internal') {
+        schoolIdInput.required = true;
+        schoolIdInput.disabled = false;
+        schoolIdRequired.style.display = '';
+      } else {
+        schoolIdInput.required = false;
+        schoolIdInput.disabled = true;
+        schoolIdRequired.style.display = 'none';
+        schoolIdInput.value = '';
+        schoolIdInput.placeholder = 'Student ID';
+      }
+      const savedFormData = sessionStorage.getItem('reservationFormData');
+      if (savedFormData) {
         const formData = JSON.parse(savedFormData);
         for (const [key, value] of Object.entries(formData)) {
-            const field = document.querySelector(`[name="${key}"]`);
-            if (field) {
-                field.value = value;
-            }
+          const field = document.querySelector(`[name="${key}"]`);
+          if (field) {
+            field.value = value;
+          }
         }
         sessionStorage.removeItem('reservationFormData');
-    }
-});
-    
+      }
+    });
+
     // Cloudinary direct upload implementation
     async function uploadToCloudinary(input) {
       const file = input.files[0];
@@ -1146,295 +1347,341 @@ document.addEventListener('DOMContentLoaded', function() {
       }, duration);
     }
 
-    window.checkAvailability = async function () {
-      try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-        const startDate = document.getElementById('startDateField').value;
-        const endDate = document.getElementById('endDateField').value;
-        const startTime = convertTo24Hour(document.getElementById('startTimeField').value);
-        const endTime = convertTo24Hour(document.getElementById('endTimeField').value);
 
-        if (!startDate || !endDate || !startTime || !endTime) {
-          showToast('Please select all date and time fields', 'error');
-          return;
-        }
 
-        // Check if end_date is before start_date
-        if (endDate < startDate) {
-          showToast('End date cannot be before start date.', 'error');
-          return;
-        }
+  window.checkAvailability = async function () {
+  const checkBtn = document.getElementById('checkAvailabilityBtn');
+  const originalText = checkBtn.innerHTML;
+  
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const startDate = document.getElementById('startDateField').value;
+    const endDate = document.getElementById('endDateField').value;
+    const startTime = convertTo24Hour(document.getElementById('startTimeField').value);
+    const endTime = convertTo24Hour(document.getElementById('endTimeField').value);
 
-        // Get selected items from session
-        const response = await fetch('/requisition/get-items', {
-          headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
+    if (!startDate || !endDate || !startTime || !endTime) {
+      showToast('Please select all date and time fields', 'error');
+      return;
+    }
 
-        if (!response.ok) throw new Error('Failed to fetch items');
-        const data = await response.json();
-        const items = data.data?.selected_items || [];
+    // Check if end_date is before start_date
+    if (endDate < startDate) {
+      showToast('End date cannot be before start date.', 'error');
+      return;
+    }
 
-        if (items.length === 0) {
-          showToast('Please add items to check availability', 'error');
-          return;
-        }
+    // Show loading state
+    checkBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Checking...';
+    checkBtn.disabled = true;
 
-        // Show loading state
-        const checkBtn = document.getElementById('checkAvailabilityBtn');
-        const originalText = checkBtn.innerHTML;
-        checkBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Checking...';
-        checkBtn.disabled = true;
+    // Get selected items from session
+    const response = await fetch('/requisition/get-items', {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
 
-        // Prepare request data - modified to match controller expectations
-        const requestData = {
-          start_date: startDate,
-          end_date: endDate,
-          start_time: startTime,
-          end_time: endTime,
-          items: items.map(item => {
-            const itemData = {
-              type: item.type
-            };
-            // Add the correct ID field based on type
-            if (item.type === 'facility') {
-              itemData.facility_id = item.facility_id;
-            } else {
-              itemData.equipment_id = item.equipment_id;
-            }
-            return itemData;
-          })
+    if (!response.ok) throw new Error('Failed to fetch items');
+    const data = await response.json();
+    const items = data.data?.selected_items || [];
+
+    if (items.length === 0) {
+      showToast('Please add items to check availability', 'error');
+      checkBtn.innerHTML = originalText;
+      checkBtn.disabled = false;
+      return;
+    }
+
+    // Prepare request data - modified to match controller expectations
+    const requestData = {
+      start_date: startDate,
+      end_date: endDate,
+      start_time: startTime,
+      end_time: endTime,
+      items: items.map(item => {
+        const itemData = {
+          type: item.type
         };
-
-        // Call API
-        const checkResponse = await fetch('/requisition/check-availability', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestData)
-        });
-
-        // Handle non-200 responses
-        if (!checkResponse.ok) {
-          let errorData;
-          try {
-            errorData = await checkResponse.json();
-          } catch {
-            errorData = {};
-          }
-          // Show all validation errors if present
-          if (errorData.errors) {
-            Object.values(errorData.errors).flat().forEach(msg => showToast(msg, 'error'));
-          } else if (errorData.message) {
-            showToast(errorData.message, 'error');
-          } else {
-            showToast('Availability check failed', 'error');
-          }
-          checkBtn.innerHTML = originalText;
-          checkBtn.disabled = false;
-          return;
+        // Add the correct ID field based on type
+        if (item.type === 'facility') {
+          itemData.facility_id = item.facility_id;
+        } else {
+          itemData.equipment_id = item.equipment_id;
         }
+        return itemData;
+      })
+    };
 
-        const result = await checkResponse.json();
+    // Call API
+    const checkResponse = await fetch('/requisition/check-availability', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData)
+    });
 
-        // Update button state
-        checkBtn.innerHTML = originalText;
-        checkBtn.disabled = false;
+    // Handle non-200 responses
+    if (!checkResponse.ok) {
+      let errorData;
+      try {
+        errorData = await checkResponse.json();
+      } catch {
+        errorData = {};
+      }
+      // Show all validation errors if present
+      if (errorData.errors) {
+        Object.values(errorData.errors).flat().forEach(msg => showToast(msg, 'error'));
+      } else if (errorData.message) {
+        showToast(errorData.message, 'error');
+      } else {
+        showToast('Availability check failed', 'error');
+      }
+      return;
+    }
 
-        if (!result.success) {
-          showToast(result.message || 'Availability check failed', 'error');
-          return;
-        }
+    const result = await checkResponse.json();
 
-        const availabilityResult = document.getElementById('availabilityResult');
-        if (result.data.available) {
-          availabilityResult.innerHTML = `
+    if (!result.success) {
+      showToast(result.message || 'Availability check failed', 'error');
+      return;
+    }
+
+    const availabilityResult = document.getElementById('availabilityResult');
+    if (result.data.available) {
+      availabilityResult.innerHTML = `
 <span class="text-success">
   <i class="bi bi-check-circle-fill" style="margin-right:5px;"></i>
   Available
 </span>
 `;
-          showToast('Time slot is available!', 'success');
-        } else {
-          availabilityResult.textContent = 'Conflict found!';
-          availabilityResult.style.color = 'red';
+      showToast('Time slot is available!', 'success');
+    } else {
+      availabilityResult.innerHTML = `
+<span class="text-danger">
+  <i class="bi bi-x-circle-fill" style="margin-right:5px;"></i>
+  Conflict found!
+</span>
+`;
 
-          const conflictItems = result.data.conflict_items.map(item =>
-            `${item.type}: ${item.name}`
-          ).join(', ');
+      const conflictItems = result.data.conflict_items.map(item =>
+        `${item.type}: ${item.name}`
+      ).join(', ');
 
-          showToast(`Conflict with: ${conflictItems}`, 'error');
-        }
+      showToast(`Conflict with: ${conflictItems}`, 'error');
+    }
 
-      } catch (error) {
-        console.error('Error checking availability:', error);
-        showToast(error.message || 'Failed to check availability', 'error');
-        const checkBtn = document.getElementById('checkAvailabilityBtn');
-        if (checkBtn) {
-          checkBtn.innerHTML = 'Check Availability';
-          checkBtn.disabled = false;
+  } catch (error) {
+    console.error('Error checking availability:', error);
+    showToast(error.message || 'Failed to check availability', 'error');
+  } finally {
+    // Always reset button state, whether successful or error
+    checkBtn.innerHTML = originalText;
+    checkBtn.disabled = false;
+  }
+};
+
+    function validateBookingSchedule() {
+      const startDate = document.getElementById('startDateField').value;
+      const endDate = document.getElementById('endDateField').value;
+      const startTime = document.getElementById('startTimeField').value;
+      const endTime = document.getElementById('endTimeField').value;
+
+      const errors = [];
+
+      // Check if any field is empty
+      if (!startDate) errors.push('Start Date is required');
+      if (!endDate) errors.push('End Date is required');
+      if (!startTime) errors.push('Start Time is required');
+      if (!endTime) errors.push('End Time is required');
+
+      // If any field is empty, show detailed error
+      if (errors.length > 0) {
+        return {
+          valid: false,
+          message: 'Please complete the booking schedule:\n• ' + errors.join('\n• ')
+        };
+      }
+
+      // Check if end date is before start date
+      if (endDate < startDate) {
+        return {
+          valid: false,
+          message: 'End date cannot be before start date.'
+        };
+      }
+
+      // Check if dates are the same but end time is before start time
+      if (startDate === endDate) {
+        const startDateTime = new Date(`${startDate}T${convertTo24Hour(startTime)}:00`);
+        const endDateTime = new Date(`${endDate}T${convertTo24Hour(endTime)}:00`);
+
+        if (endDateTime <= startDateTime) {
+          return {
+            valid: false,
+            message: 'End time must be after start time when using the same date.'
+          };
         }
       }
-    };
 
-window.openTermsModal = function (event) {
-  if (event) event.preventDefault();
-
-  // Check if modal already exists
-  let modalEl = document.getElementById('termsModal');
-  let modalInstance = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
-
-  // Function to attach event listeners
-  const attachModalEventListeners = () => {
-    const agreeTerms = document.getElementById('agreeTerms');
-    const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
-    
-    if (agreeTerms && confirmSubmitBtn) {
-      // Remove any existing listeners first to avoid duplicates
-      agreeTerms.replaceWith(agreeTerms.cloneNode(true));
-      confirmSubmitBtn.replaceWith(confirmSubmitBtn.cloneNode(true));
-      
-      // Re-get references after cloning
-      const newAgreeTerms = document.getElementById('agreeTerms');
-      const newConfirmSubmitBtn = document.getElementById('confirmSubmitBtn');
-      
-      // Attach new listeners
-      newAgreeTerms.addEventListener('change', function () {
-        newConfirmSubmitBtn.disabled = !this.checked;
-      });
-
-      newConfirmSubmitBtn.addEventListener('click', async function () {
-        await submitForm();
-      });
-      
-      // Ensure button starts disabled
-      newConfirmSubmitBtn.disabled = true;
+      return { valid: true };
     }
-  };
 
-  if (!modalEl) {
-    // Create modal HTML
-    const modalHTML = `
-    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div class="terms-content mb-4" style="max-height: 50vh; overflow-y: auto;">
-              <h6>Booking Terms and Conditions</h6>
-              <ol>
-                <li>All bookings are subject to approval by CPU Administration.</li>
-                <li>Payment must be made within 3 business days after approval.</li>
-                <li>Cancellations must be made at least 5 days before the event.</li>
-                <li>Damage to facilities/equipment will incur additional charges.</li>
-                <li>Alcohol and smoking are strictly prohibited on campus.</li>
-                <li>External users must provide valid identification.</li>
-                <li>CPU reserves the right to cancel bookings for violations.</li>
-              </ol>
-              <div class="form-check mt-3">
-                <input class="form-check-input" type="checkbox" id="agreeTerms">
-                <label class="form-check-label" for="agreeTerms">
-                  I agree to the terms and conditions
-                </label>
-              </div>
-            </div>
-            <div id="submitStatus" class="d-none">
-              <div class="d-flex justify-content-center">
-                <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-              </div>
-              <p class="text-center mt-2">Processing your request...</p>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" id="confirmSubmitBtn" class="btn btn-primary" disabled>Submit Request</button>
+    window.openTermsModal = function (event) {
+      if (event) event.preventDefault();
+
+      // Check if modal already exists
+      let modalEl = document.getElementById('termsModal');
+      let modalInstance = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+
+      // Function to attach event listeners
+      const attachModalEventListeners = () => {
+        const agreeTerms = document.getElementById('agreeTerms');
+        const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+
+        if (agreeTerms && confirmSubmitBtn) {
+          // Remove any existing listeners first to avoid duplicates
+          agreeTerms.replaceWith(agreeTerms.cloneNode(true));
+          confirmSubmitBtn.replaceWith(confirmSubmitBtn.cloneNode(true));
+
+          // Re-get references after cloning
+          const newAgreeTerms = document.getElementById('agreeTerms');
+          const newConfirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+
+          // Attach new listeners
+          newAgreeTerms.addEventListener('change', function () {
+            newConfirmSubmitBtn.disabled = !this.checked;
+          });
+
+          newConfirmSubmitBtn.addEventListener('click', async function () {
+            await submitForm();
+          });
+
+          // Ensure button starts disabled
+          newConfirmSubmitBtn.disabled = true;
+        }
+      };
+
+      if (!modalEl) {
+        // Create modal HTML
+        const modalHTML = `
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="terms-content mb-4" style="max-height: 50vh; overflow-y: auto;">
+          <h6>Booking Terms and Conditions</h6>
+          <ol>
+            <li>All bookings are subject to approval by CPU Administration.</li>
+            <li>Payment must be made within 3 business days after approval.</li>
+            <li>Cancellations must be made at least 5 days before the event.</li>
+            <li>Damage to facilities/equipment will incur additional charges.</li>
+            <li>Alcohol and smoking are strictly prohibited on campus.</li>
+            <li>External users must provide valid identification.</li>
+            <li>CPU reserves the right to cancel bookings for violations.</li>
+          </ol>
+          <div class="form-check mt-3 text-center">
+            <input class="form-check-input me-2" type="checkbox" id="agreeTerms">
+            <label class="form-check-label" for="agreeTerms">
+              I agree to the terms and conditions
+            </label>
           </div>
         </div>
       </div>
+      <div class="modal-footer justify-content-end">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+<button type="button" id="confirmSubmitBtn" class="btn btn-primary" disabled>
+  <span class="btn-text">Submit Request</span>
+  <span class="btn-loading">
+    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+    Submitting Request...
+  </span>
+</button>
+      </div>
     </div>
+  </div>
+</div>
+
     `;
 
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    modalEl = document.getElementById('termsModal');
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        modalEl = document.getElementById('termsModal');
 
-    // Initialize new modal instance
-    modalInstance = new bootstrap.Modal(modalEl, {
-      backdrop: true,
-      keyboard: true,
-      focus: true
-    });
+        // Initialize new modal instance
+        modalInstance = new bootstrap.Modal(modalEl, {
+          backdrop: true,
+          keyboard: true,
+          focus: true
+        });
 
-    // Add event listeners for modal lifecycle
-    modalEl.addEventListener('hidden.bs.modal', function () {
-      modalInstance.dispose();
-      modalEl.remove();
-    });
+        // Add event listeners for modal lifecycle
+        modalEl.addEventListener('hidden.bs.modal', function () {
+          modalInstance.dispose();
+          modalEl.remove();
+        });
 
-    // Attach event listeners for checkbox and button
-    attachModalEventListeners();
+        // Attach event listeners for checkbox and button
+        attachModalEventListeners();
 
-  } else if (!modalInstance) {
-    // If modal element exists but no instance, create one
-    modalInstance = new bootstrap.Modal(modalEl, {
-      backdrop: true,
-      keyboard: true,
-      focus: true
-    });
-    
-    // Attach event listeners since they might be missing
-    attachModalEventListeners();
-  } else {
-    // Modal exists and has instance, but ensure listeners are attached
-    attachModalEventListeners();
-  }
+      } else if (!modalInstance) {
+        // If modal element exists but no instance, create one
+        modalInstance = new bootstrap.Modal(modalEl, {
+          backdrop: true,
+          keyboard: true,
+          focus: true
+        });
 
-  // Reset checkbox state each time modal opens
-  const agreeTerms = document.getElementById('agreeTerms');
-  const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
-  if (agreeTerms && confirmSubmitBtn) {
-    agreeTerms.checked = false;
-    confirmSubmitBtn.disabled = true;
-  }
+        // Attach event listeners since they might be missing
+        attachModalEventListeners();
+      } else {
+        // Modal exists and has instance, but ensure listeners are attached
+        attachModalEventListeners();
+      }
 
-  // Show the modal
-  if (modalInstance) {
-    modalInstance.show();
-  } else {
-    console.error('Modal instance could not be created');
-    showToast('Failed to open terms modal. Please try again.', 'error');
-  }
-};
+      // Reset checkbox state each time modal opens
+      const agreeTerms = document.getElementById('agreeTerms');
+      const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+      if (agreeTerms && confirmSubmitBtn) {
+        agreeTerms.checked = false;
+        confirmSubmitBtn.disabled = true;
+      }
+
+      // Show the modal
+      if (modalInstance) {
+        modalInstance.show();
+      } else {
+        console.error('Modal instance could not be created');
+        showToast('Failed to open terms modal. Please try again.', 'error');
+      }
+    };
     // Attach form submission handler
     document.getElementById('reservationForm')?.addEventListener('submit', function (e) {
       e.preventDefault();
       openTermsModal(e);
     });
 
-    window.submitForm = async function () {
+   window.submitForm = async function () {
   try {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     const modal = document.getElementById('termsModal');
-    const submitStatus = document.getElementById('submitStatus');
     const confirmBtn = document.getElementById('confirmSubmitBtn');
-    
+
     // Get or create modal instance
     let termsModalInstance = bootstrap.Modal.getInstance(modal);
     if (!termsModalInstance) {
       termsModalInstance = new bootstrap.Modal(modal);
     }
 
-    // Show loading state
-    submitStatus.classList.remove('d-none');
+    // Show loading state - ONLY on the button, remove submitStatus
+    confirmBtn.classList.add('loading');
     confirmBtn.disabled = true;
 
     // Fix 2: Defensive checks for optional fields
@@ -1508,11 +1755,15 @@ window.openTermsModal = function (event) {
 
     // Hide the terms modal
     termsModalInstance.hide();
-    
-    // Show success details in the success modal
-    document.getElementById('successDetails').textContent = 
-      `Your request ID: ${result.data.request_id}\nAccess Code: ${result.data.access_code}`;
-    
+
+// Show success details in the success modal
+document.getElementById('successDetails').innerHTML =
+  `Your request ID: ${result.data.request_id}<br>Access Code: ${result.data.access_code}`;
+
+
+    // Add user's email to the success message
+    document.getElementById('userEmail').textContent = formData.email;
+
     // Show the success modal
     const successModal = new bootstrap.Modal(document.getElementById('successModal'));
     successModal.show();
@@ -1536,38 +1787,39 @@ window.openTermsModal = function (event) {
     console.error('Error submitting form:', error);
     showToast(error.message || 'Failed to submit form', 'error');
 
-    // Reset modal state
-    const submitStatus = document.getElementById('submitStatus');
-    if (submitStatus) submitStatus.classList.add('d-none');
+    // Reset button state
     const confirmBtn = document.getElementById('confirmSubmitBtn');
-    if (confirmBtn) confirmBtn.disabled = false;
+    if (confirmBtn) {
+      confirmBtn.classList.remove('loading');
+      confirmBtn.disabled = false;
+    }
   }
 };
 
-   window.convertTo24Hour = function (time12h) {
-    if (!time12h) return '';
-    
-    // Handle case where time might already be in 24-hour format
-    if (time12h.includes(':')) {
+    window.convertTo24Hour = function (time12h) {
+      if (!time12h) return '';
+
+      // Handle case where time might already be in 24-hour format
+      if (time12h.includes(':')) {
         const [timePart, modifier] = time12h.split(' ');
-        
+
         // If no modifier (AM/PM), assume it's already 24-hour
         if (!modifier) return timePart;
-        
+
         let [hours, minutes] = timePart.split(':');
         hours = parseInt(hours, 10);
 
         if (modifier === 'PM' && hours !== 12) {
-            hours += 12;
+          hours += 12;
         } else if (modifier === 'AM' && hours === 12) {
-            hours = 0;
+          hours = 0;
         }
 
         return `${hours.toString().padStart(2, '0')}:${minutes}`;
-    }
-    
-    return time12h; // Return as-is if format is unexpected
-};
+      }
+
+      return time12h; // Return as-is if format is unexpected
+    };
 
     document.addEventListener('DOMContentLoaded', function () {
       // DOM Elements
@@ -1675,14 +1927,14 @@ window.openTermsModal = function (event) {
         }
       };
 
-       window.calculateAndDisplayFees = async function () {
-      try {
+      window.calculateAndDisplayFees = async function () {
+        try {
           const response = await fetch('/requisition/get-items', {
-              headers: {
-                  'X-CSRF-TOKEN': csrfToken,
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json'
-              }
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
           });
 
           if (!response.ok) throw new Error('Failed to fetch items');
@@ -1699,10 +1951,10 @@ window.openTermsModal = function (event) {
           // Calculate duration in hours if schedule is selected
           let durationHours = 0;
           if (startDate && endDate && startTime && endTime) {
-              const startDateTime = new Date(`${startDate}T${convertTo24Hour(startTime)}:00`);
-              const endDateTime = new Date(`${endDate}T${convertTo24Hour(endTime)}:00`);
-              durationHours = (endDateTime - startDateTime) / (1000 * 60 * 60); // Convert ms to hours
-              durationHours = Math.max(0, durationHours); // Ensure positive value
+            const startDateTime = new Date(`${startDate}T${convertTo24Hour(startTime)}:00`);
+            const endDateTime = new Date(`${endDate}T${convertTo24Hour(endTime)}:00`);
+            durationHours = (endDateTime - startDateTime) / (1000 * 60 * 60); // Convert ms to hours
+            durationHours = Math.max(0, durationHours); // Ensure positive value
           }
 
           let facilityTotal = 0;
@@ -1712,15 +1964,15 @@ window.openTermsModal = function (event) {
           // Facilities breakdown
           const facilityItems = items.filter(i => i.type === 'facility');
           if (facilityItems.length > 0) {
-              htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
+            htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
 
-              facilityItems.forEach(item => {
-                  let fee = parseFloat(item.external_fee);
-                  
-                  // Calculate fee based on rate type and duration
-                  if (item.rate_type === 'Per Hour' && durationHours > 0) {
-                      fee = fee * durationHours;
-                      htmlContent += `
+            facilityItems.forEach(item => {
+              let fee = parseFloat(item.external_fee);
+
+              // Calculate fee based on rate type and duration
+              if (item.rate_type === 'Per Hour' && durationHours > 0) {
+                fee = fee * durationHours;
+                htmlContent += `
                           <div class="fee-item d-flex justify-content-between mb-2">
                               <span>${item.name} (${durationHours.toFixed(1)} hrs)</span>
                               <div class="text-end">
@@ -1729,19 +1981,19 @@ window.openTermsModal = function (event) {
                               </div>
                           </div>
                       `;
-                  } else {
-                      htmlContent += `
+              } else {
+                htmlContent += `
                           <div class="fee-item d-flex justify-content-between mb-2">
                               <span>${item.name}</span>
                               <span>₱${fee.toLocaleString()}</span>
                           </div>
                       `;
-                  }
-                  
-                  facilityTotal += fee;
-              });
+              }
 
-              htmlContent += `
+              facilityTotal += fee;
+            });
+
+            htmlContent += `
                   <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
                       <strong>Subtotal</strong>
                       <strong>₱${facilityTotal.toLocaleString()}</strong>
@@ -1752,17 +2004,17 @@ window.openTermsModal = function (event) {
           // Equipment breakdown
           const equipmentItems = items.filter(i => i.type === 'equipment');
           if (equipmentItems.length > 0) {
-              htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
+            htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
 
-              equipmentItems.forEach(item => {
-                  let unitFee = parseFloat(item.external_fee);
-                  const quantity = item.quantity || 1;
-                  let itemTotal = unitFee * quantity;
-                  
-                  // Calculate fee based on rate type and duration
-                  if (item.rate_type === 'Per Hour' && durationHours > 0) {
-                      itemTotal = itemTotal * durationHours;
-                      htmlContent += `
+            equipmentItems.forEach(item => {
+              let unitFee = parseFloat(item.external_fee);
+              const quantity = item.quantity || 1;
+              let itemTotal = unitFee * quantity;
+
+              // Calculate fee based on rate type and duration
+              if (item.rate_type === 'Per Hour' && durationHours > 0) {
+                itemTotal = itemTotal * durationHours;
+                htmlContent += `
                           <div class="fee-item d-flex justify-content-between mb-2">
                               <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''} (${durationHours.toFixed(1)} hrs)</span>
                               <div class="text-end">
@@ -1771,8 +2023,8 @@ window.openTermsModal = function (event) {
                               </div>
                           </div>
                       `;
-                  } else {
-                      htmlContent += `
+              } else {
+                htmlContent += `
                           <div class="fee-item d-flex justify-content-between mb-2">
                               <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
                               <div class="text-end">
@@ -1781,12 +2033,12 @@ window.openTermsModal = function (event) {
                               </div>
                           </div>
                       `;
-                  }
-                  
-                  equipmentTotal += itemTotal;
-              });
+              }
 
-              htmlContent += `
+              equipmentTotal += itemTotal;
+            });
+
+            htmlContent += `
                   <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
                       <strong>Subtotal</strong>
                       <strong>₱${equipmentTotal.toLocaleString()}</strong>
@@ -1797,39 +2049,39 @@ window.openTermsModal = function (event) {
           // Total
           const total = facilityTotal + equipmentTotal;
           if (total > 0) {
-              htmlContent += `
+            htmlContent += `
                   <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
                       <h6 class="mb-0">Total Amount</h6>
                       <h6 class="mb-0">₱${total.toLocaleString()}</h6>
                   </div>
               `;
           } else {
-              htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
+            htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
           }
 
           htmlContent += '</div>';
           feeDisplay.innerHTML = htmlContent;
 
-      } catch (error) {
+        } catch (error) {
           console.error('Error calculating fees:', error);
           showToast('Failed to calculate fees', 'error');
           feeDisplay.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
-      }
-  };
+        }
+      };
 
-  // Add event listeners to schedule fields to recalculate fees when they change
-  const scheduleFields = [
-      'startDateField', 'endDateField', 'startTimeField', 'endTimeField'
-  ];
-  
-  scheduleFields.forEach(fieldId => {
-      const field = document.getElementById(fieldId);
-      if (field) {
-          field.addEventListener('change', function() {
-              calculateAndDisplayFees();
+      // Add event listeners to schedule fields to recalculate fees when they change
+      const scheduleFields = [
+        'startDateField', 'endDateField', 'startTimeField', 'endTimeField'
+      ];
+
+      scheduleFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.addEventListener('change', function () {
+            calculateAndDisplayFees();
           });
-      }
-  });
+        }
+      });
 
       // --- Remove items from selection ---
       window.removeSelectedItem = async function (id, type) {
@@ -1962,6 +2214,34 @@ window.openTermsModal = function (event) {
           return { valid: false, firstInvalid: null, isMissingLetter: true };
         }
 
+        // Validate booking schedule
+        const scheduleValidation = validateBookingSchedule();
+        if (!scheduleValidation.valid) {
+          showToast(scheduleValidation.message, 'error');
+
+          // Highlight the first empty/invalid schedule field
+          const startDateField = document.getElementById('startDateField');
+          const endDateField = document.getElementById('endDateField');
+          const startTimeField = document.getElementById('startTimeField');
+          const endTimeField = document.getElementById('endTimeField');
+
+          if (!startDateField.value) {
+            showFieldError(startDateField, 'Start Date is required');
+            firstInvalid = startDateField;
+          } else if (!endDateField.value) {
+            showFieldError(endDateField, 'End Date is required');
+            firstInvalid = endDateField;
+          } else if (!startTimeField.value) {
+            showFieldError(startTimeField, 'Start Time is required');
+            firstInvalid = startTimeField;
+          } else if (!endTimeField.value) {
+            showFieldError(endTimeField, 'End Time is required');
+            firstInvalid = endTimeField;
+          }
+
+          return { valid: false, firstInvalid, isMissingLetter: false, isInvalidSchedule: true };
+        }
+
         requiredFields.forEach(name => {
           const input = reservationForm.querySelector(`[name="${name}"]`);
           if (input) {
@@ -2023,10 +2303,10 @@ window.openTermsModal = function (event) {
         e.preventDefault();
         e.stopPropagation();
 
-        const { valid, firstInvalid, isMissingLetter } = validateFormFields();
+        const { valid, firstInvalid, isMissingLetter, isInvalidSchedule } = validateFormFields();
 
         if (!valid) {
-          if (!isMissingLetter) {
+          if (!isMissingLetter && !isInvalidSchedule) {
             showToast('Please fill in all required fields correctly.', 'error');
             if (firstInvalid) {
               firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });

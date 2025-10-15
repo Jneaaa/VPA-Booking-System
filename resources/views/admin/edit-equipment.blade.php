@@ -85,11 +85,6 @@
         justify-content: center;
         align-items: center;
     }
-
-    .card-body {
-        padding: 1.5rem;
-    }
-
     #photosPreview {
         min-height: 110px;
     }
@@ -159,13 +154,9 @@
         /* Allow details section to take remaining space */
     }
 </style>
-<div class="container-fluid px-4">
-    <!-- Main Layout -->
-    <div id="layout">
         <!-- Main Content -->
-        <main id="main">
+        <main>
             <!-- Edit Equipment Page -->
-            <div class="card shadow mb-4">
                 <div class="card-body">
                     <form id="editEquipmentForm">
                         <input type="hidden" id="equipmentId" value="{{ request()->get('id') }}">
@@ -411,15 +402,14 @@
                         </div>
 
                         <!-- Form Actions -->
-                        <div class="d-flex justify-content-end gap-2 mt-4">
+                        <div class="d-flex justify-content-
+                         gap-2 mt-4">
                             <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
                             <button type="submit" class="btn btn-primary">Update Equipment</button>
                         </div>
                     </form>
                 </div>
-            </div>
 
-    </div>
     <!-- Event Modal -->
     <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

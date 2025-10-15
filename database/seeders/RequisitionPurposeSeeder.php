@@ -12,11 +12,11 @@ class RequisitionPurposeSeeder extends Seeder
         $purposes = [
             'Facility Rental',
             'Equipment Rental',
-            'Subject Requirement - Class, Seminar, Conference',
+            'Class/Seminar/Conference',
             'University Program/Activity',
             'CPU Organization Led Activity',
             'Student-Organized Activity',
-            'Alumni-Organized Events',
+            'Alumni-Organized Activity',
             'Alumni - Class Reunion',
             'Alumni - Personal Events',
             'External Event',

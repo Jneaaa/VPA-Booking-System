@@ -173,6 +173,7 @@ Route::get('/admin-role', [AdminController::class, 'adminRoles']);
 
 Route::get('/equipment', [EquipmentController::class, 'publicIndex']);
 Route::get('/facilities', [FacilityController::class, 'publicIndex']);
+Route::get('/requisition-forms/calendar-events', [RequisitionFormController::class, 'getCalendarEvents']);
 
 // Submit Feedback
 
