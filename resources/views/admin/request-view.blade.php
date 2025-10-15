@@ -290,16 +290,18 @@
                                         </div>
 
                                         <!-- Official Receipt Card -->
-                                        <div class="col-auto">
-                                            <div class="card text-center">
-                                                <div class="card-body p-2 d-flex flex-column justify-content-center">
-                                                    <i id="officialReceiptIcon"
-                                                        class="fas fa-file-invoice-dollar fa-2x text-muted mb-1"></i>
-                                                    <small class="text-muted mb-1">Transaction record</small>
-                                                    <div id="officialReceiptDocument"></div>
-                                                </div>
-                                            </div>
-                                        </div>
+<!-- Official Receipt Card -->
+<div class="col-auto">
+    <div class="card text-center">
+        <div class="card-body p-2 d-flex flex-column justify-content-center">
+            <i id="officialReceiptIcon" class="fas fa-file-invoice-dollar fa-2x text-muted mb-1"></i>
+            <small class="text-muted mb-1">Transaction record</small>
+            <div id="officialReceiptDocument">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
                                     </div> <!-- end row -->
                                 </div>
                             </div>
@@ -820,6 +822,49 @@
                         </div>
                     </div>
                 </div>
+                <div class="modal fade" id="markScheduledModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Mark as Scheduled</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to mark this request as scheduled? This will generate an official
+                                    receipt.</p>
+
+                                <div class="mb-3">
+                                    <label for="officialReceiptNum" class="form-label">Official Receipt Number *</label>
+                                    <input type="text" class="form-control" id="officialReceiptNum"
+                                        placeholder="Enter official receipt number" required>
+                                    <div class="form-text">This will be the unique identifier for the official receipt.
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="scheduledCalendarTitle" class="form-label">Calendar Event Title</label>
+                                    <input type="text" class="form-control" id="scheduledCalendarTitle"
+                                        placeholder="Enter calendar event title" maxlength="50">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="scheduledCalendarDescription" class="form-label">Calendar Event
+                                        Description</label>
+                                    <textarea class="form-control" id="scheduledCalendarDescription" rows="3"
+                                        placeholder="Enter calendar event description" maxlength="100"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="confirmMarkScheduled">
+                                    <span class="spinner-border spinner-border-sm d-none" role="status"
+                                        aria-hidden="true"></span>
+                                    Confirm & Generate Receipt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
 
                 <!-- Back to Top Button -->
@@ -856,6 +901,7 @@
                 });
             });
 
+            const markScheduledModal = new bootstrap.Modal(document.getElementById('markScheduledModal'));
             const closeFormModal = new bootstrap.Modal(document.getElementById('closeFormModal'));
             const commentsContainer = document.getElementById('formRemarks');
             const commentTextarea = document.querySelector('.card-footer textarea');
@@ -875,6 +921,11 @@
             const approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
             const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
             const finalizeModal = new bootstrap.Modal(document.getElementById('finalizeModal'));
+            
+            // Function to handle mark scheduled action
+            function handleMarkScheduled() {
+                markScheduledModal.show();
+            }
 
 
             // Fee management elements
@@ -1009,9 +1060,9 @@
                                 const actionMessage = document.createElement('div');
                                 actionMessage.className = 'action-taken-message text-center p-3';
                                 actionMessage.innerHTML = `
-                            <i class="bi bi-check-circle-fill text-success fs-4 d-block mb-2"></i>
-                            <p class="mb-0 small text-muted">You have already taken action for this request.</p>
-                        `;
+                                <i class="bi bi-check-circle-fill text-success fs-4 d-block mb-2"></i>
+                                <p class="mb-0 small text-muted">You have already taken action for this request.</p>
+                            `;
                                 actionPanel.appendChild(actionMessage);
                             }
                         }
@@ -1077,27 +1128,27 @@
                                 }
                                 break;
 
-                            case 2: // Awaiting Payment (status ID 2)
-                                console.log('Status: Awaiting Payment - Replacing Finalize with Mark Scheduled, replacing More with Close Form');
+case 2: // Awaiting Payment (status ID 2)
+    console.log('Status: Awaiting Payment - Replacing Finalize with Mark Scheduled, replacing More with Close Form');
 
-                                // Replace Finalize button with Mark Scheduled
-                                if (finalizeBtn) {
-                                    finalizeBtn.style.display = 'none';
-                                }
+    // Replace Finalize button with Mark Scheduled
+    if (finalizeBtn) {
+        finalizeBtn.style.display = 'none';
+    }
 
-                                // Replace More dropdown with Close Form button
-                                if (moreActionsDropdown) {
-                                    moreActionsDropdown.style.display = 'none';
-                                }
+    // Replace More dropdown with Close Form button
+    if (moreActionsDropdown) {
+        moreActionsDropdown.style.display = 'none';
+    }
 
-                                // Create Mark Scheduled button
-                                const markScheduledBtn = document.createElement('button');
-                                markScheduledBtn.id = 'markScheduledBtn';
-                                markScheduledBtn.className = 'btn btn-primary w-100 mb-2';
-                                markScheduledBtn.innerHTML = '<i class="bi bi-calendar-event me-1"></i> Mark Scheduled';
-                                markScheduledBtn.addEventListener('click', function () {
-                                    handleStatusAction('Scheduled');
-                                });
+    // Create Mark Scheduled button
+    const markScheduledBtn = document.createElement('button');
+    markScheduledBtn.id = 'markScheduledBtn';
+    markScheduledBtn.className = 'btn btn-primary w-100 mb-2';
+    markScheduledBtn.innerHTML = '<i class="bi bi-calendar-event me-1"></i> Mark Scheduled';
+    markScheduledBtn.addEventListener('click', function () {
+        handleMarkScheduled(); // Use the custom handler instead of handleStatusAction
+    });
 
                                 // Create Close Form button
                                 const closeFormBtnAwaiting = document.createElement('button');
@@ -1153,41 +1204,41 @@
                                 }
                                 break;
 
-case 4: // Ongoing (status ID 4)
-    console.log('Status: Ongoing - Replacing Finalize with Mark Late, replacing More with Close Form');
+                            case 4: // Ongoing (status ID 4)
+                                console.log('Status: Ongoing - Replacing Finalize with Mark Late, replacing More with Close Form');
 
-    // Hide existing buttons
-    if (finalizeBtn) {
-        finalizeBtn.style.display = 'none';
-    }
-    if (moreActionsDropdown) {
-        moreActionsDropdown.style.display = 'none';
-    }
+                                // Hide existing buttons
+                                if (finalizeBtn) {
+                                    finalizeBtn.style.display = 'none';
+                                }
+                                if (moreActionsDropdown) {
+                                    moreActionsDropdown.style.display = 'none';
+                                }
 
-    // Only create Mark Late button if it doesn't exist
-    if (!document.getElementById('markLateBtn')) {
-        const markLateBtn = document.createElement('button');
-        markLateBtn.id = 'markLateBtn';
-        markLateBtn.className = 'btn btn-primary w-100 mb-2';
-        markLateBtn.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Mark Late';
-        markLateBtn.addEventListener('click', function () {
-            handleStatusAction('Late');
-        });
-        actionPanel.appendChild(markLateBtn);
-    }
+                                // Only create Mark Late button if it doesn't exist
+                                if (!document.getElementById('markLateBtn')) {
+                                    const markLateBtn = document.createElement('button');
+                                    markLateBtn.id = 'markLateBtn';
+                                    markLateBtn.className = 'btn btn-primary w-100 mb-2';
+                                    markLateBtn.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Mark Late';
+                                    markLateBtn.addEventListener('click', function () {
+                                        handleStatusAction('Late');
+                                    });
+                                    actionPanel.appendChild(markLateBtn);
+                                }
 
-    // Only create Close Form button if it doesn't exist
-    if (!document.getElementById('closeFormBtn')) {
-        const closeFormBtnOngoing = document.createElement('button');
-        closeFormBtnOngoing.id = 'closeFormBtn';
-        closeFormBtnOngoing.className = 'btn btn-light-danger w-100 mb-2';
-        closeFormBtnOngoing.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
-        closeFormBtnOngoing.addEventListener('click', function () {
-            closeForm();
-        });
-        actionPanel.appendChild(closeFormBtnOngoing);
-    }
-    break;
+                                // Only create Close Form button if it doesn't exist
+                                if (!document.getElementById('closeFormBtn')) {
+                                    const closeFormBtnOngoing = document.createElement('button');
+                                    closeFormBtnOngoing.id = 'closeFormBtn';
+                                    closeFormBtnOngoing.className = 'btn btn-light-danger w-100 mb-2';
+                                    closeFormBtnOngoing.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
+                                    closeFormBtnOngoing.addEventListener('click', function () {
+                                        closeForm();
+                                    });
+                                    actionPanel.appendChild(closeFormBtnOngoing);
+                                }
+                                break;
 
 
                             case 5: // Late (status ID 5)
@@ -1283,30 +1334,30 @@ case 4: // Ongoing (status ID 4)
                 }
 
                 return history.map(item => `
-            <div class="d-flex align-items-center mb-3 p-2 border rounded">
-                <div class="me-3 flex-shrink-0">
-                    ${item.admin_photo ?
+                <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                    <div class="me-3 flex-shrink-0">
+                        ${item.admin_photo ?
                         `<img src="${item.admin_photo}" class="rounded-circle" width="45" height="45" alt="${item.admin_name}" style="object-fit: cover;">` :
                         `<div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width: 45px; height: 45px;">
-                            ${item.admin_name.split(' ').map(n => n.charAt(0)).join('')}
-                        </div>`
+                                ${item.admin_name.split(' ').map(n => n.charAt(0)).join('')}
+                            </div>`
                     }
-                </div>
-                <div class="flex-grow-1">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <strong class="d-block">${item.admin_name}</strong>
-                            <small class="text-muted">
-                                <i class="fa ${item.action_icon} ${item.action_class} me-1"></i>
-                                ${item.action} this request
-                            </small>
-                            ${item.remarks ? `<div class="mt-1 small text-muted">"${item.remarks}"</div>` : ''}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong class="d-block">${item.admin_name}</strong>
+                                <small class="text-muted">
+                                    <i class="fa ${item.action_icon} ${item.action_class} me-1"></i>
+                                    ${item.action} this request
+                                </small>
+                                ${item.remarks ? `<div class="mt-1 small text-muted">"${item.remarks}"</div>` : ''}
+                            </div>
+                            <small class="text-muted text-end">${item.formatted_date}</small>
                         </div>
-                        <small class="text-muted text-end">${item.formatted_date}</small>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
             }
 
 
@@ -1385,119 +1436,219 @@ case 4: // Ongoing (status ID 4)
             });
 
             // Add event listeners for status options in the More Actions dropdown
-            document.querySelectorAll('#moreActionsBtn + .dropdown-menu .status-option').forEach(option => {
-                option.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const action = this.dataset.value;
 
-                    // Check if we're dealing with Late status and current status is already Late
-                    const statusBadge = document.getElementById('statusBadge');
-                    const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
+document.querySelectorAll('#moreActionsBtn + .dropdown-menu .status-option').forEach(option => {
+    option.addEventListener('click', function (e) {
+        e.preventDefault();
+        const action = this.dataset.value;
 
-                    if (action === 'Late' && currentStatusName === 'Late') {
-                        handleUnmarkLate();
-                    } else {
-                        handleStatusAction(action);
-                    }
-                });
-            });
+        // SPECIAL CASE: Handle Scheduled with custom modal
+        if (action === 'Scheduled') {
+            handleMarkScheduled();
+            return;
+        }
+
+        // Check if we're dealing with Late status and current status is already Late
+        const statusBadge = document.getElementById('statusBadge');
+        const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
+
+        if (action === 'Late' && currentStatusName === 'Late') {
+            handleUnmarkLate();
+        } else {
+            handleStatusAction(action);
+        }
+    });
+});
 
 
-            // Function to handle different status actions
-            function handleStatusAction(action) {
-                const adminToken = localStorage.getItem('adminToken');
-                const statusBadge = document.getElementById('statusBadge');
-                const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
+           // Function to handle different status actions
+function handleStatusAction(action) {
+    const statusBadge = document.getElementById('statusBadge');
+    const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
 
-                // Get current status ID from the request data
-                const currentRequest = allRequests.find(req => req.request_id == requestId);
-                const currentStatusId = currentRequest ? currentRequest.form_details.status.status_id : null;
+    // Get current status ID from the request data
+    const currentRequest = allRequests.find(req => req.request_id == requestId);
+    const currentStatusId = currentRequest ? currentRequest.form_details.status.id : null;
 
-                // Check if user is Head Admin (you'll need to implement this check)
-                const isHeadAdmin = checkIfHeadAdmin(); // You'll need to implement this function
+    // Check if user is Head Admin (you'll need to implement this check)
+    const isHeadAdmin = checkIfHeadAdmin(); 
 
-                if (isHeadAdmin) {
-                    // Head Admin specific restrictions based on status_id
-                    switch (currentStatusId) {
-                        case 'Awaiting Payment': // Assuming status_id for Awaiting Payment
-                            if (action === 'Ongoing' || action === 'Late') {
-                                showToast('This action is not available for forms with Awaiting Payment status.', 'error');
-                                return;
-                            }
-                            break;
+    function checkIfHeadAdmin() {
+    try {
+        // Get admin data from localStorage or make an API call
+        const adminData = JSON.parse(localStorage.getItem('adminProfile') || '{}');
+        return adminData.role?.role_title === 'Head Admin';
+    } catch (error) {
+        console.error('Error checking Head Admin status:', error);
+        return false;
+    }
+}
 
-                        case 'Scheduled': // Assuming status_id for Scheduled
-                            if (action === 'Scheduled' || action === 'Late') {
-                                showToast('This action is not available for forms with Scheduled status.', 'error');
-                                return;
-                            }
-                            // Disable finalize button for Scheduled status
-                            const finalizeBtn = document.getElementById('finalizeBtn');
-                            if (finalizeBtn && action === 'Finalize') {
-                                showToast('Cannot finalize a form that is already Scheduled.', 'error');
-                                return;
-                            }
-                            break;
-
-                        case 'Ongoing': // Assuming status_id for Ongoing
-                            // For Ongoing status, replace Finalize with Mark Late
-                            if (action === 'Finalize') {
-                                // Instead of finalizing, mark as late
-                                handleStatusAction('Late');
-                                return;
-                            }
-                            break;
-                    }
+    if (isHeadAdmin) {
+        // Head Admin specific restrictions based on status_id
+        switch (currentStatusId) {
+            case 'Awaiting Payment': // Assuming status_id for Awaiting Payment
+                if (action === 'Ongoing' || action === 'Late') {
+                    showToast('This action is not available for forms with Awaiting Payment status.', 'error');
+                    return;
                 }
+                break;
 
-                switch (action) {
-                    case 'Scheduled':
-                    case 'Ongoing':
-                    case 'Late':
-                        showStatusUpdateModal(action);
-                        break;
+            case 'Scheduled': // Assuming status_id for Scheduled
+                if (action === 'Scheduled' || action === 'Late') {
+                    showToast('This action is not available for forms with Scheduled status.', 'error');
+                    return;
+                }
+                // Disable finalize button for Scheduled status
+                const finalizeBtn = document.getElementById('finalizeBtn');
+                if (finalizeBtn && action === 'Finalize') {
+                    showToast('Cannot finalize a form that is already Scheduled.', 'error');
+                    return;
+                }
+                break;
 
-                    case 'Finalize Form':
-                        if (currentStatusName === 'Pending Approval') {
-                            finalizeModal.show();
-                        } else {
-                            showToast('This form is already finalized.', 'error');
-                        }
-                        break;
+            case 'Ongoing': // Assuming status_id for Ongoing
+                // For Ongoing status, replace Finalize with Mark Late
+                if (action === 'Finalize') {
+                    // Instead of finalizing, mark as late
+                    handleStatusAction('Late');
+                    return;
+                }
+                break;
+        }
+    }
 
-                    case 'Set Penalty Fee':
-                        // Prompt user for penalty amount
-                        const penaltyAmount = prompt('Enter late penalty amount:');
-                        if (penaltyAmount !== null && penaltyAmount !== '') {
-                            const amount = parseFloat(penaltyAmount);
-                            if (!isNaN(amount) && amount >= 0) { // allow 0
-                                addLatePenalty(amount);
-                            } else {
-                                showToast('Please enter a valid penalty amount (0 or greater).', 'error');
-                            }
-                        }
-                        break;
+    // SPECIAL CASE: Handle Scheduled status with custom modal
+    if (action === 'Scheduled') {
+        handleMarkScheduled();
+        return; // Exit early to prevent the generic status modal from showing
+    }
 
-                    case 'Close':
-                        closeForm();
-                        break;
+    // For all other statuses, use the generic status update modal
+    switch (action) {
+        case 'Ongoing':
+        case 'Late':
+            showStatusUpdateModal(action);
+            break;
 
-                    default:
-                        console.log('Unknown action:', action);
+        case 'Finalize Form':
+            if (currentStatusName === 'Pending Approval') {
+                finalizeModal.show();
+            } else {
+                showToast('This form is already finalized.', 'error');
+            }
+            break;
+
+        case 'Set Penalty Fee':
+            // Prompt user for penalty amount
+            const penaltyAmount = prompt('Enter late penalty amount:');
+            if (penaltyAmount !== null && penaltyAmount !== '') {
+                const amount = parseFloat(penaltyAmount);
+                if (!isNaN(amount) && amount >= 0) { // allow 0
+                    addLatePenalty(amount);
+                } else {
+                    showToast('Please enter a valid penalty amount (0 or greater).', 'error');
                 }
             }
+            break;
+
+        case 'Close':
+            closeForm();
+            break;
+
+        default:
+            console.log('Unknown action:', action);
+    }
+}
+
+            // Confirm mark scheduled
+document.getElementById('confirmMarkScheduled').addEventListener('click', async function () {
+    const btn = this;
+    const spinner = btn.querySelector('.spinner-border');
+    const originalText = btn.innerHTML;
+    
+    const officialReceiptNum = document.getElementById('officialReceiptNum').value.trim();
+    const calendarTitle = document.getElementById('scheduledCalendarTitle').value.trim();
+    const calendarDescription = document.getElementById('scheduledCalendarDescription').value.trim();
+    
+    if (!officialReceiptNum) {
+        showToast('Please enter an official receipt number', 'error');
+        return;
+    }
+
+    // Show loading state
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+
+    try {
+        const response = await fetch(`/api/admin/requisition/${requestId}/mark-scheduled`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${adminToken}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                official_receipt_num: officialReceiptNum,
+                calendar_title: calendarTitle || null,
+                calendar_description: calendarDescription || null
+            })
+        });
+
+        const contentType = response.headers.get('content-type');
+        let responseData;
+
+        if (contentType && contentType.includes('application/json')) {
+            responseData = await response.json();
+        } else {
+            const textResponse = await response.text();
+            throw new Error(textResponse || 'Non-JSON response from server');
+        }
+
+        if (!response.ok) {
+            const errorMessage = responseData.error ||
+                responseData.message ||
+                JSON.stringify(responseData) ||
+                'Failed to mark as scheduled';
+            throw new Error(errorMessage);
+        }
+
+        showToast('Request marked as scheduled successfully! Official receipt generated.', 'success');
+        markScheduledModal.hide();
+
+        // Clear form
+        document.getElementById('officialReceiptNum').value = '';
+        document.getElementById('scheduledCalendarTitle').value = '';
+        document.getElementById('scheduledCalendarDescription').value = '';
+
+        // Refresh the page to show updated status
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+
+    } catch (error) {
+        console.error('Error marking as scheduled:', error);
+        showToast('Error: ' + error.message, 'error');
+        
+        // Reset button state on error
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        spinner.classList.add('d-none');
+    }
+});
 
             // Update your loadComments function to load both comments and fees
             async function loadMixedActivity() {
                 try {
                     const container = document.getElementById('formRemarks');
                     container.innerHTML = `
-                                    <div class="comment-loading">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">Loading activity...</span>
+                                        <div class="comment-loading">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading activity...</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                `;
+                                    `;
 
                     const commentsResponse = await fetch(`/api/admin/requisition/${requestId}/comments`, {
                         headers: { 'Authorization': `Bearer ${adminToken}`, 'Accept': 'application/json' }
@@ -1522,11 +1673,11 @@ case 4: // Ongoing (status ID 4)
                 } catch (error) {
                     console.error('Error loading activity:', error);
                     container.innerHTML = `
-                                    <div class="empty-comments text-danger">
-                                        <i class="bi bi-exclamation-triangle"></i>
-                                        <p>Failed to load activity.</p>
-                                    </div>
-                                `;
+                                        <div class="empty-comments text-danger">
+                                            <i class="bi bi-exclamation-triangle"></i>
+                                            <p>Failed to load activity.</p>
+                                        </div>
+                                    `;
                 }
             }
 
@@ -1543,11 +1694,11 @@ case 4: // Ongoing (status ID 4)
 
                 if (comments.length === 0 && fees.length === 0) {
                     container.innerHTML = `
-                                    <div class="empty-comments">
-                                        <i class="bi bi-chat"></i>
-                                        <p>No action has been taken in this form yet.</p>
-                                    </div>
-                                `;
+                                        <div class="empty-comments">
+                                            <i class="bi bi-chat"></i>
+                                            <p>No action has been taken in this form yet.</p>
+                                        </div>
+                                    `;
                     return;
                 }
 
@@ -1593,31 +1744,31 @@ case 4: // Ongoing (status ID 4)
             // Function to generate comment HTML
             function generateCommentHTML(comment) {
                 return `
-                            <div class="comment mb-3">
-                                <div class="d-flex align-items-start">
-                                    <!-- Admin Profile Picture -->
-                                    <div class="me-2 flex-shrink-0">
-                                        ${comment.admin.photo_url ?
+                                <div class="comment mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <!-- Admin Profile Picture -->
+                                        <div class="me-2 flex-shrink-0">
+                                            ${comment.admin.photo_url ?
                         `<img src="${comment.admin.photo_url}" class="rounded-circle" width="40" height="40" alt="${comment.admin.first_name}'s profile picture" style="object-fit: cover;">` :
                         `<div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width: 40px; height: 40px; font-size: 1rem;">
-                                                ${comment.admin.first_name.charAt(0)}${comment.admin.last_name.charAt(0)}
-                                            </div>`
+                                                    ${comment.admin.first_name.charAt(0)}${comment.admin.last_name.charAt(0)}
+                                                </div>`
                     }
-                                    </div>
-
-                                    <!-- Message Bubble -->
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex align-items-center mb-1">
-                                            <strong class="me-2" style="font-size: 0.85rem;">${comment.admin.first_name} ${comment.admin.last_name}</strong>
-                                            <small class="text-muted">${formatTimeAgo(comment.created_at)}</small>
                                         </div>
-                                        <div class="message-bubble bg-primary text-white p-3 rounded-3" style="max-width: 80%; border-bottom-left-radius: 4px !important;">
-                                            <p class="mb-0" style="white-space: pre-wrap; line-height: 1.4;">${escapeHtml(comment.comment)}</p>
+
+                                        <!-- Message Bubble -->
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <strong class="me-2" style="font-size: 0.85rem;">${comment.admin.first_name} ${comment.admin.last_name}</strong>
+                                                <small class="text-muted">${formatTimeAgo(comment.created_at)}</small>
+                                            </div>
+                                            <div class="message-bubble bg-primary text-white p-3 rounded-3" style="max-width: 80%; border-bottom-left-radius: 4px !important;">
+                                                <p class="mb-0" style="white-space: pre-wrap; line-height: 1.4;">${escapeHtml(comment.comment)}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            `;
+                                `;
             }
 
             // Function to generate fee/action HTML
@@ -1627,32 +1778,32 @@ case 4: // Ongoing (status ID 4)
                 const adminName = fee.added_by?.name || 'Admin';
 
                 return `
-                            <div class="comment mb-3">
-                                <div class="d-flex align-items-start">
-                                    <!-- Icon Circle -->
-                                    <div class="me-2 flex-shrink-0">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center" 
-                                             style="width: 40px; height: 40px; font-size: 1rem; background-color: #d4edda; color: #28a745;">
-                                            <i class="fa fa-money-bill"></i>
+                                <div class="comment mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <!-- Icon Circle -->
+                                        <div class="me-2 flex-shrink-0">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                                                 style="width: 40px; height: 40px; font-size: 1rem; background-color: #d4edda; color: #28a745;">
+                                                <i class="fa fa-money-bill"></i>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <!-- Action Bubble -->
-                                    <div class="flex-grow-1">
-                                        <div class="message-bubble bg-info text-white p-3 rounded-3" 
-                                             style="max-width: 80%; border-bottom-left-radius: 4px !important;">
-                                            <p class="mb-1" style="white-space: normal; line-height: 1.4;">
-                                                <span style="font-size: 0.85rem;">${adminName}</span> ${fee.type === 'discount' ? 'added a discount' : 'added a fee'}: 
-                                                <strong>${fee.label}</strong> ₱${amount.toFixed(2)}
-                                            </p>
-                                            <small class="text-dark">
-                                                ${formatTimeAgo(fee.created_at)}
-                                            </small>
+                                        <!-- Action Bubble -->
+                                        <div class="flex-grow-1">
+                                            <div class="message-bubble bg-info text-white p-3 rounded-3" 
+                                                 style="max-width: 80%; border-bottom-left-radius: 4px !important;">
+                                                <p class="mb-1" style="white-space: normal; line-height: 1.4;">
+                                                    <span style="font-size: 0.85rem;">${adminName}</span> ${fee.type === 'discount' ? 'added a discount' : 'added a fee'}: 
+                                                    <strong>${fee.label}</strong> ₱${amount.toFixed(2)}
+                                                </p>
+                                                <small class="text-dark">
+                                                    ${formatTimeAgo(fee.created_at)}
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            `;
+                                `;
             }
 
 
@@ -1774,18 +1925,18 @@ case 4: // Ongoing (status ID 4)
                 toast.style.borderRadius = '0.3rem';
 
                 toast.innerHTML = `
-                                                                                                                                            <div class="d-flex align-items-center px-3 py-1"> 
-                                                                                                                                                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                                                                                                                                <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                                                                                                                                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                                                                                                                            </div>
-                                                                                                                                            <div class="loading-bar" style="
-                                                                                                                                                height: 3px;
-                                                                                                                                                background: rgba(255,255,255,0.7);
-                                                                                                                                                width: 100%;
-                                                                                                                                                transition: width ${duration}ms linear;
-                                                                                                                                            "></div>
-                                                                                                                                        `;
+                                                                                                                                                <div class="d-flex align-items-center px-3 py-1"> 
+                                                                                                                                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                                                                                                                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                                                                                                                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                                                                                                                </div>
+                                                                                                                                                <div class="loading-bar" style="
+                                                                                                                                                    height: 3px;
+                                                                                                                                                    background: rgba(255,255,255,0.7);
+                                                                                                                                                    width: 100%;
+                                                                                                                                                    transition: width ${duration}ms linear;
+                                                                                                                                                "></div>
+                                                                                                                                            `;
 
                 document.body.appendChild(toast);
 
@@ -1838,61 +1989,61 @@ case 4: // Ongoing (status ID 4)
                 switch (status) {
                     case 'Scheduled':
                         modalContent.innerHTML = `
-                            <div class="text-center">
-                                <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
-                                <p>Are you sure? This action cannot be undone.</p>
-                                <p class="text-muted small">
-                                    This will set the form's status to <strong>Scheduled</strong>.
-                                    The request can still be cancelled if an emergency happens. 
-                                    If such a situation occurs, make sure to contact the requester about refund details and settle it in the business office on campus before closing the form.
-                                </p>
-                            </div>
-                        `;
+                                <div class="text-center">
+                                    <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                                    <p>Are you sure? This action cannot be undone.</p>
+                                    <p class="text-muted small">
+                                        This will set the form's status to <strong>Scheduled</strong>.
+                                        The request can still be cancelled if an emergency happens. 
+                                        If such a situation occurs, make sure to contact the requester about refund details and settle it in the business office on campus before closing the form.
+                                    </p>
+                                </div>
+                            `;
                         break;
                     case 'Ongoing':
                         modalContent.innerHTML = `
-                            <div class="text-center">
-                                <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
-                                <p>Are you sure? This action cannot be undone.</p>
-                                <p class="text-muted small">
-                                    Sets the form status to <strong>Ongoing</strong>. Use this to manually set it if not already done. 
-                                </p>
-                            </div>
-                        `;
+                                <div class="text-center">
+                                    <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                                    <p>Are you sure? This action cannot be undone.</p>
+                                    <p class="text-muted small">
+                                        Sets the form status to <strong>Ongoing</strong>. Use this to manually set it if not already done. 
+                                    </p>
+                                </div>
+                            `;
                         break;
                     case 'Late':
                         modalContent.innerHTML = `
-                            <div class="text-center">
-                                <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
-                                <p>Are you sure? This action cannot be undone.</p>
-                                <p class="text-muted small">
-                                    This will set the form's status to <strong>Late</strong> and mark it as overdue.
-                                </p>
-                            </div>
-                            <div class="mt-4">
-                                <div class="mb-3">
-                                    <label for="latePenaltyAmount" class="form-label">Late Penalty Amount (Optional)</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">₱</span>
-                                        <input type="number" class="form-control" id="latePenaltyAmount" 
-                                               placeholder="Enter penalty amount" step="0.01" min="0" value="0">
-                                    </div>
-                                    <small class="text-muted">Enter the late penalty amount to be added to the fees (leave as 0 for no penalty).</small>
+                                <div class="text-center">
+                                    <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                                    <p>Are you sure? This action cannot be undone.</p>
+                                    <p class="text-muted small">
+                                        This will set the form's status to <strong>Late</strong> and mark it as overdue.
+                                    </p>
                                 </div>
-                            </div>
-                        `;
+                                <div class="mt-4">
+                                    <div class="mb-3">
+                                        <label for="latePenaltyAmount" class="form-label">Late Penalty Amount (Optional)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">₱</span>
+                                            <input type="number" class="form-control" id="latePenaltyAmount" 
+                                                   placeholder="Enter penalty amount" step="0.01" min="0" value="0">
+                                        </div>
+                                        <small class="text-muted">Enter the late penalty amount to be added to the fees (leave as 0 for no penalty).</small>
+                                    </div>
+                                </div>
+                            `;
                         break;
                     case 'Cancel Form':
                         modalContent.innerHTML = `
-                            <div class="text-center">
-                                <i class="fa fa-exclamation-circle fa-3x text-danger mb-3"></i>
-                                <p>Are you sure? This action cannot be undone.</p>
-                                <p class="text-muted small">
-                                    This will <strong class="text-danger">cancel</strong> the form and set its status to <strong>Cancelled</strong>.
-                                    Note: This action cannot be undone. The requester will be notified about the cancellation.
-                                </p>
-                            </div>
-                        `;
+                                <div class="text-center">
+                                    <i class="fa fa-exclamation-circle fa-3x text-danger mb-3"></i>
+                                    <p>Are you sure? This action cannot be undone.</p>
+                                    <p class="text-muted small">
+                                        This will <strong class="text-danger">cancel</strong> the form and set its status to <strong>Cancelled</strong>.
+                                        Note: This action cannot be undone. The requester will be notified about the cancellation.
+                                    </p>
+                                </div>
+                            `;
                         break;
                 }
 
@@ -1994,15 +2145,15 @@ case 4: // Ongoing (status ID 4)
                 const modalContent = document.getElementById('statusModalContent');
 
                 modalContent.innerHTML = `
-                    <div class="text-center">
-                        <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
-                        <p>Are you sure you want to unmark this form as late?</p>
-                        <p class="text-muted small">
-                            This will set the form's status back to <strong>Ongoing</strong>, remove the late flag, 
-                            and reset any late penalty fees to zero.
-                        </p>
-                    </div>
-                `;
+                        <div class="text-center">
+                            <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                            <p>Are you sure you want to unmark this form as late?</p>
+                            <p class="text-muted small">
+                                This will set the form's status back to <strong>Ongoing</strong>, remove the late flag, 
+                                and reset any late penalty fees to zero.
+                            </p>
+                        </div>
+                    `;
 
                 selectedStatus = 'Ongoing'; // Set to Ongoing to unmark late
                 statusUpdateModal.show();
@@ -2259,7 +2410,7 @@ case 4: // Ongoing (status ID 4)
                 }
             }
 
-            document.getElementById('waiveAllSwitch').addEventListener('change', function() {
+            document.getElementById('waiveAllSwitch').addEventListener('change', function () {
                 handleWaiveAll(this);
             });
 
@@ -2836,10 +2987,10 @@ case 4: // Ongoing (status ID 4)
                 document.getElementById('modalPurpose').textContent = request.form_details.purpose;
                 document.getElementById('modalParticipants').textContent = request.form_details.num_participants;
                 document.getElementById('modalStatus').innerHTML = `
-                                <span class="badge" style="background-color: ${request.form_details.status.color}">
-                                    ${request.form_details.status.name}
-                                </span>
-                            `;
+                                    <span class="badge" style="background-color: ${request.form_details.status.color}">
+                                        ${request.form_details.status.name}
+                                    </span>
+                                `;
                 document.getElementById('modalFee').textContent = `₱${request.fees.tentative_fee}`;
                 document.getElementById('modalApprovals').textContent = `${request.approval_info.approval_count}`;
 
@@ -2896,14 +3047,14 @@ case 4: // Ongoing (status ID 4)
                         }
 
                         feeElement.innerHTML = `
-                                <span class="item-name">${fee.label}</span>
-                                <span class="d-flex align-items-center">
-                                    <span class="item-price me-2">${amountText}</span>
-                                    <button class="btn btn-sm btn-danger delete-fee-btn" data-fee-id="${fee.fee_id}" data-fee-type="${fee.type}">
-                                        <i class="fa fa-times"></i>
-                                    </button>
-                                </span>
-                            `;
+                                    <span class="item-name">${fee.label}</span>
+                                    <span class="d-flex align-items-center">
+                                        <span class="item-price me-2">${amountText}</span>
+                                        <button class="btn btn-sm btn-danger delete-fee-btn" data-fee-id="${fee.fee_id}" data-fee-type="${fee.type}">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </span>
+                                `;
 
                         additionalFeesContainer.appendChild(feeElement);
                     });
@@ -2971,11 +3122,11 @@ case 4: // Ongoing (status ID 4)
                 } else {
                     // Show empty message
                     additionalFeesContainer.innerHTML = `
-                            <div class="text-center text-muted py-4">
-                                <i class="fa fa-coins fa-2x d-block mb-2"></i>
-                                <p class="mb-0">No additional fees or discounts</p>
-                            </div>
-                        `;
+                                <div class="text-center text-muted py-4">
+                                    <i class="fa fa-coins fa-2x d-block mb-2"></i>
+                                    <p class="mb-0">No additional fees or discounts</p>
+                                </div>
+                            `;
                 }
             }
 
@@ -2998,265 +3149,280 @@ case 4: // Ongoing (status ID 4)
 
 
 
-async function fetchRequestDetails() {
-    try {
-        // Ensure loading state is visible and content is hidden
-        document.getElementById('loadingState').style.display = 'block';
-        document.getElementById('contentState').style.display = 'none';
+            async function fetchRequestDetails() {
+                try {
+                    // Ensure loading state is visible and content is hidden
+                    document.getElementById('loadingState').style.display = 'block';
+                    document.getElementById('contentState').style.display = 'none';
 
-        const response = await fetch(`http://127.0.0.1:8000/api/admin/requisition-forms`, {
-            headers: {
-                'Authorization': `Bearer ${adminToken}`,
-                'Accept': 'application/json'
+                    const response = await fetch(`http://127.0.0.1:8000/api/admin/requisition-forms`, {
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to fetch request details');
+
+                    allRequests = await response.json();
+                    const request = allRequests.find(req => req.request_id == requestId);
+                    if (!request) throw new Error('Request not found');
+
+                    // Update approval counts for the finalize modal
+                    updateApprovalCounts(
+                        request.approval_info.approval_count,
+                        request.approval_info.rejection_count
+                    );
+
+                    // Update request ID in title
+                    document.getElementById('requestIdTitle').textContent = String(requestId).padStart(4, '0');
+
+                    // Update status badge
+                    const statusBadge = document.getElementById('statusBadge');
+                    statusBadge.textContent = request.form_details.status.name;
+                    statusBadge.style.backgroundColor = request.form_details.status.color;
+
+                    // Update fees display
+                    document.getElementById('totalApprovedFee').textContent = `₱${parseFloat(request.fees.approved_fee).toFixed(2)}`;
+                    document.getElementById('feeBreakdownTotal').textContent = `₱${parseFloat(request.fees.approved_fee).toFixed(2)}`;
+
+                    // Contact information
+                    document.getElementById('formDetails').innerHTML = `
+                <table class="table table-borderless mb-0 small text-start align-top">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div><strong>Requester</strong></div>
+                                <div>${request.user_details.first_name} ${request.user_details.last_name}</div>
+                            </td>
+                            <td>
+                                <div><strong>School ID</strong></div>
+                                <div>${request.user_details.school_id || 'N/A'}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div><strong>Email</strong></div>
+                                <div>${request.user_details.email}</div>
+                            </td>
+                            <td>
+                                <div><strong>Organization</strong></div>
+                                <div>${request.user_details.organization_name || 'N/A'}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div><strong>User Type</strong></div>
+                                <div>${request.user_details.user_type}</div>
+                            </td>
+                            <td>
+                                <div><strong>Contact Number</strong></div>
+                                <div>${request.user_details.contact_number || 'N/A'}</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+                    // Event details
+                    document.getElementById('eventDetails').innerHTML = `
+                <table class="table table-borderless mb-0 small text-start align-top">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div><strong>Endorser</strong></div>
+                                <div>${request.documents.endorser || 'N/A'}</div>
+                            </td>
+                            <td>
+                                <div><strong>Date Endorsed</strong></div>
+                                <div>${request.documents.date_endorsed || 'N/A'}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div><strong>Rental Purpose</strong></div>
+                                <div>${request.form_details.purpose}</div>
+                            </td>
+                            <td>
+                                <div><strong>Participants</strong></div>
+                                <div>${request.form_details.num_participants}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div><strong>Additional Requests</strong></div>
+                                <div>${request.form_details.additional_requests || 'No additional requests.'}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div><strong>Start Schedule</strong></div>
+                                <div>${formatStartDateTime(request.schedule)}</div>
+                            </td>
+                            <td>
+                                <div><strong>End Schedule</strong></div>
+                                <div>${formatEndDateTime(request.schedule)}</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+                    // Update requested items with fee breakdown
+                    document.getElementById('requestedItems').innerHTML = `
+                <div class="mb-3">
+                    ${request.requested_items.facilities.length > 0 ? `
+                        <h6 class="fw-bold d-flex justify-content-between align-items-center mb-2" style="font-size:0.85rem; padding:0 0.5rem;">Facilities:</h6>
+                        ${request.requested_items.facilities.map(f =>
+                        `<div class="d-flex align-items-center mb-2 item-row" style="padding:0 0.5rem;">
+                                <span class="item-name">${f.name}</span>
+                                <span style="flex:1; border-bottom: 1px dashed #ccc; margin: 0 0.5rem;"></span>
+                                <span class="item-price">₱${f.fee}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
+                            </div>`
+                    ).join('')}
+                    ` : ''}
+
+                    ${request.requested_items.equipment.length > 0 ? `
+                        <h6 class="fw-bold d-flex justify-content-between align-items-center mt-3 mb-2" style="font-size:0.85rem; padding:0 0.5rem;">Equipment:</h6>
+                        ${request.requested_items.equipment.map(e =>
+                        `<div class="d-flex align-items-center mb-2 item-row" style="padding:0 0.5rem;">
+                                <span class="item-name">${e.name} × ${e.quantity || 1}</span>
+                                <span style="flex:1; border-bottom: 1px dashed #ccc; margin: 0 0.5rem;"></span>
+                                <span class="item-price">₱${e.fee}${e.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
+                            </div>`
+                    ).join('')}
+                    ` : ''}
+                </div>
+            `;
+
+                    // Update status cards
+                    document.getElementById('approvalsCount').textContent = request.approval_info.approval_count;
+                    document.getElementById('rejectionsCount').textContent = request.approval_info.rejection_count;
+                    document.getElementById('isLateStatus').textContent = request.status_tracking.is_late ? 'Late' : 'Not Late';
+
+                    // Update document cards
+                    document.getElementById('formalLetterDocument').innerHTML = request.documents.formal_letter.url ?
+                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                    data-document-url="${request.documents.formal_letter.url}" data-document-title="Formal Letter">
+                    Uploaded
+                </button>` :
+                        '<span class="badge bg-secondary">Not uploaded</span>';
+
+                    document.getElementById('facilityLayoutDocument').innerHTML = request.documents.facility_layout.url ?
+                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                    data-document-url="${request.documents.facility_layout.url}" data-document-title="Facility Setup">
+                    Uploaded
+                </button>` :
+                        '<span class="badge bg-secondary">Not uploaded</span>';
+
+                    document.getElementById('proofOfPaymentDocument').innerHTML = request.documents.proof_of_payment.url ?
+                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                    data-document-url="${request.documents.proof_of_payment.url}" data-document-title="Proof of Payment">
+                    Uploaded
+                </button>` :
+                        '<span class="badge bg-secondary">Not uploaded</span>';
+
+                  // Official Receipt - Check both uploaded document AND generated receipt number
+const officialReceiptContainer = document.getElementById('officialReceiptDocument');
+if (request.documents.official_receipt.url) {
+    // If official receipt document is uploaded
+    officialReceiptContainer.innerHTML = 
+        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+            data-document-url="${request.documents.official_receipt.url}" data-document-title="Official Receipt">
+            Uploaded
+        </button>`;
+} else if (request.form_details.official_receipt_num) {
+    // If official receipt number exists (form is scheduled), show the generate receipt button
+    const receiptNum = request.form_details.official_receipt_num;
+    officialReceiptContainer.innerHTML = 
+        `<a href="/official-receipt/${requestId}" target="_blank" class="btn btn-sm btn-success">
+            <i class="fas fa-receipt me-1"></i> View Receipt
+        </a>
+        <small class="text-muted d-block mt-1">OR: ${receiptNum}</small>`;
+} else {
+    // No official receipt available
+    officialReceiptContainer.innerHTML = '<span class="badge bg-secondary">Not available</span>';
+}
+
+                    // Update document icons
+                    updateDocumentIcons(request.documents);
+
+                    // Load additional data and wait for completion
+                    await Promise.all([
+                        loadMixedActivity(),
+                        loadApprovalHistory(),
+                        updateBaseFees(request.requested_items, request.schedule)
+                    ]);
+
+                    // Ensure misc fees are updated
+                    if (request.fees && request.fees.requisition_fees) {
+                        updateAdditionalFees(request.fees.requisition_fees);
+                    }
+
+                    // Update dropdown text
+                    updateStatusDropdownText();
+
+                    // Check admin role and update UI
+                    await checkAdminRoleAndUpdateUI();
+
+                    // Initialize calendar
+                    setTimeout(() => {
+                        initializeCalendar();
+                    }, 100);
+
+                    // ONLY NOW show content after everything is properly loaded
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('contentState').style.display = 'block';
+
+                    // Now that container is visible, initialize calendar
+                    initializeCalendar(request.schedule);
+
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Failed to load request details', 'error');
+
+                    // Show error state
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('contentState').innerHTML = `
+                <div class="alert alert-danger">
+                    Failed to load request details. Please try refreshing the page.
+                </div>
+            `;
+                    document.getElementById('contentState').style.display = 'block';
+                }
             }
-        });
 
-        if (!response.ok) throw new Error('Failed to fetch request details');
+            // Add this helper function for document icons
+            function updateDocumentIcons(documents) {
+                // Formal Letter
+                const formalLetterIcon = document.getElementById('formalLetterIcon');
+                if (documents.formal_letter.url) {
+                    formalLetterIcon.classList.remove('text-muted');
+                    formalLetterIcon.classList.add('text-primary');
+                }
 
-        allRequests = await response.json();
-        const request = allRequests.find(req => req.request_id == requestId);
-        if (!request) throw new Error('Request not found');
+                // Facility Layout
+                const facilityLayoutIcon = document.getElementById('facilityLayoutIcon');
+                if (documents.facility_layout.url) {
+                    facilityLayoutIcon.classList.remove('text-muted');
+                    facilityLayoutIcon.classList.add('text-primary');
+                }
 
-        // Update approval counts for the finalize modal
-        updateApprovalCounts(
-            request.approval_info.approval_count,
-            request.approval_info.rejection_count
-        );
+                // Proof of Payment
+                const proofOfPaymentIcon = document.getElementById('proofOfPaymentIcon');
+                if (documents.proof_of_payment.url) {
+                    proofOfPaymentIcon.classList.remove('text-muted');
+                    proofOfPaymentIcon.classList.add('text-primary');
+                }
 
-        // Update request ID in title
-        document.getElementById('requestIdTitle').textContent = String(requestId).padStart(4, '0');
-
-        // Update status badge
-        const statusBadge = document.getElementById('statusBadge');
-        statusBadge.textContent = request.form_details.status.name;
-        statusBadge.style.backgroundColor = request.form_details.status.color;
-
-        // Update fees display
-        document.getElementById('totalApprovedFee').textContent = `₱${parseFloat(request.fees.approved_fee).toFixed(2)}`;
-        document.getElementById('feeBreakdownTotal').textContent = `₱${parseFloat(request.fees.approved_fee).toFixed(2)}`;
-
-        // Contact information
-        document.getElementById('formDetails').innerHTML = `
-            <table class="table table-borderless mb-0 small text-start align-top">
-                <tbody>
-                    <tr>
-                        <td>
-                            <div><strong>Requester</strong></div>
-                            <div>${request.user_details.first_name} ${request.user_details.last_name}</div>
-                        </td>
-                        <td>
-                            <div><strong>School ID</strong></div>
-                            <div>${request.user_details.school_id || 'N/A'}</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div><strong>Email</strong></div>
-                            <div>${request.user_details.email}</div>
-                        </td>
-                        <td>
-                            <div><strong>Organization</strong></div>
-                            <div>${request.user_details.organization_name || 'N/A'}</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div><strong>User Type</strong></div>
-                            <div>${request.user_details.user_type}</div>
-                        </td>
-                        <td>
-                            <div><strong>Contact Number</strong></div>
-                            <div>${request.user_details.contact_number || 'N/A'}</div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        `;
-
-        // Event details
-        document.getElementById('eventDetails').innerHTML = `
-            <table class="table table-borderless mb-0 small text-start align-top">
-                <tbody>
-                    <tr>
-                        <td>
-                            <div><strong>Endorser</strong></div>
-                            <div>${request.documents.endorser || 'N/A'}</div>
-                        </td>
-                        <td>
-                            <div><strong>Date Endorsed</strong></div>
-                            <div>${request.documents.date_endorsed || 'N/A'}</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div><strong>Rental Purpose</strong></div>
-                            <div>${request.form_details.purpose}</div>
-                        </td>
-                        <td>
-                            <div><strong>Participants</strong></div>
-                            <div>${request.form_details.num_participants}</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <div><strong>Additional Requests</strong></div>
-                            <div>${request.form_details.additional_requests || 'No additional requests.'}</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div><strong>Start Schedule</strong></div>
-                            <div>${formatStartDateTime(request.schedule)}</div>
-                        </td>
-                        <td>
-                            <div><strong>End Schedule</strong></div>
-                            <div>${formatEndDateTime(request.schedule)}</div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        `;
-
-        // Update requested items with fee breakdown
-        document.getElementById('requestedItems').innerHTML = `
-            <div class="mb-3">
-                ${request.requested_items.facilities.length > 0 ? `
-                    <h6 class="fw-bold d-flex justify-content-between align-items-center mb-2" style="font-size:0.85rem; padding:0 0.5rem;">Facilities:</h6>
-                    ${request.requested_items.facilities.map(f =>
-                        `<div class="d-flex align-items-center mb-2 item-row" style="padding:0 0.5rem;">
-                            <span class="item-name">${f.name}</span>
-                            <span style="flex:1; border-bottom: 1px dashed #ccc; margin: 0 0.5rem;"></span>
-                            <span class="item-price">₱${f.fee}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
-                        </div>`
-                    ).join('')}
-                ` : ''}
-
-                ${request.requested_items.equipment.length > 0 ? `
-                    <h6 class="fw-bold d-flex justify-content-between align-items-center mt-3 mb-2" style="font-size:0.85rem; padding:0 0.5rem;">Equipment:</h6>
-                    ${request.requested_items.equipment.map(e =>
-                        `<div class="d-flex align-items-center mb-2 item-row" style="padding:0 0.5rem;">
-                            <span class="item-name">${e.name} × ${e.quantity || 1}</span>
-                            <span style="flex:1; border-bottom: 1px dashed #ccc; margin: 0 0.5rem;"></span>
-                            <span class="item-price">₱${e.fee}${e.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
-                        </div>`
-                    ).join('')}
-                ` : ''}
-            </div>
-        `;
-
-        // Update status cards
-        document.getElementById('approvalsCount').textContent = request.approval_info.approval_count;
-        document.getElementById('rejectionsCount').textContent = request.approval_info.rejection_count;
-        document.getElementById('isLateStatus').textContent = request.status_tracking.is_late ? 'Late' : 'Not Late';
-
-        // Update document cards
-        document.getElementById('formalLetterDocument').innerHTML = request.documents.formal_letter.url ?
-            `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                data-document-url="${request.documents.formal_letter.url}" data-document-title="Formal Letter">
-                Uploaded
-            </button>` :
-            '<span class="badge bg-secondary">Not uploaded</span>';
-
-        document.getElementById('facilityLayoutDocument').innerHTML = request.documents.facility_layout.url ?
-            `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                data-document-url="${request.documents.facility_layout.url}" data-document-title="Facility Setup">
-                Uploaded
-            </button>` :
-            '<span class="badge bg-secondary">Not uploaded</span>';
-
-        document.getElementById('proofOfPaymentDocument').innerHTML = request.documents.proof_of_payment.url ?
-            `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                data-document-url="${request.documents.proof_of_payment.url}" data-document-title="Proof of Payment">
-                Uploaded
-            </button>` :
-            '<span class="badge bg-secondary">Not uploaded</span>';
-
-        document.getElementById('officialReceiptDocument').innerHTML = request.documents.official_receipt.url ?
-            `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                data-document-url="${request.documents.official_receipt.url}" data-document-title="Official Receipt">
-                Uploaded
-            </button>` :
-            '<span class="badge bg-secondary">Not uploaded</span>';
-
-        // Update document icons
-        updateDocumentIcons(request.documents);
-
-        // Load additional data and wait for completion
-        await Promise.all([
-            loadMixedActivity(),
-            loadApprovalHistory(),
-            updateBaseFees(request.requested_items, request.schedule)
-        ]);
-
-        // Ensure misc fees are updated
-        if (request.fees && request.fees.requisition_fees) {
-            updateAdditionalFees(request.fees.requisition_fees);
-        }
-
-        // Update dropdown text
-        updateStatusDropdownText();
-
-        // Check admin role and update UI
-        await checkAdminRoleAndUpdateUI();
-
-        // Initialize calendar
-        setTimeout(() => {
-            initializeCalendar();
-        }, 100);
-
-      // ONLY NOW show content after everything is properly loaded
-document.getElementById('loadingState').style.display = 'none';
-document.getElementById('contentState').style.display = 'block';
-
-// Now that container is visible, initialize calendar
-initializeCalendar(request.schedule);
-
-
-    } catch (error) {
-        console.error('Error:', error);
-        showToast('Failed to load request details', 'error');
-        
-        // Show error state
-        document.getElementById('loadingState').style.display = 'none';
-        document.getElementById('contentState').innerHTML = `
-            <div class="alert alert-danger">
-                Failed to load request details. Please try refreshing the page.
-            </div>
-        `;
-        document.getElementById('contentState').style.display = 'block';
-    }
-}
-
-// Add this helper function for document icons
-function updateDocumentIcons(documents) {
-    // Formal Letter
-    const formalLetterIcon = document.getElementById('formalLetterIcon');
-    if (documents.formal_letter.url) {
-        formalLetterIcon.classList.remove('text-muted');
-        formalLetterIcon.classList.add('text-primary');
-    }
-
-    // Facility Layout
-    const facilityLayoutIcon = document.getElementById('facilityLayoutIcon');
-    if (documents.facility_layout.url) {
-        facilityLayoutIcon.classList.remove('text-muted');
-        facilityLayoutIcon.classList.add('text-primary');
-    }
-
-    // Proof of Payment
-    const proofOfPaymentIcon = document.getElementById('proofOfPaymentIcon');
-    if (documents.proof_of_payment.url) {
-        proofOfPaymentIcon.classList.remove('text-muted');
-        proofOfPaymentIcon.classList.add('text-primary');
-    }
-
-    // Official Receipt
-    const officialReceiptIcon = document.getElementById('officialReceiptIcon');
-    if (documents.official_receipt.url) {
-        officialReceiptIcon.classList.remove('text-muted');
-        officialReceiptIcon.classList.add('text-primary');
-    }
-}
+                // Official Receipt
+                const officialReceiptIcon = document.getElementById('officialReceiptIcon');
+                if (documents.official_receipt.url) {
+                    officialReceiptIcon.classList.remove('text-muted');
+                    officialReceiptIcon.classList.add('text-primary');
+                }
+            }
 
             // Add this function to calculate rental duration
             function calculateRentalDuration(startDate, startTime, endDate, endTime) {
@@ -3310,20 +3476,20 @@ function updateDocumentIcons(documents) {
                         }
 
                         facilityElement.innerHTML = `
-                                                                                                            <div class="d-flex align-items-center">
-                                                                                                                <div class="form-check me-2">
-                                                                                                                    <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                                                                                        data-type="facility" 
-                                                                                                                        data-id="${facility.requested_facility_id}"
-                                                                                                                        ${facility.is_waived ? 'checked' : ''}>
+                                                                                                                <div class="d-flex align-items-center">
+                                                                                                                    <div class="form-check me-2">
+                                                                                                                        <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                                                                                            data-type="facility" 
+                                                                                                                            data-id="${facility.requested_facility_id}"
+                                                                                                                            ${facility.is_waived ? 'checked' : ''}>
+                                                                                                                    </div>
+                                                                                                                    <span class="item-name">${facility.name}</span>
                                                                                                                 </div>
-                                                                                                                <span class="item-name">${facility.name}</span>
-                                                                                                            </div>
-                                                                                                            <div class="text-end">
-                                                                                                                <small>${rateDescription}</small>
-                                                                                                                <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
-                                                                                                            </div>
-                                                                                                        `;
+                                                                                                                <div class="text-end">
+                                                                                                                    <small>${rateDescription}</small>
+                                                                                                                    <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                                                                                                                </div>
+                                                                                                            `;
                         facilitiesContainer.appendChild(facilityElement);
                     });
                 }
@@ -3350,22 +3516,22 @@ function updateDocumentIcons(documents) {
                         }
 
                         equipmentElement.innerHTML = `
-                                                                                                            <div class="d-flex align-items-center">
-                                                                                                                <div class="form-check me-2">
-                                                                                                                    <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                                                                                        data-type="equipment" 
-                                                                                                                        data-id="${equipment.requested_equipment_id}"
-                                                                                                                        ${equipment.is_waived ? 'checked' : ''}>
+                                                                                                                <div class="d-flex align-items-center">
+                                                                                                                    <div class="form-check me-2">
+                                                                                                                        <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                                                                                            data-type="equipment" 
+                                                                                                                            data-id="${equipment.requested_equipment_id}"
+                                                                                                                            ${equipment.is_waived ? 'checked' : ''}>
+                                                                                                                    </div>
+                                                                                                                    <span class="item-name">
+                                                                                                                        ${equipment.name} ${quantity > 1 ? `(×${quantity})` : ''}
+                                                                                                                    </span>
                                                                                                                 </div>
-                                                                                                                <span class="item-name">
-                                                                                                                    ${equipment.name} ${quantity > 1 ? `(×${quantity})` : ''}
-                                                                                                                </span>
-                                                                                                            </div>
-                                                                                                            <div class="text-end">
-                                                                                                                <small>${rateDescription}</small>
-                                                                                                                <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
-                                                                                                            </div>
-                                                                                                        `;
+                                                                                                                <div class="text-end">
+                                                                                                                    <small>${rateDescription}</small>
+                                                                                                                    <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                                                                                                                </div>
+                                                                                                            `;
                         equipmentContainer.appendChild(equipmentElement);
                     });
                 }
@@ -3497,27 +3663,27 @@ function updateDocumentIcons(documents) {
                 }
 
                 feeItem.innerHTML = `
-                                                                                                                                                                                                                                                                                                                                                                                ${adminPhoto ?
+                                                                                                                                                                                                                                                                                                                                                                                    ${adminPhoto ?
                         `<img src="${adminPhoto}" class="rounded-circle me-3" width="32" height="32" alt="Admin Photo">` :
                         `<i class="bi bi-person-circle fs-5 me-3 text-secondary"></i>`
                     }
-                                                                                                                                                                                                                                                                                                                                                                                <div class="flex-grow-1">
-                                                                                                                                                                                                                                                                                                                                                                                    <div class="d-flex justify-content-between align-items-center">
-                                                                                                                                                                                                                                                                                                                                                                                        <div>
-                                                                                                                                                                                                                                                                                                                                                                                            <small class="text-muted fst-italic">
-                                                                                                                                                                                                                                                                                                                                                                                                ${fee.label} (${typeName}) of ₱${amount.toFixed(2)} added by <strong>${adminName}</strong>
-                                                                                                                                                                                                                                                                                                                                                                                            </small>
+                                                                                                                                                                                                                                                                                                                                                                                    <div class="flex-grow-1">
+                                                                                                                                                                                                                                                                                                                                                                                        <div class="d-flex justify-content-between align-items-center">
+                                                                                                                                                                                                                                                                                                                                                                                            <div>
+                                                                                                                                                                                                                                                                                                                                                                                                <small class="text-muted fst-italic">
+                                                                                                                                                                                                                                                                                                                                                                                                    ${fee.label} (${typeName}) of ₱${amount.toFixed(2)} added by <strong>${adminName}</strong>
+                                                                                                                                                                                                                                                                                                                                                                                                </small>
+                                                                                                                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                                                                                                                            <button class="btn btn-sm remove-btn text-secondary p-0 border-0">
+                                                                                                                <i class="bi bi-x-lg"></i>
+                                                                                                            </button>
+
+
+                                                                                                                                                                                                                                                                                                                                                                                            </button>
                                                                                                                                                                                                                                                                                                                                                                                         </div>
-                                                                                                                                                                                                                                                                                                                                                                                        <button class="btn btn-sm remove-btn text-secondary p-0 border-0">
-                                                                                                            <i class="bi bi-x-lg"></i>
-                                                                                                        </button>
-
-
-                                                                                                                                                                                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                                                                                                                                                                                        <small class="text-muted fst-italic">${timestamp}</small>
                                                                                                                                                                                                                                                                                                                                                                                     </div>
-                                                                                                                                                                                                                                                                                                                                                                                    <small class="text-muted fst-italic">${timestamp}</small>
-                                                                                                                                                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                                                                                                                                                            `;
+                                                                                                                                                                                                                                                                                                                                                                                `;
 
                 // Add remove functionality for regular fees
                 feeItem.querySelector(".remove-btn").addEventListener("click", async function () {

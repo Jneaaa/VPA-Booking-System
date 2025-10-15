@@ -190,7 +190,8 @@ public function pendingRequests()
                     'calendar_info' => [
                         'title' => $form->calendar_title,
                         'description' => $form->calendar_description
-                    ]
+                    ],
+                    'official_receipt_num' => $form->official_receipt_num
                 ],
                 'schedule' => [
                     'start_date' => $form->start_date,
@@ -1786,7 +1787,242 @@ public function updateStatus(Request $request, $requestId)
         return $totalDiscount;
     }
 
+    // Add this method to AdminApprovalController.php
+
+public function markAsScheduled(Request $request, $requestId)
+{
+    try {
+        \Log::debug('Mark as scheduled request received', [
+            'request_id' => $requestId,
+            'admin_id' => auth()->id(),
+            'official_receipt_num' => $request->official_receipt_num
+        ]);
+
+        $validatedData = $request->validate([
+            'official_receipt_num' => 'required|string|max:50|unique:requisition_forms,official_receipt_num',
+            'calendar_title' => 'sometimes|string|max:50|nullable',
+            'calendar_description' => 'sometimes|string|max:100|nullable',
+        ]);
+
+        $adminId = auth()->id();
+        if (!$adminId) {
+            return response()->json(['error' => 'Admin not authenticated'], 401);
+        }
+
+        $form = RequisitionForm::with([
+            'requestedFacilities.facility',
+            'requestedEquipment.equipment',
+            'requisitionFees',
+            'purpose',
+            'formStatus'
+        ])->findOrFail($requestId);
+
+        // Update form with official receipt number and status
+        $scheduledStatus = FormStatus::where('status_name', 'Scheduled')->first();
+        if (!$scheduledStatus) {
+            throw new \Exception('Scheduled status not found');
+        }
+
+        $form->official_receipt_num = $validatedData['official_receipt_num'];
+        $form->status_id = $scheduledStatus->status_id;
+        
+        if (!empty($validatedData['calendar_title'])) {
+            $form->calendar_title = $validatedData['calendar_title'];
+        }
+        
+        if (!empty($validatedData['calendar_description'])) {
+            $form->calendar_description = $validatedData['calendar_description'];
+        }
+
+        $form->save();
+
+        // Send confirmation email
+        $this->sendScheduledConfirmationEmail($form);
+
+        \Log::info('Form marked as scheduled successfully', [
+            'request_id' => $requestId,
+            'official_receipt_num' => $form->official_receipt_num,
+            'admin_id' => $adminId
+        ]);
+
+        return response()->json([
+            'message' => 'Form marked as scheduled successfully',
+            'official_receipt_num' => $form->official_receipt_num,
+            'new_status' => 'Scheduled'
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Mark as scheduled validation failed', [
+            'request_id' => $requestId,
+            'errors' => $e->errors()
+        ]);
+
+        return response()->json([
+            'error' => 'Validation failed',
+            'details' => $e->errors()
+        ], 422);
+
+    } catch (\Exception $e) {
+        \Log::error('Failed to mark form as scheduled', [
+            'request_id' => $requestId,
+            'admin_id' => auth()->id(),
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'error' => 'Failed to mark form as scheduled',
+            'details' => $e->getMessage()
+        ], 500);
+    }
+}
+
+private function sendScheduledConfirmationEmail($form)
+{
+    try {
+        $userName = $form->first_name . ' ' . $form->last_name;
+        $userEmail = $form->email;
+
+        $emailData = [
+            'user_name' => $userName,
+            'request_id' => $form->request_id,
+            'official_receipt_num' => $form->official_receipt_num,
+            'purpose' => $form->purpose->purpose_name,
+            'start_date' => $form->start_date,
+            'start_time' => $form->start_time,
+            'end_date' => $form->end_date,
+            'end_time' => $form->end_time,
+            'approved_fee' => $form->approved_fee
+        ];
+
+        // Use view() instead of loading the file directly
+        \Mail::send('emails.booking-scheduled', $emailData, function ($message) use ($userEmail, $userName) {
+            $message->to($userEmail, $userName)
+                ->subject('Your Booking Has Been Scheduled – Official Receipt Generated');
+        });
+
+        \Log::debug('Scheduled confirmation email sent successfully', [
+            'recipient' => $userEmail,
+            'request_id' => $form->request_id,
+            'official_receipt_num' => $form->official_receipt_num
+        ]);
+
+    } catch (\Exception $emailError) {
+        \Log::error('Failed to send scheduled confirmation email', [
+            'request_id' => $form->request_id,
+            'error' => $emailError->getMessage(),
+            'recipient' => $form->email
+        ]);
+    }
+}
+public function generateOfficialReceipt($requestId)
+{
+    try {
+        \Log::debug('=== GENERATE OFFICIAL RECEIPT CALLED ===', [
+            'request_id' => $requestId,
+            'full_url' => request()->fullUrl(),
+            'method' => request()->method()
+        ]);
+
+        $form = RequisitionForm::with([
+            'requestedFacilities.facility',
+            'requestedEquipment.equipment',
+            'purpose',
+            'requisitionFees',
+            'formStatus'
+        ])->findOrFail($requestId);
+
+        // Check if official receipt number exists
+        if (empty($form->official_receipt_num)) {
+            abort(404, 'Official receipt not generated yet');
+        }
+
+        // Calculate total fee
+        $totalFee = $form->approved_fee;
+
+        // Prepare receipt data
+        $receiptData = [
+            'official_receipt_num' => $form->official_receipt_num,
+            'user_name' => $form->first_name . ' ' . $form->last_name,
+            'user_email' => $form->email,
+            'organization_name' => $form->organization_name,
+            'contact_number' => $form->contact_number,
+            'request_id' => $form->request_id,
+            'facility_name' => $form->requestedFacilities->first()->facility->facility_name ?? 'N/A',
+            'purpose' => $form->purpose->purpose_name,
+            'num_participants' => $form->num_participants,
+            'total_fee' => $totalFee,
+            'issued_date' => $form->updated_at->format('F j, Y'),
+            'schedule' => Carbon::parse($form->start_date)->format('F j, Y') . ' — ' . 
+                         Carbon::parse($form->start_time)->format('g:i A') . ' to ' . 
+                         Carbon::parse($form->end_time)->format('g:i A'),
+            'start_schedule' => Carbon::parse($form->start_date)->format('F j, Y') . ' — ' . 
+                               Carbon::parse($form->start_time)->format('g:i A'),
+            'end_schedule' => Carbon::parse($form->end_date)->format('F j, Y') . ' — ' . 
+                             Carbon::parse($form->end_time)->format('g:i A'),
+            'fee_breakdown' => $this->getFeeBreakdown($form)
+        ];
+
+        return view('public.official-receipt', compact('receiptData'));
+
+    } catch (\Exception $e) {
+        \Log::error('Failed to generate official receipt', [
+            'request_id' => $requestId,
+            'error' => $e->getMessage()
+        ]);
+
+        abort(404, 'Receipt not found');
+    }
+}
+
+private function getFeeBreakdown($form)
+{
+    $breakdown = [];
+
+    // Add facility fees
+    foreach ($form->requestedFacilities as $facility) {
+        if (!$facility->is_waived) {
+            $breakdown[] = [
+                'description' => $facility->facility->facility_name . ' Rental',
+                'amount' => $facility->facility->external_fee
+            ];
+        }
+    }
+
+    // Add equipment fees
+    foreach ($form->requestedEquipment as $equipment) {
+        if (!$equipment->is_waived) {
+            $breakdown[] = [
+                'description' => $equipment->equipment->equipment_name . ' Rental' . 
+                               ($equipment->quantity > 1 ? ' (×' . $equipment->quantity . ')' : ''),
+                'amount' => $equipment->equipment->external_fee * $equipment->quantity
+            ];
+        }
+    }
+
+    // Add additional fees
+    foreach ($form->requisitionFees as $fee) {
+        if ($fee->fee_amount > 0) {
+            $breakdown[] = [
+                'description' => $fee->label,
+                'amount' => $fee->fee_amount
+            ];
+        }
+    }
+
+    // Add late penalty if applicable
+    if ($form->is_late && $form->late_penalty_fee > 0) {
+        $breakdown[] = [
+            'description' => 'Late Penalty Fee',
+            'amount' => $form->late_penalty_fee
+        ];
+    }
+
+    return $breakdown;
+}
+
     // Completed Transactions // 
+
 
     public function completedRequests()
     {
