@@ -4,7 +4,6 @@
 
 @section('content')
     <style>
-
         /* New styles for the dashboard header */
         .dashboard-header {
             position: relative;
@@ -39,9 +38,28 @@
             z-index: -1;
         }
 
+        /* Status badge styles */
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status-awaiting {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
     </style>
 
-    <div id="main-container">
+    <div>
         <!-- Main Content -->
         <main>
             <!-- Dashboard Header with Wallpaper -->
@@ -53,96 +71,111 @@
                     </a>
                 </div>
             </div>
-<!-- Stats Cards -->
-<div class="row g-4 mb-4">
-  <div class="col-md-4">
-    <div class="card border-0 shadow-sm h-100 hover-effect">
-      <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <span class="text-muted small">Ongoing Events</span>
-            <h2 class="mt-2 mb-0 fw-bold" id="ongoingEvents">0</h2>
-          </div>
-          <a href="{{ asset('admin/calendar') }}" class="text-primary text-decoration-none">
-            <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 45px; height: 45px; border-color: #5d759917 !important;">
-              <i class="fa-solid fa-angle-right fs-5"></i>
+
+            <!-- Stats Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 hover-effect">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small">Ongoing Events</span>
+                                    <h2 class="mt-2 mb-0 fw-bold" id="ongoingEvents">0</h2>
+                                </div>
+                                <a href="{{ asset('admin/calendar') }}" class="text-primary text-decoration-none">
+                                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 45px; height: 45px; border-color: #5d759917 !important;">
+                                        <i class="fa-solid fa-angle-right fs-5"></i>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 hover-effect">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small">Pending Requests</span>
+                                    <h2 class="mt-2 mb-0 fw-bold" id="pendingRequests">0</h2>
+                                </div>
+                                <a href="{{ asset('admin/manage-requests') }}" class="text-primary text-decoration-none">
+                                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 45px; height: 45px; border-color: #5d759917 !important;">
+                                        <i class="fa-solid fa-angle-right fs-5"></i>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 hover-effect">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small">Total Requisitions</span>
+                                    <h2 class="mt-2 mb-0 fw-bold" id="totalRequisitions">0</h2>
+                                </div>
+                                <a href="{{ asset('admin/archives') }}" class="text-primary text-decoration-none">
+                                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 45px; height: 45px; border-color: #5d759917 !important;">
+                                        <i class="fa-solid fa-angle-right fs-5"></i>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="col-md-4">
-    <div class="card border-0 shadow-sm h-100 hover-effect">
-      <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <span class="text-muted small">Pending Requests</span>
-            <h2 class="mt-2 mb-0 fw-bold" id="pendingRequests">0</h2>
-          </div>
-          <a href="{{ asset('admin/manage-requests') }}" class="text-primary text-decoration-none">
-            <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 45px; height: 45px; border-color: #5d759917 !important;">
-              <i class="fa-solid fa-angle-right fs-5"></i>
+            <div class="row g-3">
+                <!-- Left Column -->
+                <div class="col-md-4 d-flex flex-column gap-3">
+                    <!-- Equipment Condition Tracker -->
+                    <div class="card p-3 flex-fill" style="height: 294px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Inventory Tracker</h5>
+                            <span class="badge bg-primary" id="equipmentCount">0 items</span>
+                        </div>
+                        <div class="equipment-list-container" style="height: 220px; overflow-y: auto;">
+                            <div id="equipmentList" class="d-flex flex-column gap-2">
+                                <!-- Equipment items will be loaded here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pending Requisitions List -->
+                    <div class="card p-3 flex-fill" style="height: 294px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Pending Requisitions</h5>
+                            <span class="badge bg-primary" id="requisitionCount">0</span>
+                        </div>
+                        <div class="requisition-list-container" style="height: 220px; overflow-y: auto;">
+                            <div id="requisitionList" class="d-flex flex-column gap-2">
+                                <!-- Requisition items will be loaded here dynamically -->
+                                <div class="text-center text-muted py-4">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                    <div class="mt-2">Loading requisitions...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-md-8">
+                    <!-- Calendar Section -->
+                    <div class="card p-3 h-100" style="height: 600px;">
+                        <div class="card border-0 h-100">
+                            <div class="card-body p-2 h-100">
+                                <div id="calendar" style="height: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="col-md-4">
-    <div class="card border-0 shadow-sm h-100 hover-effect">
-      <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <span class="text-muted small">Total Requisitions</span>
-            <h2 class="mt-2 mb-0 fw-bold" id="totalRequisitions">0</h2>
-          </div>
-          <a href="{{ asset('admin/archives') }}" class="text-primary text-decoration-none">
-            <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 45px; height: 45px; border-color: #5d759917 !important;">
-              <i class="fa-solid fa-angle-right fs-5"></i>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="row g-3">
-  <!-- Left Column -->
-  <div class="col-md-4 d-flex flex-column gap-3">
-    <!-- Equipment Condition Tracker -->
-    <div class="card p-3 flex-fill" style="height: 294px;">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0">Inventory Tracker</h5>
-        <span class="badge bg-primary" id="equipmentCount">0 items</span>
-      </div>
-      <div class="equipment-list-container" style="height: 220px; overflow-y: auto;">
-        <div id="equipmentList" class="d-flex flex-column gap-2">
-          <!-- Equipment items will be loaded here dynamically -->
-        </div>
-      </div>
-    </div>
-    
-    <div class="card p-3 flex-fill" style="height: 294px;">
-      <!-- Bottom container (empty for now) -->
-    </div>
-  </div>
-
-  <!-- Right Column -->
-  <div class="col-md-8">
-    <!-- Calendar Section -->
-    <div class="card p-3 h-100" style="height: 600px;">
-      <div class="card border-0 h-100">
-        <div class="card-body p-2 h-100">
-          <div id="calendar" style="height: 100%;"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
             <!-- System Log Section -->
             <div class="card shadow-sm mt-3">
                 <div class="card-body">
@@ -190,37 +223,37 @@
     </div>
 
     <!-- Event Modal -->
-<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Event Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <strong>Title:</strong> <span id="eventTitle"></span>
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Date:</strong> <span id="eventDate"></span>
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Time:</strong> <span id="eventTime">10:00 AM - 12:00 PM</span>
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Description:</strong> <span id="eventDescription"></span>
-                    </li>
-                    <!-- Additional event details will be inserted here -->
-                    <div id="eventDetails"></div>
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Event Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>Title:</strong> <span id="eventTitle"></span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Date:</strong> <span id="eventDate"></span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Time:</strong> <span id="eventTime">10:00 AM - 12:00 PM</span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Description:</strong> <span id="eventDescription"></span>
+                        </li>
+                        <!-- Additional event details will be inserted here -->
+                        <div id="eventDetails"></div>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 @endsection
 
 @section('scripts')
@@ -286,12 +319,24 @@
                     document.getElementById('totalRequisitions').textContent = totalRequisitions;
                     document.getElementById('pendingRequests').textContent = pendingRequests;
                     document.getElementById('ongoingEvents').textContent = ongoingEvents;
+
+                    // Display pending requisitions (status_id 1 and 2)
+                    displayPendingRequisitions(data);
                 })
                 .catch(error => {
                     console.error('Error fetching requisition data:', error);
                     document.getElementById('totalRequisitions').textContent = 'Error';
                     document.getElementById('pendingRequests').textContent = 'Error';
                     document.getElementById('ongoingEvents').textContent = 'Error';
+                    
+                    // Show error in requisition list
+                    document.getElementById('requisitionList').innerHTML = `
+                        <div class="text-center text-danger py-4">
+                            <i class="bi bi-exclamation-triangle fs-4"></i>
+                            <div class="mt-2">Failed to load requisitions</div>
+                            <small class="text-muted">${error.message}</small>
+                        </div>
+                    `;
                 });
 
             // Fetch and display equipment data
@@ -348,7 +393,8 @@
                     equip.items.forEach(item => {
                         allItems.push({
                             ...item,
-                            equipment_name: equip.equipment_name
+                            equipment_name: equip.equipment_name,
+                            equipment_id: equip.equipment_id // Make sure equipment_id is included
                         });
                     });
                 }
@@ -370,12 +416,14 @@
             // Update count
             equipmentCount.textContent = `${allItems.length} ${allItems.length === 1 ? 'item' : 'items'}`;
 
-            // Create equipment items list - WRAPPING STATUS INDICATOR AND CONDITION TEXT TOGETHER
+            // Create equipment items list - with clickable items
             const itemsHTML = allItems.map((item, index) => {
                 const conditionName = item.condition?.condition_name || 'Unknown';
                 const conditionColor = item.condition?.color_code || '#6c757d';
+                const equipmentId = item.equipment_id;
                 
                 console.log(`Item ${index}:`, {
+                    equipment_id: equipmentId,
                     equipment_name: item.equipment_name,
                     item_name: item.item_name,
                     condition: conditionName,
@@ -383,7 +431,11 @@
                 });
                 
                 return `
-                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom clickable-equipment-item" 
+                         data-equipment-id="${equipmentId}"
+                         style="cursor: pointer; transition: background-color 0.2s;"
+                         onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                         onmouseout="this.style.backgroundColor='transparent'">
                         <div class="flex-grow-1 me-3" style="min-width: 0;">
                             <div class="small text-muted text-truncate">${item.equipment_name}</div>
                             <div class="fw-medium text-truncate">${item.item_name}</div>
@@ -398,8 +450,108 @@
 
             equipmentList.innerHTML = itemsHTML;
             
+            // Add click event listeners to all equipment items
+            addEquipmentItemClickListeners();
+            
             // Debug: Check the rendered HTML
             console.log('Rendered equipment list HTML:', equipmentList.innerHTML);
+        }
+
+        function addEquipmentItemClickListeners() {
+            const equipmentItems = document.querySelectorAll('.clickable-equipment-item');
+            
+            equipmentItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const equipmentId = this.getAttribute('data-equipment-id');
+                    if (equipmentId) {
+                        // Redirect to the edit equipment page with the equipment ID
+                        window.location.href = `/admin/edit-equipment?id=${equipmentId}`;
+                    }
+                });
+            });
+            
+            console.log(`Added click listeners to ${equipmentItems.length} equipment items`);
+        }
+
+        function displayPendingRequisitions(requisitions) {
+            const requisitionList = document.getElementById('requisitionList');
+            const requisitionCount = document.getElementById('requisitionCount');
+            
+            console.log('Displaying pending requisitions:', requisitions);
+
+            // Filter requisitions with status_id 1 and 2 (Pending Approval and Awaiting Payment)
+            const pendingRequisitions = requisitions.filter(req => {
+                const statusId = req.form_details.status.id;
+                return statusId === 1 || statusId === 2;
+            });
+
+            console.log('Filtered pending requisitions:', pendingRequisitions);
+
+            if (pendingRequisitions.length === 0) {
+                requisitionList.innerHTML = `
+                    <div class="text-center text-muted py-4 small">
+                        <i class="bi bi-inbox fs-4"></i>
+                        <div class="mt-2">No pending requisitions</div>
+                    </div>
+                `;
+                requisitionCount.textContent = '0';
+                return;
+            }
+
+            // Update count
+            requisitionCount.textContent = pendingRequisitions.length;
+
+            // Create requisition items list - with clickable items
+            const requisitionsHTML = pendingRequisitions.map(req => {
+                const requestId = req.request_id;
+                const purpose = req.form_details.purpose;
+                const status = req.form_details.status.name;
+                const statusClass = status === 'Pending Approval' ? 'status-pending' : 'status-awaiting';
+                const fullText = `#${requestId.toString().padStart(4, '0')} (${purpose})`;
+
+                return `
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom clickable-requisition-item small"
+                         data-request-id="${requestId}"
+                         style="cursor: pointer; transition: background-color 0.2s;"
+                         onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                         onmouseout="this.style.backgroundColor='transparent'"
+                         title="${fullText}">
+                        <div class="flex-grow-1 me-3" style="min-width: 0;">
+                            <div class="fw-medium text-truncate">${fullText}</div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span class="status-badge ${statusClass}">${status}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            requisitionList.innerHTML = requisitionsHTML;
+
+            // Add click event listeners to all requisition items
+            addRequisitionItemClickListeners();
+
+            // Enable Bootstrap tooltips (optional)
+            const tooltipTriggerList = [].slice.call(requisitionList.querySelectorAll('[title]'));
+            tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+
+            console.log('Rendered requisition list HTML:', requisitionList.innerHTML);
+        }
+
+        function addRequisitionItemClickListeners() {
+            const requisitionItems = document.querySelectorAll('.clickable-requisition-item');
+            
+            requisitionItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const requestId = this.getAttribute('data-request-id');
+                    if (requestId) {
+                        // Redirect to the requisition view page with the request ID
+                        window.location.href = `/admin/requisition/${requestId}`;
+                    }
+                });
+            });
+            
+            console.log(`Added click listeners to ${requisitionItems.length} requisition items`);
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
