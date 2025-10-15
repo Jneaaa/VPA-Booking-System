@@ -246,6 +246,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/notifications', [NotificationController::class, 'getNotifications']);
     Route::post('/admin/notifications/mark-read/{notificationId?}', [NotificationController::class, 'markAsRead']);
     Route::post('/admin/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+    
+
+    Route::post('/admin/requisition/{requestId}/mark-scheduled', [AdminApprovalController::class, 'markAsScheduled']);
 
 
     Route::get('/admin/requisition/{requestId}/approval-history', [AdminApprovalController::class, 'getApprovalHistory']);
