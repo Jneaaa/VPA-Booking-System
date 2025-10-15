@@ -524,7 +524,7 @@
                         <div class="nav-icon p-1 rounded me-2">
                             <i class="fa-solid fa-calendar me-1"></i>
                         </div>
-                        <span>Bookings</span>
+                        <span>Events Calendar</span>
                     </div>
                 </a>
             </li>
@@ -543,7 +543,7 @@
                             <div class="nav-icon p-1 rounded me-2">
                                 <i class="fa-solid fa-file-lines me-2"></i>
                             </div>
-                            <span>Requests</span>
+                            <span>Requisitions</span>
                         </div>
                         <span id="requisitionNotificationBadge" class="badge bg-danger ms-2"
                             style="display: none;">0</span>
