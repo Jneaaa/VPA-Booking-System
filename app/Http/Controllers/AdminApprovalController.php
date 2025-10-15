@@ -17,6 +17,33 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
+/* AdminApprovalController — Summary Documentation
+
+This controller manages the entire admin-side approval and fee handling process
+for requisition forms within the booking system. It provides endpoints for viewing,
+approving, rejecting, and modifying requests, as well as managing related financial actions.
+
+The controller includes methods to fetch pending and completed requests, allowing
+admins to review requisition forms that are awaiting approval or have been finalized.
+Only authorized roles such as Head Admin, Vice President of Administration, and
+Approving Officer can perform approval or rejection actions. When a request is approved
+or rejected, a corresponding record is created in the requisition_approvals table,
+capturing details such as the admin who performed the action, remarks, and the timestamp.
+
+It also handles the financial side of the approval process. Through dedicated methods,
+admins can add fees or discounts to a requisition form, each stored in the
+requisition_fees table with details like label, amount, and references to any
+waived facilities or equipment. Additional methods allow specific items or entire
+forms to be marked as waived, updating related database records to reflect that
+charges have been removed or discounted.
+
+Overall, the AdminApprovalController serves as the core module for managing
+the administrative workflow of requisition approval, ensuring that all actions,
+statuses, and fee-related transactions are properly validated, recorded, and
+restricted to the appropriate user roles.
+*/
+
+
 class AdminApprovalController extends Controller
 {
 

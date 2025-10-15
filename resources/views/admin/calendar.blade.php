@@ -3,34 +3,73 @@
 @section('title', 'Ongoing Events')
 @section('content')
   <style>
+    /* Base checkbox style */
+    .form-check-input {
+      width: 1.1em;
+      height: 1.1em;
+      cursor: pointer;
+    }
+
+
+    .scheduled-checkbox:checked {
+      background-color: #1e7941ff;
+      border-color: #1e7941ff;
+    }
+
+    .ongoing-checkbox:focus {
+      box-shadow: 0 0 0 0.2rem #1461314d
+    }
+
+    .ongoing-checkbox:checked {
+      background-color: #ac7a0fff;
+      border-color: #ac7a0fff;
+    }
+
+    .ongoing-checkbox:focus {
+      box-shadow: 0 0 0 0.2rem #75530941;
+    }
+
+    /* Late = red */
+    .late-checkbox:checked {
+      background-color: #8f2a2aff;
+      border-color: #8f2a2aff;
+    }
+
+    .late-checkbox:focus {
+      box-shadow: 0 0 0 0.2rem #701a1a59;
+    }
 
     /* Skeleton-specific height constraints */
-.col-lg-3 .skeleton-container {
-  min-height: auto !important;
-  height: auto !important;
-}
+    .col-lg-3 .skeleton-container {
+      min-height: auto !important;
+      height: auto !important;
+    }
 
-/* Limit skeleton calendar height */
-.col-lg-3 .card:first-child .skeleton-container {
-  max-height: 200px; /* Reduced from ~300px */
-}
+    /* Limit skeleton calendar height */
+    .col-lg-3 .card:first-child .skeleton-container {
+      max-height: 200px;
+      /* Reduced from ~300px */
+    }
 
-/* Limit skeleton filter height */
-.col-lg-3 .card:last-child .skeleton-container {
-  max-height: 100px; /* Reduced from ~150px */
-}
+    /* Limit skeleton filter height */
+    .col-lg-3 .card:last-child .skeleton-container {
+      max-height: 100px;
+      /* Reduced from ~150px */
+    }
 
-/* Ensure skeleton days don't take too much space */
-#miniCalendarDaysSkeleton {
-  max-height: 120px;
-  overflow: hidden;
-}
+    /* Ensure skeleton days don't take too much space */
+    #miniCalendarDaysSkeleton {
+      max-height: 120px;
+      overflow: hidden;
+    }
 
-/* Make skeleton days grid more compact */
-#miniCalendarDaysSkeleton .skeleton-day {
-  height: 20px !important; /* Reduced from 32px */
-  margin: 1px;
-}
+    /* Make skeleton days grid more compact */
+    #miniCalendarDaysSkeleton .skeleton-day {
+      height: 20px !important;
+      /* Reduced from 32px */
+      margin: 1px;
+    }
+
     /* Make the row stretch full height */
     .row.g-3 {
       align-items: stretch;
@@ -298,23 +337,23 @@
               <!-- Actual Events Filter Content -->
               <div class="calendar-content">
                 <h6 class="fw-bold mb-3">Events Filter</h6>
+
                 <div class="form-check mb-2">
-                  <input class="form-check-input event-filter-checkbox" type="checkbox" value="Ongoing" id="filterOngoing"
-                    checked>
-                  <label class="form-check-label" for="filterOngoing">
-                    <span class="badge"
-                      style="background-color: #28a745; display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 8px;"></span>
-                    Ongoing Events
-                  </label>
+                  <input class="form-check-input event-filter-checkbox scheduled-checkbox" type="checkbox" value="Scheduled"
+                    id="filterScheduled" checked>
+                  <label class="form-check-label" for="filterScheduled">Scheduled Events</label>
                 </div>
+
                 <div class="form-check mb-2">
-                  <input class="form-check-input event-filter-checkbox" type="checkbox" value="Late" id="filterLate"
-                    checked>
-                  <label class="form-check-label" for="filterLate">
-                    <span class="badge"
-                      style="background-color: #dc3545; display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 8px;"></span>
-                    Late Events
-                  </label>
+                  <input class="form-check-input event-filter-checkbox ongoing-checkbox" type="checkbox" value="Ongoing"
+                    id="filterOngoing" checked>
+                  <label class="form-check-label" for="filterOngoing">Ongoing Events</label>
+                </div>
+
+                <div class="form-check mb-2">
+                  <input class="form-check-input event-filter-checkbox late-checkbox" type="checkbox" value="Late"
+                    id="filterLate" checked>
+                  <label class="form-check-label" for="filterLate">Late Events</label>
                 </div>
               </div>
             </div>
@@ -457,21 +496,21 @@
       document.body.classList.add('loading');
 
       // Generate skeleton days for mini calendar
-     function generateSkeletonDays() {
-  const skeletonContainer = document.getElementById('miniCalendarDaysSkeleton');
-  if (!skeletonContainer) return;
+      function generateSkeletonDays() {
+        const skeletonContainer = document.getElementById('miniCalendarDaysSkeleton');
+        if (!skeletonContainer) return;
 
-  skeletonContainer.innerHTML = '';
+        skeletonContainer.innerHTML = '';
 
-  // Generate 35 skeleton days (5 weeks instead of 6)
-  for (let i = 0; i < 35; i++) {
-    const skeletonDay = document.createElement('div');
-    skeletonDay.className = 'skeleton skeleton-day';
-    skeletonDay.style.height = '20px'; // Compact height
-    skeletonDay.style.margin = '1px'; // Reduced spacing
-    skeletonContainer.appendChild(skeletonDay);
-  }
-}
+        // Generate 35 skeleton days (5 weeks instead of 6)
+        for (let i = 0; i < 35; i++) {
+          const skeletonDay = document.createElement('div');
+          skeletonDay.className = 'skeleton skeleton-day';
+          skeletonDay.style.height = '20px'; // Compact height
+          skeletonDay.style.margin = '1px'; // Reduced spacing
+          skeletonContainer.appendChild(skeletonDay);
+        }
+      }
 
       // Hide loading skeletons and show content
       function hideSkeletons() {
@@ -694,14 +733,16 @@
 
         calendar.removeAllEvents();
 
-        // Filter requests by status (Ongoing or Late)
+        // Filter requests by status
         filteredRequests = allRequests.filter(req => {
           const statusName = req.form_details.status.name;
+          const showScheduled = document.getElementById('filterScheduled').checked;
           const showOngoing = document.getElementById('filterOngoing').checked;
           const showLate = document.getElementById('filterLate').checked;
 
-          return (statusName === 'Ongoing' && showOngoing) ||
-            (statusName === 'Late' && showLate);
+          return (statusName === 'Scheduled' && showScheduled) ||
+                (statusName === 'Ongoing' && showOngoing) ||
+                (statusName === 'Late' && showLate);
         });
 
         console.log('Filtered calendar events:', {
@@ -745,10 +786,10 @@
         document.getElementById('modalPurpose').textContent = request.form_details.purpose;
         document.getElementById('modalParticipants').textContent = request.form_details.num_participants;
         document.getElementById('modalStatus').innerHTML = `
-                <span class="badge" style="background-color: ${request.form_details.status.color}">
-                    ${request.form_details.status.name}
-                </span>
-            `;
+                    <span class="badge" style="background-color: ${request.form_details.status.color}">
+                        ${request.form_details.status.name}
+                    </span>
+                `;
         document.getElementById('modalFee').textContent = `₱${request.fees.approved_fee}`;
         document.getElementById('modalApprovals').textContent = `${request.approval_info.approval_count}`;
         document.getElementById('modalRejections').textContent = `${request.approval_info.rejection_count}`;
@@ -849,18 +890,18 @@
         toast.style.borderRadius = '0.3rem';
 
         toast.innerHTML = `
-                <div class="d-flex align-items-center px-3 py-1"> 
-                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="loading-bar" style="
-                    height: 3px;
-                    background: rgba(255,255,255,0.7);
-                    width: 100%;
-                    transition: width ${duration}ms linear;
-                "></div>
-            `;
+                    <div class="d-flex align-items-center px-3 py-1"> 
+                        <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                        <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="loading-bar" style="
+                        height: 3px;
+                        background: rgba(255,255,255,0.7);
+                        width: 100%;
+                        transition: width ${duration}ms linear;
+                    "></div>
+                `;
 
         document.body.appendChild(toast);
 

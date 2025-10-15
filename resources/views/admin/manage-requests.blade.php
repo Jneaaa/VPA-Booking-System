@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Review Submissions')
+@section('title', 'Pending Requests')
 
 @section('content')
   <style>

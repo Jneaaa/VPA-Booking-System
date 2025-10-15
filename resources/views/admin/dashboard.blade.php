@@ -38,9 +38,6 @@
             z-index: -1;
         }
 
-        .card {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        }
     </style>
 
     <div id="main-container">
@@ -51,101 +48,90 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h2 class="fw-bold mb-0">Your Dashboard</h2>
                     <a href="#" id="manageProfileBtn" class="btn btn-light">
-                        <i class="bi bi-gear me-1"></i> Manage Requests
+                        <i class="bi bi-gear me-1"></i> Edit Profile
                     </a>
                 </div>
             </div>
-            <!-- Stats Cards -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100 hover-effect">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="text-muted small">Total Requisitions</span>
-                                    <h2 class="mt-2 mb-0 fw-bold" id="totalRequisitions">0</h2>
-                                </div>
-                                <div class="bg-primary bg-opacity-10 p-3 rounded">
-                                    <i class="bi bi-file-earmark-text fs-4 text-primary"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100 hover-effect">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="text-muted small">Ongoing Events</span>
-                                    <h2 class="mt-2 mb-0 fw-bold" id="ongoingEvents">0</h2>
-                                </div>
-                                <div class="bg-primary bg-opacity-10 p-3 rounded">
-                                    <i class="bi bi-calendar-event fs-4 text-primary"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100 hover-effect">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="text-muted small">Pending Requests</span>
-                                    <h2 class="mt-2 mb-0 fw-bold" id="pendingRequests">0</h2>
-
-                                </div>
-                                <div class="bg-primary bg-opacity-10 p-3 rounded">
-                                    <i class="bi bi-clock-history fs-4 text-primary"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100 hover-effect">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small">Ongoing Events</span>
+            <h2 class="mt-2 mb-0 fw-bold" id="ongoingEvents">0</h2>
+          </div>
+          <a href="{{ asset('admin/calendar') }}" class="text-primary text-decoration-none">
+            <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 45px; height: 45px; border-color: #5d759917 !important;">
+              <i class="fa-solid fa-angle-right fs-5"></i>
             </div>
-
-<!-- Calendar Section -->
-<div class="card shadow-sm">
-  <!-- Card Header -->
-  <div class="card-header bg-white d-flex justify-content-between align-items-center">
-    <h5 class="card-title mb-0 fw-bold">Events Calendar</h5>
-    <div class="d-flex gap-2">
-      <!-- Filter Dropdown -->
-      <div class="dropdown">
-        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="eventTypeDropdown"
-          data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-funnel me-1"></i> Filter
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="eventTypeDropdown">
-          <li><button class="dropdown-item" data-filter="facility"><i class="bi bi-door-open me-2"></i> Facility Rentals</button></li>
-          <li><button class="dropdown-item" data-filter="equipment"><i class="bi bi-tools me-2"></i> Equipment Rentals</button></li>
-          <li><button class="dropdown-item" data-filter="university"><i class="bi bi-building me-2"></i> University Events</button></li>
-          <li><button class="dropdown-item" data-filter="external"><i class="bi bi-globe me-2"></i> External Events</button></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><button class="dropdown-item" data-filter="all"><i class="bi bi-eye me-2"></i> Show All</button></li>
-        </ul>
+          </a>
+        </div>
       </div>
-      <!-- Open Calendar Button -->
-      <a href="calendar.html" class="btn btn-sm btn-primary">
-        <i class="bi bi-calendar-week me-1"></i> Open
-      </a>
     </div>
   </div>
 
-  <!-- Card Body -->
-  <div class="card-body">
-    <!-- Inner Calendar Card -->
-    <div class="card border-0">
-      <div class="card-body p-2">
-        <div id="calendar" style="height: 600px;"></div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100 hover-effect">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small">Pending Requests</span>
+            <h2 class="mt-2 mb-0 fw-bold" id="pendingRequests">0</h2>
+          </div>
+          <a href="{{ asset('admin/manage-requests') }}" class="text-primary text-decoration-none">
+            <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 45px; height: 45px; border-color: #5d759917 !important;">
+              <i class="fa-solid fa-angle-right fs-5"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100 hover-effect">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small">Total Requisitions</span>
+            <h2 class="mt-2 mb-0 fw-bold" id="totalRequisitions">0</h2>
+          </div>
+          <a href="{{ asset('admin/archives') }}" class="text-primary text-decoration-none">
+            <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary" style="width: 45px; height: 45px; border-color: #5d759917 !important;">
+              <i class="fa-solid fa-angle-right fs-5"></i>
+            </div>
+          </a>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
+<div class="row g-3">
+  <!-- Left Column -->
+  <div class="col-md-4 d-flex flex-column gap-3">
+    <div class="card p-3 flex-fill" style="height: 294px;">
+      <!-- Top container (empty for now) -->
+    </div>
+    <div class="card p-3 flex-fill" style="height: 294px;">
+      <!-- Bottom container (empty for now) -->
+    </div>
+  </div>
+
+  <!-- Right Column -->
+  <div class="col-md-8">
+    <!-- Calendar Section -->
+    <div class="card p-3 h-100" style="height: 600px;">
+      <div class="card border-0 h-100">
+        <div class="card-body p-2 h-100">
+          <div id="calendar" style="height: 100%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 
             <!-- System Log Section -->
