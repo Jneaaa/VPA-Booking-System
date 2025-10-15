@@ -57,6 +57,42 @@
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
+
+        /* System log styles */
+        .log-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .system-log-item {
+            border-left: 4px solid #007bff;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .system-log-item.approval {
+            border-left-color: #28a745;
+        }
+
+        .system-log-item.rejection {
+            border-left-color: #dc3545;
+        }
+
+        .system-log-item.comment {
+            border-left-color: #17a2b8;
+        }
+
+        .system-log-item.fee {
+            border-left-color: #ffc107;
+        }
+
+        .log-request-id {
+            background-color: #e9ecef;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
     </style>
 
     <div>
@@ -182,39 +218,16 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h3 class="fw-bold">System Log</h3>
                         <div class="d-flex gap-2">
-                            <div class="dropdown">
-                                <button class="btn btn-secondary dropdown-toggle" type="button" id="adminRoleDropdown"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-person me-1"></i> Filter by Role
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="adminRoleDropdown">
-                                    <li><button class="dropdown-item" data-filter="head-admin">Head Admin</button></li>
-                                    <li><button class="dropdown-item" data-filter="assistant-admin">Assistant Admin</button>
-                                    </li>
-                                    <li><button class="dropdown-item" data-filter="all">Show All</button></li>
-                                </ul>
-                            </div>
                             <input type="date" class="form-control" id="logDateFilter" placeholder="Filter by Date">
                         </div>
                     </div>
 
                     <!-- System log container -->
                     <div id="systemLog" class="border rounded p-3 log-container">
-                        <ul class="list-group">
-                            <!-- Example log entries -->
-                            <li class="list-group-item">
-                                <strong>John Doe</strong> (Head Admin) approved a requisition for the Main Auditorium on
-                                <em>March 15, 2024</em>.
-                            </li>
-                            <li class="list-group-item">
-                                <strong>Jane Smith</strong> (Assistant Admin) added new equipment: Sound System on
-                                <em>March 10, 2024</em>.
-                            </li>
-                            <li class="list-group-item">
-                                <strong>John Doe</strong> (Head Admin) deleted a facility: Old Gymnasium on
-                                <em>March 5, 2024</em>.
-                            </li>
-                        </ul>
+                        <div class="text-center text-muted py-4">
+                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                            <div class="mt-2">Loading system log...</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -257,6 +270,7 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="{{ asset('js/admin/calendar.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -322,6 +336,9 @@
 
                     // Display pending requisitions (status_id 1 and 2)
                     displayPendingRequisitions(data);
+
+                    // Load system log data
+                    loadSystemLog(data);
                 })
                 .catch(error => {
                     console.error('Error fetching requisition data:', error);
@@ -341,7 +358,267 @@
 
             // Fetch and display equipment data
             fetchEquipmentData();
+
+            // Add event listeners for filters
+            document.getElementById('logDateFilter').addEventListener('change', function() {
+                loadSystemLog();
+            });
+
+            document.querySelectorAll('#adminRoleDropdown + .dropdown-menu .dropdown-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    loadSystemLog(null, filter);
+                });
+            });
         });
+
+        async function loadSystemLog(requisitionsData = null, roleFilter = 'all') {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const dateFilter = document.getElementById('logDateFilter').value;
+                
+                let systemLogData = [];
+
+                // If we have requisitions data, use it; otherwise fetch fresh data
+                if (requisitionsData) {
+                    systemLogData = await processSystemLogData(requisitionsData);
+                } else {
+                    const response = await fetch('http://127.0.0.1:8000/api/admin/requisition-forms', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to fetch requisition data');
+                    const data = await response.json();
+                    systemLogData = await processSystemLogData(data);
+                }
+
+                // Apply filters
+                let filteredData = systemLogData;
+
+                if (dateFilter) {
+                    filteredData = filteredData.filter(item => {
+                        const itemDate = new Date(item.timestamp).toISOString().split('T')[0];
+                        return itemDate === dateFilter;
+                    });
+                }
+
+                if (roleFilter !== 'all') {
+                    filteredData = filteredData.filter(item => item.admin_role === roleFilter);
+                }
+
+                displaySystemLog(filteredData);
+
+            } catch (error) {
+                console.error('Error loading system log:', error);
+                document.getElementById('systemLog').innerHTML = `
+                    <div class="text-center text-danger py-4">
+                        <i class="bi bi-exclamation-triangle fs-4"></i>
+                        <div class="mt-2">Failed to load system log</div>
+                        <small class="text-muted">${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+
+        async function processSystemLogData(requisitions) {
+            const systemLog = [];
+            const token = localStorage.getItem('adminToken');
+
+            // Process each requisition for system log entries
+            for (const requisition of requisitions) {
+                const requestId = requisition.request_id;
+                const formattedRequestId = String(requestId).padStart(4, '0');
+
+                // Get approval history for this requisition
+                try {
+                    const approvalResponse = await fetch(`/api/admin/requisition/${requestId}/approval-history`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (approvalResponse.ok) {
+                        const approvalHistory = await approvalResponse.json();
+                        
+                        // Add approval/rejection entries to system log
+                        approvalHistory.forEach(history => {
+                            systemLog.push({
+                                type: history.action === 'approved' ? 'approval' : 'rejection',
+                                admin_name: history.admin_name,
+                                admin_role: history.admin_role || 'Admin',
+                                request_id: requestId,
+                                formatted_request_id: formattedRequestId,
+                                timestamp: history.created_at,
+                                remarks: history.remarks,
+                                action: history.action
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error fetching approval history for request ${requestId}:`, error);
+                }
+
+                // Get comments for this requisition
+                try {
+                    const commentsResponse = await fetch(`/api/admin/requisition/${requestId}/comments`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (commentsResponse.ok) {
+                        const commentsData = await commentsResponse.json();
+                        const comments = commentsData.comments || [];
+                        
+                        // Add comment entries to system log
+                        comments.forEach(comment => {
+                            systemLog.push({
+                                type: 'comment',
+                                admin_name: `${comment.admin.first_name} ${comment.admin.last_name}`,
+                                admin_role: comment.admin.role || 'Admin',
+                                request_id: requestId,
+                                formatted_request_id: formattedRequestId,
+                                timestamp: comment.created_at,
+                                comment: comment.comment
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error fetching comments for request ${requestId}:`, error);
+                }
+
+                // Get fees for this requisition
+                try {
+                    const feesResponse = await fetch(`/api/admin/requisition/${requestId}/fees`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (feesResponse.ok) {
+                        const fees = await feesResponse.json();
+                        
+                        // Add fee entries to system log
+                        fees.forEach(fee => {
+                            const amount = parseFloat(fee.type === 'discount' ? fee.discount_amount : fee.fee_amount);
+                            const typeName = fee.type === 'discount' ? 'Discount' : 'Additional fee';
+                            const adminName = fee.added_by?.name || 'Admin';
+
+                            systemLog.push({
+                                type: 'fee',
+                                admin_name: adminName,
+                                admin_role: fee.added_by?.role || 'Admin',
+                                request_id: requestId,
+                                formatted_request_id: formattedRequestId,
+                                timestamp: fee.created_at,
+                                fee_label: fee.label,
+                                fee_amount: amount,
+                                fee_type: typeName
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error fetching fees for request ${requestId}:`, error);
+                }
+            }
+
+            // Sort by timestamp (newest first)
+            return systemLog.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+
+        function displaySystemLog(logEntries) {
+            const systemLogContainer = document.getElementById('systemLog');
+
+            if (logEntries.length === 0) {
+                systemLogContainer.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-inbox fs-4"></i>
+                        <div class="mt-2">No system log entries found</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const logHTML = logEntries.map(entry => {
+                let logContent = '';
+                const formattedTime = formatTimeAgo(entry.timestamp);
+
+                switch (entry.type) {
+                    case 'approval':
+                        logContent = `
+                            <strong>${entry.admin_name}</strong> approved requisition 
+                            <span class="log-request-id">#${entry.formatted_request_id}</span>
+                            ${entry.remarks ? `with remarks: "${entry.remarks}"` : ''}
+                        `;
+                        break;
+
+                    case 'rejection':
+                        logContent = `
+                            <strong>${entry.admin_name}</strong> rejected requisition 
+                            <span class="log-request-id">#${entry.formatted_request_id}</span>
+                            ${entry.remarks ? `with remarks: "${entry.remarks}"` : ''}
+                        `;
+                        break;
+
+                    case 'comment':
+                        logContent = `
+                            <strong>${entry.admin_name}</strong> commented on requisition 
+                            <span class="log-request-id">#${entry.formatted_request_id}</span>: 
+                            "${entry.comment}"
+                        `;
+                        break;
+
+                    case 'fee':
+                        logContent = `
+                            <strong>${entry.admin_name}</strong> added a ${entry.fee_type.toLowerCase()} 
+                            "<strong>${entry.fee_label}</strong>" of ₱${entry.fee_amount.toFixed(2)} to requisition 
+                            <span class="log-request-id">#${entry.formatted_request_id}</span>
+                        `;
+                        break;
+                }
+
+                return `
+                    <div class="system-log-item ${entry.type}">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <div class="flex-grow-1">
+                                ${logContent}
+                            </div>
+                        </div>
+                        <small class="text-muted">${formattedTime}</small>
+                    </div>
+                `;
+            }).join('');
+
+            systemLogContainer.innerHTML = logHTML;
+        }
+
+        // Helper function to format time ago (e.g., "2 minutes ago")
+        function formatTimeAgo(timestamp) {
+            const now = new Date();
+            const commentTime = new Date(timestamp);
+            const diffInSeconds = Math.floor((now - commentTime) / 1000);
+
+            if (diffInSeconds < 60) {
+                return 'just now';
+            } else if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+            } else if (diffInSeconds < 604800) {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days} day${days !== 1 ? 's' : ''} ago`;
+            } else {
+                return commentTime.toLocaleDateString();
+            }
+        }
 
         function fetchEquipmentData() {
             console.log('Fetching equipment data...');
@@ -502,29 +779,30 @@
             requisitionCount.textContent = pendingRequisitions.length;
 
             // Create requisition items list - with clickable items
-            const requisitionsHTML = pendingRequisitions.map(req => {
-                const requestId = req.request_id;
-                const purpose = req.form_details.purpose;
-                const status = req.form_details.status.name;
-                const statusClass = status === 'Pending Approval' ? 'status-pending' : 'status-awaiting';
-                const fullText = `#${requestId.toString().padStart(4, '0')} (${purpose})`;
+           // Create requisition items list - with clickable items
+const requisitionsHTML = pendingRequisitions.map(req => {
+    const requestId = req.request_id;
+    const purpose = req.form_details.purpose;
+    const status = req.form_details.status.name;
+    const statusClass = status === 'Pending Approval' ? 'status-pending' : 'status-awaiting';
+    const fullText = `#${requestId.toString().padStart(4, '0')} (${purpose})`;
 
-                return `
-                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom clickable-requisition-item small"
-                         data-request-id="${requestId}"
-                         style="cursor: pointer; transition: background-color 0.2s;"
-                         onmouseover="this.style.backgroundColor='#f8f9fa'" 
-                         onmouseout="this.style.backgroundColor='transparent'"
-                         title="${fullText}">
-                        <div class="flex-grow-1 me-3" style="min-width: 0;">
-                            <div class="fw-medium text-truncate">${fullText}</div>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <span class="status-badge ${statusClass}">${status}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+    return `
+        <div class="d-flex justify-content-between align-items-center py-2 border-bottom clickable-requisition-item small"
+             data-request-id="${requestId}"
+             style="cursor: pointer; transition: background-color 0.2s;"
+             onmouseover="this.style.backgroundColor='#f8f9fa'" 
+             onmouseout="this.style.backgroundColor='transparent'"
+             title="${fullText}">
+            <div class="flex-grow-1 me-3" style="min-width: 0;">
+                <div class="fw-medium text-truncate">${fullText}</div>
+            </div>
+            <div class="flex-shrink-0">
+                <span class="status-badge ${statusClass}">${status}</span>
+            </div>
+        </div>
+    `;
+}).join('');
 
             requisitionList.innerHTML = requisitionsHTML;
 
@@ -537,22 +815,20 @@
 
             console.log('Rendered requisition list HTML:', requisitionList.innerHTML);
         }
-
-        function addRequisitionItemClickListeners() {
-            const requisitionItems = document.querySelectorAll('.clickable-requisition-item');
-            
-            requisitionItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    const requestId = this.getAttribute('data-request-id');
-                    if (requestId) {
-                        // Redirect to the requisition view page with the request ID
-                        window.location.href = `/admin/requisition/${requestId}`;
-                    }
-                });
-            });
-            
-            console.log(`Added click listeners to ${requisitionItems.length} requisition items`);
-        }
+function addRequisitionItemClickListeners() {
+    const requisitionItems = document.querySelectorAll('.clickable-requisition-item');
+    
+    requisitionItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const requestId = this.getAttribute('data-request-id');
+            if (requestId) {
+                // Redirect to the requisition view page with the request ID
+                window.location.href = `/admin/requisition/${requestId}`;
+            }
+        });
+    });
+    
+    console.log(`Added click listeners to ${requisitionItems.length} requisition items`);
+}
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 @endsection
