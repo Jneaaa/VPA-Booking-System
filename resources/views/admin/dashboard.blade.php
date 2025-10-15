@@ -4,6 +4,7 @@
 
 @section('content')
     <style>
+
         /* New styles for the dashboard header */
         .dashboard-header {
             position: relative;
@@ -112,9 +113,19 @@
 <div class="row g-3">
   <!-- Left Column -->
   <div class="col-md-4 d-flex flex-column gap-3">
+    <!-- Equipment Condition Tracker -->
     <div class="card p-3 flex-fill" style="height: 294px;">
-      <!-- Top container (empty for now) -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Inventory Tracker</h5>
+        <span class="badge bg-primary" id="equipmentCount">0 items</span>
+      </div>
+      <div class="equipment-list-container" style="height: 220px; overflow-y: auto;">
+        <div id="equipmentList" class="d-flex flex-column gap-2">
+          <!-- Equipment items will be loaded here dynamically -->
+        </div>
+      </div>
     </div>
+    
     <div class="card p-3 flex-fill" style="height: 294px;">
       <!-- Bottom container (empty for now) -->
     </div>
@@ -132,8 +143,6 @@
     </div>
   </div>
 </div>
-
-
             <!-- System Log Section -->
             <div class="card shadow-sm mt-3">
                 <div class="card-body">
@@ -218,6 +227,14 @@
     <script src="{{ asset('js/admin/calendar.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Show loading state
+            document.getElementById('equipmentList').innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                    <div class="mt-2">Loading equipment...</div>
+                </div>
+            `;
+
             const adminId = localStorage.getItem('adminId');
             const manageProfileBtn = document.getElementById('manageProfileBtn');
             if (adminId) {
@@ -248,7 +265,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('API Response:', data); // Debug: check what data is returned
+                    console.log('API Response:', data);
 
                     let totalRequisitions = data.length;
                     let pendingRequests = 0;
@@ -257,30 +274,133 @@
                     data.forEach(item => {
                         const status = item.form_details.status.name;
 
-                        // Count pending requests (based on your controller logic)
                         if (status === 'Pending Approval' || status === 'Awaiting Payment') {
                             pendingRequests++;
                         }
 
-                        // Count ongoing events
                         if (status === 'Scheduled' || status === 'Ongoing') {
                             ongoingEvents++;
                         }
                     });
 
-                    // Update the DOM with the calculated values
                     document.getElementById('totalRequisitions').textContent = totalRequisitions;
                     document.getElementById('pendingRequests').textContent = pendingRequests;
                     document.getElementById('ongoingEvents').textContent = ongoingEvents;
                 })
                 .catch(error => {
                     console.error('Error fetching requisition data:', error);
-                    // Set default values or show error message
                     document.getElementById('totalRequisitions').textContent = 'Error';
                     document.getElementById('pendingRequests').textContent = 'Error';
                     document.getElementById('ongoingEvents').textContent = 'Error';
                 });
+
+            // Fetch and display equipment data
+            fetchEquipmentData();
         });
+
+        function fetchEquipmentData() {
+            console.log('Fetching equipment data...');
+            fetch('http://127.0.0.1:8000/api/equipment', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('Equipment API response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Equipment data received:', data);
+                if (data && data.data) {
+                    displayEquipmentItems(data.data);
+                } else {
+                    throw new Error('Invalid data format - no data array found');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching equipment data:', error);
+                document.getElementById('equipmentList').innerHTML = `
+                    <div class="text-center text-danger py-4">
+                        <i class="bi bi-exclamation-triangle fs-4"></i>
+                        <div class="mt-2">Failed to load equipment data</div>
+                        <small class="text-muted">${error.message}</small>
+                    </div>
+                `;
+            });
+        }
+
+        function displayEquipmentItems(equipment) {
+            const equipmentList = document.getElementById('equipmentList');
+            const equipmentCount = document.getElementById('equipmentCount');
+            
+            console.log('Displaying equipment items:', equipment);
+            
+            // Extract all items from all equipment
+            const allItems = [];
+            equipment.forEach(equip => {
+                console.log(`Processing equipment: ${equip.equipment_name}`, equip.items);
+                if (equip.items && equip.items.length > 0) {
+                    equip.items.forEach(item => {
+                        allItems.push({
+                            ...item,
+                            equipment_name: equip.equipment_name
+                        });
+                    });
+                }
+            });
+
+            console.log('All items extracted:', allItems);
+
+            if (allItems.length === 0) {
+                equipmentList.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-inbox fs-4"></i>
+                        <div class="mt-2">No equipment items found</div>
+                    </div>
+                `;
+                equipmentCount.textContent = '0 items';
+                return;
+            }
+
+            // Update count
+            equipmentCount.textContent = `${allItems.length} ${allItems.length === 1 ? 'item' : 'items'}`;
+
+            // Create equipment items list - WRAPPING STATUS INDICATOR AND CONDITION TEXT TOGETHER
+            const itemsHTML = allItems.map((item, index) => {
+                const conditionName = item.condition?.condition_name || 'Unknown';
+                const conditionColor = item.condition?.color_code || '#6c757d';
+                
+                console.log(`Item ${index}:`, {
+                    equipment_name: item.equipment_name,
+                    item_name: item.item_name,
+                    condition: conditionName,
+                    color: conditionColor
+                });
+                
+                return `
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <div class="flex-grow-1 me-3" style="min-width: 0;">
+                            <div class="small text-muted text-truncate">${item.equipment_name}</div>
+                            <div class="fw-medium text-truncate">${item.item_name}</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0" style="white-space: nowrap;">
+                            <div style="width: 10px; height: 10px; border-radius: 50%; background-color: ${conditionColor}; border: 2px solid white; box-shadow: 0 0 0 1px #dee2e6;"></div>
+                            <span class="small">${conditionName}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            equipmentList.innerHTML = itemsHTML;
+            
+            // Debug: Check the rendered HTML
+            console.log('Rendered equipment list HTML:', equipmentList.innerHTML);
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 @endsection
