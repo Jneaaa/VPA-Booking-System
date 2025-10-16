@@ -260,40 +260,47 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    async function fetchEquipmentDetails(code) {
-        try {
-            // Call the scanner API endpoint instead of equipment API
-            const response = await fetch(`/api/scanner/scan`, {
-                method: 'POST',
-                headers: { 
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ barcode: code })
+  async function fetchEquipmentDetails(code) {
+    try {
+        const response = await fetch(`/api/scanner/scan`, {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ barcode: code })
+        });
+
+        if (!response.ok) throw new Error("Not found");
+        const data = await response.json();
+        
+        if (data.status === 'error') {
+            throw new Error(data.message);
+        }
+
+        // Update UI with equipment details
+        const item = data.item;
+        const equipment = item.equipment_details;
+        
+        eqName.textContent = equipment.name || "N/A";
+        eqDepartment.textContent = equipment.department_id || "N/A";
+        eqStatus.textContent = item.availability_status?.status_name || "Unavailable";
+        eqStatus.className = "badge-status " + getStatusClass(item.availability_status?.status_name || "");
+        eqStock.textContent = data.available_stock + " / " + data.total_stock;
+        eqPrice.textContent = equipment.external_fee || "0.00";
+        eqDescription.textContent = equipment.description || "No description";
+
+        // Show current bookings if any
+        if (data.current_bookings && data.current_bookings.length > 0) {
+            eqDescription.textContent += `\n\nCurrent Bookings:`;
+            data.current_bookings.forEach(booking => {
+                eqDescription.textContent += `\n• ${booking.requester} (${booking.start_date} to ${booking.end_date})`;
             });
+        }
 
-            if (!response.ok) throw new Error("Not found");
-            const data = await response.json();
-            
-            if (data.status === 'error') {
-                throw new Error(data.message);
-            }
-
-            // Update to match the response structure from ScannerController
-            const item = data.item;
-            const equipment = item.equipment_details || {};
-            
-            eqName.textContent = equipment.name || "N/A";
-            eqDepartment.textContent = equipment.department_id || "N/A";
-            eqStatus.textContent = item.availability_status?.status_name || "Unavailable";
-            eqStatus.className = "badge-status " + getStatusClass(item.availability_status?.status_name || "");
-            eqStock.textContent = data.available_stock ?? "0";
-            eqPrice.textContent = equipment.price || "0.00";
-            eqDescription.textContent = equipment.description || "No description";
-
-            infoBox.style.display = "block";
+        infoBox.style.display = "block";
         } catch (error) {
             console.error("Error fetching equipment:", error);
             eqName.textContent = "Not Found";

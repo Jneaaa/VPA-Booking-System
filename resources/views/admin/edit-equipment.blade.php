@@ -3,561 +3,550 @@
 @section('title', 'Edit Equipment')
 
 @section('content')
-<style>
-    #barcode[readonly] {
-    background-color: #e9ecef;
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-    .barcode-container {
-        margin-top: 10px;
-        text-align: center;
-    }
+    <style>
+        #barcode[readonly] {
+            background-color: #e9ecef;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
 
-    .barcode-preview {
-        max-width: 100%;
-        height: auto;
-        border: 1px solid #ddd;
-        padding: 5px;
-        background: white;
-    }
+        .barcode-container {
+            margin-top: 10px;
+            text-align: center;
+        }
 
-    #itemsContainer {
-        min-height: 100px;
-        max-height: 450px;
-        /* Adjust this value as needed */
-        overflow-y: auto;
-        padding: 10px;
-        border: none;
-    }
+        .barcode-preview {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            padding: 5px;
+            background: white;
+        }
 
-    /* Toast notification styles */
-    .toast {
-        z-index: 1100;
-        bottom: 0;
-        left: 0;
-        margin: 1rem;
-        opacity: 0;
-        transform: translateY(20px);
-        transition: transform 0.4s ease, opacity 0.4s ease;
-        min-width: 250px;
-        border-radius: 0.3rem;
-    }
+        #itemsContainer {
+            min-height: 100px;
+            max-height: 450px;
+            /* Adjust this value as needed */
+            overflow-y: auto;
+            padding: 10px;
+            border: none;
+        }
 
-    .toast .loading-bar {
-        height: 3px;
-        background: rgba(255, 255, 255, 0.7);
-        width: 100%;
-        transition: width 3000ms linear;
-    }
+        /* Toast notification styles */
+        .toast {
+            z-index: 1100;
+            bottom: 0;
+            left: 0;
+            margin: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            min-width: 250px;
+            border-radius: 0.3rem;
+        }
 
-    input[readonly],
-    textarea[readonly] {
-        pointer-events: none;
-        /* disables clicking/selection */
-        user-select: none;
-        /* prevents highlighting */
-        background-color: #fff;
-        /* optional: removes gray "disabled" look */
-        cursor: default;
-        /* arrow cursor instead of I-beam */
-    }
+        .toast .loading-bar {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.7);
+            width: 100%;
+            transition: width 3000ms linear;
+        }
 
-    /* Add this to your existing styles */
-    #photosPreview {
-        min-height: 110px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
+        input[readonly],
+        textarea[readonly] {
+            pointer-events: none;
+            /* disables clicking/selection */
+            user-select: none;
+            /* prevents highlighting */
+            background-color: #fff;
+            /* optional: removes gray "disabled" look */
+            cursor: default;
+            /* arrow cursor instead of I-beam */
+        }
 
-    .photo-preview {
-        position: relative;
-        width: 100px;
-        height: 100px;
-    }
+        /* Add this to your existing styles */
+        #photosPreview {
+            min-height: 110px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-    /* Layout fixes */
-    .dropzone {
-        min-height: 300px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    #photosPreview {
-        min-height: 110px;
-    }
+        .photo-preview {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
 
-    .form-control,
-    .form-select {
-        padding: 0.5rem 0.75rem;
-    }
+        /* Layout fixes */
+        .dropzone {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
 
-    textarea.form-control {
-        min-height: 100px;
-    }
+        #photosPreview {
+            min-height: 110px;
+        }
 
-    .row.mb-4 {
-        margin-bottom: 1.5rem !important;
-    }
+        .form-control,
+        .form-select {
+            padding: 0.5rem 0.75rem;
+        }
 
-    #itemsContainer {
-        min-height: 100px;
-    }
+        textarea.form-control {
+            min-height: 100px;
+        }
 
-    .amenity-item,
-    .equipment-item {
-        margin-bottom: 0.75rem;
-    }
+        .row.mb-4 {
+            margin-bottom: 1.5rem !important;
+        }
 
-    .modal-body .dropzone {
-        min-height: 150px;
-    }
+        #itemsContainer {
+            min-height: 100px;
+        }
 
-    .photo-container {
-        position: relative;
-    }
+        .amenity-item,
+        .equipment-item {
+            margin-bottom: 0.75rem;
+        }
 
-    .photo-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: none;
-    }
+        .modal-body .dropzone {
+            min-height: 150px;
+        }
 
-    .change-photo-btn {
-        z-index: 1;
-    }
+        .photo-container {
+            position: relative;
+        }
 
-    .equipment-item img {
-        max-width: 100px;
-        /* Restrict photo width */
-        max-height: 100px;
-        /* Restrict photo height */
-        object-fit: cover;
-        /* Ensure photo fits within bounds */
-    }
+        .photo-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+        }
 
-    .equipment-item .card-body {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        /* Add spacing between elements */
-    }
+        .change-photo-btn {
+            z-index: 1;
+        }
 
-    .equipment-item .flex-grow-1 {
-        flex: 1;
-        /* Allow details section to take remaining space */
-    }
-</style>
-        <!-- Main Content -->
-        <main>
-            <!-- Edit Equipment Page -->
-                <div class="card-body">
-                    <form id="editEquipmentForm">
-                        <input type="hidden" id="equipmentId" value="{{ request()->get('id') }}">
+        .equipment-item img {
+            max-width: 100px;
+            /* Restrict photo width */
+            max-height: 100px;
+            /* Restrict photo height */
+            object-fit: cover;
+            /* Ensure photo fits within bounds */
+        }
 
-                        <!-- Equipment Photos and Inventory Items Section -->
-                        <div class="row mb-4">
-                            <!-- Equipment Photos Card -->
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-header d-flex justify-content-between align-items-center"
-                                        style="height: 56px;">
-                                        <h5 class="fw-bold mb-0">Equipment Photos</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="photo-section">
-                                            <div class="dropzone border p-4 text-center" id="equipmentPhotosDropzone"
-                                                style="cursor: pointer;">
-                                                <i class="bi bi-images fs-1 text-muted"></i>
-                                                <p class="mt-2">Drag & drop equipment photos here or click to browse</p>
-                                                <input type="file" id="equipmentPhotos" class="d-none" multiple
-                                                    accept="image/*">
-                                            </div>
-                                            <small class="text-muted mt-2 d-block">Upload at least one photo of the
-                                                equipment (max 5
-                                                photos)</small>
-                                            <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
-                                        </div>
-                                    </div>
-                                </div>
+        .equipment-item .card-body {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            /* Add spacing between elements */
+        }
+
+        .equipment-item .flex-grow-1 {
+            flex: 1;
+            /* Allow details section to take remaining space */
+        }
+    </style>
+    <!-- Main Content -->
+    <main>
+        <!-- Edit Equipment Page -->
+        <div class="card-body">
+            <form id="editEquipmentForm">
+                <input type="hidden" id="equipmentId" value="{{ request()->get('id') }}">
+
+                <!-- Equipment Photos and Inventory Items Section -->
+                <div class="row mb-4">
+                    <!-- Equipment Photos Card -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center"
+                                style="height: 56px;">
+                                <h5 class="fw-bold mb-0">Equipment Photos</h5>
                             </div>
-                            <!-- Image Deletion Confirmation Modal -->
-                            <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Confirm Image Deletion</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete this photo? This action cannot be undone.
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                            <button type="button" class="btn btn-danger"
-                                                id="confirmDeleteImageBtn">Delete Photo</button>
-                                        </div>
+                            <div class="card-body">
+                                <div class="photo-section">
+                                    <div class="dropzone border p-4 text-center" id="equipmentPhotosDropzone"
+                                        style="cursor: pointer;">
+                                        <i class="bi bi-images fs-1 text-muted"></i>
+                                        <p class="mt-2">Drag & drop equipment photos here or click to browse</p>
+                                        <input type="file" id="equipmentPhotos" class="d-none" multiple accept="image/*">
                                     </div>
-                                </div>
-                            </div>
-
-
-                            <!-- Inventory Items Card -->
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-header d-flex justify-content-between align-items-center"
-                                        style="height: 56px;">
-                                        <h5 class="fw-bold mb-0">Inventory Items</h5>
-                                        <button type="button" class="btn btn-sm btn-secondary" id="addItemBtn">
-                                            <i class="bi bi-plus me-1"></i>Add Item
-                                        </button>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="itemsContainer">
-                                            <p class="text-muted">No items added yet. Click "Add Item" to track
-                                                individual equipment pieces.
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <small class="text-muted mt-2 d-block">Upload at least one photo of the
+                                        equipment (max 5
+                                        photos)</small>
+                                    <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Equipment Details Section -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="fw-bold mb-0">Equipment Details</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="details-section">
-                                            <!-- Basic Information Section -->
-                                            <div class="row mb-4">
-
-
-                                                <div class="col-md-6">
-                                                    <label for="equipmentName"
-                                                        class="form-label fw-bold d-flex align-items-center">
-                                                        Equipment Name
-
-                                                        <!-- edit icon (default) -->
-                                                        <i class="bi bi-pencil text-secondary ms-2"
-                                                            id="editEquipmentName" style="cursor: pointer;"></i>
-
-                                                        <!-- save + cancel buttons (hidden at first) -->
-                                                        <div id="editActions" class="ms-2 d-none">
-                                                            <button type="button" class="btn btn-sm btn-success me-1"
-                                                                id="saveEquipmentName">
-                                                                <i class="bi bi-check"></i>
-                                                            </button>
-                                                            <button type="button" class="btn btn-sm btn-danger"
-                                                                id="cancelEquipmentName">
-                                                                <i class="bi bi-x"></i>
-                                                            </button>
-                                                        </div>
-                                                    </label>
-
-                                                    <input type="text" class="form-control text-secondary"
-                                                        id="equipmentName" value="HD Projector" readonly>
-                                                </div>
-
-
-                                                <div class="col-md-6">
-                                                    <label for="brand"
-                                                        class="form-label fw-bold d-flex align-items-center">
-                                                        Brand
-                                                        <i class="bi bi-pencil text-secondary ms-2 edit-icon"
-                                                            data-field="brand" style="cursor: pointer;"></i>
-                                                        <div class="edit-actions ms-2 d-none" data-field="brand">
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-success me-1 save-btn">
-                                                                <i class="bi bi-check"></i>
-                                                            </button>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-danger cancel-btn">
-                                                                <i class="bi bi-x"></i>
-                                                            </button>
-                                                        </div>
-                                                    </label>
-                                                    <input type="text" class="form-control text-secondary" id="brand"
-                                                        value="" readonly>
-                                                </div>
-                                            </div>
-
-
-
-                                            <div class="row mb-4">
-                                                <div class="col-12 position-relative">
-                                                    <label for="description"
-                                                        class="form-label fw-bold d-flex align-items-center">
-                                                        Description
-                                                        <i class="bi bi-pencil text-secondary ms-2 edit-icon"
-                                                            data-field="description" style="cursor: pointer;"></i>
-                                                        <div class="edit-actions ms-2 d-none" data-field="description">
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-success me-1 save-btn">
-                                                                <i class="bi bi-check"></i>
-                                                            </button>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-danger cancel-btn">
-                                                                <i class="bi bi-x"></i>
-                                                            </button>
-                                                        </div>
-                                                    </label>
-                                                    <textarea class="form-control text-secondary" id="description"
-                                                        rows="3" readonly></textarea>
-                                                    <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1"
-                                                        id="descriptionWordCount">0/255 characters</small>
-                                                </div>
-                                            </div>
-
-                                            <div class="row mb-4">
-                                                <div class="col-md-6">
-                                                    <label for="storageLocation"
-                                                        class="form-label fw-bold d-flex align-items-center">
-                                                        Storage Location
-                                                        <i class="bi bi-pencil text-secondary ms-2 edit-icon"
-                                                            data-field="storageLocation" style="cursor: pointer;"></i>
-                                                        <div class="edit-actions ms-2 d-none"
-                                                            data-field="storageLocation">
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-success me-1 save-btn">
-                                                                <i class="bi bi-check"></i>
-                                                            </button>
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-danger cancel-btn">
-                                                                <i class="bi bi-x"></i>
-                                                            </button>
-                                                        </div>
-                                                    </label>
-                                                    <input type="text" class="form-control text-secondary"
-                                                        id="storageLocation" value="" readonly>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <label for="category" class="form-label fw-bold">Category</label>
-                                                    <select class="form-select" id="category" required>
-                                                        <option value="">Select Category</option>
-                                                        <!-- Categories will be populated dynamically -->
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <!-- Quantity & Pricing Section -->
-                                            <div class="row mb-4">
-                                                <div class="col-md-3">
-                                                    <label for="rentalFee" class="form-label fw-bold">Rental Fee
-                                                        (₱)</label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text">₱</span>
-                                                        <input type="number" class="form-control" id="rentalFee" min="0"
-                                                            step="0.01" required placeholder="0.00">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="rateType" class="form-label fw-bold">Rate Type</label>
-                                                    <select class="form-select" id="rateType" required>
-                                                        <!-- Rate types will be populated dynamically -->
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="minRentalHours" class="form-label fw-bold">Min.
-                                                        Rental
-                                                        Duration</label>
-                                                    <input type="number" class="form-control" id="minRentalHours"
-                                                        min="1" value="1" required>
-                                                </div>
-                                            </div>
-                                            <!-- Department & Availability Section -->
-                                            <div class="row mb-4">
-                                                <div class="col-md-4">
-                                                    <label for="department" class="form-label fw-bold">Owning
-                                                        Department</label>
-                                                    <select class="form-select" id="department" required>
-                                                        <!-- Departments will be populated dynamically -->
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="availabilityStatus"
-                                                        class="form-label fw-bold">Availability
-                                                        Status</label>
-                                                    <select class="form-select" id="availabilityStatus" required>
-                                                        <!-- Statuses will be populated dynamically -->
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                    </div>
+                    <!-- Image Deletion Confirmation Modal -->
+                    <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirm Image Deletion</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Form Actions -->
-                        <div class="d-flex justify-content-
-                         gap-2 mt-4">
-                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Update Equipment</button>
-                        </div>
-                    </form>
-                </div>
-
-    <!-- Event Modal -->
-    <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Event Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <strong>Title:</strong> <span id="eventTitle"></span>
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Date:</strong> <span id="eventDate"></span>
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Time:</strong> <span id="eventTime">10:00 AM - 12:00 PM</span>
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Description:</strong> <span id="eventDescription"></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Reset Confirmation Modal -->
-    <div class="modal fade" id="cancelConfirmationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Discard Changes</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to cancel? Unsaved changes will be lost.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmCancelBtn">Confirm</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Inventory Item Modal -->
-    <div class="modal fade" id="inventoryItemModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Inventory Item</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="itemForm">
-                        <!-- Item Photo -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label class="form-label fw-bold">Item Photo</label>
-                                <button class="btn btn-sm btn-danger d-none" id="removePhotoBtn">
-                                    <i class="bi bi-trash"></i> Remove
-                                </button>
-                            </div>
-                            <div class="dropzone border p-4 text-center" id="itemPhotoDropzone"
-                                style="cursor: pointer;">
-                                <i class="bi bi-image fs-1 text-muted"></i>
-                                <p class="mt-2">Click to upload item photo</p>
-                                <input type="file" id="itemPhoto" class="d-none" accept="image/*">
-                            </div>
-                            <div id="itemPhotoPreview" class="mt-3 text-center"></div>
-                        </div>
-
-                        <!-- Item Name -->
-                        <div class="mb-3">
-                            <label for="itemName" class="form-label fw-bold">Item Name</label>
-                            <input type="text" class="form-control" id="itemName" placeholder="Enter item name">
-                        </div>
-
-                        <!-- Condition -->
-                        <div class="mb-3">
-                            <label for="itemCondition" class="form-label fw-bold">Condition</label>
-                            <select class="form-select" id="itemCondition" required>
-                                <option value="">Select Condition</option>
-                                <!-- Conditions will be populated dynamically -->
-                            </select>
-                        </div>
-
-                        <!-- Barcode -->
-                        <div class="mb-3">
-                            <label for="barcode" class="form-label fw-bold">Barcode Number</label>
-                            <div class="input-group">
-                            <!-- Barcode input (read-only if already generated) -->
-                             <input type="text" 
-                            class="form-control" 
-                            id="barcode" 
-                            name="barcode"
-                            value="{{ $equipment->barcode ?? '' }}" 
-                            placeholder="No barcode assigned" 
-                            {{ isset($equipment->barcode) ? 'readonly' : '' }}>
-                            
-                            <!-- Show Generate button only if barcode doesn't exist -->
-                            @if(!isset($equipment->barcode))
-                            <button class="btn btn-outline-secondary" type="button" id="generateBarcodeBtn">
-                                <i class="bi bi-upc-scan"></i> Generate
-                            </button>
-                            @endif
-                        </div>
-
-                        <div class="barcode-container {{ isset($equipment->barcode) ? '' : 'd-none' }}" id="barcodeContainer">
-                            <svg id="barcodePreview"></svg>
-                            <div class="mt-2">
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="downloadBarcodeBtn">
-                                <i class="bi bi-download"></i> Download
-                            </button>
+                                <div class="modal-body">
+                                    Are you sure you want to delete this photo? This action cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-danger" id="confirmDeleteImageBtn">Delete
+                                        Photo</button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
 
-
-
-                        <!-- Notes -->
-                        <div class="mb-3 position-relative">
-                            <label for="itemNotes" class="form-label fw-bold">Item Notes</label>
-                            <textarea class="form-control" id="itemNotes" rows="3"
-                                placeholder="Additional notes about this item"></textarea>
-                            <small class="text-muted position-absolute bottom-0 end-0 me-2 mb-1"
-                                id="notesWordCount">0/80
-                                words</small>
+                    <!-- Inventory Items Card -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center"
+                                style="height: 56px;">
+                                <h5 class="fw-bold mb-0">Inventory Items</h5>
+                                <button type="button" class="btn btn-sm btn-secondary" id="addItemBtn">
+                                    <i class="bi bi-plus me-1"></i>Add Item
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="itemsContainer">
+                                    <p class="text-muted">No items added yet. Click "Add Item" to track
+                                        individual equipment pieces.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveItemBtn">Save Item</button>
+
+                <!-- Equipment Details Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="fw-bold mb-0">Equipment Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="details-section">
+                                    <!-- Basic Information Section -->
+                                    <div class="row mb-4">
+
+
+                                        <div class="col-md-6">
+                                            <label for="equipmentName" class="form-label fw-bold d-flex align-items-center">
+                                                Equipment Name
+
+                                                <!-- edit icon (default) -->
+                                                <i class="bi bi-pencil text-secondary ms-2" id="editEquipmentName"
+                                                    style="cursor: pointer;"></i>
+
+                                                <!-- save + cancel buttons (hidden at first) -->
+                                                <div id="editActions" class="ms-2 d-none">
+                                                    <button type="button" class="btn btn-sm btn-success me-1"
+                                                        id="saveEquipmentName">
+                                                        <i class="bi bi-check"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger"
+                                                        id="cancelEquipmentName">
+                                                        <i class="bi bi-x"></i>
+                                                    </button>
+                                                </div>
+                                            </label>
+
+                                            <input type="text" class="form-control text-secondary" id="equipmentName"
+                                                value="HD Projector" readonly>
+                                        </div>
+
+
+                                        <div class="col-md-6">
+                                            <label for="brand" class="form-label fw-bold d-flex align-items-center">
+                                                Brand
+                                                <i class="bi bi-pencil text-secondary ms-2 edit-icon" data-field="brand"
+                                                    style="cursor: pointer;"></i>
+                                                <div class="edit-actions ms-2 d-none" data-field="brand">
+                                                    <button type="button" class="btn btn-sm btn-success me-1 save-btn">
+                                                        <i class="bi bi-check"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger cancel-btn">
+                                                        <i class="bi bi-x"></i>
+                                                    </button>
+                                                </div>
+                                            </label>
+                                            <input type="text" class="form-control text-secondary" id="brand" value=""
+                                                readonly>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="row mb-4">
+                                        <div class="col-12 position-relative">
+                                            <label for="description" class="form-label fw-bold d-flex align-items-center">
+                                                Description
+                                                <i class="bi bi-pencil text-secondary ms-2 edit-icon"
+                                                    data-field="description" style="cursor: pointer;"></i>
+                                                <div class="edit-actions ms-2 d-none" data-field="description">
+                                                    <button type="button" class="btn btn-sm btn-success me-1 save-btn">
+                                                        <i class="bi bi-check"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger cancel-btn">
+                                                        <i class="bi bi-x"></i>
+                                                    </button>
+                                                </div>
+                                            </label>
+                                            <textarea class="form-control text-secondary" id="description" rows="3"
+                                                readonly></textarea>
+                                            <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1"
+                                                id="descriptionWordCount">0/255 characters</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label for="storageLocation"
+                                                class="form-label fw-bold d-flex align-items-center">
+                                                Storage Location
+                                                <i class="bi bi-pencil text-secondary ms-2 edit-icon"
+                                                    data-field="storageLocation" style="cursor: pointer;"></i>
+                                                <div class="edit-actions ms-2 d-none" data-field="storageLocation">
+                                                    <button type="button" class="btn btn-sm btn-success me-1 save-btn">
+                                                        <i class="bi bi-check"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger cancel-btn">
+                                                        <i class="bi bi-x"></i>
+                                                    </button>
+                                                </div>
+                                            </label>
+                                            <input type="text" class="form-control text-secondary" id="storageLocation"
+                                                value="" readonly>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label for="category" class="form-label fw-bold">Category</label>
+                                            <select class="form-select" id="category" required>
+                                                <option value="">Select Category</option>
+                                                <!-- Categories will be populated dynamically -->
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quantity & Pricing Section -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <label for="rentalFee" class="form-label fw-bold">Rental Fee
+                                                (₱)</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">₱</span>
+                                                <input type="number" class="form-control" id="rentalFee" min="0" step="0.01"
+                                                    required placeholder="0.00">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="rateType" class="form-label fw-bold">Rate Type</label>
+                                            <select class="form-select" id="rateType" required>
+                                                <!-- Rate types will be populated dynamically -->
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="minRentalHours" class="form-label fw-bold">Min.
+                                                Rental
+                                                Duration</label>
+                                            <input type="number" class="form-control" id="minRentalHours" min="1" value="1"
+                                                required>
+                                        </div>
+                                    </div>
+                                    <!-- Department & Availability Section -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <label for="department" class="form-label fw-bold">Owning
+                                                Department</label>
+                                            <select class="form-select" id="department" required>
+                                                <!-- Departments will be populated dynamically -->
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="availabilityStatus" class="form-label fw-bold">Availability
+                                                Status</label>
+                                            <select class="form-select" id="availabilityStatus" required>
+                                                <!-- Statuses will be populated dynamically -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-
+                                     gap-2 mt-4">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Equipment</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Event Modal -->
+        <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Event Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>Title:</strong> <span id="eventTitle"></span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Date:</strong> <span id="eventDate"></span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Time:</strong> <span id="eventTime">10:00 AM - 12:00 PM</span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Description:</strong> <span id="eventDescription"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    @endsection
+        <!-- Reset Confirmation Modal -->
+        <div class="modal fade" id="cancelConfirmationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Discard Changes</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to cancel? Unsaved changes will be lost.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmCancelBtn">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Inventory Item Modal -->
+        <div class="modal fade" id="inventoryItemModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Inventory Item</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="itemForm">
+                            <!-- Item Photo -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="form-label fw-bold">Item Photo</label>
+                                    <button class="btn btn-sm btn-danger d-none" id="removePhotoBtn">
+                                        <i class="bi bi-trash"></i> Remove
+                                    </button>
+                                </div>
+                                <div class="dropzone border p-4 text-center" id="itemPhotoDropzone"
+                                    style="cursor: pointer;">
+                                    <i class="bi bi-image fs-1 text-muted"></i>
+                                    <p class="mt-2">Click to upload item photo</p>
+                                    <input type="file" id="itemPhoto" class="d-none" accept="image/*">
+                                </div>
+                                <div id="itemPhotoPreview" class="mt-3 text-center"></div>
+                            </div>
+
+                            <!-- Item Name -->
+                            <div class="mb-3">
+                                <label for="itemName" class="form-label fw-bold">Item Name</label>
+                                <input type="text" class="form-control" id="itemName" placeholder="Enter item name">
+                            </div>
+
+                            <!-- Condition -->
+                            <div class="mb-3">
+                                <label for="itemCondition" class="form-label fw-bold">Condition</label>
+                                <select class="form-select" id="itemCondition" required>
+                                    <option value="">Select Condition</option>
+                                    <!-- Conditions will be populated dynamically -->
+                                </select>
+                            </div>
+
+                            <!-- Barcode -->
+                            <div class="mb-3">
+                                <label for="barcode" class="form-label fw-bold">Barcode Number</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="barcode" name="barcode"
+                                        placeholder="EQ-{{ time() }}" value="{{ old('barcode') }}">
+                                    <button class="btn btn-outline-secondary" type="button" id="generateBarcodeBtn">
+                                        <i class="bi bi-upc-scan"></i> Generate
+                                    </button>
+                                </div>
+
+                                <div class="barcode-container d-none mt-3" id="barcodeContainer">
+                                    <div class="text-center">
+                                        <img id="barcodeImage" alt="Barcode" class="img-fluid">
+                                    </div>
+                                    <div class="mt-2 text-center">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            id="downloadBarcodeBtn">
+                                            <i class="bi bi-download"></i> Download Barcode
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                            <!-- Notes -->
+                            <div class="mb-3 position-relative">
+                                <label for="itemNotes" class="form-label fw-bold">Item Notes</label>
+                                <textarea class="form-control" id="itemNotes" rows="3"
+                                    placeholder="Additional notes about this item"></textarea>
+                                <small class="text-muted position-absolute bottom-0 end-0 me-2 mb-1"
+                                    id="notesWordCount">0/80
+                                    words</small>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="saveItemBtn">Save Item</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+@endsection
 
     @section('scripts')
         <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+
+                const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
+                const barcodeContainer = document.getElementById('barcodeContainer');
+                const barcodeImage = document.getElementById('barcodeImage');
+                const downloadBarcodeBtn = document.getElementById('downloadBarcodeBtn');
+
+
                 // 1. Global variables first
                 window.equipmentItems = [];
                 window.currentEditingItemId = null;
@@ -634,7 +623,7 @@
                         removePhotoBtn.classList.add('d-none');
                     }
 
-                      // HIDE the generate barcode button in edit mode
+                    // HIDE the generate barcode button in edit mode
                     const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
                     if (generateBarcodeBtn) {
                         generateBarcodeBtn.style.display = 'none';
@@ -644,7 +633,7 @@
                     if (item.barcode_number) {
                         const barcodeContainer = document.getElementById('barcodeContainer');
                         const canvas = document.getElementById('barcodePreview');
-                        
+
                         try {
                             JsBarcode(canvas, item.barcode_number, {
                                 format: "CODE128",
@@ -655,12 +644,12 @@
                                 fontSize: 14,
                                 margin: 10
                             });
-                            
+
                             const barcodeNumberDisplay = document.getElementById('barcodeNumberDisplay');
                             if (barcodeNumberDisplay) {
                                 barcodeNumberDisplay.textContent = item.barcode_number;
                             }
-                            
+
                             barcodeContainer.classList.remove('d-none');
                         } catch (error) {
                             console.error('Barcode generation error:', error);
@@ -703,18 +692,18 @@
                     toast.style.borderRadius = '0.3rem';
 
                     toast.innerHTML = `
-                                    <div class="d-flex align-items-center px-3 py-1"> 
-                                        <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                        <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                    </div>
-                                    <div class="loading-bar" style="
-                                        height: 3px;
-                                        background: rgba(255,255,255,0.7);
-                                        width: 100%;
-                                        transition: width ${duration}ms linear;
-                                    "></div>
-                                `;
+                                                <div class="d-flex align-items-center px-3 py-1"> 
+                                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                </div>
+                                                <div class="loading-bar" style="
+                                                    height: 3px;
+                                                    background: rgba(255,255,255,0.7);
+                                                    width: 100%;
+                                                    transition: width ${duration}ms linear;
+                                                "></div>
+                                            `;
 
                     document.body.appendChild(toast);
 
@@ -1181,11 +1170,11 @@
                         itemCloudinaryPublicId = null;
                         if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'block';
                         if (removePhotoBtn) removePhotoBtn.classList.add('d-none');
-                          // SHOW the generate barcode button in add mode
-    const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
-    if (generateBarcodeBtn) {
-        generateBarcodeBtn.style.display = 'block';
-    }
+                        // SHOW the generate barcode button in add mode
+                        const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
+                        if (generateBarcodeBtn) {
+                            generateBarcodeBtn.style.display = 'block';
+                        }
                         inventoryItemModal.show();
                     });
 
@@ -1200,8 +1189,8 @@
                                     if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
                                     if (itemPhotoPreview) {
                                         itemPhotoPreview.innerHTML = `
-                                    <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
-                                `;
+                                                <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
+                                            `;
                                     }
 
                                     // Store the file for later processing
@@ -1301,191 +1290,135 @@
                         });
                     }
 
-                    // Handle barcode generation
-                    // Handle barcode generation and display logic for edit-equipment
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const barcodeInput = document.getElementById('barcode');
-                        const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
-                        const barcodePreview = document.getElementById('barcodePreview');
-                        const barcodeContainer = document.getElementById('barcodeContainer');
-                        const downloadBarcodeBtn = document.getElementById('downloadBarcodeBtn');
 
-                        // Check if a barcode already exists (from backend data)
-                        const existingBarcode = barcodeInput && barcodeInput.value.trim();
 
-                        // If barcode already exists, show it and disable editing/regeneration
-                        if (existingBarcode) {
-                            barcodeInput.readOnly = true; // prevent editing
-                            if (generateBarcodeBtn) generateBarcodeBtn.disabled = true; // prevent regenerating
 
-                            try {
-                                JsBarcode(barcodePreview, existingBarcode, {
-                                    format: "CODE128",
-                                    lineColor: "#000",
-                                    width: 3,
-                                    height: 80,
-                                    margin: 12,
-                                    displayValue: true
-                                });
-                                barcodeContainer.classList.remove('d-none');
-                            } catch (error) {
-                                console.error('Error displaying existing barcode:', error);
-                            }
+
+
+
+                    // Check if a barcode already exists (from backend data)
+                    const existingBarcode = barcodeInput && barcodeInput.value.trim();
+
+                    // If barcode already exists, show it and disable editing/regeneration
+                    if (existingBarcode) {
+                        barcodeInput.readOnly = true; // prevent editing
+                        if (generateBarcodeBtn) generateBarcodeBtn.disabled = true; // prevent regenerating
+
+                        try {
+                            JsBarcode(barcodePreview, existingBarcode, {
+                                format: "CODE128",
+                                lineColor: "#000",
+                                width: 3,
+                                height: 80,
+                                margin: 12,
+                                displayValue: true
+                            });
+                            barcodeContainer.classList.remove('d-none');
+                        } catch (error) {
+                            console.error('Error displaying existing barcode:', error);
                         }
+                    }
 
-                        // Handle barcode generation (only if no existing barcode)
-                        if (generateBarcodeBtn && barcodeInput && !existingBarcode) {
-                            generateBarcodeBtn.addEventListener('click', function () {
-                                const barcodeValue = barcodeInput.value.trim() || `EQ-${Date.now()}`;
+                    // Handle barcode generation (only if no existing barcode)
+                    if (generateBarcodeBtn && barcodeInput && !existingBarcode) {
+                        generateBarcodeBtn.addEventListener('click', function () {
+                            let barcodeValue = barcodeInput.value.trim();
+
+                            // Generate default barcode if empty
+                            if (!barcodeValue) {
+                                barcodeValue = `EQ-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                                 barcodeInput.value = barcodeValue;
+                            }
 
-                                try {
-                                    JsBarcode(barcodePreview, barcodeValue, {
-                                        format: "CODE128",
-                                        lineColor: "#000",
-                                        width: 3,
-                                        height: 80,
-                                        margin: 12,
-                                        displayValue: true
-                                    });
+                            // Validate barcode format (alphanumeric, hyphens, underscores)
+                            if (!/^[A-Za-z0-9\-_]+$/.test(barcodeValue)) {
+                                showToast('Barcode can only contain letters, numbers, hyphens, and underscores', 'error');
+                                return;
+                            }
 
-                                    barcodeContainer.classList.remove('d-none');
-                                    generateBarcodeBtn.disabled = true; // prevent duplicate generation
-                                    barcodeInput.readOnly = true; // lock field after generation
-                                } catch (error) {
-                                    console.error('Barcode generation error:', error);
-                                    if (typeof showToast === 'function') {
-                                        showToast('Failed to generate barcode', 'error');
-                                    } else {
-                                        alert('Failed to generate barcode.');
-                                    }
-                                }
-                            });
-                        }
+                            // Ensure barcode is not too long for scanning
+                            if (barcodeValue.length > 50) {
+                                showToast('Barcode is too long for reliable scanning', 'error');
+                                return;
+                            }
 
-                        // Handle barcode download - FIXED VERSION
-                        if (downloadBarcodeBtn) {
-                            downloadBarcodeBtn.addEventListener('click', function () {
-                                const barcodeInput = document.getElementById('barcode');
-                                const barcodePreview = document.getElementById('barcodePreview');
-                                
-                                // Check if barcode exists
-                                if (!barcodeInput || !barcodeInput.value.trim()) {
-                                    showToast('Please generate a barcode first', 'error');
-                                    return;
-                                }
-
-                                // Check if barcode preview exists and has content
-                                if (!barcodePreview || !barcodePreview.innerHTML.trim()) {
-                                    showToast('Barcode preview not available. Please generate the barcode again.', 'error');
-                                    return;
-                                }
-
-                                try {
-                                    showToast('Preparing download...', 'info');
-
-                                    // Get the barcode value for filename
-                                    const barcodeValue = barcodeInput.value.trim();
-                                    
-                                    // Method 1: Try SVG to PNG conversion first
-                                    if (barcodePreview.tagName === 'svg') {
-                                        const svg = barcodePreview;
-                                        const serializer = new XMLSerializer();
-                                        const svgData = serializer.serializeToString(svg);
-                                        
-                                        // Create canvas with proper dimensions
-                                        const canvas = document.createElement('canvas');
-                                        const ctx = canvas.getContext('2d');
-                                        const img = new Image();
-                                        
-                                        // Set canvas dimensions based on SVG viewBox or estimated size
-                                        const viewBox = svg.getAttribute('viewBox');
-                                        if (viewBox) {
-                                            const dimensions = viewBox.split(' ');
-                                            canvas.width = parseInt(dimensions[2]) || 300;
-                                            canvas.height = parseInt(dimensions[3]) || 150;
-                                        } else {
-                                            // Default dimensions if no viewBox
-                                            canvas.width = 300;
-                                            canvas.height = 150;
-                                        }
-
-                                        img.onload = function () {
-                                            try {
-                                                // Clear and draw on canvas
-                                                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                                                
-                                                // Create download
-                                                const pngDataUrl = canvas.toDataURL('image/png');
-                                                triggerDownload(pngDataUrl, `barcode-${barcodeValue}.png`);
-                                                
-                                            } catch (drawError) {
-                                                console.error('Canvas drawing error:', drawError);
-                                                // Fallback: Try direct SVG download
-                                                fallbackSvgDownload(svgData, barcodeValue);
-                                            }
-                                        };
-
-                                        img.onerror = function () {
-                                            console.error('Image loading failed');
-                                            // Fallback: Try direct SVG download
-                                            fallbackSvgDownload(svgData, barcodeValue);
-                                        };
-
-                                        // Start loading the image
-                                        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-                                        
-                                    } 
-                                    // Method 2: If it's already a canvas (better approach)
-                                    else if (barcodePreview.tagName === 'CANVAS') {
-                                        const pngDataUrl = barcodePreview.toDataURL('image/png');
-                                        triggerDownload(pngDataUrl, `barcode-${barcodeValue}.png`);
-                                    } 
-                                    else {
-                                        showToast('Unsupported barcode format', 'error');
-                                    }
-
-                                } catch (error) {
-                                    console.error('Barcode download error:', error);
-                                    showToast('Failed to download barcode: ' + error.message, 'error');
-                                }
-                            });
-                        }
-
-                        // Helper function to trigger download
-                        function triggerDownload(dataUrl, filename) {
                             try {
-                                const link = document.createElement('a');
-                                link.download = filename;
-                                link.href = dataUrl;
-                                
-                                // Append to body, click, and remove
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                                
-                                showToast('Barcode downloaded successfully!', 'success');
+                                // Generate barcode using JsBarcode
+                                JsBarcode(barcodeImage, barcodeValue, {
+                                    format: "CODE128",
+                                    width: 2,
+                                    height: 100,
+                                    displayValue: true,
+                                    fontSize: 16,
+                                    margin: 10,
+                                    background: "#ffffff",
+                                    lineColor: "#000000"
+                                });
+
+                                // Show barcode container
+                                barcodeContainer.classList.remove('d-none');
+
+                                // Make barcode field readonly after generation
+                                barcodeInput.setAttribute('readonly', true);
+
+                                showToast('Barcode generated successfully!', 'success');
+
                             } catch (error) {
-                                console.error('Download trigger error:', error);
-                                showToast('Download failed. Please try again.', 'error');
+                                console.error('Barcode generation error:', error);
+                                showToast('Failed to generate barcode', 'error');
                             }
-                        }
+                        });
+                    }
 
-                        // Fallback function for SVG download
-                        function fallbackSvgDownload(svgData, barcodeValue) {
-                            try {
-                                const blob = new Blob([svgData], { type: 'image/svg+xml' });
-                                const url = URL.createObjectURL(blob);
-                                triggerDownload(url, `barcode-${barcodeValue}.svg`);
-                                // Clean up the URL object after download
-                                setTimeout(() => URL.revokeObjectURL(url), 100);
-                            } catch (svgError) {
-                                console.error('SVG download fallback failed:', svgError);
-                                showToast('Download failed in all methods. Please try generating the barcode again.', 'error');
+                    // Handle barcode download - FIXED VERSION
+                    if (downloadBarcodeBtn) {
+                        // Download barcode as PNG
+                        downloadBarcodeBtn.addEventListener('click', function () {
+                            const barcodeValue = barcodeInput.value.trim();
+                            if (!barcodeValue) {
+                                showToast('Please generate a barcode first', 'error');
+                                return;
                             }
-                        }
-                    });
+
+                            try {
+                                // Convert SVG to canvas for better PNG quality
+                                const svg = barcodeImage.parentElement.querySelector('svg');
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+
+                                // Set canvas dimensions
+                                canvas.width = 300;
+                                canvas.height = 150;
+
+                                // Create image from SVG
+                                const svgData = new XMLSerializer().serializeToString(svg);
+                                const img = new Image();
+
+                                img.onload = function () {
+                                    // Draw on canvas
+                                    ctx.fillStyle = '#ffffff';
+                                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                                    // Create download link
+                                    const link = document.createElement('a');
+                                    link.download = `barcode-${barcodeValue}.png`;
+                                    link.href = canvas.toDataURL('image/png');
+                                    link.click();
+
+                                    showToast('Barcode downloaded successfully!', 'success');
+                                };
+
+                                img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+
+                            } catch (error) {
+                                console.error('Barcode download error:', error);
+                                showToast('Failed to download barcode', 'error');
+                            }
+                        });
+                    }
+
+
 
                     // Save item functionality
                     if (saveItemBtn) {
@@ -1636,28 +1569,28 @@
                     };
 
                     itemElement.innerHTML = `
-                                    <div class="card-body">
-                                        <div class="photo-container">
-                                            <img src="${updatedItem.image_url}" class="img-thumbnail">
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="card-title">${updatedItem.item_name}</h6>
-                                            <div class="d-flex flex-wrap gap-3">
-                                                <span class="badge ${conditionColors[updatedItem.condition.condition_name] || 'bg-secondary'}">${updatedItem.condition.condition_name}</span>
-                                            </div>
-                                            ${updatedItem.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${updatedItem.barcode_number}</div>` : ''}
-                                            ${updatedItem.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${updatedItem.item_notes.substring(0, 50)}${updatedItem.item_notes.length > 50 ? '...' : ''}</p>` : ''}
-                                        </div>
-                                        <div class="d-flex align-self-start">
-                                            <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal(${updatedItem.item_id}, event)">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem(${updatedItem.item_id}, '${updatedItem.cloudinary_public_id}', event)">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                `;
+                                                <div class="card-body">
+                                                    <div class="photo-container">
+                                                        <img src="${updatedItem.image_url}" class="img-thumbnail">
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="card-title">${updatedItem.item_name}</h6>
+                                                        <div class="d-flex flex-wrap gap-3">
+                                                            <span class="badge ${conditionColors[updatedItem.condition.condition_name] || 'bg-secondary'}">${updatedItem.condition.condition_name}</span>
+                                                        </div>
+                                                        ${updatedItem.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${updatedItem.barcode_number}</div>` : ''}
+                                                        ${updatedItem.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${updatedItem.item_notes.substring(0, 50)}${updatedItem.item_notes.length > 50 ? '...' : ''}</p>` : ''}
+                                                    </div>
+                                                    <div class="d-flex align-self-start">
+                                                        <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal(${updatedItem.item_id}, event)">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem(${updatedItem.item_id}, '${updatedItem.cloudinary_public_id}', event)">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            `;
                 }
 
                 function addItemToUI(item) {
@@ -1673,28 +1606,28 @@
                     itemCard.className = 'card equipment-item';
                     itemCard.dataset.itemId = item.item_id;
                     itemCard.innerHTML = `
-                                    <div class="card-body">
-                                        <div class="photo-container">
-                                            <img src="${item.image_url}" class="img-thumbnail">
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="card-title">${item.item_name}</h6>
-                                            <div class="d-flex flex-wrap gap-3">
-                                                <span class="badge ${conditionColors[item.condition.condition_name] || 'bg-secondary'}">${item.condition.condition_name}</span>
-                                            </div>
-                                            ${item.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${item.barcode_number}</div>` : ''}
-                                            ${item.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${item.item_notes.substring(0, 50)}${item.item_notes.length > 50 ? '...' : ''}</p>` : ''}
-                                        </div>
-                                        <div class="d-flex align-self-start">
-                                            <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal(${item.item_id}, event)">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem(${item.item_id}, '${item.cloudinary_public_id}', event)">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                `;
+                                                <div class="card-body">
+                                                    <div class="photo-container">
+                                                        <img src="${item.image_url}" class="img-thumbnail">
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="card-title">${item.item_name}</h6>
+                                                        <div class="d-flex flex-wrap gap-3">
+                                                            <span class="badge ${conditionColors[item.condition.condition_name] || 'bg-secondary'}">${item.condition.condition_name}</span>
+                                                        </div>
+                                                        ${item.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${item.barcode_number}</div>` : ''}
+                                                        ${item.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${item.item_notes.substring(0, 50)}${item.item_notes.length > 50 ? '...' : ''}</p>` : ''}
+                                                    </div>
+                                                    <div class="d-flex align-self-start">
+                                                        <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal(${item.item_id}, event)">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem(${item.item_id}, '${item.cloudinary_public_id}', event)">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            `;
 
                     if (itemsContainer) {
                         if (itemsContainer.querySelector('p.text-muted')) {
@@ -1756,7 +1689,7 @@
                         document.getElementById('description').value = equipment.description || '';
                         document.getElementById('brand').value = equipment.brand || '';
                         document.getElementById('storageLocation').value = equipment.storage_location;
-                       
+
                         document.getElementById('rentalFee').value = equipment.external_fee;
                         document.getElementById('minRentalHours').value = equipment.maximum_rental_hour || 1;
 
@@ -1922,9 +1855,9 @@
                         const rateTypeDropdown = document.getElementById('rateType');
                         if (rateTypeDropdown) {
                             rateTypeDropdown.innerHTML = `
-                                            <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
-                                            <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
-                                        `;
+                                                        <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
+                                                        <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
+                                                    `;
                         }
 
                         // Fetch conditions for inventory items
@@ -2101,7 +2034,7 @@
                             brand: document.getElementById('brand').value,
                             storage_location: document.getElementById('storageLocation').value,
                             category_id: document.getElementById('category').value,
-                           
+
                             external_fee: document.getElementById('rentalFee').value,
                             rate_type: document.getElementById('rateType').value,
                             status_id: document.getElementById('availabilityStatus').value,

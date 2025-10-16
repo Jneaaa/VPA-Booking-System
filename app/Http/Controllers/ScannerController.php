@@ -2,382 +2,233 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Equipment;
 use App\Models\EquipmentItem;
-use App\Models\AvailabilityStatus;
 use App\Models\RequestedEquipment;
 use App\Models\RequisitionForm;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
 
 class ScannerController extends Controller
 {
-    // Scan barcode and get equipment information
-    public function scan(Request $request)
+    /**
+     * Handle barcode scanning and return equipment details
+     */
+    public function scan(Request $request): JsonResponse
     {
         $request->validate([
             'barcode' => 'required|string'
         ]);
 
         $barcode = $request->input('barcode');
-        
-        // Check if barcode exists in our system
-        $item = EquipmentItem::with(['equipment', 'availabilityStatus'])
-                            ->where('barcode', $barcode)
-                            ->first();
 
-        if (!$item) {
-            return response()->json([
-                'status' => 'error', 
-                'message' => 'Barcode not recognized. This item is not registered in the system.'
-            ], 404);
-        }
-
-        // Get available stock count for this equipment type
-        $availableStock = EquipmentItem::where('equipment_id', $item->equipment_id)
-                                    ->where('availability_status_id', 1) // Assuming 1 is "Available"
-                                    ->count();
-
-        return response()->json([
-            'status' => 'success',
-            'item' => $item,
-            'available_stock' => $availableStock,
-            'equipment_details' => $item->equipment
-        ]);
-    }
-
-    // Process borrowing with confirmation delay
-    public function borrow(Request $request)
-    {
-        $request->validate([
-            'barcode' => 'required|string',
-            'quantity' => 'sometimes|integer|min:1',
-            'requisition_form_id' => 'required|exists:requisition_forms,id'
-        ]);
-
-        $barcode = $request->input('barcode');
-        $quantity = $request->input('quantity', 1);
-        $requisitionFormId = $request->input('requisition_form_id');
-        
-        // Get the equipment item to determine equipment_id
-        $item = EquipmentItem::where('barcode', $barcode)->first();
-        
-        if (!$item) {
-            return response()->json([
-                'status' => 'error', 
-                'message' => 'Equipment not found'
-            ], 404);
-        }
-
-        // Check available stock
-        $availableItems = EquipmentItem::where('equipment_id', $item->equipment_id)
-                                    ->where('availability_status_id', 1) // Available
-                                    ->get();
-
-        if ($availableItems->count() < $quantity) {
-            return response()->json([
-                'status' => 'error', 
-                'message' => 'Insufficient stock. Only ' . $availableItems->count() . ' items available.'
-            ], 400);
-        }
-
-        // For single item scan
-        if ($quantity == 1) {
-            if ($item->availability_status_id != 1) { // Not Available
-                return response()->json([
-                    'status' => 'error', 
-                    'message' => 'Item is not available for borrowing'
-                ], 400);
-            }
-
-            // Return confirmation required response with delay
-            return response()->json([
-                'status' => 'confirmation_required',
-                'message' => 'Please confirm borrowing this item',
-                'item' => $item,
-                'confirmation_timeout' => 10, // seconds
-                'confirmation_id' => uniqid() // Generate unique confirmation ID
-            ]);
-        } else {
-            // For bulk quantity - process immediately
-            $borrowedItems = [];
-            
-            DB::beginTransaction();
-            try {
-                for ($i = 0; $i < $quantity; $i++) {
-                    if (isset($availableItems[$i])) {
-                        $availableItems[$i]->update([
-                            'availability_status_id' => 2, // Assuming 2 is "Borrowed"
-                            'borrowed_at' => Carbon::now()
-                        ]);
-                        
-                        // Create requested equipment record
-                        RequestedEquipment::create([
-                            'requisition_form_id' => $requisitionFormId,
-                            'equipment_item_id' => $availableItems[$i]->id,
-                            'quantity' => 1,
-                            'created_at' => Carbon::now(),
-                            'updated_at' => Carbon::now()
-                        ]);
-                        
-                        $borrowedItems[] = $availableItems[$i];
-                    }
-                }
-                
-                DB::commit();
-                
-                return response()->json([
-                    'status' => 'success',
-                    'message' => $quantity . ' items borrowed successfully',
-                    'borrowed_items' => $borrowedItems
-                ]);
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return response()->json([
-                    'status' => 'error', 
-                    'message' => 'Failed to process borrowing: ' . $e->getMessage()
-                ], 500);
-            }
-        }
-    }
-
-    // Confirm borrowing after delay
-    public function confirmBorrow(Request $request)
-    {
-        $request->validate([
-            'barcode' => 'required|string',
-            'confirmation_id' => 'required|string',
-            'requisition_form_id' => 'required|exists:requisition_forms,id'
-        ]);
-
-        $barcode = $request->input('barcode');
-        $confirmationId = $request->input('confirmation_id');
-        $requisitionFormId = $request->input('requisition_form_id');
-        
-        $item = EquipmentItem::where('barcode', $barcode)->first();
-        
-        if (!$item) {
-            return response()->json([
-                'status' => 'error', 
-                'message' => 'Equipment not found'
-            ], 404);
-        }
-
-        if ($item->availability_status_id != 1) { // Not Available
-            return response()->json([
-                'status' => 'error', 
-                'message' => 'Item is no longer available'
-            ], 400);
-        }
-
-        DB::beginTransaction();
         try {
-            // Update item status
-            $item->update([
-                'availability_status_id' => 2, // Borrowed
-                'borrowed_at' => Carbon::now()
-            ]);
+            // Find equipment item by barcode
+            $item = EquipmentItem::with([
+                'equipment.category',
+                'equipment.department',
+                'equipment.status',
+                'equipment.images',
+                'condition'
+            ])->where('barcode_number', $barcode)->first();
 
-            // Create requested equipment record
-            RequestedEquipment::create([
-                'requisition_form_id' => $requisitionFormId,
-                'equipment_item_id' => $item->id,
-                'quantity' => 1,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
-            ]);
+            if (!$item) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Equipment item not found'
+                ], 404);
+            }
 
-            DB::commit();
+            // Get current active bookings for this item
+            $currentBookings = RequestedEquipment::with([
+                'requisitionForm' => function($query) {
+                    $query->where('is_closed', false)
+                          ->where('is_finalized', true);
+                }
+            ])->where('equipment_id', $item->equipment_id)
+              ->get()
+              ->filter(function($requestedEquipment) {
+                  return $requestedEquipment->requisitionForm !== null;
+              });
+
+            // Calculate available stock
+            $totalItems = EquipmentItem::where('equipment_id', $item->equipment_id)
+                                     ->whereNull('deleted_at')
+                                     ->count();
+            
+            $bookedItems = $currentBookings->sum('quantity');
+            $availableStock = $totalItems - $bookedItems;
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Item borrowed successfully',
-                'item' => $item
+                'item' => [
+                    'item_id' => $item->item_id,
+                    'item_name' => $item->item_name,
+                    'barcode_number' => $item->barcode_number,
+                    'condition' => $item->condition,
+                    'image_url' => $item->image_url,
+                    'equipment_details' => [
+                        'equipment_id' => $item->equipment->equipment_id,
+                        'name' => $item->equipment->equipment_name,
+                        'description' => $item->equipment->description,
+                        'brand' => $item->equipment->brand,
+                        'storage_location' => $item->equipment->storage_location,
+                        'external_fee' => $item->equipment->external_fee,
+                        'rate_type' => $item->equipment->rate_type,
+                        'department_id' => $item->equipment->department->department_name ?? 'N/A',
+                        'category' => $item->equipment->category->category_name ?? 'N/A',
+                    ],
+                    'availability_status' => $item->equipment->status
+                ],
+                'current_bookings' => $currentBookings->map(function($booking) {
+                    return [
+                        'request_id' => $booking->requisitionForm->request_id,
+                        'title' => $booking->requisitionForm->calendar_title,
+                        'start_date' => $booking->requisitionForm->start_date,
+                        'end_date' => $booking->requisitionForm->end_date,
+                        'start_time' => $booking->requisitionForm->start_time,
+                        'end_time' => $booking->requisitionForm->end_time,
+                        'quantity' => $booking->quantity,
+                        'requester' => $booking->requisitionForm->first_name . ' ' . $booking->requisitionForm->last_name
+                    ];
+                }),
+                'available_stock' => max(0, $availableStock),
+                'total_stock' => $totalItems
             ]);
+
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json([
-                'status' => 'error', 
-                'message' => 'Failed to confirm borrowing: ' . $e->getMessage()
+                'status' => 'error',
+                'message' => 'Failed to scan barcode: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    // Process returning with confirmation delay
-    public function returnItem(Request $request)
+    /**
+     * Handle borrow request
+     */
+    public function borrow(Request $request): JsonResponse
     {
         $request->validate([
             'barcode' => 'required|string',
-            'quantity' => 'sometimes|integer|min:1'
+            'quantity' => 'required|integer|min:1',
+            'requisition_form_id' => 'required|exists:requisition_forms,request_id'
         ]);
 
-        $barcode = $request->input('barcode');
-        $quantity = $request->input('quantity', 1);
-        
-        // Get the equipment item to determine equipment_id
-        $item = EquipmentItem::where('barcode', $barcode)->first();
-        
-        if (!$item) {
-            return response()->json([
-                'status' => 'error', 
-                'message' => 'Equipment not found'
-            ], 404);
-        }
+        try {
+            $item = EquipmentItem::where('barcode_number', $request->barcode)->first();
 
-        // Check borrowed items for this equipment
-        $borrowedItems = EquipmentItem::where('equipment_id', $item->equipment_id)
-                                    ->where('availability_status_id', 2) // Borrowed
-                                    ->get();
-
-        if ($borrowedItems->count() < $quantity) {
-            return response()->json([
-                'status' => 'error', 
-                'message' => 'Only ' . $borrowedItems->count() . ' items are currently borrowed.'
-            ], 400);
-        }
-
-        // For single item return
-        if ($quantity == 1) {
-            if ($item->availability_status_id != 2) { // Not Borrowed
+            if (!$item) {
                 return response()->json([
-                    'status' => 'error', 
-                    'message' => 'Item is not currently borrowed'
+                    'status' => 'error',
+                    'message' => 'Equipment item not found'
+                ], 404);
+            }
+
+            // Check availability
+            $availableStock = $this->calculateAvailableStock($item->equipment_id);
+            
+            if ($availableStock < $request->quantity) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Insufficient stock. Available: ' . $availableStock
                 ], 400);
             }
 
-            // Return confirmation required response with delay
-            return response()->json([
-                'status' => 'confirmation_required',
-                'message' => 'Please confirm returning this item',
-                'item' => $item,
-                'confirmation_timeout' => 10, // seconds
-                'confirmation_id' => uniqid() // Generate unique confirmation ID
-            ]);
-        } else {
-            // For bulk quantity - process immediately
-            $returnedItems = [];
-            
-            DB::beginTransaction();
-            try {
-                for ($i = 0; $i < $quantity; $i++) {
-                    if (isset($borrowedItems[$i])) {
-                        $borrowedItems[$i]->update([
-                            'availability_status_id' => 1, // Available
-                            'borrowed_at' => null
-                        ]);
-                        
-                        $returnedItems[] = $borrowedItems[$i];
-                    }
-                }
-                
-                DB::commit();
-                
-                return response()->json([
-                    'status' => 'success',
-                    'message' => $quantity . ' items returned successfully',
-                    'returned_items' => $returnedItems
-                ]);
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return response()->json([
-                    'status' => 'error', 
-                    'message' => 'Failed to process return: ' . $e->getMessage()
-                ], 500);
-            }
-        }
-    }
-
-    // Confirm return after delay
-    public function confirmReturn(Request $request)
-    {
-        $request->validate([
-            'barcode' => 'required|string',
-            'confirmation_id' => 'required|string'
-        ]);
-
-        $barcode = $request->input('barcode');
-        $confirmationId = $request->input('confirmation_id');
-        
-        $item = EquipmentItem::where('barcode', $barcode)->first();
-        
-        if (!$item) {
-            return response()->json([
-                'status' => 'error', 
-                'message' => 'Equipment not found'
-            ], 404);
-        }
-
-        if ($item->availability_status_id != 2) { // Not Borrowed
-            return response()->json([
-                'status' => 'error', 
-                'message' => 'Item is not currently borrowed'
-            ], 400);
-        }
-
-        try {
-            // Update item status
-            $item->update([
-                'availability_status_id' => 1, // Available
-                'borrowed_at' => null
-            ]);
+            // Create or update requested equipment
+            $requestedEquipment = RequestedEquipment::updateOrCreate(
+                [
+                    'request_id' => $request->requisition_form_id,
+                    'equipment_id' => $item->equipment_id
+                ],
+                [
+                    'quantity' => $request->quantity,
+                    'is_waived' => false
+                ]
+            );
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Item returned successfully',
-                'item' => $item
+                'message' => 'Equipment borrowed successfully',
+                'data' => $requestedEquipment
             ]);
+
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error', 
-                'message' => 'Failed to confirm return: ' . $e->getMessage()
+                'status' => 'error',
+                'message' => 'Failed to process borrow request: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    // Get borrowing history by requisition form ID
-    public function getHistory(Request $request)
+    /**
+     * Handle return request
+     */
+    public function return(Request $request): JsonResponse
     {
         $request->validate([
-            'requisition_form_id' => 'required|exists:requisition_forms,id'
+            'barcode' => 'required|string',
+            'quantity' => 'required|integer|min:1'
         ]);
 
-        $requisitionFormId = $request->input('requisition_form_id');
-        
-        $requisitionForm = RequisitionForm::with([
-            'requestedEquipment.equipmentItem.equipment',
-            'requester',
-            'approvals'
-        ])->find($requisitionFormId);
+        try {
+            $item = EquipmentItem::where('barcode_number', $request->barcode)->first();
 
-        if (!$requisitionForm) {
+            if (!$item) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Equipment item not found'
+                ], 404);
+            }
+
+            // Find and update the requested equipment
+            $requestedEquipment = RequestedEquipment::where('equipment_id', $item->equipment_id)
+                ->where('quantity', '>=', $request->quantity)
+                ->first();
+
+            if (!$requestedEquipment) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No matching borrow record found'
+                ], 404);
+            }
+
+            // Reduce quantity or delete if returning all
+            if ($requestedEquipment->quantity <= $request->quantity) {
+                $requestedEquipment->delete();
+            } else {
+                $requestedEquipment->quantity -= $request->quantity;
+                $requestedEquipment->save();
+            }
+
             return response()->json([
-                'status' => 'error', 
-                'message' => 'Requisition form not found'
-            ], 404);
-        }
+                'status' => 'success',
+                'message' => 'Equipment returned successfully'
+            ]);
 
-        return response()->json([
-            'status' => 'success',
-            'requisition_form' => $requisitionForm
-        ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to process return request: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    // Check equipment status
-    public function status(Request $request)
+    /**
+     * Calculate available stock for equipment
+     */
+    private function calculateAvailableStock($equipmentId): int
     {
-        $barcode = $request->input('barcode');
-        $item = EquipmentItem::with(['equipment', 'availabilityStatus'])
-                            ->where('barcode', $barcode)
-                            ->first();
+        $totalItems = EquipmentItem::where('equipment_id', $equipmentId)
+                                 ->whereNull('deleted_at')
+                                 ->count();
 
-        if (!$item) {
-            return response()->json(['status' => 'error', 'message' => 'Equipment not found']);
-        }
+        $bookedItems = RequestedEquipment::whereHas('requisitionForm', function($query) {
+                $query->where('is_closed', false)
+                      ->where('is_finalized', true);
+            })
+            ->where('equipment_id', $equipmentId)
+            ->sum('quantity');
 
-        return response()->json([
-            'status' => 'success',
-            'equipment' => $item
-        ]);
+        return max(0, $totalItems - $bookedItems);
     }
 }
