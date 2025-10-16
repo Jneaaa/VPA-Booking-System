@@ -32,6 +32,26 @@ label.required::after {
             transition: width 3000ms linear;
         }
 
+        /* Toast notification styles */
+        .toast {
+            z-index: 1100;
+            bottom: 0;
+            left: 0;
+            margin: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            min-width: 250px;
+            border-radius: 0.3rem;
+        }
+
+        .toast .loading-bar {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.7);
+            width: 100%;
+            transition: width 3000ms linear;
+        }
+
         /* Add this to your existing styles */
         #photosPreview {
             min-height: 110px;
