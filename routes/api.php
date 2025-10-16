@@ -49,6 +49,12 @@ Route::post('/admin/update/{admin}', [AdminController::class, 'update']);
 
 // ---------------- Equipment Management ---------------- //
 
+Route::prefix('scanner')->group(function () {
+    Route::post('/scan', [ScannerController::class, 'scan']);
+    Route::post('/borrow', [ScannerController::class, 'borrow']);
+    Route::post('/return', [ScannerController::class, 'return']);
+});
+
 // Cloudinary delete route
 Route::post('/admin/cloudinary/delete', function (Request $request) {
     try {

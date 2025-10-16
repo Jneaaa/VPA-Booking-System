@@ -74,7 +74,6 @@
             background: white;
             border: 1px solid #ddd;
             margin-bottom: 10px;
-            border-radius: 4px;
         }
 
         .barcode-number {
@@ -83,13 +82,6 @@
             margin-top: 8px;
             font-size: 14px;
             letter-spacing: 1px;
-            color: #333
-        }
-
-        #barcode {
-            background-color: #f8f9fa;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
         }
 
         #generateBarcodeBtn {
@@ -381,22 +373,23 @@
                                 <label for="barcode" class="form-label fw-bold">Barcode Number</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control" id="barcode" name="barcode"
-                                        placeholder="Generate barcode" readonly>
+                                        placeholder="Enter barcode" readonly>
                                     <button class="btn btn-outline-primary" type="button" id="generateBarcodeBtn">
                                         <i class="bi bi-upc-scan"></i> Generate
                                     </button>
                                 </div>
 
                                 <!-- Barcode Preview -->
-                                <div class="barcode-container d-none mt-3" id="barcodeContainer">
-                                    <canvas id="barcodePreview" class="barcode-preview"></canvas>
-                                    <div class="barcode-number" id="barcodeNumberDisplay"></div>
-                                    <div class="mt-2">
-                                        <button type="button" class="btn btn-sm btn-outline-primary" id="downloadBarcodeBtn">
-                                            <i class="bi bi-download"></i> Download
-                                        </button>
-                                    </div>
-                                </div>
+                               <div class="barcode-container d-none mt-3" id="barcodeContainer">
+    <img id="barcodePreview" class="barcode-preview" src="" alt="Barcode">
+    <div class="barcode-number" id="barcodeNumberDisplay"></div>
+    <div class="mt-2">
+        <button type="button" class="btn btn-sm btn-outline-primary" id="downloadBarcodeBtn">
+            <i class="bi bi-download"></i> Download
+        </button>
+    </div>
+</div>
+                            </div>
 
                             <!-- Notes -->
                             <div class="mb-3 position-relative">
@@ -1029,72 +1022,38 @@
                         });
                     }
 
-                    // Handle barcode generation - FIXED VERSION
+                    // Handle barcode generation
                     if (generateBarcodeBtn && barcodeInput) {
                         generateBarcodeBtn.addEventListener('click', function () {
-                            // Generate a unique barcode value if empty
-                            const barcodeValue = barcodeInput.value.trim() || `EQ${Date.now()}${Math.random().toString(36).substr(2, 5)}`;
+                            const barcodeValue = barcodeInput.value.trim() || 'EQ' + Date.now();
                             barcodeInput.value = barcodeValue;
 
                             // Generate barcode
                             try {
-                                // Use canvas instead of img for better download functionality
-                                const canvas = document.getElementById('barcodePreview');
-                                
-                                JsBarcode(canvas, barcodeValue, {
+                                JsBarcode(barcodePreview, barcodeValue, {
                                     format: "CODE128",
                                     lineColor: "#000",
                                     width: 2,
                                     height: 40,
-                                    displayValue: true,
-                                    fontSize: 14,
-                                    margin: 10
+                                    displayValue: true
                                 });
 
-                                // Update barcode number display
-                                const barcodeNumberDisplay = document.getElementById('barcodeNumberDisplay');
-                                if (barcodeNumberDisplay) {
-                                    barcodeNumberDisplay.textContent = barcodeValue;
-                                }
-
-                                // Show the barcode container
                                 barcodeContainer.classList.remove('d-none');
-                                
-                                showToast('Barcode generated successfully!', 'success');
                             } catch (error) {
                                 console.error('Barcode generation error:', error);
-                                showToast('Failed to generate barcode: ' + error.message, 'error');
+                                showToast('Failed to generate barcode', 'error');
                             }
                         });
                     }
 
-                    // Handle barcode download - FIXED VERSION
-                    if (downloadBarcodeBtn) {
+                    // Handle barcode download
+                    if (downloadBarcodeBtn && barcodePreview) {
                         downloadBarcodeBtn.addEventListener('click', function () {
-                            const canvas = document.getElementById('barcodePreview');
-                            const barcodeValue = barcodeInput.value.trim() || 'barcode';
-                            
-                            if (!canvas) {
-                                showToast('Please generate a barcode first', 'error');
-                                return;
-                            }
-
-                            try {
-                                // Create a download link
-                                const link = document.createElement('a');
-                                link.download = `barcode-${barcodeValue}.png`;
-                                link.href = canvas.toDataURL('image/png');
-                                
-                                // Trigger download
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                                
-                                showToast('Barcode downloaded successfully!', 'success');
-                            } catch (error) {
-                                console.error('Barcode download error:', error);
-                                showToast('Failed to download barcode: ' + error.message, 'error');
-                            }
+                            const canvas = barcodePreview;
+                            const link = document.createElement('a');
+                            link.download = 'barcode-' + (barcodeInput.value || 'equipment') + '.png';
+                            link.href = canvas.toDataURL('image/png');
+                            link.click();
                         });
                     }
 
@@ -1108,12 +1067,6 @@
 
                             if (!itemName || !itemCondition) {
                                 showToast('Please fill in all required fields', 'error');
-                                return;
-                            }
-
-                            //Barcode Validation
-                            if (!barcode){
-                                showToast('Please generate a barcode first','error');
                                 return;
                             }
 
