@@ -12,6 +12,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <style>
+
+
+:root {
+  --bs-primary: #135ba3;
+  --bs-primary-rgb: 19, 91, 163;
+}
+
+
         #markAllAsRead {
             color: #2664b6ff !important;
             text-decoration: none;

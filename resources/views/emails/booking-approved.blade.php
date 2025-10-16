@@ -13,6 +13,23 @@
         .footer { background-color: #003366; color: white; padding: 10px; text-align: center; font-size: 12px; }
         .button { background-color: #eeaf01; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; }
         .important { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 15px 0; }
+        
+              .access-code { 
+    padding: 5px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.access-code small {
+    display: block;
+    font-weight: normal;
+    color: #6c757d; /* muted gray */
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 2px;
+}
+
     </style>
 </head>
 <body>
@@ -23,9 +40,7 @@
         </div>
         
         <div class="content">
-            <h2>Your Booking Request Has Been Approved – Payment Required</h2>
-            
-            <p><strong>Dear {{ $user_name }},</strong></p>
+            <p>Dear {{ $user_name }},</p>
             
             <p>Warm greetings from <strong>Central Philippine University</strong>! 🌸</p>
             
@@ -35,8 +50,14 @@
             
             <ol>
                 <li>Settle your payment of <strong>₱{{ number_format($approved_fee, 2) }}</strong> at the <strong>CPU Business Office</strong> within campus.</li>
-                <li>After payment, kindly <strong>upload a clear photo of your receipt as Proof of Payment</strong> through the Booking website.</li>
+                <li>After payment, kindly <strong>upload a clear photo of your receipt as Proof of Payment</strong> through the Booking website using your access code.</li>
             </ol>
+
+            <div class="access-code">
+                Your Access Code:<br>
+                <strong>{{ $access_code }}</strong>
+                <small>Use this code to upload your proof of payment on the booking website.</small>
+            </div>
             
             <div class="important">
                 <p>⚠️ <strong>Important Reminder:</strong><br>
