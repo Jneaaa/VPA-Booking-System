@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'CPU Booking')</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
@@ -121,7 +121,7 @@
             flex-direction: column;
             min-height: 100vh;
             margin: 0;
-            font-family: 'Poppins', 'Century Gothic', Arial, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
             color: var(--cpu-text-dark);
             overflow-x: hidden;
         }
@@ -535,21 +535,21 @@
                     <div class="skeleton skeleton-text" style="width: 80px; height: 16px;"></div>
                 </div>
             </li>
-            <li class="nav-item mb-1" id="requisitions-nav-item" style="display: none;">
-                <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/manage-requests*') ? 'active' : '' }}"
-                    href="{{ url('/admin/manage-requests') }}" id="requisitionsNavLink">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <div class="nav-icon p-1 rounded me-2">
-                                <i class="fa-solid fa-file-lines me-2"></i>
-                            </div>
-                            <span>Requisitions</span>
-                        </div>
-                        <span id="requisitionNotificationBadge" class="badge bg-danger ms-2"
-                            style="display: none;">0</span>
-                    </div>
-                </a>
-            </li>
+<li class="nav-item mb-1" id="requisitions-nav-item" style="display: none;">
+    <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/manage-requests*') ? 'active' : '' }}"
+        href="{{ url('/admin/manage-requests') }}" id="requisitionsNavLink">
+        <div class="d-flex align-items-center position-relative w-100">
+            <div class="d-flex align-items-center flex-grow-1">
+                <div class="nav-icon p-1 rounded me-2">
+                    <i class="fa-solid fa-file-lines me-2"></i>
+                </div>
+                <span>Requisitions</span>
+            </div>
+          <span id="requisitionNotificationBadge" class="badge bg-danger position-absolute rounded-pill" 
+       style="display: none; right: 10px; top: 50%; transform: translateY(-50%); min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; padding: 0 4px;">0</span>
+        </div>
+    </a>
+</li>
             <li class="nav-item mb-1 nav-link-skeleton" id="facilities-nav-skeleton">
                 <div class="d-flex align-items-center py-1 px-2">
                     <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>

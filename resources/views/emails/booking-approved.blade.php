@@ -46,11 +46,11 @@
             <p>Thank you for using our booking system. We look forward to serving you soon.</p>
             
             <p>Best regards,<br>
-            <strong>Central Philippine University</strong><br>
-            Booking Management Team</p>
+            Central Philippine University Administration</p>
         </div>
         
         <div class="footer">
+            <p>Central Philippine University &copy; {{ date('Y') }}</p>
             <p>This is an automated message. Please do not reply to this email.</p>
         </div>
     </div>

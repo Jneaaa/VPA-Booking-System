@@ -6,27 +6,29 @@
     <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
     <style>
 
-        .main-content {
-            padding: 2rem 0;
-            background-image: url('{{ asset('assets/homepage.jpg') }}');
-            background-size: cover;
-            background-position: center bottom;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            position: relative;
-        }
+.main-content {
+    min-height: 100vh;
+    background-image: url('{{ asset('assets/homepage.jpg') }}');
+    background-size: cover;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    padding: 2rem 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        .content-wrapper {
-            position: relative;
-            background-color: #ffffff;
-            border-radius: 0.5rem;
-            padding: 2rem;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .1);
-            margin: 2rem auto;
-            max-width: 1000px;
-            width: 90%;
-            min-height: auto;
-        }
+.content-wrapper {
+    position: relative;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .1);
+    max-width: 1000px;
+    width: 90%;
+    margin: 0 auto;
+}
 
         .content-wrapper h2 {
             color: #333;
@@ -238,18 +240,18 @@
         }
     </style>
 
-    <main class="main-content d-flex align-items-center justify-content-center">
-        <div class="content-wrapper">
+<main class="main-content">
+    <div class="content-wrapper">
             <h2>Requisition Form Lookup</h2>
 
             <div id="lookupSection" class="lookup-form">
                 <div class="input-group">
                     <input type="text" class="form-control" id="referenceInput"
-                        placeholder="Enter your reference code or email address" aria-label="Reference code or email">
+                        placeholder="Enter your reference code" aria-label="Reference code or email">
                     <button class="btn btn-primary" type="button" onclick="showResults()">Search</button>
                 </div>
                 <p id="noResultsMessage" class="no-requisition-message">No requisition forms found. Please check your
-                    reference code or email and try again.</p>
+                    reference code and try again.</p>
             </div>
 
             <div id="resultsSection" style="display: none;">

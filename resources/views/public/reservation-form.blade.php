@@ -16,6 +16,25 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
     rel="stylesheet" />
   <style>
+#termsModal .modal-header {
+  padding-top: 0.5rem;
+  padding-bottom: 0.25rem;
+}
+
+
+#termsModal .modal-title {
+  margin-top: 0.55rem; 
+  justify-content: center;
+  position: relative;
+}
+
+
+.modal-header .btn-close {
+  position: absolute;
+  right: 1rem;
+  top: 0.75rem;
+}
+
     /* Add this to your existing CSS */
     #school_id:disabled {
       background-color: #f8f9fa;
@@ -998,33 +1017,23 @@
     </div>
   </div>
 
-  <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md">
-      <div class="modal-content text-center">
-        <div class="modal-header" style="padding: 0.25rem 1rem;">
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-            style="width: 1rem; height: 1rem; margin-top: 0.2rem;"></button>
-        </div>
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content text-center">
+      <div class="modal-header">
+        <h5 class="modal-title text-primary mb-0" id="termsModalLabel">Terms and Conditions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+          style="width: 1rem; height: 1rem; margin-top: 0.2rem;"></button>
+      </div>
 
 
 
-        <div class="modal-body">
-          <div class="terms-content mb-0 mx-auto" style="max-height: 50vh; overflow-y: auto; text-align: center;">
-
-            <!-- Centered Logo -->
-            <img src="{{ asset('assets/cpu-logo.png') }}" alt="CPU Logo" class="mx-auto d-block mb-3"
-              style="width: 75px; height: auto;">
-
-            <div class="d-flex align-items-center my-2">
-              <hr class="flex-grow-1 me-2" style="height:1px;">
-              <h5 class="text-center text-primary mb-0">Terms and Conditions</h5>
-              <hr class="flex-grow-1 ms-2" style="height:1px;">
-            </div>
-
-            <small class="d-block text-start mb-3" style="padding-left: 17px;">
-              By using our booking service, you agree to comply with the following terms and conditions, as well as all
-              campus policies set by Central Philippine University (CPU):
-            </small>
+         <div class="modal-body">
+        <div class="terms-content mb-0 mx-auto" style="max-height: 50vh; overflow-y: auto; text-align: center;">
+          <small class="d-block text-start mb-3" style="padding-left: 17px;">
+            By using our booking service, you agree to comply with the following terms and conditions, as well as all
+            campus policies set by Central Philippine University (CPU):
+          </small>
 
 
             <ol class="text-start">
