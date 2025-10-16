@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class RequestedEquipment extends Model
 {
     use HasFactory;
+    protected $primaryKey = 'requested_equipment_id';
     protected $fillable = [
         'request_id',
         'equipment_id',
