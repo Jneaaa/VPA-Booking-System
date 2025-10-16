@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             EquipmentCategorySeeder::class,
             AdminSeeder::class,
             EquipmentSeeder::class,
+            EquipmentItemSeeder::class,
             AdminDepartmentSeeder::class,
             FacilityCategorySeeder::class,
             FacilitySubcategorySeeder::class,
@@ -28,8 +29,6 @@ class DatabaseSeeder extends Seeder
             RequisitionPurposeSeeder::class,
             FormStatusSeeder::class,
             RequisitionFormsSeeder::class
-            
-            // Add other seeders here if needed
         ]);
     }
 }

@@ -16,32 +16,6 @@ Route::middleware('web')->group(function () {
     Route::get('/admin/feedback-data', [FeedbackController::class, 'getFeedbackData'])->name('admin.feedback.data');
     Route::get('/admin/feedback-stats', [FeedbackController::class, 'getFeedbackStats'])->name('admin.feedback.stats');
 
-    Route::get('/test-email', function () {
-    try {
-        $emailData = [
-            'user_name' => 'Hannah Escosar',
-            'request_id' => 123,
-            'official_receipt_num' => 'OR-2024-001',
-            'purpose' => 'Birthday Party',
-            'start_date' => '2024-12-25',
-            'start_time' => '14:00:00',
-            'end_date' => '2024-12-25',
-            'end_time' => '18:00:00',
-            'approved_fee' => 1500.00
-        ];
-
-        \Mail::send('emails.booking-scheduled', $emailData, function ($message) {
-            $message->to('hannahescosar@gmail.com', 'Hannah Escosar')
-                    ->subject('TEST: Your Booking Has Been Scheduled – Official Receipt Generated');
-        });
-
-        return response()->json(['message' => 'Test email sent successfully!']);
-        
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
-});
-
     // ----- Public Views ----- //
     Route::view('/facility-catalog', 'public.facility-catalog');
     Route::view('/equipment-catalog', 'public.equipment-catalog');

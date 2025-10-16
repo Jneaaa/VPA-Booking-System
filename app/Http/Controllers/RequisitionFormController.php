@@ -735,43 +735,31 @@ public function getCalendarEvents()
         }
     }
 
-    protected function sendConfirmationEmail(RequisitionForm $requisitionForm)
-    {
-        try {
-            $subject = 'CPU Booking System - Requisition Form Received';
+protected function sendConfirmationEmail(RequisitionForm $requisitionForm)
+{
+    try {
+        $subject = 'CPU Booking System - Requisition Form Received';
 
-            $emailContent = "
-        Dear {$requisitionForm->first_name} {$requisitionForm->last_name},
+        $emailData = [
+            'first_name' => $requisitionForm->first_name,
+            'last_name' => $requisitionForm->last_name,
+            'access_code' => $requisitionForm->access_code,
+        ];
 
-        We have successfully received your requisition form for the use of CPU facilities and/or equipment. An administrator will now review your request. Once your form has been evaluated and approved, you will receive another email with the results.
+        // Use the blade template instead of raw text
+        \Mail::send('emails.booking-confirmation', $emailData, function ($message) use ($requisitionForm, $subject) {
+            $message->to($requisitionForm->email)
+                ->subject($subject)
+                ->from(config('mail.from.address'), config('mail.from.name'));
+        });
 
-        Please note that you may cancel your request within 5 days should an emergency arise.
+        \Log::info('Confirmation email sent to: ' . $requisitionForm->email);
 
-        To monitor and track the status of your request, you can enter your code in the \"Your Bookings\" tab on the booking website.
-
-        Your Request Code:
-        <strong>{$requisitionForm->access_code}</strong>
-
-        Thank you for using the CPU Facility and Equipment Booking System.
-
-        Sincerely,
-        CPU Booking Management Team
-        ";
-
-            // Use Laravel's Mail facade to send email
-            \Mail::raw($emailContent, function ($message) use ($requisitionForm, $subject) {
-                $message->to($requisitionForm->email)
-                    ->subject($subject)
-                    ->from(config('mail.from.address'), config('mail.from.name'));
-            });
-
-            \Log::info('Confirmation email sent to: ' . $requisitionForm->email);
-
-        } catch (\Exception $e) {
-            \Log::error('Failed to send confirmation email: ' . $e->getMessage());
-            // Don't throw exception here - email failure shouldn't prevent form submission
-        }
+    } catch (\Exception $e) {
+        \Log::error('Failed to send confirmation email: ' . $e->getMessage());
+        // Don't throw exception here - email failure shouldn't prevent form submission
     }
+}
 
     public function clearSession()
     {
