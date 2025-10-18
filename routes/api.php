@@ -49,6 +49,26 @@ Route::post('/admin/update/{admin}', [AdminController::class, 'update']);
 
 // ---------------- Equipment Management ---------------- //
 
+Route::post('/admin/generate-barcode', function (Request $request) {
+    try {
+        $equipmentId = $request->input('equipment_id');
+        $itemId = $request->input('item_id');
+        
+        $barcodeValue = \App\Services\BarcodeService::generateEquipmentBarcode($equipmentId, $itemId);
+        
+        return response()->json([
+            'status' => 'success',
+            'barcode' => $barcodeValue
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to generate barcode: ' . $e->getMessage()
+        ], 500);
+    }
+});
+
 Route::prefix('scanner')->group(function () {
     Route::post('/scan', [ScannerController::class, 'scan']);
     Route::post('/borrow', [ScannerController::class, 'borrow']);

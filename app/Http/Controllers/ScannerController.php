@@ -13,95 +13,158 @@ class ScannerController extends Controller
     /**
      * Handle barcode scanning and return equipment details
      */
-    public function scan(Request $request): JsonResponse
-    {
-        $request->validate([
-            'barcode' => 'required|string'
-        ]);
+  public function scan(Request $request): JsonResponse
+{
+    $request->validate([
+        'barcode' => 'required|string'
+    ]);
 
-        $barcode = $request->input('barcode');
+    $barcode = $request->input('barcode');
 
-        try {
-            // Find equipment item by barcode
+    try {
+        // Clean and validate barcode
+        $barcode = trim($barcode);
+        
+        // Remove any "EQ-" prefix if duplicated and clean the barcode
+        $barcode = preg_replace('/^(EQ-)+/', 'EQ-', $barcode);
+        $barcode = preg_replace('/[^A-Z0-9\-]/', '', $barcode);
+
+        // Log the scanned barcode for debugging
+        \Log::info('Scanner: Attempting to scan barcode', ['barcode' => $barcode]);
+
+        // First try exact match
+        $item = EquipmentItem::with([
+            'equipment.category',
+            'equipment.department',
+            'equipment.status',
+            'equipment.images',
+            'condition'
+        ])->where('barcode_number', $barcode)->first();
+
+        if (!$item) {
+            // Try partial match (in case of scanning issues)
             $item = EquipmentItem::with([
                 'equipment.category',
-                'equipment.department',
+                'equipment.department', 
                 'equipment.status',
                 'equipment.images',
                 'condition'
-            ])->where('barcode_number', $barcode)->first();
+            ])->where('barcode_number', 'like', '%' . $barcode . '%')->first();
+        }
 
-            if (!$item) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Equipment item not found'
-                ], 404);
+        if (!$item) {
+            // Try without EQ- prefix (some scanners might not capture it properly)
+            $barcodeWithoutPrefix = str_replace('EQ-', '', $barcode);
+            if ($barcodeWithoutPrefix !== $barcode) {
+                $item = EquipmentItem::with([
+                    'equipment.category',
+                    'equipment.department', 
+                    'equipment.status',
+                    'equipment.images',
+                    'condition'
+                ])->where('barcode_number', 'like', '%' . $barcodeWithoutPrefix . '%')->first();
             }
+        }
 
-            // Get current active bookings for this item
-            $currentBookings = RequestedEquipment::with([
-                'requisitionForm' => function($query) {
-                    $query->where('is_closed', false)
-                          ->where('is_finalized', true);
-                }
-            ])->where('equipment_id', $item->equipment_id)
-              ->get()
-              ->filter(function($requestedEquipment) {
-                  return $requestedEquipment->requisitionForm !== null;
-              });
-
-            // Calculate available stock
-            $totalItems = EquipmentItem::where('equipment_id', $item->equipment_id)
-                                     ->whereNull('deleted_at')
-                                     ->count();
-            
-            $bookedItems = $currentBookings->sum('quantity');
-            $availableStock = $totalItems - $bookedItems;
-
-            return response()->json([
-                'status' => 'success',
-                'item' => [
-                    'item_id' => $item->item_id,
-                    'item_name' => $item->item_name,
-                    'barcode_number' => $item->barcode_number,
-                    'condition' => $item->condition,
-                    'image_url' => $item->image_url,
-                    'equipment_details' => [
-                        'equipment_id' => $item->equipment->equipment_id,
-                        'name' => $item->equipment->equipment_name,
-                        'description' => $item->equipment->description,
-                        'brand' => $item->equipment->brand,
-                        'storage_location' => $item->equipment->storage_location,
-                        'external_fee' => $item->equipment->external_fee,
-                        'rate_type' => $item->equipment->rate_type,
-                        'department_id' => $item->equipment->department->department_name ?? 'N/A',
-                        'category' => $item->equipment->category->category_name ?? 'N/A',
-                    ],
-                    'availability_status' => $item->equipment->status
-                ],
-                'current_bookings' => $currentBookings->map(function($booking) {
-                    return [
-                        'request_id' => $booking->requisitionForm->request_id,
-                        'title' => $booking->requisitionForm->calendar_title,
-                        'start_date' => $booking->requisitionForm->start_date,
-                        'end_date' => $booking->requisitionForm->end_date,
-                        'start_time' => $booking->requisitionForm->start_time,
-                        'end_time' => $booking->requisitionForm->end_time,
-                        'quantity' => $booking->quantity,
-                        'requester' => $booking->requisitionForm->first_name . ' ' . $booking->requisitionForm->last_name
-                    ];
-                }),
-                'available_stock' => max(0, $availableStock),
-                'total_stock' => $totalItems
-            ]);
-
-        } catch (\Exception $e) {
+        if (!$item) {
+            \Log::warning('Scanner: Equipment item not found', ['barcode' => $barcode]);
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to scan barcode: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Equipment item not found. Please ensure:
+                1. The barcode was generated by the system
+                2. The equipment item exists in the database
+                3. The barcode is properly scanned'
+            ], 404);
         }
+
+        \Log::info('Scanner: Equipment item found', [
+            'item_id' => $item->item_id,
+            'barcode' => $item->barcode_number,
+            'scanned_barcode' => $barcode
+        ]);
+
+        // Get current active bookings for this item
+        $currentBookings = RequestedEquipment::with([
+            'requisitionForm' => function($query) {
+                $query->where('is_closed', false)
+                      ->where('is_finalized', true);
+            }
+        ])->where('equipment_id', $item->equipment_id)
+          ->get()
+          ->filter(function($requestedEquipment) {
+              return $requestedEquipment->requisitionForm !== null;
+          });
+
+        // Calculate available stock - REMOVE deleted_at condition
+        $totalItems = EquipmentItem::where('equipment_id', $item->equipment_id)->count();
+        
+        $bookedItems = $currentBookings->sum('quantity');
+        $availableStock = $totalItems - $bookedItems;
+
+        // Format response data
+        $responseData = [
+            'status' => 'success',
+            'item' => [
+                'item_id' => $item->item_id,
+                'item_name' => $item->item_name,
+                'barcode_number' => $item->barcode_number,
+                'condition' => $item->condition,
+                'image_url' => $item->image_url,
+                'equipment_details' => [
+                    'equipment_id' => $item->equipment->equipment_id,
+                    'name' => $item->equipment->equipment_name,
+                    'description' => $item->equipment->description,
+                    'brand' => $item->equipment->brand,
+                    'storage_location' => $item->equipment->storage_location,
+                    'external_fee' => $item->equipment->external_fee,
+                    'rate_type' => $item->equipment->rate_type,
+                    'department_id' => $item->equipment->department->department_name ?? 'N/A',
+                    'category' => $item->equipment->category->category_name ?? 'N/A',
+                ],
+                'availability_status' => $item->equipment->status
+            ],
+            'current_bookings' => $currentBookings->map(function($booking) {
+                return [
+                    'request_id' => $booking->requisitionForm->request_id,
+                    'title' => $booking->requisitionForm->calendar_title,
+                    'start_date' => $booking->requisitionForm->start_date,
+                    'end_date' => $booking->requisitionForm->end_date,
+                    'start_time' => $booking->requisitionForm->start_time,
+                    'end_time' => $booking->requisitionForm->end_time,
+                    'quantity' => $booking->quantity,
+                    'requester' => $booking->requisitionForm->first_name . ' ' . $booking->requisitionForm->last_name
+                ];
+            }),
+            'available_stock' => max(0, $availableStock),
+            'total_stock' => $totalItems,
+            'scan_debug' => [
+                'scanned_barcode' => $barcode,
+                'matched_barcode' => $item->barcode_number,
+                'match_type' => $barcode === $item->barcode_number ? 'exact' : 'partial'
+            ]
+        ];
+
+        \Log::info('Scanner: Successfully processed scan', [
+            'item_id' => $item->item_id,
+            'available_stock' => $availableStock,
+            'total_stock' => $totalItems
+        ]);
+
+        return response()->json($responseData);
+
+    } catch (\Exception $e) {
+        \Log::error('Scanner: Error scanning barcode', [
+            'barcode' => $barcode,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to scan barcode: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * Handle borrow request
