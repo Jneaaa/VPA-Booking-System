@@ -87,6 +87,10 @@
             align-items: center;
         }
 
+        .card-body {
+            padding: 1.5rem;
+        }
+
         #photosPreview {
             min-height: 110px;
         }
@@ -156,249 +160,267 @@
             /* Allow details section to take remaining space */
         }
     </style>
-    <!-- Main Content -->
-    <main>
-        <!-- Edit Equipment Page -->
-        <div class="card-body">
-            <form id="editEquipmentForm">
-                <input type="hidden" id="equipmentId" value="{{ request()->get('id') }}">
+    <div class="container-fluid px-4">
+        <!-- Main Layout -->
+        <div id="layout">
+            <!-- Main Content -->
+            <main id="main">
+                <!-- Edit Equipment Page -->
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <form id="editEquipmentForm">
+                            <input type="hidden" id="equipmentId" value="{{ request()->get('id') }}">
 
-                <!-- Equipment Photos and Inventory Items Section -->
-                <div class="row mb-4">
-                    <!-- Equipment Photos Card -->
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center"
-                                style="height: 56px;">
-                                <h5 class="fw-bold mb-0">Equipment Photos</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="photo-section">
-                                    <div class="dropzone border p-4 text-center" id="equipmentPhotosDropzone"
-                                        style="cursor: pointer;">
-                                        <i class="bi bi-images fs-1 text-muted"></i>
-                                        <p class="mt-2">Drag & drop equipment photos here or click to browse</p>
-                                        <input type="file" id="equipmentPhotos" class="d-none" multiple accept="image/*">
-                                    </div>
-                                    <small class="text-muted mt-2 d-block">Upload at least one photo of the
-                                        equipment (max 5
-                                        photos)</small>
-                                    <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Image Deletion Confirmation Modal -->
-                    <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Confirm Image Deletion</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    Are you sure you want to delete this photo? This action cannot be undone.
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="button" class="btn btn-danger" id="confirmDeleteImageBtn">Delete
-                                        Photo</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <!-- Inventory Items Card -->
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center"
-                                style="height: 56px;">
-                                <h5 class="fw-bold mb-0">Inventory Items</h5>
-                                <button type="button" class="btn btn-sm btn-secondary" id="addItemBtn">
-                                    <i class="bi bi-plus me-1"></i>Add Item
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <div id="itemsContainer">
-                                    <p class="text-muted">No items added yet. Click "Add Item" to track
-                                        individual equipment pieces.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Equipment Details Section -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="fw-bold mb-0">Equipment Details</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="details-section">
-                                    <!-- Basic Information Section -->
-                                    <div class="row mb-4">
-
-
-                                        <div class="col-md-6">
-                                            <label for="equipmentName" class="form-label fw-bold d-flex align-items-center">
-                                                Equipment Name
-
-                                                <!-- edit icon (default) -->
-                                                <i class="bi bi-pencil text-secondary ms-2" id="editEquipmentName"
-                                                    style="cursor: pointer;"></i>
-
-                                                <!-- save + cancel buttons (hidden at first) -->
-                                                <div id="editActions" class="ms-2 d-none">
-                                                    <button type="button" class="btn btn-sm btn-success me-1"
-                                                        id="saveEquipmentName">
-                                                        <i class="bi bi-check"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-danger"
-                                                        id="cancelEquipmentName">
-                                                        <i class="bi bi-x"></i>
-                                                    </button>
+                            <!-- Equipment Photos and Inventory Items Section -->
+                            <div class="row mb-4">
+                                <!-- Equipment Photos Card -->
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center"
+                                            style="height: 56px;">
+                                            <h5 class="fw-bold mb-0">Equipment Photos</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="photo-section">
+                                                <div class="dropzone border p-4 text-center" id="equipmentPhotosDropzone"
+                                                    style="cursor: pointer;">
+                                                    <i class="bi bi-images fs-1 text-muted"></i>
+                                                    <p class="mt-2">Drag & drop equipment photos here or click to browse</p>
+                                                    <input type="file" id="equipmentPhotos" class="d-none" multiple
+                                                        accept="image/*">
                                                 </div>
-                                            </label>
-
-                                            <input type="text" class="form-control text-secondary" id="equipmentName"
-                                                value="HD Projector" readonly>
-                                        </div>
-
-
-                                        <div class="col-md-6">
-                                            <label for="brand" class="form-label fw-bold d-flex align-items-center">
-                                                Brand
-                                                <i class="bi bi-pencil text-secondary ms-2 edit-icon" data-field="brand"
-                                                    style="cursor: pointer;"></i>
-                                                <div class="edit-actions ms-2 d-none" data-field="brand">
-                                                    <button type="button" class="btn btn-sm btn-success me-1 save-btn">
-                                                        <i class="bi bi-check"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-danger cancel-btn">
-                                                        <i class="bi bi-x"></i>
-                                                    </button>
-                                                </div>
-                                            </label>
-                                            <input type="text" class="form-control text-secondary" id="brand" value=""
-                                                readonly>
-                                        </div>
-                                    </div>
-
-
-
-                                    <div class="row mb-4">
-                                        <div class="col-12 position-relative">
-                                            <label for="description" class="form-label fw-bold d-flex align-items-center">
-                                                Description
-                                                <i class="bi bi-pencil text-secondary ms-2 edit-icon"
-                                                    data-field="description" style="cursor: pointer;"></i>
-                                                <div class="edit-actions ms-2 d-none" data-field="description">
-                                                    <button type="button" class="btn btn-sm btn-success me-1 save-btn">
-                                                        <i class="bi bi-check"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-danger cancel-btn">
-                                                        <i class="bi bi-x"></i>
-                                                    </button>
-                                                </div>
-                                            </label>
-                                            <textarea class="form-control text-secondary" id="description" rows="3"
-                                                readonly></textarea>
-                                            <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1"
-                                                id="descriptionWordCount">0/255 characters</small>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-4">
-                                        <div class="col-md-6">
-                                            <label for="storageLocation"
-                                                class="form-label fw-bold d-flex align-items-center">
-                                                Storage Location
-                                                <i class="bi bi-pencil text-secondary ms-2 edit-icon"
-                                                    data-field="storageLocation" style="cursor: pointer;"></i>
-                                                <div class="edit-actions ms-2 d-none" data-field="storageLocation">
-                                                    <button type="button" class="btn btn-sm btn-success me-1 save-btn">
-                                                        <i class="bi bi-check"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-danger cancel-btn">
-                                                        <i class="bi bi-x"></i>
-                                                    </button>
-                                                </div>
-                                            </label>
-                                            <input type="text" class="form-control text-secondary" id="storageLocation"
-                                                value="" readonly>
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <label for="category" class="form-label fw-bold">Category</label>
-                                            <select class="form-select" id="category" required>
-                                                <option value="">Select Category</option>
-                                                <!-- Categories will be populated dynamically -->
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <!-- Quantity & Pricing Section -->
-                                    <div class="row mb-4">
-                                        <div class="col-md-3">
-                                            <label for="rentalFee" class="form-label fw-bold">Rental Fee
-                                                (₱)</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text">₱</span>
-                                                <input type="number" class="form-control" id="rentalFee" min="0" step="0.01"
-                                                    required placeholder="0.00">
+                                                <small class="text-muted mt-2 d-block">Upload at least one photo of the
+                                                    equipment (max 5
+                                                    photos)</small>
+                                                <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
-                                            <label for="rateType" class="form-label fw-bold">Rate Type</label>
-                                            <select class="form-select" id="rateType" required>
-                                                <!-- Rate types will be populated dynamically -->
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label for="minRentalHours" class="form-label fw-bold">Min.
-                                                Rental
-                                                Duration</label>
-                                            <input type="number" class="form-control" id="minRentalHours" min="1" value="1"
-                                                required>
+                                    </div>
+                                </div>
+                                <!-- Image Deletion Confirmation Modal -->
+                                <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirm Image Deletion</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to delete this photo? This action cannot be undone.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cancel</button>
+                                                <button type="button" class="btn btn-danger"
+                                                    id="confirmDeleteImageBtn">Delete Photo</button>
+                                            </div>
                                         </div>
                                     </div>
-                                    <!-- Department & Availability Section -->
-                                    <div class="row mb-4">
-                                        <div class="col-md-4">
-                                            <label for="department" class="form-label fw-bold">Owning
-                                                Department</label>
-                                            <select class="form-select" id="department" required>
-                                                <!-- Departments will be populated dynamically -->
-                                            </select>
+                                </div>
+
+
+                                <!-- Inventory Items Card -->
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center"
+                                            style="height: 56px;">
+                                            <h5 class="fw-bold mb-0">Inventory Items</h5>
+                                            <button type="button" class="btn btn-sm btn-secondary" id="addItemBtn">
+                                                <i class="bi bi-plus me-1"></i>Add Item
+                                            </button>
                                         </div>
-                                        <div class="col-md-4">
-                                            <label for="availabilityStatus" class="form-label fw-bold">Availability
-                                                Status</label>
-                                            <select class="form-select" id="availabilityStatus" required>
-                                                <!-- Statuses will be populated dynamically -->
-                                            </select>
+                                        <div class="card-body">
+                                            <div id="itemsContainer">
+                                                <p class="text-muted">No items added yet. Click "Add Item" to track
+                                                    individual equipment pieces.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+
+                            <!-- Equipment Details Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="fw-bold mb-0">Equipment Details</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="details-section">
+                                                <!-- Basic Information Section -->
+                                                <div class="row mb-4">
+
+
+                                                    <div class="col-md-6">
+                                                        <label for="equipmentName"
+                                                            class="form-label fw-bold d-flex align-items-center">
+                                                            Equipment Name
+
+                                                            <!-- edit icon (default) -->
+                                                            <i class="bi bi-pencil text-secondary ms-2"
+                                                                id="editEquipmentName" style="cursor: pointer;"></i>
+
+                                                            <!-- save + cancel buttons (hidden at first) -->
+                                                            <div id="editActions" class="ms-2 d-none">
+                                                                <button type="button" class="btn btn-sm btn-success me-1"
+                                                                    id="saveEquipmentName">
+                                                                    <i class="bi bi-check"></i>
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-danger"
+                                                                    id="cancelEquipmentName">
+                                                                    <i class="bi bi-x"></i>
+                                                                </button>
+                                                            </div>
+                                                        </label>
+
+                                                        <input type="text" class="form-control text-secondary"
+                                                            id="equipmentName" value="HD Projector" readonly>
+                                                    </div>
+
+
+                                                    <div class="col-md-6">
+                                                        <label for="brand"
+                                                            class="form-label fw-bold d-flex align-items-center">
+                                                            Brand
+                                                            <i class="bi bi-pencil text-secondary ms-2 edit-icon"
+                                                                data-field="brand" style="cursor: pointer;"></i>
+                                                            <div class="edit-actions ms-2 d-none" data-field="brand">
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-success me-1 save-btn">
+                                                                    <i class="bi bi-check"></i>
+                                                                </button>
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-danger cancel-btn">
+                                                                    <i class="bi bi-x"></i>
+                                                                </button>
+                                                            </div>
+                                                        </label>
+                                                        <input type="text" class="form-control text-secondary" id="brand"
+                                                            value="" readonly>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="row mb-4">
+                                                    <div class="col-12 position-relative">
+                                                        <label for="description"
+                                                            class="form-label fw-bold d-flex align-items-center">
+                                                            Description
+                                                            <i class="bi bi-pencil text-secondary ms-2 edit-icon"
+                                                                data-field="description" style="cursor: pointer;"></i>
+                                                            <div class="edit-actions ms-2 d-none" data-field="description">
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-success me-1 save-btn">
+                                                                    <i class="bi bi-check"></i>
+                                                                </button>
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-danger cancel-btn">
+                                                                    <i class="bi bi-x"></i>
+                                                                </button>
+                                                            </div>
+                                                        </label>
+                                                        <textarea class="form-control text-secondary" id="description"
+                                                            rows="3" readonly></textarea>
+                                                        <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1"
+                                                            id="descriptionWordCount">0/255 characters</small>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row mb-4">
+                                                    <div class="col-md-6">
+                                                        <label for="storageLocation"
+                                                            class="form-label fw-bold d-flex align-items-center">
+                                                            Storage Location
+                                                            <i class="bi bi-pencil text-secondary ms-2 edit-icon"
+                                                                data-field="storageLocation" style="cursor: pointer;"></i>
+                                                            <div class="edit-actions ms-2 d-none"
+                                                                data-field="storageLocation">
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-success me-1 save-btn">
+                                                                    <i class="bi bi-check"></i>
+                                                                </button>
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-danger cancel-btn">
+                                                                    <i class="bi bi-x"></i>
+                                                                </button>
+                                                            </div>
+                                                        </label>
+                                                        <input type="text" class="form-control text-secondary"
+                                                            id="storageLocation" value="" readonly>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label for="category" class="form-label fw-bold">Category</label>
+                                                        <select class="form-select" id="category" required>
+                                                            <option value="">Select Category</option>
+                                                            <!-- Categories will be populated dynamically -->
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Quantity & Pricing Section -->
+                                                <div class="row mb-4">
+                                                    <div class="col-md-3">
+                                                        <label for="rentalFee" class="form-label fw-bold">Rental Fee
+                                                            (₱)</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">₱</span>
+                                                            <input type="number" class="form-control" id="rentalFee" min="0"
+                                                                step="0.01" required placeholder="0.00">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label for="rateType" class="form-label fw-bold">Rate Type</label>
+                                                        <select class="form-select" id="rateType" required>
+                                                            <!-- Rate types will be populated dynamically -->
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label for="minRentalHours" class="form-label fw-bold">Min.
+                                                            Rental
+                                                            Duration</label>
+                                                        <input type="number" class="form-control" id="minRentalHours"
+                                                            min="1" value="1" required>
+                                                    </div>
+                                                </div>
+                                                <!-- Department & Availability Section -->
+                                                <div class="row mb-4">
+                                                    <div class="col-md-4">
+                                                        <label for="department" class="form-label fw-bold">Owning
+                                                            Department</label>
+                                                        <select class="form-select" id="department" required>
+                                                            <!-- Departments will be populated dynamically -->
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label for="availabilityStatus"
+                                                            class="form-label fw-bold">Availability
+                                                            Status</label>
+                                                        <select class="form-select" id="availabilityStatus" required>
+                                                            <!-- Statuses will be populated dynamically -->
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Update Equipment</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <!-- Form Actions -->
-                <div class="d-flex justify-content-
-                                     gap-2 mt-4">
-                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Equipment</button>
-                </div>
-            </form>
         </div>
-
         <!-- Event Modal -->
         <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
@@ -493,28 +515,21 @@
                             <div class="mb-3">
                                 <label for="barcode" class="form-label fw-bold">Barcode Number</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" id="barcode" name="barcode"
-                                        placeholder="EQ-{{ time() }}" value="{{ old('barcode') }}">
+                                    <input type="text" class="form-control" id="barcode" placeholder="Enter barcode">
                                     <button class="btn btn-outline-secondary" type="button" id="generateBarcodeBtn">
                                         <i class="bi bi-upc-scan"></i> Generate
                                     </button>
                                 </div>
-
-                                <div class="barcode-container d-none mt-3" id="barcodeContainer">
-                                    <div class="text-center">
-                                        <img id="barcodeImage" alt="Barcode" class="img-fluid">
-                                    </div>
-                                    <div class="mt-2 text-center">
+                                <div class="barcode-container d-none" id="barcodeContainer">
+                                    <img id="barcodePreview" class="barcode-preview" src="" alt="Barcode">
+                                    <div class="mt-2">
                                         <button type="button" class="btn btn-sm btn-outline-primary"
                                             id="downloadBarcodeBtn">
-                                            <i class="bi bi-download"></i> Download Barcode
+                                            <i class="bi bi-download"></i> Download
                                         </button>
                                     </div>
                                 </div>
                             </div>
-
-
-
 
                             <!-- Notes -->
                             <div class="mb-3 position-relative">
@@ -540,13 +555,11 @@
         <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-
+                const barcodeInput = document.getElementById('barcode');
                 const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
                 const barcodeContainer = document.getElementById('barcodeContainer');
-                const barcodeImage = document.getElementById('barcodeImage');
+                const barcodePreview = document.getElementById('barcodePreview'); // This is the canvas
                 const downloadBarcodeBtn = document.getElementById('downloadBarcodeBtn');
-
-
                 // 1. Global variables first
                 window.equipmentItems = [];
                 window.currentEditingItemId = null;
@@ -629,33 +642,6 @@
                         generateBarcodeBtn.style.display = 'none';
                     }
 
-                    // Show existing barcode preview if available
-                    if (item.barcode_number) {
-                        const barcodeContainer = document.getElementById('barcodeContainer');
-                        const canvas = document.getElementById('barcodePreview');
-
-                        try {
-                            JsBarcode(canvas, item.barcode_number, {
-                                format: "CODE128",
-                                lineColor: "#000",
-                                width: 2,
-                                height: 40,
-                                displayValue: true,
-                                fontSize: 14,
-                                margin: 10
-                            });
-
-                            const barcodeNumberDisplay = document.getElementById('barcodeNumberDisplay');
-                            if (barcodeNumberDisplay) {
-                                barcodeNumberDisplay.textContent = item.barcode_number;
-                            }
-
-                            barcodeContainer.classList.remove('d-none');
-                        } catch (error) {
-                            console.error('Barcode generation error:', error);
-                        }
-                    }
-
                     // Store the current editing item ID
                     window.currentEditingItemId = itemId;
 
@@ -692,18 +678,18 @@
                     toast.style.borderRadius = '0.3rem';
 
                     toast.innerHTML = `
-                                                <div class="d-flex align-items-center px-3 py-1"> 
-                                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                                </div>
-                                                <div class="loading-bar" style="
-                                                    height: 3px;
-                                                    background: rgba(255,255,255,0.7);
-                                                    width: 100%;
-                                                    transition: width ${duration}ms linear;
-                                                "></div>
-                                            `;
+                                            <div class="d-flex align-items-center px-3 py-1"> 
+                                                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                                <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                            </div>
+                                            <div class="loading-bar" style="
+                                                height: 3px;
+                                                background: rgba(255,255,255,0.7);
+                                                width: 100%;
+                                                transition: width ${duration}ms linear;
+                                            "></div>
+                                        `;
 
                     document.body.appendChild(toast);
 
@@ -1170,6 +1156,7 @@
                         itemCloudinaryPublicId = null;
                         if (itemPhotoDropzone) itemPhotoDropzone.style.display = 'block';
                         if (removePhotoBtn) removePhotoBtn.classList.add('d-none');
+
                         // SHOW the generate barcode button in add mode
                         const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
                         if (generateBarcodeBtn) {
@@ -1189,8 +1176,8 @@
                                     if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
                                     if (itemPhotoPreview) {
                                         itemPhotoPreview.innerHTML = `
-                                                <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
-                                            `;
+                                            <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
+                                        `;
                                     }
 
                                     // Store the file for later processing
@@ -1290,135 +1277,130 @@
                         });
                     }
 
+// Improved barcode generation for optimal Quagga scanning
+if (generateBarcodeBtn && barcodeInput) {
+    generateBarcodeBtn.addEventListener('click', async function () {
+        const generateBarcodeBtn = this;
+        const originalText = generateBarcodeBtn.innerHTML;
 
+        try {
+            generateBarcodeBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating...';
+            generateBarcodeBtn.disabled = true;
 
+            // Generate optimal barcode format for scanning
+            const randomPart = Math.random().toString(36).substring(2, 9).toUpperCase(); // 7 chars
+            const barcodeValue = `EQ-${randomPart}`;
 
+            barcodeInput.value = barcodeValue;
 
-
-
-                    // Check if a barcode already exists (from backend data)
-                    const existingBarcode = barcodeInput && barcodeInput.value.trim();
-
-                    // If barcode already exists, show it and disable editing/regeneration
-                    if (existingBarcode) {
-                        barcodeInput.readOnly = true; // prevent editing
-                        if (generateBarcodeBtn) generateBarcodeBtn.disabled = true; // prevent regenerating
-
-                        try {
-                            JsBarcode(barcodePreview, existingBarcode, {
-                                format: "CODE128",
-                                lineColor: "#000",
-                                width: 3,
-                                height: 80,
-                                margin: 12,
-                                displayValue: true
-                            });
-                            barcodeContainer.classList.remove('d-none');
-                        } catch (error) {
-                            console.error('Error displaying existing barcode:', error);
-                        }
+            // Generate barcode with optimal settings for scanning
+            JsBarcode("#barcodePreview", barcodeValue, {
+                format: "CODE128",
+                width: 3, // Optimal width for scanning
+                height: 120, // Good height for reliability
+                displayValue: true,
+                fontSize: 16,
+                margin: 15, // Good margin
+                background: "#ffffff",
+                lineColor: "#000000", // Pure black for best contrast
+                valid: function(valid) {
+                    if (valid) {
+                        console.log('Barcode generated successfully:', barcodeValue);
+                    } else {
+                        console.warn('Barcode validation failed');
                     }
+                }
+            });
 
-                    // Handle barcode generation (only if no existing barcode)
-                    if (generateBarcodeBtn && barcodeInput && !existingBarcode) {
-                        generateBarcodeBtn.addEventListener('click', function () {
-                            let barcodeValue = barcodeInput.value.trim();
+            const barcodeNumberDisplay = document.getElementById('barcodeNumberDisplay');
+            if (barcodeNumberDisplay) {
+                barcodeNumberDisplay.textContent = barcodeValue;
+                barcodeNumberDisplay.style.fontFamily = 'monospace'; // Better readability
+            }
 
-                            // Generate default barcode if empty
-                            if (!barcodeValue) {
-                                barcodeValue = `EQ-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                                barcodeInput.value = barcodeValue;
-                            }
+            barcodeContainer.classList.remove('d-none');
+            barcodeInput.setAttribute('readonly', true);
+            
+            showToast('Barcode generated! Format: ' + barcodeValue, 'success');
+            
+            // Test barcode scannability
+            setTimeout(() => {
+                testBarcodeScannability(barcodeValue);
+            }, 1000);
 
-                            // Validate barcode format (alphanumeric, hyphens, underscores)
-                            if (!/^[A-Za-z0-9\-_]+$/.test(barcodeValue)) {
-                                showToast('Barcode can only contain letters, numbers, hyphens, and underscores', 'error');
-                                return;
-                            }
+        } catch (error) {
+            console.error('Barcode generation error:', error);
+            showToast('Failed to generate barcode', 'error');
+        } finally {
+            generateBarcodeBtn.innerHTML = originalText;
+            generateBarcodeBtn.disabled = false;
+        }
+    });
+}
 
-                            // Ensure barcode is not too long for scanning
-                            if (barcodeValue.length > 50) {
-                                showToast('Barcode is too long for reliable scanning', 'error');
-                                return;
-                            }
+// Test barcode format for scannability
+function testBarcodeScannability(barcodeValue) {
+    const tests = [
+        { test: () => barcodeValue.length >= 8, message: 'Barcode should be at least 8 characters' },
+        { test: () => barcodeValue.startsWith('EQ-'), message: 'Barcode should start with EQ-' },
+        { test: () => /^EQ-[A-Z0-9]+$/.test(barcodeValue), message: 'Barcode should contain only letters and numbers after EQ-' },
+        { test: () => barcodeValue.length <= 20, message: 'Barcode should not be too long' }
+    ];
 
-                            try {
-                                // Generate barcode using JsBarcode
-                                JsBarcode(barcodeImage, barcodeValue, {
-                                    format: "CODE128",
-                                    width: 2,
-                                    height: 100,
-                                    displayValue: true,
-                                    fontSize: 16,
-                                    margin: 10,
-                                    background: "#ffffff",
-                                    lineColor: "#000000"
-                                });
+    const failedTests = tests.filter(test => !test.test());
+    
+    if (failedTests.length > 0) {
+        console.warn('Barcode scannability issues:', failedTests.map(t => t.message));
+        return false;
+    }
+    
+    console.log('Barcode format is scannable:', barcodeValue);
+    return true;
+}
 
-                                // Show barcode container
-                                barcodeContainer.classList.remove('d-none');
+// Handle barcode download with better quality
+if (downloadBarcodeBtn) {
+    downloadBarcodeBtn.addEventListener('click', function () {
+        const barcodeValue = barcodeInput.value.trim();
+        if (!barcodeValue) {
+            showToast('Please generate a barcode first', 'error');
+            return;
+        }
 
-                                // Make barcode field readonly after generation
-                                barcodeInput.setAttribute('readonly', true);
+        try {
+            // Get the canvas element
+            const canvas = document.getElementById('barcodePreview');
+            if (!canvas) {
+                showToast('Barcode preview not found', 'error');
+                return;
+            }
 
-                                showToast('Barcode generated successfully!', 'success');
+            // Create a higher quality canvas for download
+            const downloadCanvas = document.createElement('canvas');
+            const downloadCtx = downloadCanvas.getContext('2d');
+            
+            // Double the resolution for better print quality
+            downloadCanvas.width = canvas.width * 2;
+            downloadCanvas.height = canvas.height * 2;
+            downloadCtx.scale(2, 2);
+            
+            // Draw the original barcode
+            downloadCtx.drawImage(canvas, 0, 0);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `barcode-${barcodeValue}.png`;
+            link.href = downloadCanvas.toDataURL('image/png');
+            link.click();
 
-                            } catch (error) {
-                                console.error('Barcode generation error:', error);
-                                showToast('Failed to generate barcode', 'error');
-                            }
-                        });
-                    }
+            showToast('Barcode downloaded! Save as PNG for best scanning results.', 'success');
 
-                    // Handle barcode download - FIXED VERSION
-                    if (downloadBarcodeBtn) {
-                        // Download barcode as PNG
-                        downloadBarcodeBtn.addEventListener('click', function () {
-                            const barcodeValue = barcodeInput.value.trim();
-                            if (!barcodeValue) {
-                                showToast('Please generate a barcode first', 'error');
-                                return;
-                            }
-
-                            try {
-                                // Convert SVG to canvas for better PNG quality
-                                const svg = barcodeImage.parentElement.querySelector('svg');
-                                const canvas = document.createElement('canvas');
-                                const ctx = canvas.getContext('2d');
-
-                                // Set canvas dimensions
-                                canvas.width = 300;
-                                canvas.height = 150;
-
-                                // Create image from SVG
-                                const svgData = new XMLSerializer().serializeToString(svg);
-                                const img = new Image();
-
-                                img.onload = function () {
-                                    // Draw on canvas
-                                    ctx.fillStyle = '#ffffff';
-                                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                                    // Create download link
-                                    const link = document.createElement('a');
-                                    link.download = `barcode-${barcodeValue}.png`;
-                                    link.href = canvas.toDataURL('image/png');
-                                    link.click();
-
-                                    showToast('Barcode downloaded successfully!', 'success');
-                                };
-
-                                img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-
-                            } catch (error) {
-                                console.error('Barcode download error:', error);
-                                showToast('Failed to download barcode', 'error');
-                            }
-                        });
-                    }
-
-
+        } catch (error) {
+            console.error('Barcode download error:', error);
+            showToast('Failed to download barcode', 'error');
+        }
+    });
+}
 
                     // Save item functionality
                     if (saveItemBtn) {
@@ -1569,28 +1551,28 @@
                     };
 
                     itemElement.innerHTML = `
-                                                <div class="card-body">
-                                                    <div class="photo-container">
-                                                        <img src="${updatedItem.image_url}" class="img-thumbnail">
-                                                    </div>
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="card-title">${updatedItem.item_name}</h6>
-                                                        <div class="d-flex flex-wrap gap-3">
-                                                            <span class="badge ${conditionColors[updatedItem.condition.condition_name] || 'bg-secondary'}">${updatedItem.condition.condition_name}</span>
-                                                        </div>
-                                                        ${updatedItem.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${updatedItem.barcode_number}</div>` : ''}
-                                                        ${updatedItem.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${updatedItem.item_notes.substring(0, 50)}${updatedItem.item_notes.length > 50 ? '...' : ''}</p>` : ''}
-                                                    </div>
-                                                    <div class="d-flex align-self-start">
-                                                        <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal(${updatedItem.item_id}, event)">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem(${updatedItem.item_id}, '${updatedItem.cloudinary_public_id}', event)">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    </div>
+                                            <div class="card-body">
+                                                <div class="photo-container">
+                                                    <img src="${updatedItem.image_url}" class="img-thumbnail">
                                                 </div>
-                                            `;
+                                                <div class="flex-grow-1">
+                                                    <h6 class="card-title">${updatedItem.item_name}</h6>
+                                                    <div class="d-flex flex-wrap gap-3">
+                                                        <span class="badge ${conditionColors[updatedItem.condition.condition_name] || 'bg-secondary'}">${updatedItem.condition.condition_name}</span>
+                                                    </div>
+                                                    ${updatedItem.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${updatedItem.barcode_number}</div>` : ''}
+                                                    ${updatedItem.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${updatedItem.item_notes.substring(0, 50)}${updatedItem.item_notes.length > 50 ? '...' : ''}</p>` : ''}
+                                                </div>
+                                                <div class="d-flex align-self-start">
+                                                    <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal(${updatedItem.item_id}, event)">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem(${updatedItem.item_id}, '${updatedItem.cloudinary_public_id}', event)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
                 }
 
                 function addItemToUI(item) {
@@ -1606,28 +1588,28 @@
                     itemCard.className = 'card equipment-item';
                     itemCard.dataset.itemId = item.item_id;
                     itemCard.innerHTML = `
-                                                <div class="card-body">
-                                                    <div class="photo-container">
-                                                        <img src="${item.image_url}" class="img-thumbnail">
-                                                    </div>
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="card-title">${item.item_name}</h6>
-                                                        <div class="d-flex flex-wrap gap-3">
-                                                            <span class="badge ${conditionColors[item.condition.condition_name] || 'bg-secondary'}">${item.condition.condition_name}</span>
-                                                        </div>
-                                                        ${item.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${item.barcode_number}</div>` : ''}
-                                                        ${item.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${item.item_notes.substring(0, 50)}${item.item_notes.length > 50 ? '...' : ''}</p>` : ''}
-                                                    </div>
-                                                    <div class="d-flex align-self-start">
-                                                        <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal(${item.item_id}, event)">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem(${item.item_id}, '${item.cloudinary_public_id}', event)">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    </div>
+                                            <div class="card-body">
+                                                <div class="photo-container">
+                                                    <img src="${item.image_url}" class="img-thumbnail">
                                                 </div>
-                                            `;
+                                                <div class="flex-grow-1">
+                                                    <h6 class="card-title">${item.item_name}</h6>
+                                                    <div class="d-flex flex-wrap gap-3">
+                                                        <span class="badge ${conditionColors[item.condition.condition_name] || 'bg-secondary'}">${item.condition.condition_name}</span>
+                                                    </div>
+                                                    ${item.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${item.barcode_number}</div>` : ''}
+                                                    ${item.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${item.item_notes.substring(0, 50)}${item.item_notes.length > 50 ? '...' : ''}</p>` : ''}
+                                                </div>
+                                                <div class="d-flex align-self-start">
+                                                    <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal(${item.item_id}, event)">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem(${item.item_id}, '${item.cloudinary_public_id}', event)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
 
                     if (itemsContainer) {
                         if (itemsContainer.querySelector('p.text-muted')) {
@@ -1855,9 +1837,9 @@
                         const rateTypeDropdown = document.getElementById('rateType');
                         if (rateTypeDropdown) {
                             rateTypeDropdown.innerHTML = `
-                                                        <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
-                                                        <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
-                                                    `;
+                                                    <option value="Per Hour" ${equipment.rate_type === 'Per Hour' ? 'selected' : ''}>Per Hour</option>
+                                                    <option value="Per Event" ${equipment.rate_type === 'Per Event' ? 'selected' : ''}>Per Event</option>
+                                                `;
                         }
 
                         // Fetch conditions for inventory items
