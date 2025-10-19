@@ -5,32 +5,6 @@
 @section('content')
 
     <style>
-        /* ---------- Page styles ---------- */
-        body,
-        html {
-            background: linear-gradient(135deg, #012952ff, #d2d3bfff);
-            color: #fff;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        /* Back button */
-        #back-btn {
-            display: inline-block;
-            margin: 3rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            background: #fff;
-            color: #012952;
-            font-weight: bold;
-            text-decoration: none;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-            transition: 0.15s ease;
-        }
-
-        #back-btn:hover {
-            background: #e9ecef;
-            color: #012952;
-        }
 
         /* Scanner layout */
         #scannerContainer {
@@ -44,13 +18,10 @@
         }
 
         .scanner-box {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
             padding: 1.5rem;
             width: 100%;
             max-width: 700px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         #reader {
@@ -62,20 +33,6 @@
             border-radius: 12px;
             overflow: hidden;
             background: #000;
-        }
-
-        /* Upload Button */
-        #uploadInput {
-            margin-top: 0.75rem;
-            background: #fff;
-            color: #012952;
-            border: none;
-            border-radius: 8px;
-            padding: 0.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            max-width: 420px;
         }
 
         /* small control buttons */
@@ -236,13 +193,12 @@
         <div id="scannerContainer">
             <!-- Scanner Section -->
             <div class="scanner-box">
-                <h2>Start Scanning</h2>
-                <p>Use camera or upload a barcode Image / PDF</p>
+                <h2 class="fw-bold">Start Scanning</h2>
+                <p>Use camera to scan an equipment's barcode</p>
 
                 <div id="reader"></div>
 
                 <div class="btn-controls">
-                    <input type="file" id="uploadInput" accept="image/*,application/pdf">
                     <button id="stop-scan" class="button-small" type="button">Stop Scan</button>
                     <button id="resume-scan" class="button-small" type="button" style="display:none;">Resume Scan</button>
                 </div>

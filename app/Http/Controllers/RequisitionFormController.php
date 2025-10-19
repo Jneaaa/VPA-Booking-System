@@ -793,4 +793,95 @@ protected function sendConfirmationEmail(RequisitionForm $requisitionForm)
         return response()->json(['success' => true]);
     }
 
+public function getArchivedRequisitions()
+{
+    try {
+        // Get status IDs to exclude
+        $excludedStatuses = ['Pending Approval', 'Awaiting Payment', 'Scheduled', 'Ongoing', 'Late'];
+        $excludedStatusIds = FormStatus::whereIn('status_name', $excludedStatuses)
+            ->pluck('status_id')
+            ->toArray();
+
+        \Log::info('Fetching archived requisitions', [
+            'excluded_statuses' => $excludedStatuses,
+            'excluded_status_ids' => $excludedStatusIds
+        ]);
+
+        // Get requisitions excluding the specified statuses
+        $archivedRequisitions = RequisitionForm::with([
+                'status',
+                'purpose',
+                'requestedFacilities.facility',
+                'requestedEquipment.equipment'
+            ])
+            ->whereNotIn('status_id', $excludedStatusIds)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($requisition) {
+                try {
+                    // Create datetime strings without seconds first
+                    $startDateTimeStr = $requisition->start_date . ' ' . $requisition->start_time;
+                    $endDateTimeStr = $requisition->end_date . ' ' . $requisition->end_time;
+                    // Parse the datetime strings - Carbon will handle the parsing automatically
+                    $startDateTime = Carbon::parse($startDateTimeStr);
+                    $endDateTime = Carbon::parse($endDateTimeStr);
+                    
+                    $startSchedule = $startDateTime->format('F j, Y \a\t g:i A');
+                    $endSchedule = $endDateTime->format('F j, Y \a\t g:i A');
+                } catch (\Exception $e) {
+                    \Log::error('Date formatting error for request ' . $requisition->request_id . ': ' . $e->getMessage());
+                    // Fallback to original format if parsing fails
+                    $startSchedule = $requisition->start_date . ' ' . $requisition->start_time;
+                    $endSchedule = $requisition->end_date . ' ' . $requisition->end_time;
+                }
+                
+                return [
+                    'request_id' => $requisition->request_id,
+                    'official_receipt_num' => $requisition->official_receipt_num,
+                    'requester_name' => $requisition->first_name . ' ' . $requisition->last_name,
+                    'email' => $requisition->email,
+                    'organization_name' => $requisition->organization_name,
+                    'purpose' => $requisition->purpose->purpose_name ?? 'N/A',
+                    'status' => $requisition->status->status_name,
+                    'status_color' => $requisition->status->color_code,
+                    'start_date' => $requisition->start_date,
+                    'end_date' => $requisition->end_date,
+                    'start_time' => $requisition->start_time,
+                    'end_time' => $requisition->end_time,
+                    'start_schedule' => $startSchedule, 
+                    'end_schedule' => $endSchedule,    
+                    'num_participants' => $requisition->num_participants,
+                    'facilities' => $requisition->requestedFacilities->map(function ($rf) {
+                        return $rf->facility->facility_name ?? 'Unknown Facility';
+                    })->toArray(),
+                    'equipment' => $requisition->requestedEquipment->map(function ($re) {
+                        $name = $re->equipment->equipment_name ?? 'Unknown Equipment';
+                        $quantity = $re->quantity > 1 ? " × {$re->quantity}" : '';
+                        return $name . $quantity;
+                    })->toArray(),
+                    'created_at' => $requisition->created_at,
+                    'updated_at' => $requisition->updated_at
+                ];
+            });
+
+        \Log::info('Archived requisitions loaded', [
+            'total_archived' => $archivedRequisitions->count(),
+            'excluded_status_count' => count($excludedStatusIds)
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $archivedRequisitions
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error fetching archived requisitions: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to load archived requisitions: ' . $e->getMessage(),
+            'data' => []
+        ], 500);
+    }
+}
+
 }

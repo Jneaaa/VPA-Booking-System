@@ -26,12 +26,6 @@ use App\Http\Controllers\FormStatusController;
 use App\Http\Controllers\Dropdowns\ConditionController;
 use App\Http\Controllers\Dropdowns\RequisitionPurposeController;
 
-
-// Add this temporary route
-Route::get('/debug-facility-images/{facilityId}', [FacilityController::class, 'debugCloudinaryImages']);
-// Change to POST route in routes/api.php
-Route::get('/test-delete', [FacilityController::class, 'testCloudinaryDelete']);
-Route::get('/test-cloudinary-connection', [FacilityController::class, 'testCloudinaryConnection']);
 // ---------------- Admin Routes ---------------- //
 
 Route::get('/admins', [AdminController::class, 'getAllAdmins']);
@@ -44,8 +38,6 @@ Route::delete('/admins/{admin}', [AdminController::class, 'deleteAdmin']);
 Route::get('/admins/{admin}', [AdminController::class, 'getAdminInfo']);
 Route::put('/admins/{admin}', [AdminController::class, 'update']);
 Route::post('/admin/update/{admin}', [AdminController::class, 'update']);
-
-
 
 // ---------------- Equipment Management ---------------- //
 
@@ -268,16 +260,12 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware
 
 Route::middleware('auth:sanctum')->group(function () {
 
-
     Route::get('/admin/notifications', [NotificationController::class, 'getNotifications']);
     Route::post('/admin/notifications/mark-read/{notificationId?}', [NotificationController::class, 'markAsRead']);
     Route::post('/admin/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
-    
-
     Route::post('/admin/requisition/{requestId}/mark-scheduled', [AdminApprovalController::class, 'markAsScheduled']);
-
-
     Route::get('/admin/requisition/{requestId}/approval-history', [AdminApprovalController::class, 'getApprovalHistory']);
+    Route::get('/admin/archives', [RequisitionFormController::class, 'getArchivedRequisitions']);
 
     // ---- Admin Approval Routes ---- //
     Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'pendingRequests']);
