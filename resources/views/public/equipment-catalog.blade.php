@@ -7,6 +7,14 @@
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <link rel="stylesheet" href="{{ asset('css/public/catalog.css') }}" />
   <style>
+        /* Fix modal z-index for event details modal */
+#eventDetailModal {
+  z-index: 9999 !important;
+}
+
+#eventDetailModal .modal-dialog {
+  z-index: 10000;
+}
         /* Event Modal Styles */
     .event-details p {
       margin-bottom: 1rem;
@@ -71,24 +79,22 @@
     }
 
     .btn-custom {
-      background-color: var(--cpu-secondary);
-      color: var(--cpu-text-dark);
+      background-color: #f5bc40ff;
+      color: #1d1300ff;
       border-color: transparent !important;
     }
 
     .btn-custom:hover {
-      background-color: #ffb71bff;
-      color: var(--cpu-text-dark);
+      background-color: #daa32cff;
+      color: #1d1300ff;
       border-color: transparent !important;
     }
 
     .btn-custom:active {
-      background-color: #e0a800 !important;
-      /* darker shade for click feedback */
-      color: var(--cpu-text-dark) !important;
+      background-color: #c08e22ff !important;
+      color: #1d1300ff !important;
       border-color: transparent !important;
       box-shadow: none !important;
-      /* removes Bootstrap's default blue outline */
     }
 
 /* Additional fix for the card container */
@@ -421,6 +427,23 @@
       </div>
     </div>
   </div>
+    <!-- Availability Modal -->
+<div class="modal fade" id="availabilityModal" tabindex="-1" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="availabilityModalLabel">Availability Schedule</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-3" style="min-height: 70vh;">
+        <div id="availabilityCalendar" style="height: 65vh;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -781,7 +804,7 @@ function renderEquipmentGrid(equipmentList) {
       </div>
       <div class="catalog-card-actions">
         ${getEquipmentButtonHtml(item)}
-        <button class="btn btn-outline-secondary">Check Availability</button>
+        <button class="btn btn-light btn-custom">Check Availability</button>
       </div>
     </div>
     `;
@@ -1088,8 +1111,242 @@ function renderEquipmentList(equipmentList) {
       });
     }
 
+    
+// Initialize availability calendar for specific item
+function initializeAvailabilityCalendar(itemId, itemType, itemName) {
+  const calendarEl = document.getElementById('availabilityCalendar');
+  if (!calendarEl) return;
+
+  // Clear any existing content first
+  calendarEl.innerHTML = '';
+
+  // Create and show loading overlay
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.className = 'calendar-loading-overlay';
+  loadingOverlay.innerHTML = `
+    <div class="calendar-loading-content">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading availability data...</p>
+    </div>
+  `;
+  
+  // Add CSS for loading overlay
+  if (!document.querySelector('#calendarLoadingStyles')) {
+    const loadingStyles = document.createElement('style');
+    loadingStyles.id = 'calendarLoadingStyles';
+    loadingStyles.textContent = `
+      .calendar-loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        border-radius: 0.375rem;
+      }
+      .calendar-loading-content {
+        text-align: center;
+      }
+      .calendar-hidden {
+        visibility: hidden;
+        opacity: 0;
+      }
+      .calendar-visible {
+        visibility: visible;
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
+      }
+    `;
+    document.head.appendChild(loadingStyles);
+  }
+
+  // Add loading overlay to calendar container
+  calendarEl.style.position = 'relative';
+  calendarEl.appendChild(loadingOverlay);
+
+  // Hide the calendar initially
+  calendarEl.classList.add('calendar-hidden');
+
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    titleFormat: {
+      year: 'numeric',
+      month: 'short'
+    },
+    height: 'auto',
+    handleWindowResize: true,
+    windowResizeDelay: 100,
+    aspectRatio: 1.5,
+    expandRows: false,
+    events: function (fetchInfo, successCallback, failureCallback) {
+      // Ensure loading overlay is visible and calendar is hidden
+      loadingOverlay.style.display = 'flex';
+      calendarEl.classList.add('calendar-hidden');
+      
+      // Fetch events filtered by specific item
+      fetch(`/api/requisition-forms/calendar-events?${itemType}_id=${itemId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            successCallback(data.data);
+          } else {
+            failureCallback(data.message);
+          }
+        })
+        .catch(error => {
+          failureCallback('Failed to load availability data');
+          console.error('Availability calendar error:', error);
+        })
+        .finally(() => {
+          // Hide loading overlay and show calendar when everything is ready
+          setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+            calendarEl.classList.remove('calendar-hidden');
+            calendarEl.classList.add('calendar-visible');
+            calendar.updateSize();
+          }, 500); // Increased delay to ensure everything is rendered
+        });
+    },
+    loading: function(isLoading) {
+      // FullCalendar's built-in loading callback
+      if (isLoading) {
+        loadingOverlay.style.display = 'flex';
+        calendarEl.classList.add('calendar-hidden');
+      } else {
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+          calendarEl.classList.remove('calendar-hidden');
+          calendarEl.classList.add('calendar-visible');
+        }, 500);
+      }
+    },
+    eventClick: function (info) {
+      showEventModal(info.event);
+    },
+    eventDidMount: function (info) {
+      info.el.style.backgroundColor = info.event.backgroundColor;
+      info.el.style.borderColor = info.event.borderColor;
+      info.el.style.color = '#fff';
+      info.el.style.fontWeight = 'bold';
+      info.el.style.borderRadius = '4px';
+      info.el.style.padding = '2px 4px';
+      info.el.style.fontSize = '12px';
+    },
+    datesSet: function (info) {
+      // Ensure calendar stays hidden during date changes until fully loaded
+      if (loadingOverlay.style.display !== 'none') {
+        calendarEl.classList.add('calendar-hidden');
+      }
+      setTimeout(() => {
+        calendar.updateSize();
+      }, 50);
+    },
+    eventTimeFormat: {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    },
+    slotMinTime: '06:00:00',
+    slotMaxTime: '22:00:00',
+    allDaySlot: false,
+    nowIndicator: true,
+    navLinks: true,
+    dayHeaderFormat: {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric'
+    },
+    slotLabelFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    },
+    views: {
+      dayGridMonth: {
+        dayHeaderFormat: { weekday: 'short' },
+        fixedWeekCount: false
+      },
+      timeGridWeek: {
+        dayHeaderFormat: {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric'
+        },
+        slotMinTime: '00:00:00',
+        slotMaxTime: '24:00:00'
+      },
+      timeGridDay: {
+        dayHeaderFormat: {
+          weekday: 'long',
+          month: 'short',
+          day: 'numeric'
+        },
+        slotMinTime: '06:00:00',
+        slotMaxTime: '22:00:00'
+      }
+    },
+    eventDisplay: 'block',
+    dayMaxEvents: 3,
+    moreLinkClick: 'popover',
+    slotDuration: '01:00:00',
+    slotLabelInterval: '01:00:00'
+  });
+
+  calendar.render();
+  
+  // Update modal title with item name
+  document.getElementById('availabilityModalLabel').textContent = `Availability - ${itemName}`;
+
+  return calendar;
+}
+
+function setupAvailabilityButtons() {
+  catalogItemsContainer.addEventListener("click", (e) => {
+    if ((e.target.classList.contains("btn-custom") || e.target.classList.contains("btn-outline-secondary")) && 
+        e.target.textContent === "Check Availability") {
+      const card = e.target.closest(".catalog-card");
+      const itemId = card.querySelector(".add-remove-btn")?.dataset.id;
+      const itemType = card.querySelector(".add-remove-btn")?.dataset.type;
+      const itemName = card.querySelector("h5")?.textContent.trim();
+      
+      if (itemId && itemType) {
+        showAvailabilityCalendar(itemId, itemType, itemName);
+      }
+    }
+  });
+}
+
+// Function to show availability modal
+function showAvailabilityCalendar(itemId, itemType, itemName) {
+  const modal = new bootstrap.Modal(document.getElementById('availabilityModal'));
+  let availabilityCalendar = null;
+  
+  document.getElementById('availabilityModal').addEventListener('shown.bs.modal', function () {
+    if (!availabilityCalendar) {
+      availabilityCalendar = initializeAvailabilityCalendar(itemId, itemType, itemName);
+    } else {
+      availabilityCalendar.refetchEvents();
+      availabilityCalendar.updateSize();
+    }
+  });
+  
+  modal.show();
+}
+
+
     // Main Initialization
-    // In your init() function:
+
     async function init() {
       try {
         const [equipmentData, categoriesData, selectedItemsResponse] = await Promise.all([
@@ -1108,6 +1365,7 @@ function renderEquipmentList(equipmentList) {
         filterAndRenderItems();
         setupEventListeners();
         updateCartBadge();
+        setupAvailabilityButtons();
 
         catalogItemsContainer.classList.remove("d-none");
       } catch (error) {

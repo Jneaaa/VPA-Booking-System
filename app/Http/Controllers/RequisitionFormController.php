@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\Log;
 class RequisitionFormController extends Controller
 {
     // Get calendar events for public view (Scheduled, Ongoing, Late events only)
-public function getCalendarEvents()
+public function getCalendarEvents(Request $request)
 {
     try {
         // Get status IDs for Scheduled, Ongoing, and Late
@@ -50,14 +50,38 @@ public function getCalendarEvents()
 
         \Log::info('Fetching calendar events with status IDs:', ['status_ids' => $statusIds]);
 
-        $events = RequisitionForm::with([
+        // Get filter parameters
+        $facilityId = $request->get('facility_id');
+        $equipmentId = $request->get('equipment_id');
+
+        \Log::info('Filter parameters:', [
+            'facility_id' => $facilityId,
+            'equipment_id' => $equipmentId
+        ]);
+
+        $query = RequisitionForm::with([
                 'requestedFacilities.facility',
                 'requestedEquipment.equipment',
                 'purpose',
                 'status'
             ])
-            ->whereIn('status_id', $statusIds)
-            ->get()
+            ->whereIn('status_id', $statusIds);
+
+        // Filter by facility_id if provided
+        if ($facilityId) {
+            $query->whereHas('requestedFacilities', function($q) use ($facilityId) {
+                $q->where('facility_id', $facilityId);
+            });
+        }
+
+        // Filter by equipment_id if provided
+        if ($equipmentId) {
+            $query->whereHas('requestedEquipment', function($q) use ($equipmentId) {
+                $q->where('equipment_id', $equipmentId);
+            });
+        }
+
+        $events = $query->get()
             ->map(function ($requisition) {
                 // Event title
                 $title = $requisition->calendar_title ?: "Booking #{$requisition->request_id}";
@@ -97,6 +121,8 @@ public function getCalendarEvents()
         \Log::info('Calendar events loaded', [
             'total_events' => $events->count(),
             'status_ids' => $statusIds,
+            'facility_id_filter' => $facilityId,
+            'equipment_id_filter' => $equipmentId,
             'events_by_status' => $events->groupBy('extendedProps.status')->map->count()
         ]);
 
