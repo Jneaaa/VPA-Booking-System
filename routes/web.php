@@ -25,13 +25,13 @@ Route::middleware('web')->group(function () {
     Route::view('/about-services', 'public.about-services');
     Route::view('/about-facilities', 'public.about-facilities');
     Route::view('/user-feedback', 'public.user-feedback');
-    Route::view('/official-receipt', 'public.official-receipt');
+    Route::view('/official-receipt', 'public.official-receipt'); // for testing //
     Route::view('/index', 'public.index');
     Route::view('/your-bookings', 'public.your-bookings');
     Route::view('/user-payment', 'public.user-payment');
     Route::view('/policies', 'public.policies');
     Route::get('/official-receipt/{requestId}', [App\Http\Controllers\AdminApprovalController::class, 'generateOfficialReceipt'])
-    ->name('official-receipt');
+        ->name('official-receipt');
 
     // ----- Admin Views ----- //
     Route::get('/admin/profile/{adminId}', function ($adminId) {
@@ -44,7 +44,6 @@ Route::middleware('web')->group(function () {
     Route::view('/admin/admin-login', 'admin.admin-login');
     Route::view('/admin/admins', 'admin.admins');
     Route::view('/admin/calendar', 'admin.calendar');
-    Route::view('/admin/archives', 'admin.archives');
     Route::view('/admin/dashboard', 'admin.dashboard');
     Route::view('/admin/manage-equipment', 'admin.manage-equipment');
     Route::view('/admin/manage-facilities', 'admin.manage-facilities');
@@ -55,6 +54,9 @@ Route::middleware('web')->group(function () {
     Route::get('/admin/requisition/{requestId}', function ($requestId) {
         return view('admin.request-view', ['requestId' => $requestId]);
     });
+    Route::get('/admin/archives', function () {
+        return view('admin.archives');
+    })->name('admin.archives');
 
     // ----- Auth Routes ----- //
     Route::get('/login', function () {

@@ -4,6 +4,31 @@
 
 @section('content')
   <style>
+    .request-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: #dc3545;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .requisition-card {
+      position: relative;
+    }
+
+    .unread-card {
+      border-left: 4px solid #007bff !important;
+      background-color: #f8f9fa;
+    }
+
     .btn-secondary {
       background-color: #889096ff;
       color: white;
@@ -43,16 +68,18 @@
       min-height: 400px;
     }
 
-.requisition-card {
-  margin-bottom: 1rem;
-  height: auto;
-  background-color: white;
-  transition: background-color 0.3s ease; /* smooth fade */
-}
+    .requisition-card {
+      margin-bottom: 1rem;
+      height: auto;
+      background-color: white;
+      transition: background-color 0.3s ease;
+      /* smooth fade */
+    }
 
-.requisition-card:hover {
-  background-color: #f6f8faff; /* slightly darker */
-}
+    .requisition-card:hover {
+      background-color: #f6f8faff;
+      /* slightly darker */
+    }
 
 
     .compact-card {
@@ -151,16 +178,16 @@
       .cards-grid {
         grid-template-columns: 1fr;
       }
-      
+
       .filter-row {
         flex-direction: column;
       }
-      
+
       .search-container {
         width: 100%;
         margin-top: 0.5rem;
       }
-      
+
       .search-container input {
         width: 100% !important;
       }
@@ -184,7 +211,7 @@
       }
     }
 
-    .compact-info-column > div {
+    .compact-info-column>div {
       margin-bottom: 0.25rem;
     }
 
@@ -198,13 +225,13 @@
       justify-content: center;
       border-radius: 50%;
     }
-    
+
     .circle-btn i {
       font-size: 0.9rem;
       line-height: 1;
       margin: 0;
     }
-    
+
     .filter-row {
       display: flex;
       flex-wrap: wrap;
@@ -212,13 +239,13 @@
       gap: 0.5rem;
       width: 100%;
     }
-    
+
     .search-container {
       display: flex;
       gap: 0.5rem;
       margin-left: auto;
     }
-    
+
     .search-container input {
       width: 200px;
     }
@@ -257,7 +284,8 @@
 
             <!-- Right side: search -->
             <div class="search-container">
-              <input type="search" class="form-control form-control-sm" id="searchInput" placeholder="Search by request number...">
+              <input type="search" class="form-control form-control-sm" id="searchInput"
+                placeholder="Search by request number...">
               <button class="btn btn-primary btn-sm" id="searchButton">Search</button>
             </div>
           </div>
@@ -319,7 +347,9 @@
       const sortFilter = document.getElementById('sortFilter');
       const searchInput = document.getElementById('searchInput');
       const searchButton = document.getElementById('searchButton');
-      
+
+
+      let unreadRequests = new Set();
       let currentLayout = 'compact'; // Set compact as default
       let formsData = []; // Store forms data to avoid refetching
       let statusOptions = [];
@@ -336,17 +366,187 @@
           sort: sortFilter.value,
           search: searchInput.value.trim()
         };
-        
+
         // Save to localStorage for persistence
         localStorage.setItem('requisitionFilters', JSON.stringify(currentFilters));
         localStorage.setItem('requisitionLayout', currentLayout);
+      }
+
+      function updateRequisitionNavBadge() {
+        const navBadge = document.getElementById('requisitionNotificationBadge');
+        if (navBadge) {
+          if (unreadRequests.size > 0) {
+            navBadge.textContent = unreadRequests.size > 99 ? '99+' : unreadRequests.size;
+            navBadge.style.display = 'flex';
+          } else {
+            navBadge.style.display = 'none';
+          }
+        }
+      }
+
+
+      function markRequestAsRead(requestId) {
+        unreadRequests.delete(requestId.toString());
+        localStorage.setItem('unreadRequests', JSON.stringify([...unreadRequests]));
+        updateRequisitionNavBadge();
+        displayForms(formsData); // Re-render to remove badge
+      }
+
+      function displayForms(forms) {
+        requisitionContainer.innerHTML = '';
+
+        if (forms.length === 0) {
+          requisitionContainer.innerHTML = `
+              <div class="empty-state">
+                  <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                  <p class="mt-3 text-muted">No requisitions found matching your criteria.</p>
+              </div>
+          `;
+          return;
+        }
+
+        if (currentLayout === 'compact') {
+          requisitionContainer.classList.add('cards-grid');
+          requisitionContainer.classList.remove('overflow-auto');
+        } else {
+          requisitionContainer.classList.remove('cards-grid');
+          requisitionContainer.classList.add('overflow-auto');
+          requisitionContainer.style.maxHeight = 'calc(100vh - 300px)';
+        }
+
+        forms.forEach(form => {
+          const statusName = getStatusName(form.status_id);
+          const statusColor = getStatusColor(form.status_id);
+          const requestNumber = form.request_id.toString().padStart(4, '0');
+          const isUnread = unreadRequests.has(form.request_id.toString());
+
+          let cardHtml = '';
+
+          if (currentLayout === 'compact') {
+            cardHtml = `
+                  <div class="card requisition-card compact-card mb-1 ${isUnread ? 'unread-card' : ''}" 
+                       data-request-id="${form.request_id}" style="cursor: pointer;">
+                      ${isUnread ? '<span class="request-badge"></span>' : ''}
+                      <div class="card-body p-1">
+                          <div class="d-flex justify-content-between align-items-center mb-1">
+                              <h5 class="card-title mb-0 fw-bold">Request #${requestNumber}</h5>
+
+                              <!-- Circle action buttons -->
+                              <div class="d-flex gap-1">
+                                  <button class="btn btn-sm btn-secondary circle-btn view-history-btn"
+                                          data-request-id="${form.request_id}" 
+                                          title="Approval History">
+                                      <i class="bi bi-clock-history"></i>
+                                  </button>
+                                  <button class="btn btn-sm btn-primary circle-btn manage-btn"
+                                          data-request-id="${form.request_id}" 
+                                          title="Manage Request">
+                                      <i class="bi bi-pencil"></i>
+                                  </button>
+                              </div>
+                          </div>
+
+                          <div class="compact-info-column">
+                              <div>
+                                  <span class="card-label">Status:</span> 
+                                  <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
+                              </div>
+                              <div>
+                                  <span class="card-label">Requester:</span> ${form.requester || 'N/A'}
+                              </div>
+                              <div>
+                                  <span class="card-label">Purpose:</span> ${form.purpose || 'N/A'}
+                              </div>
+                              <div>
+                                  <span class="card-label">Approvals:</span> ${form.approvals || '0'}
+                              </div>
+                              <div>
+                                  <span class="card-label">Rejections:</span> ${form.rejections || '0'}
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              `;
+  } else {
+  cardHtml = `
+    <div class="card requisition-card ${isUnread ? 'unread-card' : ''}" 
+         data-request-id="${form.request_id}" style="cursor: pointer;">
+        ${isUnread ? '<span class="request-badge"></span>' : ''}
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5 class="card-title mb-0">Request #${requestNumber}</h5>
+                <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p class="mb-2"><span class="card-label">Requester:</span> ${form.requester}</p>
+                    <p class="mb-2"><span class="card-label">Purpose:</span> ${form.purpose}</p>
+                    <p class="mb-2"><span class="card-label">Schedule:</span> ${form.schedule}</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-2"><span class="card-label">Facilities:</span> ${form.requested_items}</p>
+                    <p class="mb-2"><span class="card-label">Tentative Fee:</span> ₱${form.tentative_fee}</p>
+                    <p class="mb-2"><span class="card-label">Approvals:</span> ${form.approvals}</p>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary manage-btn" 
+                        data-request-id="${form.request_id}">Review Request</button>
+                <button class="btn btn-secondary view-history-btn" 
+                        data-request-id="${form.request_id}">View Approval History</button>
+            </div>
+        </div>
+    </div>
+  `;
+}
+
+          requisitionContainer.innerHTML += cardHtml;
+        });
+        addCardEventListeners();
+      }
+
+      function addCardEventListeners() {
+        // Card click to mark as read
+        document.querySelectorAll('.requisition-card').forEach(card => {
+          card.addEventListener('click', function () {
+            const requestId = this.getAttribute('data-request-id');
+            markRequestAsRead(requestId);
+          });
+        });
+
+        // Manage button
+        document.querySelectorAll('.manage-btn').forEach(btn => {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const requestId = this.getAttribute('data-request-id');
+            handleManage(requestId);
+          });
+        });
+
+        // History button
+        document.querySelectorAll('.view-history-btn').forEach(btn => {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const requestId = this.getAttribute('data-request-id');
+            showApprovalHistory(requestId);
+          });
+        });
+      }
+
+      function trackUnreadRequests() {
+        const savedUnread = localStorage.getItem('unreadRequests');
+        if (savedUnread) {
+          unreadRequests = new Set(JSON.parse(savedUnread));
+        }
       }
 
       // Load saved filter values
       function loadSavedFilters() {
         const savedFilters = localStorage.getItem('requisitionFilters');
         const savedLayout = localStorage.getItem('requisitionLayout');
-        
+
         if (savedFilters) {
           const filters = JSON.parse(savedFilters);
           statusFilter.value = filters.status;
@@ -354,7 +554,7 @@
           searchInput.value = filters.search;
           currentFilters = filters;
         }
-        
+
         if (savedLayout) {
           currentLayout = savedLayout;
           // Update layout toggle buttons
@@ -391,7 +591,7 @@
 
           const statusData = await statusResponse.json();
           statusOptions = statusData;
-          
+
           // Populate status filter
           statusData.forEach(status => {
             const option = document.createElement('option');
@@ -421,12 +621,12 @@
       });
 
       // Search functionality
-      searchButton.addEventListener('click', function() {
+      searchButton.addEventListener('click', function () {
         updateCurrentFilters();
         applyFilters();
       });
 
-      searchInput.addEventListener('keypress', function(e) {
+      searchInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
           updateCurrentFilters();
           applyFilters();
@@ -434,34 +634,34 @@
       });
 
       // Filter change listeners
-      statusFilter.addEventListener('change', function() {
+      statusFilter.addEventListener('change', function () {
         updateCurrentFilters();
         applyFilters();
       });
-      
-      sortFilter.addEventListener('change', function() {
+
+      sortFilter.addEventListener('change', function () {
         updateCurrentFilters();
         applyFilters();
       });
 
       function applyFilters() {
         let filteredData = [...formsData];
-        
+
         // Apply status filter
         if (currentFilters.status !== 'all') {
           filteredData = filteredData.filter(form => form.status_id.toString() === currentFilters.status);
         }
-      
-        
+
+
         // Apply search filter
         if (currentFilters.search) {
-          filteredData = filteredData.filter(form => 
+          filteredData = filteredData.filter(form =>
             form.request_id.toString().includes(currentFilters.search)
           );
         }
-        
+
         // Apply sorting
-        switch(currentFilters.sort) {
+        switch (currentFilters.sort) {
           case 'newest':
             filteredData.sort((a, b) => b.request_id - a.request_id);
             break;
@@ -473,22 +673,21 @@
             filteredData.sort((a, b) => a.status_id - b.status_id);
             break;
         }
-        
+
         displayForms(filteredData);
       }
 
       async function fetchAndDisplayForms(showLoading = true) {
         try {
-          // Show loading state only if explicitly requested
           if (showLoading) {
             requisitionContainer.innerHTML = `
-              <div class="loading-spinner">
-                <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-2">Loading Requisitions...</p>
-              </div>
-            `;
+                    <div class="loading-spinner">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading Requisitions...</p>
+                    </div>
+                `;
           }
 
           const adminToken = localStorage.getItem('adminToken');
@@ -507,127 +706,26 @@
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
-          formsData = await response.json();
-          applyFilters(); // Apply filters with current settings
+          const newFormsData = await response.json();
+
+          // Check for new requests and add to unread set
+          const currentRequestIds = new Set(formsData.map(form => form.request_id.toString()));
+          newFormsData.forEach(form => {
+            if (!currentRequestIds.has(form.request_id.toString())) {
+              unreadRequests.add(form.request_id.toString());
+            }
+          });
+
+          // Save updated unread requests
+          localStorage.setItem('unreadRequests', JSON.stringify([...unreadRequests]));
+
+          formsData = newFormsData;
+          applyFilters();
 
         } catch (error) {
           console.error('Error fetching forms:', error);
           requisitionContainer.innerHTML = '<div class="alert alert-danger">Failed to load requisitions. Please try again later.</div>';
-
-          // Log additional error details for debugging (without exposing sensitive data)
-          if (error.message.includes('authentication')) {
-            console.warn('Authentication issue detected. Redirecting to login...');
-            // You might want to redirect to login here
-          } else if (error.message.includes('network')) {
-            console.warn('Network error detected. Please check your connection.');
-          }
         }
-      }
-
-      function displayForms(forms) {
-        // Clear container and set appropriate class
-        requisitionContainer.innerHTML = '';
-        
-        if (forms.length === 0) {
-          requisitionContainer.innerHTML = `
-            <div class="empty-state">
-              <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-              <p class="mt-3 text-muted">No requisitions found matching your criteria.</p>
-            </div>
-          `;
-          return;
-        }
-
-        if (currentLayout === 'compact') {
-          requisitionContainer.classList.add('cards-grid');
-          requisitionContainer.classList.remove('overflow-auto');
-        } else {
-          requisitionContainer.classList.remove('cards-grid');
-          requisitionContainer.classList.add('overflow-auto');
-          requisitionContainer.style.maxHeight = 'calc(100vh - 300px)';
-        }
-
-        forms.forEach(form => {
-          const statusName = getStatusName(form.status_id);
-          const statusColor = getStatusColor(form.status_id);
-          const requestNumber = form.request_id.toString().padStart(4, '0');
-
-          let cardHtml = '';
-
-          if (currentLayout === 'compact') {
-            cardHtml = `
-              <div class="card requisition-card compact-card mb-1">
-                <div class="card-body p-1">
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <h5 class="card-title mb-0 fw-bold">Request #${requestNumber}</h5>
-
-                    <!-- Circle action buttons -->
-                    <div class="d-flex gap-1">
-                      <button class="btn btn-sm btn-secondary circle-btn"
-                              onclick="showApprovalHistory(${form.request_id})" title="Approval History">
-                        <i class="bi bi-clock-history"></i>
-                      </button>
-                      <button class="btn btn-sm btn-primary circle-btn"
-                              onclick="handleManage(${form.request_id})" title="Manage Request">
-                        <i class="bi bi-pencil"></i>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="compact-info-column">
-                    <div>
-                      <span class="card-label">Status:</span> 
-                      <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
-                    </div>
-                    <div>
-                    <span class="card-label">Requester:</span> ${form.requester || 'N/A'}
-                    </div>
-                    <div>
-                      <span class="card-label">Purpose:</span> ${form.purpose || 'N/A'}
-                    </div>
-                    <div>
-                      <span class="card-label">Approvals:</span> ${form.approvals || '0'}
-                    </div>
-                    <div>
-                      <span class="card-label">Rejections:</span> ${form.rejections || '0'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            `;
-          } else {
-            cardHtml = `
-              <div class="card requisition-card">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-start mb-3">
-                    <h5 class="card-title mb-0">Request #${requestNumber}</h5>
-                    <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
-                  </div>
-
-                  <div class="row mb-3">
-                    <div class="col-md-6">
-                      <p class="mb-2"><span class="card-label">Requester:</span> ${form.requester}</p>
-                      <p class="mb-2"><span class="card-label">Purpose:</span> ${form.purpose}</p>
-                      <p class="mb-2"><span class="card-label">Schedule:</span> ${form.schedule}</p>
-                    </div>
-                    <div class="col-md-6">
-                      <p class="mb-2"><span class="card-label">Facilities:</span> ${form.requested_items}</p>
-                      <p class="mb-2"><span class="card-label">Tentative Fee:</span> ₱${form.tentative_fee}</p>
-                      <p class="mb-2"><span class="card-label">Approvals:</span> ${form.approvals}</p>
-                    </div>
-                  </div>
-
-                  <div class="d-flex gap-2">
-                    <button class="btn btn-primary" onclick="handleManage(${form.request_id})">Review Request</button>
-                    <button class="btn btn-secondary" onclick="showApprovalHistory(${form.request_id})">View Approval History</button>
-                  </div>
-                </div>
-              </div>
-            `;
-          }
-
-          requisitionContainer.innerHTML += cardHtml;
-        });
       }
 
       // Helper function to get status name
@@ -636,15 +734,20 @@
         return status ? status.status_name : 'Unknown';
       }
 
+
+
       // Helper function to get status color
       function getStatusColor(statusId) {
         const status = statusOptions.find(s => s.status_id === statusId);
         return status ? status.color_code : '#6c757d'; // Default gray if not found
       }
 
+      // Initialize tracking when DOM loads
+      trackUnreadRequests();
+
       // Initial load
       fetchFilterOptions().then(() => {
-        fetchAndDisplayForms(true); // Show loading on initial load
+        fetchAndDisplayForms(true);
       });
 
       // Refresh every 30 seconds without showing loading spinner

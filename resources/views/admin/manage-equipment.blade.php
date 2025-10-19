@@ -95,10 +95,8 @@
   }
 </style>
 
-
-<div id="layout">
   <!-- Main Content -->
-  <main id="main">
+  <main>
     <div class="container-fluid bg-light rounded p-4 d-flex flex-column h-100">
       <div class="container-fluid d-flex flex-column h-100">
 
@@ -112,7 +110,7 @@
               </a>
 
                <a href="{{ url('/admin/scan-equipment') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle-fill me-2"></i>Equipment Scanner
+                <i class="fa-solid fa-camera me-2"></i>Barcode Scanner
             </a>
             </div>
           </div>
@@ -184,7 +182,6 @@
         </div>
       </div>
   </main>
-</div>
 @endsection
 
 @section('scripts')

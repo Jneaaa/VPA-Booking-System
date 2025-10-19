@@ -445,13 +445,6 @@
                             <span class="ms-2">Loading notifications...</span>
                         </div>
                     </div>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li class="text-center">
-                        <a href="{{ url('/admin/manage-requests') }}" class="dropdown-item text-primary">View All
-                            Requisitions</a>
-                    </li>
                 </ul>
             </div>
 
@@ -614,7 +607,7 @@
                     href="{{ url('/admin/archives') }}">
                     <div class="d-flex align-items-center">
                         <div class="nav-icon p-1 rounded me-2">
-                            <i class="fa-solid fa-box-archive me-2"></i>
+                            <i class="fa-solid fa-hourglass-end me-2"></i>
                         </div>
                         <span>Archives</span>
                     </div>
@@ -730,32 +723,43 @@
                 }
             }
 
-            renderNotificationList(notifications) {
-                const container = document.getElementById('notificationList');
-                if (!container) return;
+renderNotificationList(notifications) {
+    const container = document.getElementById('notificationList');
+    if (!container) return;
 
-                if (notifications.length === 0) {
-                    container.innerHTML = '<div class="text-center py-3 text-muted">No notifications</div>';
-                    return;
-                }
+    if (notifications.length === 0) {
+        container.innerHTML = '<div class="text-center py-3 text-muted">No notifications</div>';
+        return;
+    }
 
-                container.innerHTML = notifications.map(notification => `
-            <div class="notification-item mb-2 p-2 rounded ${notification.is_read ? '' : 'bg-light'}" 
-                 style="cursor: pointer; border-left: 3px solid ${notification.is_read ? 'transparent' : '#007bff'};"
-                 onclick="notificationManager.markAsRead(${notification.notification_id})">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <div class="small text-muted">${this.formatTime(notification.created_at)}</div>
-                        <div class="fw-medium">${notification.message}</div>
-                        ${notification.request_id ?
-                        `<small class="text-primary">Request #${notification.request_id}</small>` : ''}
-                    </div>
-                    ${!notification.is_read ?
-                        '<span class="badge bg-primary ms-2">New</span>' : ''}
+    container.innerHTML = notifications.map(notification => `
+        <div class="notification-item mb-2 p-2 rounded ${notification.is_read ? '' : 'bg-light'}" 
+             style="cursor: pointer; border-left: 3px solid ${notification.is_read ? 'transparent' : '#007bff'};"
+             onclick="notificationManager.handleNotificationClick(${notification.notification_id}, ${notification.request_id || 'null'})">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <div class="small text-muted">${this.formatTime(notification.created_at)}</div>
+                    <div class="fw-medium">${notification.message}</div>
+                    ${notification.request_id ?
+                    `<small class="text-primary">Request #${notification.request_id}</small>` : ''}
                 </div>
+                ${!notification.is_read ?
+                    '<span class="badge bg-primary ms-2">New</span>' : ''}
             </div>
-        `).join('');
-            }
+        </div>
+    `).join('');
+}
+
+// Add new method to handle notification clicks
+handleNotificationClick(notificationId, requestId) {
+    // Mark as read first
+    this.markAsRead(notificationId);
+    
+    // If it's a request notification, redirect to the request view
+    if (requestId) {
+        window.location.href = `/admin/requisition/${requestId}`;
+    }
+}
 
             async markAsRead(notificationId = null) {
                 try {
