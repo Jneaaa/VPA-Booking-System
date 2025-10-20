@@ -166,115 +166,150 @@ class ScannerController extends Controller
     }
 }
 
-    /**
-     * Handle borrow request
-     */
-    public function borrow(Request $request): JsonResponse
-    {
-        $request->validate([
-            'barcode' => 'required|string',
-            'quantity' => 'required|integer|min:1',
-            'requisition_form_id' => 'required|exists:requisition_forms,request_id'
-        ]);
+/**
+ * Handle borrow request - Update item condition to 'In Use'
+ */
+public function borrow(Request $request): JsonResponse
+{
+    $request->validate([
+        'barcode' => 'required|string'
+    ]);
 
-        try {
-            $item = EquipmentItem::where('barcode_number', $request->barcode)->first();
+    try {
+        $barcode = $request->input('barcode');
+        
+        // Find the equipment item by barcode
+        $item = EquipmentItem::where('barcode_number', $barcode)->first();
 
-            if (!$item) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Equipment item not found'
-                ], 404);
-            }
-
-            // Check availability
-            $availableStock = $this->calculateAvailableStock($item->equipment_id);
-            
-            if ($availableStock < $request->quantity) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Insufficient stock. Available: ' . $availableStock
-                ], 400);
-            }
-
-            // Create or update requested equipment
-            $requestedEquipment = RequestedEquipment::updateOrCreate(
-                [
-                    'request_id' => $request->requisition_form_id,
-                    'equipment_id' => $item->equipment_id
-                ],
-                [
-                    'quantity' => $request->quantity,
-                    'is_waived' => false
-                ]
-            );
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Equipment borrowed successfully',
-                'data' => $requestedEquipment
-            ]);
-
-        } catch (\Exception $e) {
+        if (!$item) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to process borrow request: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Equipment item not found'
+            ], 404);
         }
-    }
 
-    /**
-     * Handle return request
-     */
-    public function return(Request $request): JsonResponse
-    {
-        $request->validate([
-            'barcode' => 'required|string',
-            'quantity' => 'required|integer|min:1'
-        ]);
-
-        try {
-            $item = EquipmentItem::where('barcode_number', $request->barcode)->first();
-
-            if (!$item) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Equipment item not found'
-                ], 404);
-            }
-
-            // Find and update the requested equipment
-            $requestedEquipment = RequestedEquipment::where('equipment_id', $item->equipment_id)
-                ->where('quantity', '>=', $request->quantity)
-                ->first();
-
-            if (!$requestedEquipment) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'No matching borrow record found'
-                ], 404);
-            }
-
-            // Reduce quantity or delete if returning all
-            if ($requestedEquipment->quantity <= $request->quantity) {
-                $requestedEquipment->delete();
-            } else {
-                $requestedEquipment->quantity -= $request->quantity;
-                $requestedEquipment->save();
-            }
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Equipment returned successfully'
-            ]);
-
-        } catch (\Exception $e) {
+        // Check if item is already in use
+        if ($item->condition_id === 6) { // 6 = 'In Use'
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to process return request: ' . $e->getMessage()
-            ], 500);
+                'message' => 'This item is already in use'
+            ], 400);
         }
+
+        // Update condition to 'In Use' (condition_id = 6)
+        $item->update([
+            'condition_id' => 6, // 'In Use'
+            'updated_by' => auth()->id()
+        ]);
+
+        // Log the action
+        \Log::info('Scanner: Item borrowed', [
+            'item_id' => $item->item_id,
+            'barcode' => $barcode,
+            'previous_condition' => $item->getOriginal('condition_id'),
+            'new_condition' => 6,
+            'updated_by' => auth()->id()
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Item borrowed successfully. Condition changed to "In Use"',
+            'item' => [
+                'item_id' => $item->item_id,
+                'item_name' => $item->item_name,
+                'condition_id' => $item->condition_id,
+                'status_id' => $item->status_id,
+                'item_notes' => $item->item_notes
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Scanner: Error processing borrow request', [
+            'barcode' => $request->barcode,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to process borrow request: ' . $e->getMessage()
+        ], 500);
     }
+}
+
+/**
+ * Handle return request - Update item condition to 'Available' and return item data
+ */
+public function return(Request $request): JsonResponse
+{
+    $request->validate([
+        'barcode' => 'required|string'
+    ]);
+
+    try {
+        $barcode = $request->input('barcode');
+        
+        // Find the equipment item by barcode
+        $item = EquipmentItem::where('barcode_number', $barcode)->first();
+
+        if (!$item) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Equipment item not found'
+            ], 404);
+        }
+
+        // Check if item is actually in use
+        if ($item->condition_id !== 6) { // 6 = 'In Use'
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This item is not currently in use. Current condition: ' . $item->condition->condition_name
+            ], 400);
+        }
+
+        // Store the original item data for response
+        $originalItem = $item->toArray();
+
+        // Update condition to 'Available' (condition_id = 2 - 'Good')
+        $item->update([
+            'condition_id' => 2, // 'Good' (Available)
+            'updated_by' => auth()->id()
+        ]);
+
+        // Log the action
+        \Log::info('Scanner: Item returned', [
+            'item_id' => $item->item_id,
+            'barcode' => $barcode,
+            'previous_condition' => 6,
+            'new_condition' => 2,
+            'updated_by' => auth()->id()
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Item returned successfully. Condition changed to "Available"',
+            'item' => [
+                'item_id' => $originalItem['item_id'],
+                'item_name' => $originalItem['item_name'],
+                'condition_id' => $originalItem['condition_id'], // Keep original for modal
+                'status_id' => $originalItem['status_id'],
+                'item_notes' => $originalItem['item_notes']
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Scanner: Error processing return request', [
+            'barcode' => $request->barcode,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to process return request: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
     /**
      * Calculate available stock for equipment

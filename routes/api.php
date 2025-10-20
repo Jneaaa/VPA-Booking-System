@@ -195,8 +195,7 @@ Route::get('/requisition-forms/calendar-events', [RequisitionFormController::cla
 
 // Submit Feedback
 
-Route::post('/feedback', [FeedbackController::class, 'store'])
-    ->name('feedback.store');
+Route::post('/feedback', [FeedbackController::class, 'store']);
 
 
 // Public cancellation route for requesters
