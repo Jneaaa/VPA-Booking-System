@@ -219,39 +219,90 @@ class EquipmentController extends Controller
 public function destroy($id): JsonResponse
 {
     try {
-        $equipment = Equipment::findOrFail($id);
+        $equipment = Equipment::with(['images', 'items'])->findOrFail($id);
 
+        \Log::info('Starting equipment deletion process', [
+            'equipment_id' => $id,
+            'equipment_name' => $equipment->equipment_name,
+            'image_count' => $equipment->images->count(),
+            'item_count' => $equipment->items->count()
+        ]);
 
-        // Delete associated images from Cloudinary and database
+        // Collect all Cloudinary public_ids for bulk deletion
+        $publicIds = [];
+
+        // Process equipment images
         foreach ($equipment->images as $image) {
-            if ($image->cloudinary_public_id && $image->cloudinary_public_id !== 'oxvsxogzu9koqhctnf7s') {
-                try {
-                    Cloudinary::destroy($image->cloudinary_public_id);
-                    \Log::info('Deleted Cloudinary image', [
-                        'public_id' => $image->cloudinary_public_id
-                    ]);
-                } catch (\Exception $cloudinaryError) {
-                    \Log::error('Cloudinary delete failed but continuing', [
-                        'error' => $cloudinaryError->getMessage(),
-                        'public_id' => $image->cloudinary_public_id
-                    ]);
-                    // Continue even if Cloudinary delete fails
-                }
+            if ($image->cloudinary_public_id && 
+                $image->cloudinary_public_id !== 'oxvsxogzu9koqhctnf7s' &&
+                !in_array($image->cloudinary_public_id, $publicIds)) {
+                
+                $publicIds[] = $image->cloudinary_public_id;
+                \Log::info('Added image to Cloudinary deletion list', [
+                    'public_id' => $image->cloudinary_public_id,
+                    'image_id' => $image->image_id
+                ]);
             }
+            // Delete the database record
             $image->delete();
         }
 
-        // Delete associated items
-        $equipment->items()->delete();
+        // Process equipment items
+        foreach ($equipment->items as $item) {
+            if ($item->cloudinary_public_id && 
+                $item->cloudinary_public_id !== 'oxvsxogzu9koqhctnf7s' &&
+                !in_array($item->cloudinary_public_id, $publicIds)) {
+                
+                $publicIds[] = $item->cloudinary_public_id;
+                \Log::info('Added item image to Cloudinary deletion list', [
+                    'public_id' => $item->cloudinary_public_id,
+                    'item_id' => $item->item_id
+                ]);
+            }
+            // Delete the database record
+            $item->delete();
+        }
+
+        // Bulk delete from Cloudinary if we have public_ids
+        if (!empty($publicIds)) {
+            try {
+                \Log::info('Attempting Cloudinary bulk deletion', [
+                    'public_ids' => $publicIds,
+                    'total_images' => count($publicIds)
+                ]);
+
+                $result = Cloudinary::destroy($publicIds);
+                
+                \Log::info('Cloudinary bulk deletion successful', [
+                    'result' => $result,
+                    'deleted_count' => count($publicIds)
+                ]);
+            } catch (\Exception $cloudinaryError) {
+                \Log::error('Cloudinary bulk deletion failed', [
+                    'error' => $cloudinaryError->getMessage(),
+                    'public_ids' => $publicIds,
+                    'trace' => $cloudinaryError->getTraceAsString()
+                ]);
+                // Continue with database deletion even if Cloudinary fails
+            }
+        } else {
+            \Log::info('No Cloudinary images to delete', [
+                'equipment_id' => $id
+            ]);
+        }
 
         // Delete the equipment itself
         $equipment->delete();
 
-        \Log::info('Equipment deleted successfully', [
+        \Log::info('Equipment deletion completed successfully', [
             'equipment_id' => $id,
+            'cloudinary_images_deleted' => count($publicIds)
         ]);
 
-        return response()->json(['message' => 'Equipment deleted successfully']);
+        return response()->json([
+            'message' => 'Equipment deleted successfully',
+            'cloudinary_images_deleted' => count($publicIds)
+        ]);
 
     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
         \Log::error('Equipment not found for deletion', [
