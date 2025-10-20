@@ -3,6 +3,11 @@
 @section('title', 'Ongoing Events')
 @section('content')
   <style>
+        .card {
+  border: 0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem; /* optional, for smoother corners */
+}
     /* Base checkbox style */
     .form-check-input {
       width: 1.1em;
@@ -293,11 +298,11 @@
               <div class="calendar-content">
                 <div class="mini-calendar">
                   <div class="d-flex justify-content-between align-items-center mb-3">
-                    <button class="btn btn-sm btn-outline-secondary prev-month" type="button">
+                    <button class="btn btn-sm btn-secondary prev-month" type="button">
                       <i class="bi bi-chevron-left"></i>
                     </button>
                     <h6 class="mb-0 month-year" id="currentMonthYear">October 2024</h6>
-                    <button class="btn btn-sm btn-outline-secondary next-month" type="button">
+                    <button class="btn btn-sm btn-secondary next-month" type="button">
                       <i class="bi bi-chevron-right"></i>
                     </button>
                   </div>

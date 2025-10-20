@@ -4,6 +4,16 @@
 
 @section('content')
 <style>
+      .btn-outline-danger {
+  background-color: #ffe5e5; /* light red */
+  border-color: #dc3545;    /* default Bootstrap danger border */
+  color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: #fff;
+}
   .filters-row {
   flex-wrap: nowrap !important;   
   overflow-x: auto;             

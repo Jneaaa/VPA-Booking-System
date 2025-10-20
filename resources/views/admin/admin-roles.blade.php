@@ -4,6 +4,11 @@
 
 @section('content')
   <style>
+            .card {
+  border: 0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem; /* optional, for smoother corners */
+}
     #confirmDeleteBtn {
       min-width: 120px;
     }
@@ -19,7 +24,6 @@
     .form-section,
     .table-section {
       background-color: #fff;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     }
 
     .table-section .table-responsive {
@@ -42,7 +46,7 @@
     }
 
     .table-section table th {
-      background-color: #f8f9fa;
+      background-color: #eff0f1ff;
     }
 
     /* Column width adjustments */
@@ -184,12 +188,10 @@
     }
   </style>
 
-  <div id="layout">
     <main id="main">
-      <div class="container my-4">
 
         <!-- Add New Admin card -->
-        <section class="form-section card p-4 mb-4">
+        <section class="form-section card border-0 p-4 mb-4">
           <h3 class="mb-4 fw-bold">Add New Admin</h3>
           <form id="addAdminForm" novalidate>
             @csrf
@@ -273,7 +275,7 @@
         </section>
 
         <!-- Existing Admins card -->
-        <section class="table-section card p-4">
+        <section class="table-section border-0 card p-4">
           <h3 class="mb-4 fw-bold">Existing Admins</h3>
 
           <!-- Loading indicator -->
@@ -304,11 +306,8 @@
             </table>
           </div>
         </section>
-
-
-      </div><!-- /.container -->
     </main>
-  </div>
+
 
 
   <!-- Edit Admin Modal -->

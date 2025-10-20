@@ -5,6 +5,7 @@
 @section('content')
 
     <style>
+        
         #archiveTable {
             font-size: 0.875rem;
         }
