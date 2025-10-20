@@ -455,10 +455,7 @@
                     <i class="bi bi-three-dots three-dots-icon"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
+                
                     <li><a class="dropdown-item text-danger" href="{{ url('/admin/admin-login') }}" id="logoutLink">
                             <i class="bi bi-box-arrow-right me-2"></i>Logout
                         </a></li>

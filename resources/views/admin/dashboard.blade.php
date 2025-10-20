@@ -4,6 +4,12 @@
 
 @section('content')
   <style>
+    .card {
+  border: 0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem; /* optional, for smoother corners */
+}
+
     /* New styles for the dashboard header */
     .dashboard-header {
       position: relative;
@@ -209,11 +215,12 @@
         <div class="col-md-8">
           <!-- Calendar Section -->
           <div class="card p-3 h-100" style="height: 600px;">
-            <div class="card border-0 h-100">
-              <div class="card-body p-2 h-100">
-                <div id="calendar"></div>
-              </div>
-            </div>
+<div class="card border-0 h-100" style="box-shadow: none !important;">
+  <div class="card-body p-2 h-100">
+    <div id="calendar"></div>
+  </div>
+</div>
+
           </div>
         </div>
       </div>
