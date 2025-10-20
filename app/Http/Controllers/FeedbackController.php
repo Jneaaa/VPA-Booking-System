@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Feedback;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class FeedbackController extends Controller
 {
@@ -15,6 +16,47 @@ class FeedbackController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
+
+        public function store(Request $request)
+    {
+        try {
+            // Validate the incoming request
+            $validator = Validator::make($request->all(), [
+                'email' => 'nullable|email|max:255',
+                'request_id' => 'nullable|exists:requisition_forms,request_id',
+                'system_performance' => 'required|in:poor,fair,satisfactory,very good,outstanding',
+                'booking_experience' => 'required|in:poor,fair,good,very good,excellent',
+                'ease_of_use' => 'required|in:very difficult,difficult,neutral,easy,very easy',
+                'useability' => 'required|in:very unlikely,unlikely,neutral,likely,very likely',
+                'additional_feedback' => 'nullable|string|max:1000'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Create the feedback
+            $feedback = Feedback::create($validator->validated());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Feedback submitted successfully!',
+                'data' => $feedback
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit feedback',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function getFeedbackData(Request $request)
     {
         try {

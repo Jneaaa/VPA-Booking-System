@@ -6,11 +6,14 @@
     <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}">
     <style>
         /* Change background of active (checked) rating buttons */
-input.btn-check:checked + label.btn {
-    background-color: #003366; /* your custom color */
-    color: white;              /* ensure text is readable */
-    border-color: #003366;     /* optional: match border to bg */
-}
+        input.btn-check:checked+label.btn {
+            background-color: #003366;
+            /* your custom color */
+            color: white;
+            /* ensure text is readable */
+            border-color: #003366;
+            /* optional: match border to bg */
+        }
 
         body {
             background: url('{{ asset('assets/cpu-pic1.jpg') }}') center/cover no-repeat fixed;
@@ -239,27 +242,29 @@ input.btn-check:checked + label.btn {
     </div>
 
 <div class="modal fade" id="thankYouModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center">
-            <!-- Modal Header with blue background -->
-            <div class="modal-header text-white" style="background-color: #e0e5e9ff;">
-            </div>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      
+      <!-- Modal Header with close button only -->
+      <div class="modal-header border-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
 
-            <div class="modal-body p-4">
-                <!-- Big chat heart icon -->
-                <i class="bi bi-chat-square-heart-fill text-danger mb-3" style="font-size: 4rem;"></i>
+      <div class="modal-body p-4">
+        <!-- Big chat heart icon -->
+        <i class="bi bi-chat-square-heart-fill text-danger mb-3" style="font-size: 4rem;"></i>
 
-                <h5>Thank You for Your Feedback!</h5>
-                <p>Your input helps us improve our services for everyone. We appreciate your time!</p>
+        <h5>Thank You for Your Feedback!</h5>
+        <p>Your input helps us improve our services for everyone. We appreciate your time!</p>
 
-                <div class="mt-5">
-                    <button type="button" class="btn btn-primary" onclick="window.location.href='{{ asset('index') }}'">
-                        Back to Home
-                    </button>
-                </div>
-            </div>
+        <div class="mt-5">
+          <button type="button" class="btn btn-primary" onclick="window.location.href='{{ asset('index') }}'">
+            Back to Home
+          </button>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 
@@ -267,57 +272,57 @@ input.btn-check:checked + label.btn {
 
 
     <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const textarea = document.getElementById('additional_feedback');
-    const charCount = document.getElementById('charCount');
+        document.addEventListener('DOMContentLoaded', function () {
+            const textarea = document.getElementById('additional_feedback');
+            const charCount = document.getElementById('charCount');
 
-    textarea.addEventListener('input', function () {
-        charCount.textContent = this.value.length;
-    });
-
-    const feedbackForm = document.getElementById('feedbackForm');
-    feedbackForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        try {
-            const response = await fetch("{{ route('feedback.store') }}", {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: formData
+            textarea.addEventListener('input', function () {
+                charCount.textContent = this.value.length;
             });
 
-            const result = await response.json();
-            console.log('Server response:', result);
+            const feedbackForm = document.getElementById('feedbackForm');
+            feedbackForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
 
-            if (!response.ok) {
-                console.error('Server returned error:', result);
-                alert('Error submitting form: ' + (result.message || response.statusText));
-                return;
-            }
+                const formData = new FormData(this);
 
-            // Show the Bootstrap modal
-            const thankYouModalEl = document.getElementById('thankYouModal');
-            if (thankYouModalEl) {
-                const modal = new bootstrap.Modal(thankYouModalEl);
-                modal.show();
+                try {
+                    const response = await fetch("/api/feedback", {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    console.log('Server response:', result);
+
+                    if (!response.ok) {
+                        console.error('Server returned error:', result);
+                        alert('Error submitting form: ' + (result.message || response.statusText));
+                        return;
+                    }
+
+                    // Show the Bootstrap modal
+                    const thankYouModalEl = document.getElementById('thankYouModal');
+                    if (thankYouModalEl) {
+                        const modal = new bootstrap.Modal(thankYouModalEl);
+                        modal.show();
 
 
-            } else {
-                console.warn('Thank You modal element not found. Redirecting...');
-                window.location.href = "{{ asset('index') }}";
-            }
+                    } else {
+                        console.warn('Thank You modal element not found. Redirecting...');
+                        window.location.href = "{{ asset('index') }}";
+                    }
 
-        } catch (err) {
-            console.error('Fetch error:', err);
-            alert('Error submitting form: ' + err.message);
-        }
-    });
-});
+                } catch (err) {
+                    console.error('Fetch error:', err);
+                    alert('Error submitting form: ' + err.message);
+                }
+            });
+        });
 
 
     </script>

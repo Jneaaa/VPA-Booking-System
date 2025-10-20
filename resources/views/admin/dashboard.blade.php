@@ -126,7 +126,7 @@
                 </div>
                 <a href="{{ asset('admin/calendar') }}" class="text-primary text-decoration-none">
                   <div
-                    class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
+                    class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center"
                     style="width: 45px; height: 45px; border-color: #5d759917 !important;">
                     <i class="fa-solid fa-angle-right fs-5"></i>
                   </div>
@@ -146,7 +146,7 @@
                 </div>
                 <a href="{{ asset('admin/manage-requests') }}" class="text-primary text-decoration-none">
                   <div
-                    class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
+                    class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center"
                     style="width: 45px; height: 45px; border-color: #5d759917 !important;">
                     <i class="fa-solid fa-angle-right fs-5"></i>
                   </div>
@@ -166,7 +166,7 @@
                 </div>
                 <a href="{{ asset('admin/archives') }}" class="text-primary text-decoration-none">
                   <div
-                    class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center border border-2 border-primary"
+                    class="bg-primary bg-opacity-10 p-3 rounded-circle d-flex align-items-center justify-content-center"
                     style="width: 45px; height: 45px; border-color: #5d759917 !important;">
                     <i class="fa-solid fa-angle-right fs-5"></i>
                   </div>
@@ -180,35 +180,45 @@
       <div class="row g-3">
         <!-- Left Column -->
         <div class="col-md-4 d-flex flex-column gap-3">
-          <!-- Equipment Condition Tracker -->
-          <div class="card p-3 flex-fill" style="height: 294px;">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="fw-bold mb-0">Inventory Tracker</h5>
-              <span class="badge bg-primary" id="equipmentCount">0 items</span>
-            </div>
-            <div class="equipment-list-container" style="height: 220px; overflow-y: auto;">
-              <div id="equipmentList" class="d-flex flex-column gap-2">
-                <!-- Equipment items will be loaded here dynamically -->
-              </div>
-            </div>
-          </div>
+<!-- Equipment Condition Tracker -->
+<div class="card p-3 flex-fill" style="height: 294px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ url('/admin/manage-equipment') }}" class="text-decoration-none">
+            <h5 class="fw-bold mb-0 text-primary">Inventory Tracker</h5>
+        </a>
+        <span class="badge bg-primary" id="equipmentCount">0 items</span>
+    </div>
+    <div class="equipment-list-container" style="height: 170px; overflow-y: auto;">
+        <div id="equipmentList" class="d-flex flex-column gap-2">
+            <!-- Equipment items will be loaded here dynamically -->
+        </div>
+    </div>
+    <!-- Added footer with scan equipment button -->
+    <div class="card-footer border-0 bg-transparent px-0 pb-0 pt-2 mt-auto">
+        <a href="{{ url('/admin/scan-equipment') }}" class="btn btn-secondary w-100 py-2">
+            <i class="bi bi-qr-code-scan me-2"></i>Scan Equipment
+        </a>
+    </div>
+</div>
 
-          <!-- Pending Requisitions List -->
-          <div class="card p-3 flex-fill" style="height: 294px;">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="fw-bold mb-0">Pending Requisitions</h5>
-              <span class="badge bg-primary" id="requisitionCount">0</span>
+<!-- Pending Requisitions List -->
+<div class="card p-3 flex-fill" style="height: 294px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ url('/admin/manage-requests') }}" class="text-decoration-none">
+            <h5 class="fw-bold mb-0 text-primary">Pending Requisitions</h5>
+        </a>
+        <span class="badge bg-primary" id="requisitionCount">0</span>
+    </div>
+    <div class="requisition-list-container" style="height: 220px; overflow-y: auto;">
+        <div id="requisitionList" class="d-flex flex-column gap-2">
+            <!-- Requisition items will be loaded here dynamically -->
+            <div class="text-center text-muted py-4">
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+                <div class="mt-2">Loading requisitions...</div>
             </div>
-            <div class="requisition-list-container" style="height: 220px; overflow-y: auto;">
-              <div id="requisitionList" class="d-flex flex-column gap-2">
-                <!-- Requisition items will be loaded here dynamically -->
-                <div class="text-center text-muted py-4">
-                  <div class="spinner-border spinner-border-sm" role="status"></div>
-                  <div class="mt-2">Loading requisitions...</div>
-                </div>
-              </div>
-            </div>
-          </div>
+        </div>
+    </div>
+</div>
         </div>
 
         <!-- Right Column -->
@@ -229,7 +239,7 @@
       <div class="card shadow-sm mt-3">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold">System Log</h3>
+            <h4 class="fw-bold text-primary">System Log</h4>
             <div class="d-flex gap-2">
               <input type="date" class="form-control" id="logDateFilter" placeholder="Filter by Date">
             </div>
