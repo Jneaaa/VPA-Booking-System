@@ -4,9 +4,97 @@
 
 @section('content')
     <style>
+        .card-body.position-relative {
+            min-height: 200px;
+        }
+
+        #itemsLoading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            width: 100%;
+        }
+
+        #itemsEmptyState {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            width: 100%;
+        }
+
+
+        .spinner-border {
+            width: 2rem;
+            height: 2rem;
+        }
+
         label.required::after {
             content: " *";
             color: red;
+        }
+
+        #barcode[readonly] {
+            background-color: #e9ecef;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .barcode-container {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .barcode-preview {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            padding: 5px;
+            background: white;
+        }
+
+        #itemsContainer {
+            min-height: 100px;
+            max-height: 450px;
+            /* Adjust this value as needed */
+            overflow-y: auto;
+            padding: 10px;
+            border: none;
+        }
+
+        /* Toast notification styles */
+        .toast {
+            z-index: 1100;
+            bottom: 0;
+            left: 0;
+            margin: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            min-width: 250px;
+            border-radius: 0.3rem;
+        }
+
+        .toast .loading-bar {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.7);
+            width: 100%;
+            transition: width 3000ms linear;
+        }
+
+        input[readonly],
+        textarea[readonly] {
+            pointer-events: none;
+            /* disables clicking/selection */
+            user-select: none;
+            /* prevents highlighting */
+            background-color: #fff;
+            /* optional: removes gray "disabled" look */
+            cursor: default;
+            /* arrow cursor instead of I-beam */
         }
 
         /* Add this to your existing styles */
@@ -36,6 +124,28 @@
             min-height: 110px;
         }
 
+        .form-control,
+        .form-select {
+            padding: 0.5rem 0.75rem;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+        }
+
+        .row.mb-4 {
+            margin-bottom: 1.5rem !important;
+        }
+
+        #itemsContainer {
+            min-height: 100px;
+        }
+
+        .amenity-item,
+        .equipment-item {
+            margin-bottom: 0.75rem;
+        }
+
         .modal-body .dropzone {
             min-height: 150px;
         }
@@ -58,225 +168,214 @@
             z-index: 1;
         }
 
-        .barcode-container {
-            margin-top: 10px;
-            text-align: center;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
+        .equipment-item img {
+            max-width: 100px;
+            /* Restrict photo width */
+            max-height: 100px;
+            /* Restrict photo height */
+            object-fit: cover;
+            /* Ensure photo fits within bounds */
         }
 
-        .barcode-preview {
-            max-width: 100%;
-            height: auto;
-            padding: 10px;
-            background: white;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
+        .equipment-item .card-body {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            /* Add spacing between elements */
         }
 
-        .barcode-number {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            margin-top: 8px;
-            font-size: 14px;
-            letter-spacing: 1px;
-        }
-
-        #generateBarcodeBtn {
-            white-space: nowrap;
+        .equipment-item .flex-grow-1 {
+            flex: 1;
+            /* Allow details section to take remaining space */
         }
     </style>
-    <div class="container-fluid px-4">
-        <!-- Main Layout -->
-        <div id="layout">
-            <!-- Main Content -->
-            <main>
-                    <div class="card-body">
-                        <form id="addEquipmentForm">
-                            <!-- Equipment Photos and Inventory Items Section -->
-                            <div class="row mb-4">
-                                <!-- Equipment Photos Card -->
-                                <div class="col-md-6">
-                                    <div class="card h-100">
-                                        <div class="card-header d-flex justify-content-between align-items-center"
-                                            style="height: 56px;">
-                                            <h5 class="fw-bold mb-0">Equipment Photos</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="photo-section">
-                                                <div class="dropzone border p-4 text-center" id="equipmentPhotosDropzone"
-                                                    style="cursor: pointer;">
-                                                    <i class="bi bi-images fs-1 text-muted"></i>
-                                                    <p class="mt-2">Drag & drop equipment photos here or click to browse</p>
-                                                    <input type="file" id="equipmentPhotos" class="d-none" multiple
-                                                        accept="image/*">
-                                                </div>
-                                                <small class="text-muted mt-2 d-block">Upload at least one photo of the
-                                                    equipment (max 5
-                                                    photos)</small>
-                                                <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
-                                            </div>
-                                        </div>
-                                    </div>
+        <main>
+            <div class="card-body">
+                <form id="addEquipmentForm">
+                    <!-- Equipment Photos and Inventory Items Section -->
+                    <div class="row mb-4">
+                        <!-- Equipment Photos Card -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center"
+                                    style="height: 56px;">
+                                    <h5 class="fw-bold mb-0">Equipment Photos</h5>
                                 </div>
-                                <!-- Image Deletion Confirmation Modal -->
-                                <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Confirm Image Deletion</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                Are you sure you want to delete this photo? This action cannot be undone.
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Cancel</button>
-                                                <button type="button" class="btn btn-danger"
-                                                    id="confirmDeleteImageBtn">Delete Photo</button>
-                                            </div>
+                                <div class="card-body">
+                                    <div class="photo-section">
+                                        <div class="dropzone border p-4 text-center" id="equipmentPhotosDropzone"
+                                            style="cursor: pointer;">
+                                            <i class="bi bi-images fs-1 text-muted"></i>
+                                            <p class="mt-2">Drag & drop equipment photos here or click to browse</p>
+                                            <input type="file" id="equipmentPhotos" class="d-none" multiple
+                                                accept="image/*">
                                         </div>
-                                    </div>
-                                </div>
-
-                                <!-- Inventory Items Card -->
-                                <div class="col-md-6">
-                                    <div class="card h-100">
-                                        <div class="card-header d-flex justify-content-between align-items-center"
-                                            style="height: 56px;">
-                                            <h5 class="fw-bold mb-0">Inventory Items</h5>
-                                            <button type="button" class="btn btn-sm btn-secondary" id="addItemBtn">
-                                                <i class="bi bi-plus me-1"></i>Add Item
-                                            </button>
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="itemsContainer">
-                                                <p class="text-muted">No items added yet. Click "Add Item" to track
-                                                    individual equipment pieces.
-                                                </p>
-                                            </div>
-                                        </div>
+                                        <small class="text-muted mt-2 d-block">Upload at least one photo of the
+                                            equipment (max 5
+                                            photos)</small>
+                                        <div id="photosPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Equipment Details Section -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="fw-bold mb-0">Equipment Details</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="details-section">
-                                                <!-- Basic Information Section -->
-                                                <div class="row mb-4">
-                                                    <div class="col-md-6">
-                                                        <label for="equipmentName" class="form-label fw-bold">
-                                                            Equipment Name
-                                                        </label>
-                                                        <input type="text" class="form-control" id="equipmentName"
-                                                            placeholder="Equipment Name" required>
-                                                    </div>
-
-                                                    <div class="col-md-6">
-                                                        <label for="brand" class="form-label fw-bold">
-                                                            Brand
-                                                        </label>
-                                                        <input type="text" class="form-control" id="brand"
-                                                            placeholder="Brand">
-                                                    </div>
-                                                </div>
-
-                                                <div class="row mb-4">
-                                                    <div class="col-12 position-relative">
-                                                        <label for="description" class="form-label fw-bold">
-                                                            Description
-                                                        </label>
-                                                        <textarea class="form-control" id="description" rows="3"
-                                                            placeholder="Write a short description..."></textarea>
-                                                        <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1"
-                                                            id="descriptionWordCount">0/255 characters</small>
-                                                    </div>
-                                                </div>
-
-                                               <div class="row mb-4">
-    <div class="col-md-3">
-        <label for="storageLocation" class="form-label fw-bold">Storage Location</label>
-        <input type="text" class="form-control" id="storageLocation" placeholder="Storage Location" required>
-    </div>
-
-    <div class="col-md-3">
-        <label for="category" class="form-label fw-bold">Category</label>
-        <select class="form-select" id="category" required>
-            <option value="">Select Category</option>
-            <!-- Categories will be populated dynamically -->
-        </select>
-    </div>
-
-    <div class="col-md-3">
-        <label for="companyFee" class="form-label fw-bold">Rental Fee (₱)</label>
-        <div class="input-group">
-            <span class="input-group-text">₱</span>
-            <input type="number" class="form-control" id="companyFee" min="0" step="0.01" required placeholder="0.00">
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <label for="availabilityStatus" class="form-label fw-bold">Availability Status</label>
-        <select class="form-select" id="availabilityStatus" required>
-            <!-- Statuses will be populated dynamically -->
-        </select>
-    </div>
-</div>
-
-
-                                                <div class="row mb-4">
-                                                    <div class="col-md-4">
-                                                        <label for="rateType" class="form-label fw-bold">Rate Type</label>
-                                                        <select class="form-select" id="rateType" required>
-                                                            <option value="">Select Rate Type</option>
-                                                            <option value="Per Hour">Per Hour</option>
-                                                            <option value="Per Event">Per Event</option>
-                                                        </select>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <label for="department" class="form-label fw-bold">Owning
-                                                            Department</label>
-                                                        <select class="form-select" id="department" required>
-                                                            <!-- Departments will be populated dynamically -->
-                                                        </select>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <label for="minRentalHours" class="form-label fw-bold">Min. Rental
-                                                            Duration (hours)</label>
-                                                        <input type="number" class="form-control" id="minRentalHours"
-                                                            min="1" value="1" required>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                        </div>
+                        <!-- Image Deletion Confirmation Modal -->
+                        <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirm Image Deletion</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete this photo? This action cannot be undone.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Cancel</button>
+                                        <button type="button" class="btn btn-danger" id="confirmDeleteImageBtn">Delete
+                                            Photo</button>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                           <!-- Form Actions -->
-<div class="d-flex justify-content-center gap-2 mt-4">
-    <button type="submit" class="btn btn-primary">Add Equipment</button>
-    <button type="button" class="btn btn-secondary" id="cancelBtn">Discard</button>
-</div>
-
-                        </form>
+                        <!-- Inventory Items Card -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center"
+                                    style="height: 56px;">
+                                    <h5 class="fw-bold mb-0">Inventory Items</h5>
+                                    <button type="button" class="btn btn-sm btn-secondary" id="addItemBtn">
+                                        <i class="bi bi-plus me-1"></i>Add Item
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="itemsContainer">
+                                        <p class="text-muted">No items added yet. Click "Add Item" to track
+                                            individual equipment pieces.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-        </div>
+                    <!-- Equipment Details Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="fw-bold mb-0">Equipment Details</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="details-section">
+                                        <!-- Basic Information Section -->
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <label for="equipmentName" class="form-label fw-bold">
+                                                    Equipment Name
+                                                </label>
+                                                <input type="text" class="form-control" id="equipmentName"
+                                                    placeholder="Equipment Name" required>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label for="brand" class="form-label fw-bold">
+                                                    Brand
+                                                </label>
+                                                <input type="text" class="form-control" id="brand" placeholder="Brand">
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-4">
+                                            <div class="col-12 position-relative">
+                                                <label for="description" class="form-label fw-bold">
+                                                    Description
+                                                </label>
+                                                <textarea class="form-control" id="description" rows="3"
+                                                    placeholder="Write a short description..."></textarea>
+                                                <small class="text-muted position-absolute bottom-0 end-0 me-4 mb-1"
+                                                    id="descriptionWordCount">0/255 characters</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-4">
+                                            <div class="col-md-3">
+                                                <label for="storageLocation" class="form-label fw-bold">Storage
+                                                    Location</label>
+                                                <input type="text" class="form-control" id="storageLocation"
+                                                    placeholder="Storage Location" required>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label for="category" class="form-label fw-bold">Category</label>
+                                                <select class="form-select" id="category" required>
+                                                    <option value="">Select Category</option>
+                                                    <!-- Categories will be populated dynamically -->
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label for="companyFee" class="form-label fw-bold">Rental Fee
+                                                    (₱)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">₱</span>
+                                                    <input type="number" class="form-control" id="companyFee" min="0"
+                                                        step="0.01" required placeholder="0.00">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label for="availabilityStatus" class="form-label fw-bold">Availability
+                                                    Status</label>
+                                                <select class="form-select" id="availabilityStatus" required>
+                                                    <!-- Statuses will be populated dynamically -->
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row mb-4">
+                                            <div class="col-md-4">
+                                                <label for="rateType" class="form-label fw-bold">Rate Type</label>
+                                                <select class="form-select" id="rateType" required>
+                                                    <option value="">Select Rate Type</option>
+                                                    <option value="Per Hour">Per Hour</option>
+                                                    <option value="Per Event">Per Event</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label for="department" class="form-label fw-bold">Owning
+                                                    Department</label>
+                                                <select class="form-select" id="department" required>
+                                                    <!-- Departments will be populated dynamically -->
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label for="minRentalHours" class="form-label fw-bold">Min. Rental
+                                                    Duration (hours)</label>
+                                                <input type="number" class="form-control" id="minRentalHours" min="1"
+                                                    value="1" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-center gap-2 mt-4">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Equipment</button>
+                    </div>
+
+                </form>
+
+        </main>
         <!-- Event Modal -->
         <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
@@ -368,28 +467,27 @@
                                 </select>
                             </div>
 
-<!-- Barcode -->
-<div class="mb-3">
-    <label for="barcode" class="form-label fw-bold">Barcode Number</label>
-    <div class="input-group">
-        <input type="text" class="form-control" id="barcode" name="barcode"
-            placeholder="Generate barcode" readonly>
-        <button class="btn btn-outline-primary" type="button" id="generateBarcodeBtn">
-            <i class="bi bi-upc-scan"></i> Generate
-        </button>
-    </div>
+                            <!-- Barcode -->
+                            <div class="mb-3">
+                                <label for="barcode" class="form-label fw-bold">Barcode Number</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="barcode" name="barcode"
+                                        placeholder="Generate barcode" readonly>
+                                    <button class="btn btn-primary" type="button" id="generateBarcodeBtn">
+                                        <i class="bi bi-upc-scan"></i> Generate
+                                    </button>
+                                </div>
 
-    <!-- Barcode Preview -->
-    <div class="barcode-container d-none mt-3" id="barcodeContainer">
-        <canvas id="barcodePreview" class="barcode-preview"></canvas>
-        <div class="barcode-number" id="barcodeNumberDisplay"></div>
-        <div class="mt-2">
-            <button type="button" class="btn btn-sm btn-outline-primary" id="downloadBarcodeBtn">
-                <i class="bi bi-download"></i> Download
-            </button>
-        </div>
-    </div>
-</div>
+                                <!-- Barcode Preview -->
+                                <div class="barcode-container d-none mt-3" id="barcodeContainer">
+                                    <canvas id="barcodePreview" class="barcode-preview"></canvas>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-secondary" id="downloadBarcodeBtn">
+                                            <i class="bi bi-download"></i> Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- Notes -->
                             <div class="mb-3 position-relative">
@@ -409,17 +507,37 @@
                 </div>
             </div>
         </div>
+        <!-- Delete Item Confirmation Modal -->
+        <div class="modal fade" id="deleteItemModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Item Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete this item? The change will be applied when you click "Update
+                        Equipment".
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteItemBtn">Delete Item</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 @endsection
 
     @section('scripts')
         <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                   const barcodeInput = document.getElementById('barcode');
-            const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
-            const barcodeContainer = document.getElementById('barcodeContainer');
-            const barcodePreview = document.getElementById('barcodePreview'); // This is the canvas
-            const downloadBarcodeBtn = document.getElementById('downloadBarcodeBtn');
+                const barcodeInput = document.getElementById('barcode');
+                const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
+                const barcodeContainer = document.getElementById('barcodeContainer');
+                const barcodePreview = document.getElementById('barcodePreview'); // This is the canvas
+                const downloadBarcodeBtn = document.getElementById('downloadBarcodeBtn');
                 // 1. Global variables first
                 window.equipmentItems = [];
                 window.currentEditingItemId = null;
@@ -529,18 +647,18 @@
                     toast.style.borderRadius = '0.3rem';
 
                     toast.innerHTML = `
-                                <div class="d-flex align-items-center px-3 py-1"> 
-                                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                    <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                </div>
-                                <div class="loading-bar" style="
-                                    height: 3px;
-                                    background: rgba(255,255,255,0.7);
-                                    width: 100%;
-                                    transition: width ${duration}ms linear;
-                                "></div>
-                            `;
+                                        <div class="d-flex align-items-center px-3 py-1"> 
+                                            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                            <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                            <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                        </div>
+                                        <div class="loading-bar" style="
+                                            height: 3px;
+                                            background: rgba(255,255,255,0.7);
+                                            width: 100%;
+                                            transition: width ${duration}ms linear;
+                                        "></div>
+                                    `;
 
                     document.body.appendChild(toast);
 
@@ -657,7 +775,7 @@
                     } catch (error) {
                         console.error('Error saving image to database:', error);
                         showToast('Warning: Image uploaded but database save failed', 'warning');
-                        throw error;
+                        throw error; // Re-throw to handle in the calling function
                     }
                 }
 
@@ -688,15 +806,58 @@
 
                         // Check if the deletion was actually successful based on the actual response format
                         if (result.result && (result.result.deleted || result.result === 'ok' || result.result === 'success')) {
+                            // Success! The image was deleted from Cloudinary
+                            //  showToast('Image deleted from storage', 'success'); //
                             return result;
                         } else {
                             console.warn('Unexpected Cloudinary response format:', result);
+                            // Still consider it a success since the API call didn't fail
+                            //   showToast('Image cleanup completed', 'success'); //
                             return result;
                         }
 
                     } catch (error) {
                         console.error('Error deleting image from Cloudinary:', error);
                         showToast('Failed to delete from storage: ' + error.message, 'error');
+                        throw error;
+                    }
+                }
+
+                async function deleteImage(equipmentId, imageId, cloudinaryPublicId) {
+                    try {
+                        const token = localStorage.getItem('adminToken');
+
+                        // 1. Delete from Cloudinary via your simple backend endpoint
+                        if (cloudinaryPublicId) {
+                            await fetch(`http://127.0.0.1:8000/api/admin/cloudinary/delete`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ public_id: cloudinaryPublicId })
+                            });
+                            //       showToast('Image deleted from storage', 'success'); //
+                        }
+
+                        // 2. Delete from your database
+                        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/${imageId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to delete image from database');
+                        }
+
+                        //     showToast('Image reference deleted', 'success'); //
+
+                    } catch (error) {
+                        console.error('Error deleting image:', error);
+                        showToast('Failed to delete image: ' + error.message, 'error');
                         throw error;
                     }
                 }
@@ -884,7 +1045,7 @@
                     });
                 }
 
-                               // 18. Initialize Inventory Item Modal
+                // 18. Initialize Inventory Item Modal
                 const addItemBtn = document.getElementById('addItemBtn');
                 if (addItemBtn) {
                     const inventoryItemModal = new bootstrap.Modal('#inventoryItemModal');
@@ -926,8 +1087,8 @@
                                     if (removePhotoBtn) removePhotoBtn.classList.remove('d-none');
                                     if (itemPhotoPreview) {
                                         itemPhotoPreview.innerHTML = `
-                                    <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
-                                `;
+                                            <img src="${e.target.result}" class="img-thumbnail" style="max-height: 150px;">
+                                        `;
                                     }
 
                                     // Store the file for later processing
@@ -1027,132 +1188,132 @@
                         });
                     }
 
-// Improved barcode generation for optimal Quagga scanning
-if (generateBarcodeBtn && barcodeInput) {
-    generateBarcodeBtn.addEventListener('click', async function () {
-        const generateBarcodeBtn = this;
-        const originalText = generateBarcodeBtn.innerHTML;
+                    // Improved barcode generation for optimal Quagga scanning
+                    if (generateBarcodeBtn && barcodeInput) {
+                        generateBarcodeBtn.addEventListener('click', async function () {
+                            const generateBarcodeBtn = this;
+                            const originalText = generateBarcodeBtn.innerHTML;
 
-        try {
-            generateBarcodeBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating...';
-            generateBarcodeBtn.disabled = true;
+                            try {
+                                generateBarcodeBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating...';
+                                generateBarcodeBtn.disabled = true;
 
-            // Generate optimal barcode format for scanning
-            const randomPart = Math.random().toString(36).substring(2, 9).toUpperCase(); // 7 chars
-            const barcodeValue = `EQ-${randomPart}`;
+                                // Generate optimal barcode format for scanning
+                                const randomPart = Math.random().toString(36).substring(2, 9).toUpperCase(); // 7 chars
+                                const barcodeValue = `EQ-${randomPart}`;
 
-            barcodeInput.value = barcodeValue;
+                                barcodeInput.value = barcodeValue;
 
-            // Generate barcode with optimal settings for scanning
-            JsBarcode("#barcodePreview", barcodeValue, {
-                format: "CODE128",
-                width: 3, // Optimal width for scanning
-                height: 120, // Good height for reliability
-                displayValue: true,
-                fontSize: 16,
-                margin: 15, // Good margin
-                background: "#ffffff",
-                lineColor: "#000000", // Pure black for best contrast
-                valid: function(valid) {
-                    if (valid) {
-                        console.log('Barcode generated successfully:', barcodeValue);
-                    } else {
-                        console.warn('Barcode validation failed');
+                                // Generate barcode with optimal settings for scanning
+                                JsBarcode("#barcodePreview", barcodeValue, {
+                                    format: "CODE128",
+                                    width: 3, // Optimal width for scanning
+                                    height: 120, // Good height for reliability
+                                    displayValue: true,
+                                    fontSize: 16,
+                                    margin: 15, // Good margin
+                                    background: "#ffffff",
+                                    lineColor: "#000000", // Pure black for best contrast
+                                    valid: function (valid) {
+                                        if (valid) {
+                                            console.log('Barcode generated successfully:', barcodeValue);
+                                        } else {
+                                            console.warn('Barcode validation failed');
+                                        }
+                                    }
+                                });
+
+                                const barcodeNumberDisplay = document.getElementById('barcodeNumberDisplay');
+                                if (barcodeNumberDisplay) {
+                                    barcodeNumberDisplay.textContent = barcodeValue;
+                                    barcodeNumberDisplay.style.fontFamily = 'monospace'; // Better readability
+                                }
+
+                                barcodeContainer.classList.remove('d-none');
+                                barcodeInput.setAttribute('readonly', true);
+
+                                showToast('Barcode generated! Format: ' + barcodeValue, 'success');
+
+                                // Test barcode scannability
+                                setTimeout(() => {
+                                    testBarcodeScannability(barcodeValue);
+                                }, 1000);
+
+                            } catch (error) {
+                                console.error('Barcode generation error:', error);
+                                showToast('Failed to generate barcode', 'error');
+                            } finally {
+                                generateBarcodeBtn.innerHTML = originalText;
+                                generateBarcodeBtn.disabled = false;
+                            }
+                        });
                     }
-                }
-            });
 
-            const barcodeNumberDisplay = document.getElementById('barcodeNumberDisplay');
-            if (barcodeNumberDisplay) {
-                barcodeNumberDisplay.textContent = barcodeValue;
-                barcodeNumberDisplay.style.fontFamily = 'monospace'; // Better readability
-            }
+                    // Test barcode format for scannability
+                    function testBarcodeScannability(barcodeValue) {
+                        const tests = [
+                            { test: () => barcodeValue.length >= 8, message: 'Barcode should be at least 8 characters' },
+                            { test: () => barcodeValue.startsWith('EQ-'), message: 'Barcode should start with EQ-' },
+                            { test: () => /^EQ-[A-Z0-9]+$/.test(barcodeValue), message: 'Barcode should contain only letters and numbers after EQ-' },
+                            { test: () => barcodeValue.length <= 20, message: 'Barcode should not be too long' }
+                        ];
 
-            barcodeContainer.classList.remove('d-none');
-            barcodeInput.setAttribute('readonly', true);
-            
-            showToast('Barcode generated! Format: ' + barcodeValue, 'success');
-            
-            // Test barcode scannability
-            setTimeout(() => {
-                testBarcodeScannability(barcodeValue);
-            }, 1000);
+                        const failedTests = tests.filter(test => !test.test());
 
-        } catch (error) {
-            console.error('Barcode generation error:', error);
-            showToast('Failed to generate barcode', 'error');
-        } finally {
-            generateBarcodeBtn.innerHTML = originalText;
-            generateBarcodeBtn.disabled = false;
-        }
-    });
-}
+                        if (failedTests.length > 0) {
+                            console.warn('Barcode scannability issues:', failedTests.map(t => t.message));
+                            return false;
+                        }
 
-// Test barcode format for scannability
-function testBarcodeScannability(barcodeValue) {
-    const tests = [
-        { test: () => barcodeValue.length >= 8, message: 'Barcode should be at least 8 characters' },
-        { test: () => barcodeValue.startsWith('EQ-'), message: 'Barcode should start with EQ-' },
-        { test: () => /^EQ-[A-Z0-9]+$/.test(barcodeValue), message: 'Barcode should contain only letters and numbers after EQ-' },
-        { test: () => barcodeValue.length <= 20, message: 'Barcode should not be too long' }
-    ];
-
-    const failedTests = tests.filter(test => !test.test());
-    
-    if (failedTests.length > 0) {
-        console.warn('Barcode scannability issues:', failedTests.map(t => t.message));
-        return false;
-    }
-    
-    console.log('Barcode format is scannable:', barcodeValue);
-    return true;
-}
+                        console.log('Barcode format is scannable:', barcodeValue);
+                        return true;
+                    }
 
 
 
-   // Handle barcode download with better quality
-if (downloadBarcodeBtn) {
-    downloadBarcodeBtn.addEventListener('click', function () {
-        const barcodeValue = barcodeInput.value.trim();
-        if (!barcodeValue) {
-            showToast('Please generate a barcode first', 'error');
-            return;
-        }
+                    // Handle barcode download with better quality
+                    if (downloadBarcodeBtn) {
+                        downloadBarcodeBtn.addEventListener('click', function () {
+                            const barcodeValue = barcodeInput.value.trim();
+                            if (!barcodeValue) {
+                                showToast('Please generate a barcode first', 'error');
+                                return;
+                            }
 
-        try {
-            // Get the canvas element
-            const canvas = document.getElementById('barcodePreview');
-            if (!canvas) {
-                showToast('Barcode preview not found', 'error');
-                return;
-            }
+                            try {
+                                // Get the canvas element
+                                const canvas = document.getElementById('barcodePreview');
+                                if (!canvas) {
+                                    showToast('Barcode preview not found', 'error');
+                                    return;
+                                }
 
-            // Create a higher quality canvas for download
-            const downloadCanvas = document.createElement('canvas');
-            const downloadCtx = downloadCanvas.getContext('2d');
-            
-            // Double the resolution for better print quality
-            downloadCanvas.width = canvas.width * 2;
-            downloadCanvas.height = canvas.height * 2;
-            downloadCtx.scale(2, 2);
-            
-            // Draw the original barcode
-            downloadCtx.drawImage(canvas, 0, 0);
-            
-            // Create download link
-            const link = document.createElement('a');
-            link.download = `barcode-${barcodeValue}.png`;
-            link.href = downloadCanvas.toDataURL('image/png');
-            link.click();
+                                // Create a higher quality canvas for download
+                                const downloadCanvas = document.createElement('canvas');
+                                const downloadCtx = downloadCanvas.getContext('2d');
 
-            showToast('Barcode downloaded! Save as PNG for best scanning results.', 'success');
+                                // Double the resolution for better print quality
+                                downloadCanvas.width = canvas.width * 2;
+                                downloadCanvas.height = canvas.height * 2;
+                                downloadCtx.scale(2, 2);
 
-        } catch (error) {
-            console.error('Barcode download error:', error);
-            showToast('Failed to download barcode', 'error');
-        }
-    });
-}
+                                // Draw the original barcode
+                                downloadCtx.drawImage(canvas, 0, 0);
+
+                                // Create download link
+                                const link = document.createElement('a');
+                                link.download = `barcode-${barcodeValue}.png`;
+                                link.href = downloadCanvas.toDataURL('image/png');
+                                link.click();
+
+                                showToast('Barcode downloaded! Save as PNG for best scanning results.', 'success');
+
+                            } catch (error) {
+                                console.error('Barcode download error:', error);
+                                showToast('Failed to download barcode', 'error');
+                            }
+                        });
+                    }
 
                     // Save item functionality
                     if (saveItemBtn) {
@@ -1299,28 +1460,28 @@ if (downloadBarcodeBtn) {
                     };
 
                     itemElement.innerHTML = `
-                                <div class="card-body">
-                                    <div class="photo-container">
-                                        <img src="${updatedItem.image_url}" class="img-thumbnail">
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h6 class="card-title">${updatedItem.item_name}</h6>
-                                        <div class="d-flex flex-wrap gap-3">
-                                            <span class="badge ${conditionColors[updatedItem.condition.condition_name] || 'bg-secondary'}">${updatedItem.condition.condition_name}</span>
+                                        <div class="card-body">
+                                            <div class="photo-container">
+                                                <img src="${updatedItem.image_url}" class="img-thumbnail">
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="card-title">${updatedItem.item_name}</h6>
+                                                <div class="d-flex flex-wrap gap-3">
+                                                    <span class="badge ${conditionColors[updatedItem.condition.condition_name] || 'bg-secondary'}">${updatedItem.condition.condition_name}</span>
+                                                </div>
+                                                ${updatedItem.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${updatedItem.barcode_number}</div>` : ''}
+                                                ${updatedItem.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${updatedItem.item_notes.substring(0, 50)}${updatedItem.item_notes.length > 50 ? '...' : ''}</p>` : ''}
+                                            </div>
+                                            <div class="d-flex align-self-start">
+                                                <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal('${updatedItem.item_id}', event)">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem('${updatedItem.item_id}', '${updatedItem.cloudinary_public_id}', event)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                        ${updatedItem.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${updatedItem.barcode_number}</div>` : ''}
-                                        ${updatedItem.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${updatedItem.item_notes.substring(0, 50)}${updatedItem.item_notes.length > 50 ? '...' : ''}</p>` : ''}
-                                    </div>
-                                    <div class="d-flex align-self-start">
-                                        <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal('${updatedItem.item_id}', event)">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem('${updatedItem.item_id}', '${updatedItem.cloudinary_public_id}', event)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
+                                    `;
                 }
 
                 function addItemToUI(item) {
@@ -1336,28 +1497,28 @@ if (downloadBarcodeBtn) {
                     itemCard.className = 'card equipment-item';
                     itemCard.dataset.itemId = item.item_id;
                     itemCard.innerHTML = `
-                                <div class="card-body">
-                                    <div class="photo-container">
-                                        <img src="${item.image_url}" class="img-thumbnail">
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h6 class="card-title">${item.item_name}</h6>
-                                        <div class="d-flex flex-wrap gap-3">
-                                            <span class="badge ${conditionColors[item.condition.condition_name] || 'bg-secondary'}">${item.condition.condition_name}</span>
+                                        <div class="card-body">
+                                            <div class="photo-container">
+                                                <img src="${item.image_url}" class="img-thumbnail">
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="card-title">${item.item_name}</h6>
+                                                <div class="d-flex flex-wrap gap-3">
+                                                    <span class="badge ${conditionColors[item.condition.condition_name] || 'bg-secondary'}">${item.condition.condition_name}</span>
+                                                </div>
+                                                ${item.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${item.barcode_number}</div>` : ''}
+                                                ${item.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${item.item_notes.substring(0, 50)}${item.item_notes.length > 50 ? '...' : ''}</p>` : ''}
+                                            </div>
+                                            <div class="d-flex align-self-start">
+                                                <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal('${item.item_id}', event)">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem('${item.item_id}', '${item.cloudinary_public_id}', event)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                        ${item.barcode_number ? `<div class="mt-2"><strong>Barcode:</strong> ${item.barcode_number}</div>` : ''}
-                                        ${item.item_notes ? `<p class="mt-2 mb-0"><strong>Notes:</strong> ${item.item_notes.substring(0, 50)}${item.item_notes.length > 50 ? '...' : ''}</p>` : ''}
-                                    </div>
-                                    <div class="d-flex align-self-start">
-                                        <button type="button" class="btn btn-sm btn-primary me-1" onclick="openEditItemModal('${item.item_id}', event)">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteItem('${item.item_id}', '${item.cloudinary_public_id}', event)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
+                                    `;
 
                     if (itemsContainer) {
                         if (itemsContainer.querySelector('p.text-muted')) {
@@ -1547,7 +1708,7 @@ if (downloadBarcodeBtn) {
                     });
                 }
 
-                // 25. Form submission handler - FIXED FIELD NAMES
+                // 25. Form submission handler - FIXED VERSION
                 document.getElementById('addEquipmentForm').addEventListener('submit', async function (e) {
                     e.preventDefault();
 
@@ -1556,7 +1717,7 @@ if (downloadBarcodeBtn) {
                     try {
                         showToast('Creating equipment...', 'info');
 
-                        // 1. First create the equipment record - FIXED FIELD NAMES
+                        // 1. First create the equipment record
                         const formData = {
                             equipment_name: document.getElementById('equipmentName').value,
                             description: document.getElementById('description').value,
@@ -1589,15 +1750,32 @@ if (downloadBarcodeBtn) {
                         window.newEquipmentId = equipmentResult.data.equipment_id;
                         showToast('Equipment created successfully! Processing images and items...', 'success');
 
-                        // 2. Process equipment image uploads with the new equipment ID
-                        for (const upload of pendingImageUploads) {
+                        // 2. Process equipment image uploads with the new equipment ID - FIXED
+                        const uploadPromises = pendingImageUploads.map(async (upload) => {
                             try {
                                 const cloudinaryData = await uploadToCloudinary(upload.file, window.newEquipmentId);
                                 await saveImageToDatabase(window.newEquipmentId, cloudinaryData.secure_url, cloudinaryData.public_id);
+
+                                console.log('Equipment photo uploaded successfully:', cloudinaryData.secure_url);
+                                return { success: true, upload };
                             } catch (error) {
                                 console.error('Error uploading equipment image:', error);
-                                showToast('Warning: Failed to upload some images', 'warning');
+                                return { success: false, error, upload };
                             }
+                        });
+
+                        // Wait for all equipment photo uploads to complete
+                        const uploadResults = await Promise.allSettled(uploadPromises);
+
+                        // Check for failed uploads
+                        const failedUploads = uploadResults.filter(result =>
+                            result.status === 'fulfilled' && !result.value.success
+                        );
+
+                        if (failedUploads.length > 0) {
+                            showToast(`Warning: ${failedUploads.length} equipment photo(s) failed to upload`, 'warning');
+                        } else if (pendingImageUploads.length > 0) {
+                            showToast('All equipment photos uploaded successfully!', 'success');
                         }
 
                         // 3. Process item changes with the new equipment ID
@@ -1644,18 +1822,13 @@ if (downloadBarcodeBtn) {
                         pendingImageDeletions = [];
                         pendingItemPhotoChanges.clear();
 
-                        showToast('Equipment created successfully!', 'success');
+                        showToast('Equipment created successfully with all photos and items!', 'success');
                         setTimeout(() => {
                             window.location.href = '/admin/manage-equipment';
                         }, 1500);
 
                     } catch (error) {
                         console.error('Error creating equipment:', error);
-                        // Log error without exposing sensitive data
-                        console.log('Equipment creation error details:', {
-                            message: error.message,
-                            stack: error.stack
-                        });
                         showToast('Failed to create equipment: ' + error.message, 'error');
                     }
                 });

@@ -3,9 +3,13 @@
 @section('title', 'Manage Equipment')
 
 @section('content')
-
 <style>
-
+  .filters-row {
+  flex-wrap: nowrap !important;   
+  overflow-x: auto;             
+  overflow-y: hidden;            
+  white-space: nowrap;        
+}
   /* Toast notification styles */
 .toast {
     z-index: 1100;
@@ -61,13 +65,9 @@
 
   #equipmentContainer {
     flex: 1;
-    /* take up remaining space between header and pagination */
     overflow-y: auto;
-    /* allow inner scrolling */
-    min-height: 0;
-    /* IMPORTANT for flexbox scrolling */
+    min-height: 400px;
     padding-right: 8px;
-    /* Add right padding */
   }
 
   /* Custom thin scrollbar */
@@ -97,65 +97,65 @@
 
   <!-- Main Content -->
   <main>
-    <div class="container-fluid bg-light rounded p-4 d-flex flex-column h-100">
-      <div class="container-fluid d-flex flex-column h-100">
+<!-- Header & Controls -->
+<div>
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center">
+    <h2 class="card-title m-0 fw-bold"></h2>
+  </div>
 
-        <!-- Header & Controls -->
-        <div>
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="card-title m-0 fw-bold">Manage Equipment</h2>
-            <div>
-              <a href="{{ url('/admin/add-equipment') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle-fill me-2"></i>Add New
-              </a>
+  <!-- Filters, Search Bar & Buttons (single scrollable row) -->
+  <div class="row mb-3 g-2 align-items-center filters-row">
+    <div class="col-auto flex-shrink-0">
+      <select id="layoutSelect" class="form-select">
+        <option value="grid">Grid Layout</option>
+        <option value="list">List Layout</option>
+      </select>
+    </div>
 
-               <a href="{{ url('/admin/scan-equipment') }}" class="btn btn-primary">
-                <i class="fa-solid fa-camera me-2"></i>Barcode Scanner
-            </a>
-            </div>
-          </div>
+    <div class="col-auto flex-shrink-0">
+      <select id="statusFilter" class="form-select">
+        <option value="all">All Statuses</option>
+      </select>
+    </div>
 
-          <!-- Filters & Search Bar -->
-          <div class="row mb-3 g-2">
-            <div class="col-sm-6 col-md-2 col-lg-2">
-              <select id="layoutSelect" class="form-select">
-                <option value="grid">Grid Layout</option>
-                <option value="list">List Layout</option>
-              </select>
-            </div>
-            <div class="col-sm-6 col-md-2 col-lg-2">
-              <select id="statusFilter" class="form-select">
-                <option value="all">All Statuses</option>
-                <!-- Statuses will be populated dynamically -->
-              </select>
-            </div>
-            <div class="col-sm-6 col-md-2 col-lg-2">
-              <select id="categoryFilter" class="form-select">
-                <option value="all">All Categories</option>
-                <!-- Categories will be populated dynamically -->
-              </select>
-            </div>
-            <div class="col-sm-12 col-md-4 col-lg-4 ms-auto">
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                <input type="text" id="searchInput" class="form-control" placeholder="Search Equipment...">
-              </div>
-            </div>
-          </div>
+    <div class="col-auto flex-shrink-0">
+      <select id="categoryFilter" class="form-select">
+        <option value="all">All Categories</option>
+      </select>
+    </div>
 
-          <!-- Equipment List (scrollable) -->
-          <div id="equipmentContainer" class="flex-grow-1 overflow-auto" style="height: calc(100vh - 300px);">
-            <div class="row g-2" id="equipmentCardsContainer">
-              <div class="col-12 text-center py-5" id="loadingIndicator">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2">Loading equipment...</p>
-              </div>
-              <div class="col-12 text-center py-5 d-none" id="noResultsMessage">
-                <i class="bi bi-exclamation-circle fs-1 text-muted"></i>
-                <p class="mt-2 text-muted">No equipment found matching your criteria</p>
-              </div>
-            </div>
-          </div>
+    <div class="col flex-grow-1">
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" id="searchInput" class="form-control" placeholder="Search Equipment...">
+      </div>
+    </div>
+
+    <div class="col-auto text-nowrap">
+      <a href="{{ url('/admin/add-equipment') }}" class="btn btn-primary me-2">
+        <i class="bi bi-plus-circle-fill me-2"></i>Add New
+      </a>
+      <a href="{{ url('/admin/scan-equipment') }}" class="btn btn-primary">
+        <i class="fa-solid fa-camera me-2"></i>Barcode Scanner
+      </a>
+    </div>
+  </div>
+
+  <!-- Equipment List (scrollable) -->
+  <div id="equipmentContainer" class="flex-grow-1 overflow-auto" style="height: calc(100vh - 300px);">
+    <div class="row g-2" id="equipmentCardsContainer">
+      <div class="col-12 text-center py-5" id="loadingIndicator">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Loading equipment...</p>
+      </div>
+      <div class="col-12 text-center py-5 d-none" id="noResultsMessage">
+        <i class="bi bi-exclamation-circle fs-1 text-muted"></i>
+        <p class="mt-2 text-muted">No equipment found matching your criteria</p>
+      </div>
+    </div>
+  </div>
+</div>
 
           <!-- Pagination Controls (fixed at bottom) -->
           <div class="d-flex justify-content-center mt-auto pt-3">
@@ -179,8 +179,6 @@
               </ul>
             </nav>
           </div>
-        </div>
-      </div>
   </main>
 @endsection
 
@@ -678,8 +676,13 @@ window.showToast = function (message, type = 'success', duration = 3000) {
 };
 
       // Delete equipment
-     async function deleteEquipment(id) {
+    async function deleteEquipment(id) {
     try {
+        console.log('Starting equipment deletion process', {
+            equipmentId: id,
+            timestamp: new Date().toISOString()
+        });
+
         const response = await fetch(
             `http://127.0.0.1:8000/api/admin/equipment/${id}`,
             {
@@ -687,12 +690,23 @@ window.showToast = function (message, type = 'success', duration = 3000) {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     Accept: "application/json",
+                    'Content-Type': 'application/json'
                 },
             }
         );
 
+        console.log('Delete request completed', {
+            equipmentId: id,
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok
+        });
+
         if (response.status === 401) {
-            console.error("Unauthorized: Invalid or expired token.");
+            console.error('Authentication failed during deletion', {
+                equipmentId: id,
+                status: 401
+            });
             localStorage.removeItem("adminToken");
             alert("Your session has expired. Please log in again.");
             setTimeout(() => {
@@ -702,16 +716,50 @@ window.showToast = function (message, type = 'success', duration = 3000) {
         }
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Failed to delete equipment");
+            // Try to get detailed error message from response
+            let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorMessage;
+                console.error('Backend error response', {
+                    equipmentId: id,
+                    errorData: errorData,
+                    status: response.status
+                });
+            } catch (parseError) {
+                console.error('Failed to parse error response', {
+                    equipmentId: id,
+                    parseError: parseError.message,
+                    status: response.status
+                });
+            }
+            
+            throw new Error(errorMessage);
         }
 
         const result = await response.json();
+        console.log('Equipment deletion successful', {
+            equipmentId: id,
+            backendResponse: result,
+            cloudinaryImagesDeleted: result.cloudinary_images_deleted || 0
+        });
+
         return true;
 
     } catch (error) {
-        console.error("Error deleting equipment:", error);
-        alert(error.message || "Failed to delete equipment");
+        console.error('Equipment deletion failed', {
+            equipmentId: id,
+            error: error.message,
+            stack: error.stack,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Show more detailed error message to user
+        const userMessage = error.message.includes('Failed to fetch') 
+            ? 'Network error: Could not connect to server. Please check your connection.'
+            : error.message;
+            
+        alert(userMessage);
         throw error;
     }
 }
