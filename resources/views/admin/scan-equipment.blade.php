@@ -5,36 +5,55 @@
 @section('content')
 
     <style>
-        /* Add to your existing CSS */
-        #update-item-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
+        /* Equipment Item Image Styles */
+        #equipment-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1rem 0;
+            padding: 0.40rem;
+            background-color: #ffffff;
             border-radius: 10px;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            color: #012952;
-            min-width: 400px;
-            max-width: 90vw;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.36);
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        #update-item-modal input,
-        #update-item-modal select,
-        #update-item-modal textarea {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 1rem;
+        #equipment-item-image {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        #update-item-modal label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
+        /* Button disabled states */
+        .button-small:disabled {
+            opacity: 0.6;
+            cursor: not-allowed !important;
+        }
+
+        .button-small:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Ensure both status badges display inline and have proper spacing */
+        .info-item .badge-status {
+            display: inline-block;
+            padding: 0.3rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        /* Make sure the info items have proper spacing */
+        .info-item {
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         /* Scanner layout */
@@ -246,28 +265,33 @@
                 </div>
             </div>
 
-            <!-- Equipment Details Section -->
-            <div class="info-box" id="equipment-info" style="display:none;">
-                <h5>Equipment Details</h5>
-                <div class="info-item"><span class="info-label">Name:</span> <span class="info-value" id="eq-name"></span>
-                </div>
-                <div class="info-item"><span class="info-label">Department:</span> <span class="info-value"
-                        id="eq-department"></span></div>
-                <div class="info-item"><span class="info-label">Status:</span> <span class="info-value"><span id="eq-status"
-                            class="badge-status"></span></span></div>
-                <div class="info-item"><span class="info-label">Available Stock:</span> <span class="info-value"
-                        id="eq-stock"></span></div>
-                <div class="info-item"><span class="info-label">Price:</span> <span class="info-value">₱<span
-                            id="eq-price"></span></span></div>
-                <div class="info-item"><span class="info-label">Description:</span> <span class="info-value"
-                        id="eq-description"></span></div>
+        <!-- Equipment Details Section -->
+<div class="info-box" id="equipment-info" style="display:none;">
+    <h5>Equipment Details</h5>
 
-                <!-- Action buttons -->
-                <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
-                    <button id="borrow-btn" class="button-small" style="background: #28a745; color: white;">Borrow</button>
-                    <button id="return-btn" class="button-small" style="background: #17a2b8; color: white;">Return</button>
-                </div>
-            </div>
+    <!-- Equipment Item Image -->
+    <div id="equipment-image-container">
+        <img id="equipment-item-image" src="" alt="Equipment Item" style="display:none;">
+    </div>
+
+    <div class="info-item"><span class="info-label">Name:</span> <span class="info-value" id="eq-name"></span></div>
+    <div class="info-item"><span class="info-label">Department:</span> <span class="info-value" id="eq-department"></span></div>
+
+    <!-- Condition Status -->
+    <div class="info-item"><span class="info-label">Condition:</span> <span class="info-value"><span id="eq-condition" class="badge-status"></span></span></div>
+
+    <div class="info-item"><span class="info-label">Available Stock:</span> <span class="info-value" id="eq-stock"></span></div>
+    <div class="info-item"><span class="info-label">Price:</span> <span class="info-value">₱<span id="eq-price"></span></span></div>
+    
+    <!-- Changed from "Description" to "Item Notes" -->
+    <div class="info-item"><span class="info-label">Item Notes:</span> <span class="info-value" id="eq-description"></span></div>
+
+    <!-- Action buttons -->
+    <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+        <button id="borrow-btn" class="button-small" style="background: #28a745; color: white;">Borrow</button>
+        <button id="return-btn" class="button-small" style="background: #17a2b8; color: white;">Return</button>
+    </div>
+</div>
         </div>
     </main>
 
@@ -292,6 +316,10 @@
             const eqStock = document.getElementById("eq-stock");
             const eqPrice = document.getElementById("eq-price");
             const eqDescription = document.getElementById("eq-description");
+            const eqCondition = document.getElementById("eq-condition");
+            const equipmentImage = document.getElementById("equipment-item-image");
+            const equipmentImageContainer = document.getElementById("equipment-image-container");
+
 
             const stopBtn = document.getElementById("stop-scan");
             const resumeBtn = document.getElementById("resume-scan");
@@ -314,91 +342,162 @@
                 return window.conditions[conditionId] || "Unknown";
             }
 
-            function getStatusClass(status) {
-                if (!status) return "status-unavailable";
-                switch (status.toLowerCase()) {
-                    case "available": return "status-available";
-                    case "used": return "status-used";
-                    case "under maintenance": return "status-maintenance";
-                    case "unavailable": return "status-unavailable";
-                    default: return "status-unavailable";
+            function getStatusClass(conditionName) {
+                if (!conditionName) return "status-unavailable";
+
+                // Map condition names to appropriate status classes
+                const conditionMap = {
+                    'new': 'status-available',
+                    'good': 'status-available',
+                    'fair': 'status-available',
+                    'available': 'status-available',
+                    'needs maintenance': 'status-maintenance',
+                    'under maintenance': 'status-maintenance',
+                    'damaged': 'status-unavailable',
+                    'in use': 'status-used',
+                    'unavailable': 'status-unavailable'
+                };
+
+                const normalizedCondition = conditionName.toLowerCase().trim();
+                return conditionMap[normalizedCondition] || "status-unavailable";
+            }
+
+async function fetchEquipmentDetails(code) {
+    try {
+        const response = await fetch(`/api/scanner/scan`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ barcode: code })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Equipment not found");
+        }
+
+        if (data.status === 'error') {
+            throw new Error(data.message);
+        }
+
+        // Update to match the response structure from ScannerController
+        const item = data.item;
+        const equipment = item.equipment_details;
+
+        // FIX: Use item_name from equipment_items table instead of equipment name
+        eqName.textContent = item.item_name || "N/A";
+        eqDepartment.textContent = equipment.department_id || "N/A";
+
+        // Display Condition Status
+        const conditionName = item.condition_name || getConditionName(item.condition_id);
+        eqCondition.textContent = conditionName;
+        eqCondition.className = "badge-status " + getConditionStatusClass(conditionName);
+
+        // FIX: Use the accurate stock calculation
+        eqStock.textContent = data.available_stock + " / " + data.total_stock;
+        eqPrice.textContent = equipment.external_fee || "0.00";
+        
+        // Display item_notes instead of equipment description
+        eqDescription.textContent = item.item_notes || "No notes available";
+
+        // Display Equipment Item Image
+        displayEquipmentItemImage(item);
+
+        // Update action buttons based on item condition
+        updateActionButtons(item);
+
+        // STORE THE EQUIPMENT ID FOR LATER USE IN UPDATE FUNCTION
+        window.currentEquipmentId = equipment.equipment_id;
+
+        infoBox.style.display = "block";
+
+    } catch (error) {
+        console.error("Error fetching equipment:", error);
+        eqName.textContent = "Not Found";
+        eqDepartment.textContent = "-";
+        eqCondition.textContent = "Unknown";
+        eqCondition.className = "badge-status status-unavailable";
+        eqStock.textContent = "0";
+        eqPrice.textContent = "0.00";
+        eqDescription.textContent = error.message || "No notes available";
+
+        // Hide image on error
+        equipmentImage.style.display = "none";
+
+        infoBox.style.display = "block";
+        showToast(error.message || 'Equipment not found in database', 'error');
+    }
+}
+            function displayEquipmentItemImage(item) {
+                if (item.cloudinary_public_id && item.cloudinary_public_id !== 'oxvsxogzu9koqhctnf7s') {
+                    // Construct Cloudinary URL with transformations
+                    const imageUrl = `https://res.cloudinary.com/dn98ntlkd/image/upload/w_300,h_200,c_fill/${item.cloudinary_public_id}.webp`;
+
+                    equipmentImage.src = imageUrl;
+                    equipmentImage.alt = item.item_name || 'Equipment Item';
+                    equipmentImage.style.display = 'block';
+
+                    // Add error handling for broken images
+                    equipmentImage.onerror = function () {
+                        console.warn('Failed to load equipment item image, using fallback');
+                        equipmentImage.style.display = 'none';
+                    };
+                } else {
+                    // Hide image if no valid public_id or using default placeholder
+                    equipmentImage.style.display = 'none';
                 }
             }
 
-            async function fetchEquipmentDetails(code) {
-                try {
-                    const response = await fetch(`/api/scanner/scan`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({ barcode: code })
-                    });
+            function getConditionStatusClass(conditionName) {
+                if (!conditionName) return "status-unavailable";
 
-                    const data = await response.json();
+                // Map condition names to appropriate status classes
+                const conditionMap = {
+                    'new': 'status-available',
+                    'good': 'status-available',
+                    'fair': 'status-available',
+                    'needs maintenance': 'status-maintenance',
+                    'damaged': 'status-unavailable',
+                    'in use': 'status-used'
+                };
 
-                    if (!response.ok) {
-                        throw new Error(data.message || "Equipment not found");
-                    }
-
-                    if (data.status === 'error') {
-                        throw new Error(data.message);
-                    }
-
-                    // Update to match the response structure from ScannerController
-                    const item = data.item;
-                    const equipment = item.equipment_details;
-
-                    eqName.textContent = equipment.name || "N/A";
-                    eqDepartment.textContent = equipment.department_id || "N/A";
-
-                    // Display condition instead of availability status for better accuracy
-                    const conditionName = getConditionName(item.condition_id);
-                    eqStatus.textContent = conditionName;
-                    eqStatus.className = "badge-status " + getStatusClass(conditionName);
-
-                    eqStock.textContent = data.available_stock + " / " + data.total_stock;
-                    eqPrice.textContent = equipment.external_fee || "0.00";
-                    eqDescription.textContent = equipment.description || "No description";
-
-                    // Update action buttons based on item condition
-                    updateActionButtons(item);
-
-                    // STORE THE EQUIPMENT ID FOR LATER USE IN UPDATE FUNCTION
-                    window.currentEquipmentId = equipment.equipment_id;
-
-                    infoBox.style.display = "block";
-                    showToast('Equipment found successfully!', 'success');
-
-                } catch (error) {
-                    console.error("Error fetching equipment:", error);
-                    eqName.textContent = "Not Found";
-                    eqDepartment.textContent = "-";
-                    eqStatus.textContent = "Unavailable";
-                    eqStatus.className = "badge-status status-unavailable";
-                    eqStock.textContent = "0";
-                    eqPrice.textContent = "0.00";
-                    eqDescription.textContent = error.message || "No data available";
-                    infoBox.style.display = "block";
-                    showToast(error.message || 'Equipment not found in database', 'error');
-                }
+                const normalizedCondition = conditionName.toLowerCase().trim();
+                return conditionMap[normalizedCondition] || "status-unavailable";
             }
 
             function updateActionButtons(itemData) {
+                const borrowBtn = document.getElementById('borrow-btn');
                 const returnBtn = document.getElementById('return-btn');
+
+                // Disable borrow button if condition is 'In Use' (condition_id = 6)
+                if (itemData.condition_id === 6) {
+                    borrowBtn.disabled = true;
+                    borrowBtn.style.opacity = '0.6';
+                    borrowBtn.style.cursor = 'not-allowed';
+                    borrowBtn.title = 'Cannot borrow - Item is already in use';
+                } else {
+                    borrowBtn.disabled = false;
+                    borrowBtn.style.opacity = '1';
+                    borrowBtn.style.cursor = 'pointer';
+                    borrowBtn.title = 'Borrow this item';
+                }
 
                 // Enable return button only if item is "In Use" (condition_id = 6)
                 if (itemData.condition_id === 6) {
                     returnBtn.disabled = false;
                     returnBtn.style.opacity = '1';
                     returnBtn.style.cursor = 'pointer';
+                    returnBtn.title = 'Return this item';
                 } else {
                     returnBtn.disabled = true;
                     returnBtn.style.opacity = '0.6';
                     returnBtn.style.cursor = 'not-allowed';
+                    returnBtn.title = 'Cannot return - Item is not in use';
                 }
             }
 
@@ -523,7 +622,7 @@
                     const data = await response.json();
 
                     if (data.status === 'success') {
-                        showToast(data.message || 'Item borrowed successfully! Condition changed to "In Use"', 'success');
+                        showToast(data.message || 'Item borrowed successfully.', 'success');
                         fetchEquipmentDetails(currentBarcode); // Refresh data
                     } else {
                         throw new Error(data.message || 'Unknown error occurred');
@@ -534,87 +633,70 @@
                 }
             }
 
-            // Updated return function - changes condition back to 'Available' and opens update modal
-            async function handleReturn() {
-                if (!currentBarcode) return;
+async function handleReturn() {
+    if (!currentBarcode) return;
 
-                try {
-                    const response = await fetch('/api/scanner/return', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            barcode: currentBarcode
-                        })
-                    });
+    try {
+        const response = await fetch('/api/scanner/return', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                barcode: currentBarcode
+            })
+        });
 
-                    // Check if response is OK before parsing JSON
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+        // Check if response is OK before parsing JSON
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-                    const data = await response.json();
+        const data = await response.json();
 
-                    if (data.status === 'success') {
-                        showToast(data.message || 'Item returned successfully! Condition changed to "Available"', 'success');
-
-                        // Open the update item modal with the returned item data
-                        showUpdateItemModal(data.item);
-
-                        fetchEquipmentDetails(currentBarcode); // Refresh data
-                    } else {
-                        throw new Error(data.message || 'Unknown error occurred');
-                    }
-                } catch (error) {
-                    console.error('Return error:', error);
-                    showToast('Failed to process return request: ' + error.message, 'error');
-                }
-            }
+        if (data.status === 'success') {
+            showUpdateItemModal(data.item);
+            
+        } else {
+            throw new Error(data.message || 'Unknown error occurred');
+        }
+    } catch (error) {
+        console.error('Return error:', error);
+        showToast('Failed to process return request: ' + error.message, 'error');
+    }
+}
 
             // Function to show update item modal
-            function showUpdateItemModal(itemData) {
-                // Create or show update modal
-                let updateModal = document.getElementById('update-item-modal');
-                if (!updateModal) {
-                    updateModal = document.createElement('div');
-                    updateModal.id = 'update-item-modal';
-                    updateModal.style.position = 'fixed';
-                    updateModal.style.top = '50%';
-                    updateModal.style.left = '50%';
-                    updateModal.style.transform = 'translate(-50%, -50%)';
-                    updateModal.style.backgroundColor = 'white';
-                    updateModal.style.padding = '20px';
-                    updateModal.style.borderRadius = '10px';
-                    updateModal.style.zIndex = '1000';
-                    updateModal.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-                    updateModal.style.color = '#012952';
-                    updateModal.style.minWidth = '400px';
-                    updateModal.style.maxWidth = '90vw';
-
-                    updateModal.innerHTML = `
-                        <h4>Update Equipment Item</h4>
+      function showUpdateItemModal(itemData) {
+    // Store the item data for later use
+    window.currentItemData = itemData;
+    
+    // Create Bootstrap modal if it doesn't exist
+    let updateModal = document.getElementById('update-item-modal');
+    if (!updateModal) {
+        updateModal = document.createElement('div');
+        updateModal.id = 'update-item-modal';
+        updateModal.className = 'modal fade';
+        updateModal.tabIndex = -1;
+        updateModal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update Equipment Item</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
                         <form id="update-item-form">
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Item Name:</label>
-                                <input type="text" id="item-name" name="item_name" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;" required>
+                            <div class="mb-3">
+                                <label class="form-label">Item Name:</label>
+                                <input type="text" id="item-name" name="item_name" class="form-control" required>
                             </div>
 
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Status:</label>
-                                <select id="item-status" name="status_id" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
-                                    <option value="1">Available</option>
-                                    <option value="2">In Use</option>
-                                    <option value="3">Under Maintenance</option>
-                                    <option value="4">Unavailable</option>
-                                </select>
-                            </div>
-
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Condition:</label>
-                                <select id="item-condition" name="condition_id" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                            <div class="mb-3">
+                                <label class="form-label">Condition:</label>
+                                <select id="item-condition" name="condition_id" class="form-select">
                                     <option value="1">New</option>
                                     <option value="2">Good</option>
                                     <option value="3">Fair</option>
@@ -624,83 +706,102 @@
                                 </select>
                             </div>
 
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Item Notes:</label>
-                                <textarea id="item-notes" name="item_notes" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; min-height: 80px;"></textarea>
-                            </div>
-
-                            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                                <button type="button" id="cancel-update" style="padding: 8px 16px; border: 1px solid #ddd; border-radius: 5px; background: #f8f9fa; cursor: pointer;">Cancel</button>
-                                <button type="submit" id="save-update" style="padding: 8px 16px; border: none; border-radius: 5px; background: #28a745; color: white; cursor: pointer;">Save Changes</button>
+                            <div class="mb-3">
+                                <label class="form-label">Item Notes:</label>
+                                <textarea id="item-notes" name="item_notes" class="form-control" rows="3"></textarea>
                             </div>
                         </form>
-                    `;
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="save-update" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(updateModal);
 
-                    document.body.appendChild(updateModal);
+        // Add event listener for save button
+        document.getElementById('save-update').addEventListener('click', async () => {
+            await updateItem(window.currentItemData.item_id);
+        });
 
-                    // Add event listeners
-                    document.getElementById('cancel-update').addEventListener('click', () => {
-                        document.body.removeChild(updateModal);
-                    });
-
-                    document.getElementById('update-item-form').addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        await updateItem(itemData.item_id);
-                    });
-                }
-
-                // Populate form with current item data
-                document.getElementById('item-name').value = itemData.item_name || '';
-                document.getElementById('item-status').value = itemData.status_id || 1;
-                document.getElementById('item-condition').value = itemData.condition_id || 2;
-                document.getElementById('item-notes').value = itemData.item_notes || '';
-
-                updateModal.style.display = 'block';
+        // Remove the old hidden.bs.modal event listener and add a new one
+        updateModal.addEventListener('hidden.bs.modal', function () {
+            // Only refresh if we didn't just save changes (handled in updateItem)
+            if (!window.itemWasJustUpdated) {
+                fetchEquipmentDetails(currentBarcode);
             }
+            window.itemWasJustUpdated = false;
+        });
+    }
 
+    // Populate form with current item data
+    document.getElementById('item-name').value = itemData.item_name || '';
+    document.getElementById('item-condition').value = itemData.condition_id || 2;
+    document.getElementById('item-notes').value = itemData.item_notes || '';
+
+    // Reset the update flag
+    window.itemWasJustUpdated = false;
+
+    // Show the modal using Bootstrap
+    const bootstrapModal = new bootstrap.Modal(updateModal);
+    bootstrapModal.show();
+}
             // Function to update item
-            async function updateItem(itemId) {
-                try {
-                    const formData = {
-                        item_name: document.getElementById('item-name').value,
-                        status_id: parseInt(document.getElementById('item-status').value),
-                        condition_id: parseInt(document.getElementById('item-condition').value),
-                        item_notes: document.getElementById('item-notes').value
-                    };
+    async function updateItem(itemId) {
+    try {
+        const formData = {
+            item_name: document.getElementById('item-name').value,
+            condition_id: parseInt(document.getElementById('item-condition').value),
+            item_notes: document.getElementById('item-notes').value
+        };
 
-                    // Get equipment_id from the stored value
-                    const equipmentId = window.currentEquipmentId;
+        console.log('Updating item:', { itemId, formData }); // Debug log
 
-                    if (!equipmentId) {
-                        throw new Error('Equipment ID not found. Please scan the item again.');
-                    }
+        // Use the scanner update route
+        const response = await fetch(`/api/scanner/update-item/${itemId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(formData)
+        });
 
-                    const response = await fetch(`/api/equipment/${equipmentId}/items/${itemId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify(formData)
-                    });
+        // Check if response is OK before parsing JSON
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server response:', errorText);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-                    // Check if response is OK before parsing JSON
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+        const data = await response.json();
 
-                    const data = await response.json();
+        if (data.status === 'success') {
+            showToast('Item updated successfully.', 'success');
+            
+            // Hide the modal using Bootstrap
+            const updateModal = document.getElementById('update-item-modal');
+            const bootstrapModal = bootstrap.Modal.getInstance(updateModal);
+            bootstrapModal.hide();
+            
+            // IMPORTANT: Refresh the equipment details to show updated state
+            // Wait a brief moment for modal to close completely
+            setTimeout(() => {
+                fetchEquipmentDetails(currentBarcode);
+            }, 300);
+            
+        } else {
+            throw new Error(data.message || 'Unknown error occurred');
+        }
 
-                    showToast('Item updated successfully!', 'success');
-                    document.body.removeChild(document.getElementById('update-item-modal'));
-                    fetchEquipmentDetails(currentBarcode); // Refresh data
-
-                } catch (error) {
-                    console.error('Update item error:', error);
-                    showToast('Failed to update item: ' + error.message, 'error');
-                }
-            }
+    } catch (error) {
+        console.error('Update item error:', error);
+        showToast('Failed to update item: ' + error.message, 'error');
+    }
+}
 
             // Show confirmation dialog
             function showConfirmationUI(action, timeoutSeconds) {
@@ -721,11 +822,11 @@
                     confirmationDialog.style.color = '#012952';
 
                     confirmationDialog.innerHTML = `
-                                <h4>Confirm ${action === 'borrow' ? 'Borrow' : 'Return'}</h4>
-                                <p>Please confirm this action. Auto-cancelling in <span id="countdown">${timeoutSeconds}</span> seconds.</p>
-                                <button id="confirm-action">Confirm</button>
-                                <button id="cancel-action">Cancel</button>
-                            `;
+                                            <h4>Confirm ${action === 'borrow' ? 'Borrow' : 'Return'}</h4>
+                                            <p>Please confirm this action. Auto-cancelling in <span id="countdown">${timeoutSeconds}</span> seconds.</p>
+                                            <button id="confirm-action">Confirm</button>
+                                            <button id="cancel-action">Cancel</button>
+                                        `;
 
                     document.body.appendChild(confirmationDialog);
 
@@ -780,7 +881,7 @@
                     const data = await response.json();
 
                     if (data.status === 'success') {
-                        alert(`Item ${action === 'borrow' ? 'borrowed' : 'returned'} successfully!`);
+                        alert(`Item ${action === 'borrow' ? 'borrowed' : 'returned'} successfully.`);
                         fetchEquipmentDetails(currentBarcode); // Refresh data
                     } else {
                         alert('Error: ' + data.message);

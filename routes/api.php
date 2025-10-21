@@ -101,6 +101,7 @@ Route::prefix('scanner')->group(function () {
     Route::post('/scan', [ScannerController::class, 'scan']);
     Route::post('/borrow', [ScannerController::class, 'borrow']);
     Route::post('/return', [ScannerController::class, 'return']);
+    Route::put('/update-item/{itemId}', [ScannerController::class, 'updateItem']);
 });
 
 // ---------------- Barcode Generation ---------------- //

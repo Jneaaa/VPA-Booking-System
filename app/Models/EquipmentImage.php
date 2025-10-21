@@ -22,6 +22,19 @@ class EquipmentImage extends Model
         'image_type'
     ];
 
+    /* Migration format:
+    Columns:
+        image_id bigint UN AI PK 
+        equipment_id bigint UN 
+        image_url varchar(255) 
+        cloudinary_public_id varchar(255) 
+        description varchar(80) 
+        sort_order int 
+        image_type enum('Primary','Secondary') 
+        created_at timestamp 
+        updated_at timestamp
+    */
+
     public function equipment()
     {
         return $this->belongsTo(Equipment::class, 'equipment_id', 'equipment_id');
