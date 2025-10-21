@@ -13,7 +13,7 @@ class ScannerController extends Controller
     /**
      * Handle barcode scanning and return equipment details
      */
-  public function scan(Request $request): JsonResponse
+public function scan(Request $request): JsonResponse
 {
     $request->validate([
         'barcode' => 'required|string'
@@ -83,7 +83,7 @@ class ScannerController extends Controller
             'scanned_barcode' => $barcode
         ]);
 
-        // Get current active bookings for this item
+        // Get current active bookings for this equipment
         $currentBookings = RequestedEquipment::with([
             'requisitionForm' => function($query) {
                 $query->where('is_closed', false)
@@ -95,24 +95,36 @@ class ScannerController extends Controller
               return $requestedEquipment->requisitionForm !== null;
           });
 
-        // Calculate available stock - REMOVE deleted_at condition
-        $totalItems = EquipmentItem::where('equipment_id', $item->equipment_id)->count();
-        
+        // Calculate available stock using the same logic as EquipmentController
+        $totalItems = EquipmentItem::where('equipment_id', $item->equipment_id)
+                                 ->where('status_id', '!=', 5) // Exclude hidden items
+                                 ->count();
+
+        // Calculate available quantity (status=1 AND condition in [1,2,3])
+        $availableCount = EquipmentItem::where('equipment_id', $item->equipment_id)
+                                     ->where('status_id', 1) // Available status
+                                     ->whereIn('condition_id', [1, 2, 3]) // New, Good, Fair
+                                     ->where('status_id', '!=', 5) // Exclude hidden
+                                     ->count();
+
         $bookedItems = $currentBookings->sum('quantity');
-        $availableStock = $totalItems - $bookedItems;
+        $availableStock = max(0, $availableCount - $bookedItems);
 
         // Format response data
         $responseData = [
             'status' => 'success',
             'item' => [
                 'item_id' => $item->item_id,
-                'item_name' => $item->item_name,
+                'item_name' => $item->item_name, // Use item_name from equipment_items
                 'barcode_number' => $item->barcode_number,
-                'condition' => $item->condition,
+                'condition_id' => $item->condition_id,
+                'condition_name' => $item->condition->condition_name,
                 'image_url' => $item->image_url,
+                'cloudinary_public_id' => $item->cloudinary_public_id,
+                'item_notes' => $item->item_notes,
                 'equipment_details' => [
                     'equipment_id' => $item->equipment->equipment_id,
-                    'name' => $item->equipment->equipment_name,
+                    'name' => $item->equipment->equipment_name, // Keep equipment name for reference
                     'description' => $item->equipment->description,
                     'brand' => $item->equipment->brand,
                     'storage_location' => $item->equipment->storage_location,
@@ -120,8 +132,9 @@ class ScannerController extends Controller
                     'rate_type' => $item->equipment->rate_type,
                     'department_id' => $item->equipment->department->department_name ?? 'N/A',
                     'category' => $item->equipment->category->category_name ?? 'N/A',
+                    'availability_status' => $item->equipment->status->status_name,
+                    'availability_status_id' => $item->equipment->status_id,
                 ],
-                'availability_status' => $item->equipment->status
             ],
             'current_bookings' => $currentBookings->map(function($booking) {
                 return [
@@ -135,8 +148,10 @@ class ScannerController extends Controller
                     'requester' => $booking->requisitionForm->first_name . ' ' . $booking->requisitionForm->last_name
                 ];
             }),
-            'available_stock' => max(0, $availableStock),
+            'available_stock' => $availableStock,
             'total_stock' => $totalItems,
+            'available_count' => $availableCount, // Add this for debugging
+            'booked_items' => $bookedItems, // Add this for debugging
             'scan_debug' => [
                 'scanned_barcode' => $barcode,
                 'matched_barcode' => $item->barcode_number,
@@ -147,7 +162,9 @@ class ScannerController extends Controller
         \Log::info('Scanner: Successfully processed scan', [
             'item_id' => $item->item_id,
             'available_stock' => $availableStock,
-            'total_stock' => $totalItems
+            'total_stock' => $totalItems,
+            'available_count' => $availableCount,
+            'booked_items' => $bookedItems
         ]);
 
         return response()->json($responseData);
@@ -213,7 +230,7 @@ public function borrow(Request $request): JsonResponse
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Item borrowed successfully. Condition changed to "In Use"',
+            'message' => 'Item borrowed successfully.',
             'item' => [
                 'item_id' => $item->item_id,
                 'item_name' => $item->item_name,
@@ -238,7 +255,7 @@ public function borrow(Request $request): JsonResponse
 }
 
 /**
- * Handle return request - Update item condition to 'Available' and return item data
+ * Handle return request - Just opens update modal without changing condition
  */
 public function return(Request $request): JsonResponse
 {
@@ -267,33 +284,16 @@ public function return(Request $request): JsonResponse
             ], 400);
         }
 
-        // Store the original item data for response
-        $originalItem = $item->toArray();
-
-        // Update condition to 'Available' (condition_id = 2 - 'Good')
-        $item->update([
-            'condition_id' => 2, // 'Good' (Available)
-            'updated_by' => auth()->id()
-        ]);
-
-        // Log the action
-        \Log::info('Scanner: Item returned', [
-            'item_id' => $item->item_id,
-            'barcode' => $barcode,
-            'previous_condition' => 6,
-            'new_condition' => 2,
-            'updated_by' => auth()->id()
-        ]);
-
+        // Return the current item data WITHOUT updating condition
         return response()->json([
             'status' => 'success',
-            'message' => 'Item returned successfully. Condition changed to "Available"',
+            'message' => '', // Empty message - no toast will show
             'item' => [
-                'item_id' => $originalItem['item_id'],
-                'item_name' => $originalItem['item_name'],
-                'condition_id' => $originalItem['condition_id'], // Keep original for modal
-                'status_id' => $originalItem['status_id'],
-                'item_notes' => $originalItem['item_notes']
+                'item_id' => $item->item_id,
+                'item_name' => $item->item_name,
+                'condition_id' => $item->condition_id, // Keep current condition
+                'status_id' => $item->status_id,
+                'item_notes' => $item->item_notes
             ]
         ]);
 
@@ -307,6 +307,64 @@ public function return(Request $request): JsonResponse
         return response()->json([
             'status' => 'error',
             'message' => 'Failed to process return request: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Handle item update from scanner modal
+ */
+public function updateItem(Request $request, $itemId): JsonResponse
+{
+    $request->validate([
+        'item_name' => 'required|string|max:50',
+        'condition_id' => 'required|exists:conditions,condition_id',
+        'item_notes' => 'nullable|string'
+    ]);
+
+    try {
+        // Find the equipment item
+        $item = EquipmentItem::findOrFail($itemId);
+
+        // Update the item - keep the current status_id since it's not in the form
+        $item->update([
+            'item_name' => $request->input('item_name'),
+            'condition_id' => $request->input('condition_id'),
+            'item_notes' => $request->input('item_notes'),
+            'updated_by' => auth()->check() ? auth()->id() : null // Handle both authenticated and scanner updates
+        ]);
+
+        // Log the action
+        \Log::info('Scanner: Item updated', [
+            'item_id' => $item->item_id,
+            'barcode' => $item->barcode_number,
+            'condition_id' => $item->condition_id,
+            'status_id' => $item->status_id,
+            'updated_by' => auth()->check() ? auth()->id() : 'scanner'
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Item updated successfully',
+            'item' => [
+                'item_id' => $item->item_id,
+                'item_name' => $item->item_name,
+                'condition_id' => $item->condition_id,
+                'status_id' => $item->status_id,
+                'item_notes' => $item->item_notes
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Scanner: Error updating item', [
+            'item_id' => $itemId,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to update item: ' . $e->getMessage()
         ], 500);
     }
 }
