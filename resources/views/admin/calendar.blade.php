@@ -8,6 +8,40 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   border-radius: 0.75rem; /* optional, for smoother corners */
 }
+
+.fc .fc-toolbar-chunk .fc-button:focus,
+.fc .fc-toolbar-chunk .fc-button:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* FullCalendar Toolbar Buttons */
+.fc .fc-toolbar-chunk .fc-button {
+  background-color: #ffffff !important; /* White background */
+  color: #6c757d !important;            /* Gray text */
+  border: none !important;              /* No border */
+  font-weight: 500;
+  border-radius: 6px !important;
+}
+
+/* Hover state */
+.fc .fc-toolbar-chunk .fc-button:hover {
+  background-color: #f8f9fa !important; /* Slightly off-white hover */
+  color: #495057 !important;            /* Darker gray text on hover */
+  border: none !important;
+}
+
+/* Active/Pressed state */
+.fc .fc-toolbar-chunk .fc-button.fc-button-active {
+  background-color: #4272b1ff !important;
+  color: #ffffffff !important;
+  border: none !important;
+}
+
+.fc .fc-today-button {
+  text-transform: capitalize !important;
+}
+
     /* Base checkbox style */
     .form-check-input {
       width: 1.1em;
@@ -671,6 +705,12 @@
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           },
+                   buttonText: {
+    today: 'Today',
+    month: 'Month',
+    week: 'Week',
+    day: 'Day'
+  },
           titleFormat: {
             year: 'numeric',
             month: 'short'

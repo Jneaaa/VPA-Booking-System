@@ -9,6 +9,39 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   border-radius: 0.75rem; /* optional, for smoother corners */
 }
+.fc .fc-toolbar-chunk .fc-button:focus,
+.fc .fc-toolbar-chunk .fc-button:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* FullCalendar Toolbar Buttons */
+.fc .fc-toolbar-chunk .fc-button {
+  background-color: #ffffff !important; /* White background */
+  color: #6c757d !important;            /* Gray text */
+  border: none !important;              /* No border */
+  font-weight: 500;
+  border-radius: 6px !important;
+}
+
+/* Hover state */
+.fc .fc-toolbar-chunk .fc-button:hover {
+  background-color: #f8f9fa !important; /* Slightly off-white hover */
+  color: #495057 !important;            /* Darker gray text on hover */
+  border: none !important;
+}
+
+/* Active/Pressed state */
+.fc .fc-toolbar-chunk .fc-button.fc-button-active {
+  background-color: #4272b1ff !important;
+  color: #ffffffff !important;
+  border: none !important;
+}
+
+.fc .fc-today-button {
+  text-transform: capitalize !important;
+}
+
 
     /* New styles for the dashboard header */
     .dashboard-header {
@@ -161,7 +194,7 @@
             <div class="card-body p-4">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <span class="text-muted small">Total Requisitions</span>
+                  <span class="text-muted small">Completed Transactions</span>
                   <h2 class="mt-2 mb-0 fw-bold" id="totalRequisitions">0</h2>
                 </div>
                 <a href="{{ asset('admin/archives') }}" class="text-primary text-decoration-none">
@@ -370,6 +403,12 @@ function initializeCalendar() {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
+         buttonText: {
+    today: 'Today',
+    month: 'Month',
+    week: 'Week',
+    day: 'Day'
+  },
         titleFormat: {
             year: 'numeric',
             month: 'short'
