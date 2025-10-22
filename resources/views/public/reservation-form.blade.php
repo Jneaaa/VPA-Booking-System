@@ -8,6 +8,7 @@
   <title>
     Reservation Form Submission
   </title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
@@ -16,24 +17,28 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
     rel="stylesheet" />
   <style>
-#termsModal .modal-header {
-  padding-top: 0.5rem;
-  padding-bottom: 0.25rem;
-}
+    body {
+      font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+
+    #termsModal .modal-header {
+      padding-top: 0.5rem;
+      padding-bottom: 0.25rem;
+    }
 
 
-#termsModal .modal-title {
-  margin-top: 0.55rem; 
-  justify-content: center;
-  position: relative;
-}
+    #termsModal .modal-title {
+      margin-top: 0.55rem;
+      justify-content: center;
+      position: relative;
+    }
 
 
-.modal-header .btn-close {
-  position: absolute;
-  right: 1rem;
-  top: 0.75rem;
-}
+    .modal-header .btn-close {
+      position: absolute;
+      right: 1rem;
+      top: 0.75rem;
+    }
 
     /* Add this to your existing CSS */
     #school_id:disabled {
@@ -1017,23 +1022,23 @@
     </div>
   </div>
 
-<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-md">
-    <div class="modal-content text-center">
-      <div class="modal-header">
-        <h5 class="modal-title text-primary mb-0" id="termsModalLabel">Terms and Conditions</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-          style="width: 1rem; height: 1rem; margin-top: 0.2rem;"></button>
-      </div>
+  <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+      <div class="modal-content text-center">
+        <div class="modal-header">
+          <h5 class="modal-title text-primary mb-0" id="termsModalLabel">Terms and Conditions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            style="width: 1rem; height: 1rem; margin-top: 0.2rem;"></button>
+        </div>
 
 
 
-         <div class="modal-body">
-        <div class="terms-content mb-0 mx-auto" style="max-height: 50vh; overflow-y: auto; text-align: center;">
-          <small class="d-block text-start mb-3" style="padding-left: 17px;">
-            By using our booking service, you agree to comply with the following terms and conditions, as well as all
-            campus policies set by Central Philippine University (CPU):
-          </small>
+        <div class="modal-body">
+          <div class="terms-content mb-0 mx-auto" style="max-height: 50vh; overflow-y: auto; text-align: center;">
+            <small class="d-block text-start mb-3" style="padding-left: 17px;">
+              By using our booking service, you agree to comply with the following terms and conditions, as well as all
+              campus policies set by Central Philippine University (CPU):
+            </small>
 
 
             <ol class="text-start">
@@ -1358,141 +1363,141 @@
 
 
 
-  window.checkAvailability = async function () {
-  const checkBtn = document.getElementById('checkAvailabilityBtn');
-  const originalText = checkBtn.innerHTML;
-  
-  try {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    const startDate = document.getElementById('startDateField').value;
-    const endDate = document.getElementById('endDateField').value;
-    const startTime = convertTo24Hour(document.getElementById('startTimeField').value);
-    const endTime = convertTo24Hour(document.getElementById('endTimeField').value);
+    window.checkAvailability = async function () {
+      const checkBtn = document.getElementById('checkAvailabilityBtn');
+      const originalText = checkBtn.innerHTML;
 
-    if (!startDate || !endDate || !startTime || !endTime) {
-      showToast('Please select all date and time fields', 'error');
-      return;
-    }
-
-    // Check if end_date is before start_date
-    if (endDate < startDate) {
-      showToast('End date cannot be before start date.', 'error');
-      return;
-    }
-
-    // Show loading state
-    checkBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Checking...';
-    checkBtn.disabled = true;
-
-    // Get selected items from session
-    const response = await fetch('/requisition/get-items', {
-      headers: {
-        'X-CSRF-TOKEN': csrfToken,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) throw new Error('Failed to fetch items');
-    const data = await response.json();
-    const items = data.data?.selected_items || [];
-
-    if (items.length === 0) {
-      showToast('Please add items to check availability', 'error');
-      checkBtn.innerHTML = originalText;
-      checkBtn.disabled = false;
-      return;
-    }
-
-    // Prepare request data - modified to match controller expectations
-    const requestData = {
-      start_date: startDate,
-      end_date: endDate,
-      start_time: startTime,
-      end_time: endTime,
-      items: items.map(item => {
-        const itemData = {
-          type: item.type
-        };
-        // Add the correct ID field based on type
-        if (item.type === 'facility') {
-          itemData.facility_id = item.facility_id;
-        } else {
-          itemData.equipment_id = item.equipment_id;
-        }
-        return itemData;
-      })
-    };
-
-    // Call API
-    const checkResponse = await fetch('/requisition/check-availability', {
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': csrfToken,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestData)
-    });
-
-    // Handle non-200 responses
-    if (!checkResponse.ok) {
-      let errorData;
       try {
-        errorData = await checkResponse.json();
-      } catch {
-        errorData = {};
-      }
-      // Show all validation errors if present
-      if (errorData.errors) {
-        Object.values(errorData.errors).flat().forEach(msg => showToast(msg, 'error'));
-      } else if (errorData.message) {
-        showToast(errorData.message, 'error');
-      } else {
-        showToast('Availability check failed', 'error');
-      }
-      return;
-    }
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const startDate = document.getElementById('startDateField').value;
+        const endDate = document.getElementById('endDateField').value;
+        const startTime = convertTo24Hour(document.getElementById('startTimeField').value);
+        const endTime = convertTo24Hour(document.getElementById('endTimeField').value);
 
-    const result = await checkResponse.json();
+        if (!startDate || !endDate || !startTime || !endTime) {
+          showToast('Please select all date and time fields', 'error');
+          return;
+        }
 
-    if (!result.success) {
-      showToast(result.message || 'Availability check failed', 'error');
-      return;
-    }
+        // Check if end_date is before start_date
+        if (endDate < startDate) {
+          showToast('End date cannot be before start date.', 'error');
+          return;
+        }
 
-    const availabilityResult = document.getElementById('availabilityResult');
-    if (result.data.available) {
-      availabilityResult.innerHTML = `
+        // Show loading state
+        checkBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Checking...';
+        checkBtn.disabled = true;
+
+        // Get selected items from session
+        const response = await fetch('/requisition/get-items', {
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch items');
+        const data = await response.json();
+        const items = data.data?.selected_items || [];
+
+        if (items.length === 0) {
+          showToast('Please add items to check availability', 'error');
+          checkBtn.innerHTML = originalText;
+          checkBtn.disabled = false;
+          return;
+        }
+
+        // Prepare request data - modified to match controller expectations
+        const requestData = {
+          start_date: startDate,
+          end_date: endDate,
+          start_time: startTime,
+          end_time: endTime,
+          items: items.map(item => {
+            const itemData = {
+              type: item.type
+            };
+            // Add the correct ID field based on type
+            if (item.type === 'facility') {
+              itemData.facility_id = item.facility_id;
+            } else {
+              itemData.equipment_id = item.equipment_id;
+            }
+            return itemData;
+          })
+        };
+
+        // Call API
+        const checkResponse = await fetch('/requisition/check-availability', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData)
+        });
+
+        // Handle non-200 responses
+        if (!checkResponse.ok) {
+          let errorData;
+          try {
+            errorData = await checkResponse.json();
+          } catch {
+            errorData = {};
+          }
+          // Show all validation errors if present
+          if (errorData.errors) {
+            Object.values(errorData.errors).flat().forEach(msg => showToast(msg, 'error'));
+          } else if (errorData.message) {
+            showToast(errorData.message, 'error');
+          } else {
+            showToast('Availability check failed', 'error');
+          }
+          return;
+        }
+
+        const result = await checkResponse.json();
+
+        if (!result.success) {
+          showToast(result.message || 'Availability check failed', 'error');
+          return;
+        }
+
+        const availabilityResult = document.getElementById('availabilityResult');
+        if (result.data.available) {
+          availabilityResult.innerHTML = `
 <span class="text-success">
   <i class="bi bi-check-circle-fill" style="margin-right:5px;"></i>
   Available
 </span>
 `;
-      showToast('Time slot is available!', 'success');
-    } else {
-      availabilityResult.innerHTML = `
+          showToast('Time slot is available!', 'success');
+        } else {
+          availabilityResult.innerHTML = `
 <span class="text-danger">
   <i class="bi bi-x-circle-fill" style="margin-right:5px;"></i>
   Conflict found!
 </span>
 `;
 
-      const conflictItems = result.data.conflict_items.map(item =>
-        `${item.type}: ${item.name}`
-      ).join(', ');
+          const conflictItems = result.data.conflict_items.map(item =>
+            `${item.type}: ${item.name}`
+          ).join(', ');
 
-      showToast(`Conflict with: ${conflictItems}`, 'error');
-    }
+          showToast(`Conflict with: ${conflictItems}`, 'error');
+        }
 
-  } catch (error) {
-    console.error('Error checking availability:', error);
-    showToast(error.message || 'Failed to check availability', 'error');
-  } finally {
-    // Always reset button state, whether successful or error
-    checkBtn.innerHTML = originalText;
-    checkBtn.disabled = false;
-  }
-};
+      } catch (error) {
+        console.error('Error checking availability:', error);
+        showToast(error.message || 'Failed to check availability', 'error');
+      } finally {
+        // Always reset button state, whether successful or error
+        checkBtn.innerHTML = originalText;
+        checkBtn.disabled = false;
+      }
+    };
 
     function validateBookingSchedule() {
       const startDate = document.getElementById('startDateField').value;
@@ -1677,132 +1682,132 @@
       openTermsModal(e);
     });
 
-   window.submitForm = async function () {
-  try {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    const modal = document.getElementById('termsModal');
-    const confirmBtn = document.getElementById('confirmSubmitBtn');
+    window.submitForm = async function () {
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const modal = document.getElementById('termsModal');
+        const confirmBtn = document.getElementById('confirmSubmitBtn');
 
-    // Get or create modal instance
-    let termsModalInstance = bootstrap.Modal.getInstance(modal);
-    if (!termsModalInstance) {
-      termsModalInstance = new bootstrap.Modal(modal);
-    }
+        // Get or create modal instance
+        let termsModalInstance = bootstrap.Modal.getInstance(modal);
+        if (!termsModalInstance) {
+          termsModalInstance = new bootstrap.Modal(modal);
+        }
 
-    // Show loading state - ONLY on the button, remove submitStatus
-    confirmBtn.classList.add('loading');
-    confirmBtn.disabled = true;
+        // Show loading state - ONLY on the button, remove submitStatus
+        confirmBtn.classList.add('loading');
+        confirmBtn.disabled = true;
 
-    // Fix 2: Defensive checks for optional fields
-    const schoolIdInput = document.querySelector('input[name="school_id"]');
-    const numParticipantsInput = document.querySelector('input[name="num_participants"]');
-    const additionalRequestsInput = document.querySelector('textarea[name="additional_requests"]');
+        // Fix 2: Defensive checks for optional fields
+        const schoolIdInput = document.querySelector('input[name="school_id"]');
+        const numParticipantsInput = document.querySelector('input[name="num_participants"]');
+        const additionalRequestsInput = document.querySelector('textarea[name="additional_requests"]');
 
-    // Required fields
-    const firstNameInput = document.querySelector('input[name="first_name"]');
-    const lastNameInput = document.querySelector('input[name="last_name"]');
-    const emailInput = document.querySelector('input[name="email"]');
+        // Required fields
+        const firstNameInput = document.querySelector('input[name="first_name"]');
+        const lastNameInput = document.querySelector('input[name="last_name"]');
+        const emailInput = document.querySelector('input[name="email"]');
 
-    if (!firstNameInput || !lastNameInput || !emailInput) {
-      throw new Error('Required contact fields are missing in the form.');
-    }
+        if (!firstNameInput || !lastNameInput || !emailInput) {
+          throw new Error('Required contact fields are missing in the form.');
+        }
 
-    const formData = {
-      start_date: document.getElementById('startDateField').value,
-      end_date: document.getElementById('endDateField').value,
-      start_time: convertTo24Hour(document.getElementById('startTimeField').value),
-      end_time: convertTo24Hour(document.getElementById('endTimeField').value),
-      purpose_id: document.getElementById('activityPurposeField').value,
-      num_participants: numParticipantsInput ? numParticipantsInput.value : 1,
-      endorser: document.querySelector('input[name="endorser"]')?.value || null,
-      date_endorsed: document.querySelector('input[name="date_endorsed"]')?.value || null,
-      additional_requests: additionalRequestsInput ? additionalRequestsInput.value : '',
-      formal_letter_url: document.getElementById('formal_letter_url').value,
-      formal_letter_public_id: document.getElementById('formal_letter_public_id').value,
-      facility_layout_url: document.getElementById('facility_layout_url')?.value || null,
-      facility_layout_public_id: document.getElementById('facility_layout_public_id')?.value || null,
-      first_name: firstNameInput.value,
-      last_name: lastNameInput.value,
-      email: emailInput.value,
-      contact_number: document.querySelector('input[name="contact_number"]')?.value || null,
-      organization_name: document.querySelector('input[name="organization_name"]')?.value || null,
-      user_type: document.getElementById('applicantType').value, // Use dropdown value directly
-      school_id: document.getElementById('applicantType').value === 'Internal'
-        ? (schoolIdInput ? schoolIdInput.value : null)
-        : null
-    };
+        const formData = {
+          start_date: document.getElementById('startDateField').value,
+          end_date: document.getElementById('endDateField').value,
+          start_time: convertTo24Hour(document.getElementById('startTimeField').value),
+          end_time: convertTo24Hour(document.getElementById('endTimeField').value),
+          purpose_id: document.getElementById('activityPurposeField').value,
+          num_participants: numParticipantsInput ? numParticipantsInput.value : 1,
+          endorser: document.querySelector('input[name="endorser"]')?.value || null,
+          date_endorsed: document.querySelector('input[name="date_endorsed"]')?.value || null,
+          additional_requests: additionalRequestsInput ? additionalRequestsInput.value : '',
+          formal_letter_url: document.getElementById('formal_letter_url').value,
+          formal_letter_public_id: document.getElementById('formal_letter_public_id').value,
+          facility_layout_url: document.getElementById('facility_layout_url')?.value || null,
+          facility_layout_public_id: document.getElementById('facility_layout_public_id')?.value || null,
+          first_name: firstNameInput.value,
+          last_name: lastNameInput.value,
+          email: emailInput.value,
+          contact_number: document.querySelector('input[name="contact_number"]')?.value || null,
+          organization_name: document.querySelector('input[name="organization_name"]')?.value || null,
+          user_type: document.getElementById('applicantType').value, // Use dropdown value directly
+          school_id: document.getElementById('applicantType').value === 'Internal'
+            ? (schoolIdInput ? schoolIdInput.value : null)
+            : null
+        };
 
-    // Validate file upload
-    if (!formData.formal_letter_url) {
-      throw new Error('Formal letter is required');
-    }
+        // Validate file upload
+        if (!formData.formal_letter_url) {
+          throw new Error('Formal letter is required');
+        }
 
-    console.log('Submitting form data:', formData);
+        console.log('Submitting form data:', formData);
 
-    // Submit form with proper error handling
-    const submitResponse = await fetch('/requisition/submit', {
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-      credentials: 'include'
-    });
+        // Submit form with proper error handling
+        const submitResponse = await fetch('/requisition/submit', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+          credentials: 'include'
+        });
 
-    if (!submitResponse.ok) {
-      const errorData = await submitResponse.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Submission failed');
-    }
+        if (!submitResponse.ok) {
+          const errorData = await submitResponse.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Submission failed');
+        }
 
-    const result = await submitResponse.json();
+        const result = await submitResponse.json();
 
-    if (!result.success) {
-      throw new Error(result.message || 'Submission failed');
-    }
+        if (!result.success) {
+          throw new Error(result.message || 'Submission failed');
+        }
 
-    // Hide the terms modal
-    termsModalInstance.hide();
+        // Hide the terms modal
+        termsModalInstance.hide();
 
-// Show success details in the success modal
-document.getElementById('successDetails').innerHTML =
-  `Your request ID: ${result.data.request_id}<br>Access Code: ${result.data.access_code}`;
+        // Show success details in the success modal
+        document.getElementById('successDetails').innerHTML =
+          `Your request ID: ${result.data.request_id}<br>Access Code: ${result.data.access_code}`;
 
 
-    // Add user's email to the success message
-    document.getElementById('userEmail').textContent = formData.email;
+        // Add user's email to the success message
+        document.getElementById('userEmail').textContent = formData.email;
 
-    // Show the success modal
-    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-    successModal.show();
+        // Show the success modal
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
 
-    // Clear session data
-    await fetch('/requisition/clear-session', {
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': csrfToken
+        // Clear session data
+        await fetch('/requisition/clear-session', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken
+          }
+        });
+
+        // Reset form
+        document.getElementById('reservationForm').reset();
+
+        // Clear selected items
+        await renderSelectedItems();
+        await calculateAndDisplayFees();
+
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        showToast(error.message || 'Failed to submit form', 'error');
+
+        // Reset button state
+        const confirmBtn = document.getElementById('confirmSubmitBtn');
+        if (confirmBtn) {
+          confirmBtn.classList.remove('loading');
+          confirmBtn.disabled = false;
+        }
       }
-    });
-
-    // Reset form
-    document.getElementById('reservationForm').reset();
-
-    // Clear selected items
-    await renderSelectedItems();
-    await calculateAndDisplayFees();
-
-  } catch (error) {
-    console.error('Error submitting form:', error);
-    showToast(error.message || 'Failed to submit form', 'error');
-
-    // Reset button state
-    const confirmBtn = document.getElementById('confirmSubmitBtn');
-    if (confirmBtn) {
-      confirmBtn.classList.remove('loading');
-      confirmBtn.disabled = false;
-    }
-  }
-};
+    };
 
     window.convertTo24Hour = function (time12h) {
       if (!time12h) return '';

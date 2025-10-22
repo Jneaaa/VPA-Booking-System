@@ -13,9 +13,6 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-
-        // NOTE: Primary key: department_id (auto-increment)
-        // NOTE: Timestamps: created_at, updated_at (auto-managed by Laravel)
         
         DB::table('departments')->insert([
             [

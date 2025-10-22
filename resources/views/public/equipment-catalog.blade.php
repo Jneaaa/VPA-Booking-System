@@ -741,29 +741,45 @@
     }
 
     // Render items based on current layout
-    function renderItems(items) {
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
+function renderItems(items) {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
 
-      catalogItemsContainer.classList.remove("grid-layout", "list-layout");
-      catalogItemsContainer.classList.add(`${currentLayout}-layout`);
+  catalogItemsContainer.innerHTML = "";
 
-      if (paginatedItems.length === 0) {
-        catalogItemsContainer.innerHTML = `
-        <div class="col-12 text-center py-5">
+  // handle empty state
+  if (paginatedItems.length === 0) {
+    catalogItemsContainer.classList.remove("grid-layout", "list-layout");
+    catalogItemsContainer.innerHTML = `
+      <div
+        style="
+          grid-column: 1 / -1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          min-height: 220px;
+          width: 100%;
+        "
+      >
         <i class="bi bi-box-seam fs-1 text-muted"></i>
-        <h4>No equipment found</h4>
-        </div>
-        `;
-        return;
-      }
+        <h4 class="mt-2">No equipment found</h4>
+      </div>
+    `;
+    return;
+  }
 
-      if (currentLayout === "grid") {
-        renderEquipmentGrid(paginatedItems);
-      } else {
-        renderEquipmentList(paginatedItems);
-      }
-    }
+  // normal render path
+  catalogItemsContainer.classList.remove("grid-layout", "list-layout");
+  catalogItemsContainer.classList.add(`${currentLayout}-layout`);
+
+  if (currentLayout === "grid") {
+    renderEquipmentGrid(paginatedItems);
+  } else {
+    renderEquipmentList(paginatedItems);
+  }
+}
+
 
   // Grid layout for equipment (with Check Availability button)
 function renderEquipmentGrid(equipmentList) {
