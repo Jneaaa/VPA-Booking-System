@@ -40,106 +40,106 @@ use Illuminate\Support\Facades\Log;
 class RequisitionFormController extends Controller
 {
     // Get calendar events for public view (Scheduled, Ongoing, Late events only)
-public function getCalendarEvents(Request $request)
-{
-    try {
-        // Get status IDs for Scheduled, Ongoing, and Late
-        $statusIds = FormStatus::whereIn('status_name', ['Scheduled', 'Ongoing', 'Late'])
-            ->pluck('status_id')
-            ->toArray();
+    public function getCalendarEvents(Request $request)
+    {
+        try {
+            // Get status IDs for Scheduled, Ongoing, and Late
+            $statusIds = FormStatus::whereIn('status_name', ['Scheduled', 'Ongoing', 'Late'])
+                ->pluck('status_id')
+                ->toArray();
 
-        \Log::info('Fetching calendar events with status IDs:', ['status_ids' => $statusIds]);
+            \Log::info('Fetching calendar events with status IDs:', ['status_ids' => $statusIds]);
 
-        // Get filter parameters
-        $facilityId = $request->get('facility_id');
-        $equipmentId = $request->get('equipment_id');
+            // Get filter parameters
+            $facilityId = $request->get('facility_id');
+            $equipmentId = $request->get('equipment_id');
 
-        \Log::info('Filter parameters:', [
-            'facility_id' => $facilityId,
-            'equipment_id' => $equipmentId
-        ]);
+            \Log::info('Filter parameters:', [
+                'facility_id' => $facilityId,
+                'equipment_id' => $equipmentId
+            ]);
 
-        $query = RequisitionForm::with([
+            $query = RequisitionForm::with([
                 'requestedFacilities.facility',
                 'requestedEquipment.equipment',
                 'purpose',
                 'status'
             ])
-            ->whereIn('status_id', $statusIds);
+                ->whereIn('status_id', $statusIds);
 
-        // Filter by facility_id if provided
-        if ($facilityId) {
-            $query->whereHas('requestedFacilities', function($q) use ($facilityId) {
-                $q->where('facility_id', $facilityId);
-            });
+            // Filter by facility_id if provided
+            if ($facilityId) {
+                $query->whereHas('requestedFacilities', function ($q) use ($facilityId) {
+                    $q->where('facility_id', $facilityId);
+                });
+            }
+
+            // Filter by equipment_id if provided
+            if ($equipmentId) {
+                $query->whereHas('requestedEquipment', function ($q) use ($equipmentId) {
+                    $q->where('equipment_id', $equipmentId);
+                });
+            }
+
+            $events = $query->get()
+                ->map(function ($requisition) {
+                    // Event title
+                    $title = $requisition->calendar_title ?: "Booking #{$requisition->request_id}";
+
+                    // Status color
+                    $statusColor = $requisition->status->color_code;
+
+                    // Facilities
+                    $facilities = $requisition->requestedFacilities->map(function ($requestedFacility) {
+                        return $requestedFacility->facility->facility_name ?? 'Unknown Facility';
+                    })->toArray();
+
+                    // Equipment
+                    $equipment = $requisition->requestedEquipment->map(function ($requestedEquipment) {
+                        $name = $requestedEquipment->equipment->equipment_name ?? 'Unknown Equipment';
+                        $quantity = $requestedEquipment->quantity > 1 ? " × {$requestedEquipment->quantity}" : '';
+                        return $name . $quantity;
+                    })->toArray();
+
+                    return [
+                        'id' => $requisition->request_id,
+                        'title' => $title,
+                        'start' => $requisition->start_date . 'T' . $requisition->start_time,
+                        'end' => $requisition->end_date . 'T' . $requisition->end_time,
+                        'color' => $statusColor,
+                        'extendedProps' => [
+                            'status' => $requisition->status->status_name,
+                            'requester' => $requisition->first_name . ' ' . $requisition->last_name,
+                            'purpose' => $requisition->purpose->purpose_name ?? 'N/A',
+                            'num_participants' => $requisition->num_participants,
+                            'facilities' => $facilities,
+                            'equipment' => $equipment
+                        ]
+                    ];
+                });
+
+            \Log::info('Calendar events loaded', [
+                'total_events' => $events->count(),
+                'status_ids' => $statusIds,
+                'facility_id_filter' => $facilityId,
+                'equipment_id_filter' => $equipmentId,
+                'events_by_status' => $events->groupBy('extendedProps.status')->map->count()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $events
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Calendar events error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load calendar events: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
         }
-
-        // Filter by equipment_id if provided
-        if ($equipmentId) {
-            $query->whereHas('requestedEquipment', function($q) use ($equipmentId) {
-                $q->where('equipment_id', $equipmentId);
-            });
-        }
-
-        $events = $query->get()
-            ->map(function ($requisition) {
-                // Event title
-                $title = $requisition->calendar_title ?: "Booking #{$requisition->request_id}";
-
-                // Status color
-                $statusColor = $requisition->status->color_code;
-
-                // Facilities
-                $facilities = $requisition->requestedFacilities->map(function ($requestedFacility) {
-                    return $requestedFacility->facility->facility_name ?? 'Unknown Facility';
-                })->toArray();
-
-                // Equipment
-                $equipment = $requisition->requestedEquipment->map(function ($requestedEquipment) {
-                    $name = $requestedEquipment->equipment->equipment_name ?? 'Unknown Equipment';
-                    $quantity = $requestedEquipment->quantity > 1 ? " × {$requestedEquipment->quantity}" : '';
-                    return $name . $quantity;
-                })->toArray();
-
-                return [
-                    'id' => $requisition->request_id,
-                    'title' => $title,
-                    'start' => $requisition->start_date . 'T' . $requisition->start_time,
-                    'end' => $requisition->end_date . 'T' . $requisition->end_time,
-                    'color' => $statusColor,
-                    'extendedProps' => [
-                        'status' => $requisition->status->status_name,
-                        'requester' => $requisition->first_name . ' ' . $requisition->last_name,
-                        'purpose' => $requisition->purpose->purpose_name ?? 'N/A',
-                        'num_participants' => $requisition->num_participants,
-                        'facilities' => $facilities,
-                        'equipment' => $equipment
-                    ]
-                ];
-            });
-
-        \Log::info('Calendar events loaded', [
-            'total_events' => $events->count(),
-            'status_ids' => $statusIds,
-            'facility_id_filter' => $facilityId,
-            'equipment_id_filter' => $equipmentId,
-            'events_by_status' => $events->groupBy('extendedProps.status')->map->count()
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'data' => $events
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('Calendar events error: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to load calendar events: ' . $e->getMessage(),
-            'data' => []
-        ], 500);
     }
-}
 
     public function activeSchedules()
     {
@@ -681,7 +681,7 @@ public function getCalendarEvents(Request $request)
 
             // Create requisition form
             $requisitionForm = RequisitionForm::create([
-                'user_type' => $request->user_type, // Use submitted value
+                'user_type' => $request->user_type,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
@@ -692,11 +692,13 @@ public function getCalendarEvents(Request $request)
                 'purpose_id' => $request->purpose_id,
                 'num_participants' => $request->num_participants,
                 'additional_requests' => $request->additional_requests,
+                'endorser' => $request->endorser, 
+                'date_endorsed' => $request->date_endorsed,
                 'formal_letter_url' => $request->formal_letter_url,
                 'formal_letter_public_id' => $request->formal_letter_public_id,
                 'facility_layout_url' => $request->facility_layout_url ?? null,
                 'facility_layout_public_id' => $request->facility_layout_public_id ?? null,
-                'upload_token' => Str::random(40), // assume same token used for both
+                'upload_token' => Str::random(40),
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
                 'start_time' => $request->start_time,
@@ -761,31 +763,31 @@ public function getCalendarEvents(Request $request)
         }
     }
 
-protected function sendConfirmationEmail(RequisitionForm $requisitionForm)
-{
-    try {
-        $subject = 'CPU Booking System - Requisition Form Received';
+    protected function sendConfirmationEmail(RequisitionForm $requisitionForm)
+    {
+        try {
+            $subject = 'CPU Booking System - Requisition Form Received';
 
-        $emailData = [
-            'first_name' => $requisitionForm->first_name,
-            'last_name' => $requisitionForm->last_name,
-            'access_code' => $requisitionForm->access_code,
-        ];
+            $emailData = [
+                'first_name' => $requisitionForm->first_name,
+                'last_name' => $requisitionForm->last_name,
+                'access_code' => $requisitionForm->access_code,
+            ];
 
-        // Use the blade template instead of raw text
-        \Mail::send('emails.booking-confirmation', $emailData, function ($message) use ($requisitionForm, $subject) {
-            $message->to($requisitionForm->email)
-                ->subject($subject)
-                ->from(config('mail.from.address'), config('mail.from.name'));
-        });
+            // Use the blade template instead of raw text
+            \Mail::send('emails.booking-confirmation', $emailData, function ($message) use ($requisitionForm, $subject) {
+                $message->to($requisitionForm->email)
+                    ->subject($subject)
+                    ->from(config('mail.from.address'), config('mail.from.name'));
+            });
 
-        \Log::info('Confirmation email sent to: ' . $requisitionForm->email);
+            \Log::info('Confirmation email sent to: ' . $requisitionForm->email);
 
-    } catch (\Exception $e) {
-        \Log::error('Failed to send confirmation email: ' . $e->getMessage());
-        // Don't throw exception here - email failure shouldn't prevent form submission
+        } catch (\Exception $e) {
+            \Log::error('Failed to send confirmation email: ' . $e->getMessage());
+            // Don't throw exception here - email failure shouldn't prevent form submission
+        }
     }
-}
 
     public function clearSession()
     {
@@ -793,95 +795,95 @@ protected function sendConfirmationEmail(RequisitionForm $requisitionForm)
         return response()->json(['success' => true]);
     }
 
-public function getArchivedRequisitions()
-{
-    try {
-        // Get status IDs to exclude
-        $excludedStatuses = ['Pending Approval', 'Awaiting Payment', 'Scheduled', 'Ongoing', 'Late'];
-        $excludedStatusIds = FormStatus::whereIn('status_name', $excludedStatuses)
-            ->pluck('status_id')
-            ->toArray();
+    public function getArchivedRequisitions()
+    {
+        try {
+            // Get status IDs to exclude
+            $excludedStatuses = ['Pending Approval', 'Awaiting Payment', 'Scheduled', 'Ongoing', 'Late'];
+            $excludedStatusIds = FormStatus::whereIn('status_name', $excludedStatuses)
+                ->pluck('status_id')
+                ->toArray();
 
-        \Log::info('Fetching archived requisitions', [
-            'excluded_statuses' => $excludedStatuses,
-            'excluded_status_ids' => $excludedStatusIds
-        ]);
+            \Log::info('Fetching archived requisitions', [
+                'excluded_statuses' => $excludedStatuses,
+                'excluded_status_ids' => $excludedStatusIds
+            ]);
 
-        // Get requisitions excluding the specified statuses
-        $archivedRequisitions = RequisitionForm::with([
+            // Get requisitions excluding the specified statuses
+            $archivedRequisitions = RequisitionForm::with([
                 'status',
                 'purpose',
                 'requestedFacilities.facility',
                 'requestedEquipment.equipment'
             ])
-            ->whereNotIn('status_id', $excludedStatusIds)
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($requisition) {
-                try {
-                    // Create datetime strings without seconds first
-                    $startDateTimeStr = $requisition->start_date . ' ' . $requisition->start_time;
-                    $endDateTimeStr = $requisition->end_date . ' ' . $requisition->end_time;
-                    // Parse the datetime strings - Carbon will handle the parsing automatically
-                    $startDateTime = Carbon::parse($startDateTimeStr);
-                    $endDateTime = Carbon::parse($endDateTimeStr);
-                    
-                    $startSchedule = $startDateTime->format('F j, Y \a\t g:i A');
-                    $endSchedule = $endDateTime->format('F j, Y \a\t g:i A');
-                } catch (\Exception $e) {
-                    \Log::error('Date formatting error for request ' . $requisition->request_id . ': ' . $e->getMessage());
-                    // Fallback to original format if parsing fails
-                    $startSchedule = $requisition->start_date . ' ' . $requisition->start_time;
-                    $endSchedule = $requisition->end_date . ' ' . $requisition->end_time;
-                }
-                
-                return [
-                    'request_id' => $requisition->request_id,
-                    'official_receipt_num' => $requisition->official_receipt_num,
-                    'requester_name' => $requisition->first_name . ' ' . $requisition->last_name,
-                    'email' => $requisition->email,
-                    'organization_name' => $requisition->organization_name,
-                    'purpose' => $requisition->purpose->purpose_name ?? 'N/A',
-                    'status' => $requisition->status->status_name,
-                    'status_color' => $requisition->status->color_code,
-                    'start_date' => $requisition->start_date,
-                    'end_date' => $requisition->end_date,
-                    'start_time' => $requisition->start_time,
-                    'end_time' => $requisition->end_time,
-                    'start_schedule' => $startSchedule, 
-                    'end_schedule' => $endSchedule,    
-                    'num_participants' => $requisition->num_participants,
-                    'facilities' => $requisition->requestedFacilities->map(function ($rf) {
-                        return $rf->facility->facility_name ?? 'Unknown Facility';
-                    })->toArray(),
-                    'equipment' => $requisition->requestedEquipment->map(function ($re) {
-                        $name = $re->equipment->equipment_name ?? 'Unknown Equipment';
-                        $quantity = $re->quantity > 1 ? " × {$re->quantity}" : '';
-                        return $name . $quantity;
-                    })->toArray(),
-                    'created_at' => $requisition->created_at,
-                    'updated_at' => $requisition->updated_at
-                ];
-            });
+                ->whereNotIn('status_id', $excludedStatusIds)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($requisition) {
+                    try {
+                        // Create datetime strings without seconds first
+                        $startDateTimeStr = $requisition->start_date . ' ' . $requisition->start_time;
+                        $endDateTimeStr = $requisition->end_date . ' ' . $requisition->end_time;
+                        // Parse the datetime strings - Carbon will handle the parsing automatically
+                        $startDateTime = Carbon::parse($startDateTimeStr);
+                        $endDateTime = Carbon::parse($endDateTimeStr);
 
-        \Log::info('Archived requisitions loaded', [
-            'total_archived' => $archivedRequisitions->count(),
-            'excluded_status_count' => count($excludedStatusIds)
-        ]);
+                        $startSchedule = $startDateTime->format('F j, Y \a\t g:i A');
+                        $endSchedule = $endDateTime->format('F j, Y \a\t g:i A');
+                    } catch (\Exception $e) {
+                        \Log::error('Date formatting error for request ' . $requisition->request_id . ': ' . $e->getMessage());
+                        // Fallback to original format if parsing fails
+                        $startSchedule = $requisition->start_date . ' ' . $requisition->start_time;
+                        $endSchedule = $requisition->end_date . ' ' . $requisition->end_time;
+                    }
 
-        return response()->json([
-            'success' => true,
-            'data' => $archivedRequisitions
-        ]);
+                    return [
+                        'request_id' => $requisition->request_id,
+                        'official_receipt_num' => $requisition->official_receipt_num,
+                        'requester_name' => $requisition->first_name . ' ' . $requisition->last_name,
+                        'email' => $requisition->email,
+                        'organization_name' => $requisition->organization_name,
+                        'purpose' => $requisition->purpose->purpose_name ?? 'N/A',
+                        'status' => $requisition->status->status_name,
+                        'status_color' => $requisition->status->color_code,
+                        'start_date' => $requisition->start_date,
+                        'end_date' => $requisition->end_date,
+                        'start_time' => $requisition->start_time,
+                        'end_time' => $requisition->end_time,
+                        'start_schedule' => $startSchedule,
+                        'end_schedule' => $endSchedule,
+                        'num_participants' => $requisition->num_participants,
+                        'facilities' => $requisition->requestedFacilities->map(function ($rf) {
+                            return $rf->facility->facility_name ?? 'Unknown Facility';
+                        })->toArray(),
+                        'equipment' => $requisition->requestedEquipment->map(function ($re) {
+                            $name = $re->equipment->equipment_name ?? 'Unknown Equipment';
+                            $quantity = $re->quantity > 1 ? " × {$re->quantity}" : '';
+                            return $name . $quantity;
+                        })->toArray(),
+                        'created_at' => $requisition->created_at,
+                        'updated_at' => $requisition->updated_at
+                    ];
+                });
 
-    } catch (\Exception $e) {
-        \Log::error('Error fetching archived requisitions: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to load archived requisitions: ' . $e->getMessage(),
-            'data' => []
-        ], 500);
+            \Log::info('Archived requisitions loaded', [
+                'total_archived' => $archivedRequisitions->count(),
+                'excluded_status_count' => count($excludedStatusIds)
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $archivedRequisitions
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching archived requisitions: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load archived requisitions: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
     }
-}
 
 }

@@ -2946,166 +2946,159 @@ saveFeeBtn.addEventListener("click", async function () {
                 }
             });
 
-            // Initialize compact calendar
-            let calendar;
-            function initializeCalendar() {
-                const calendarEl = document.getElementById('calendar');
-                const currentRequest = allRequests.find(req => req.request_id == requestId);
-                if (!calendarEl) return;
+// Initialize compact calendar
+let calendar;
+function initializeCalendar() {
+    const calendarEl = document.getElementById('calendar');
+    const currentRequest = allRequests.find(req => req.request_id == requestId);
+    if (!calendarEl) return;
 
-                // Get current request's facility and equipment IDs
-                const currentFacilityIds = currentRequest.requested_items.facilities.map(f => f.requested_facility_id);
-                const currentEquipmentIds = currentRequest.requested_items.equipment.flatMap(e => e.requested_equipment_ids || []);
+    // Get status names to exclude
+    const excludedStatuses = ['Late', 'Returned', 'Late Return', 'Completed'];
 
-                console.log('Current request items:', {
-                    requestId: requestId,
-                    facilities: currentFacilityIds,
-                    equipment: currentEquipmentIds
-                });
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        initialDate: currentRequest.schedule.start_date,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+            today: 'Today',
+            month: 'Month',
+            week: 'Week',
+            day: 'Day'
+        },
+        titleFormat: {
+            year: 'numeric',
+            month: 'short'
+        },
+        height: '100%',
+        handleWindowResize: true,
+        windowResizeDelay: 200,
+        aspectRatio: null,
+        expandRows: true,
+        events: [],
+        eventClick: function (info) {
+            const request = allRequests.find(req => req.request_id == info.event.extendedProps.requestId);
+            if (request) {
+                showEventModal(request);
+            }
+        },
+        eventDidMount: function (info) {
+            // Add custom styling based on status
+            const request = allRequests.find(req => req.request_id == info.event.extendedProps.requestId);
 
-                calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'timeGridWeek',
-                    initialDate: currentRequest.schedule.start_date,
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                    },
-                    buttonText: {
-                        today: 'Today',
-                        month: 'Month',
-                        week: 'Week',
-                        day: 'Day'
-                    },
-                    titleFormat: {
-                        year: 'numeric',
-                        month: 'short'
-                    },
-                    height: '100%',
-                    handleWindowResize: true,
-                    windowResizeDelay: 200,
-                    aspectRatio: null,
-                    expandRows: true,
-                    events: [],
-                    eventClick: function (info) {
-                        const request = allRequests.find(req => req.request_id == info.event.extendedProps.requestId);
-                        if (request) {
-                            showEventModal(request);
-                        }
-                    },
-                    eventDidMount: function (info) {
-                        // Add custom styling based on status
-                        const status = info.event.extendedProps.status;
-                        const request = allRequests.find(req => req.request_id == info.event.extendedProps.requestId);
-
-                        if (request) {
-                            info.el.style.backgroundColor = request.form_details.status.color;
-                            info.el.style.borderColor = request.form_details.status.color;
-                        }
-                    },
-                    datesSet: function (info) {
-                        // Force refresh of calendar rendering
-                        calendar.updateSize();
-                    },
-                    viewDidMount: function (info) {
-                        // Ensure proper initial rendering
-                        setTimeout(() => calendar.updateSize(), 0);
-                    },
-                    eventTimeFormat: {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true
-                    },
-                    slotMinTime: '00:00:00',
-                    slotMaxTime: '24:00:00',
-                    allDaySlot: false,
-                    nowIndicator: true,
-                    navLinks: true,
-                    dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric' },
-                    views: {
-                        dayGridMonth: {
-                            dayHeaderFormat: {
-                                weekday: 'short'
-                            }
-                        }
-                    },
-                    eventDisplay: 'block'
-                });
-
-                calendar.render();
-
-                // Update calendar with filtered events
-                if (calendar) {
-                    calendar.removeAllEvents();
-
-                    // Filter requests that share at least one requested item with current request
-                    const filteredRequests = allRequests.filter(req => {
-                        // Skip the current request itself
-                        if (req.request_id == requestId) return false;
-
-                        // Get the other request's facility and equipment IDs
-                        const otherFacilityIds = req.requested_items.facilities.map(f => f.requested_facility_id);
-                        const otherEquipmentIds = req.requested_items.equipment.flatMap(e => e.requested_equipment_ids || []);
-
-                        // Check if they share any facilities (by ID)
-                        const shareFacilities = otherFacilityIds.some(id => currentFacilityIds.includes(id));
-
-                        // Check if they share any equipment (by ID)
-                        const shareEquipment = otherEquipmentIds.some(id => currentEquipmentIds.includes(id));
-
-                        console.log(`Comparing request ${req.request_id} with current ${requestId}:`, {
-                            otherFacilityIds: otherFacilityIds,
-                            otherEquipmentIds: otherEquipmentIds,
-                            currentFacilityIds: currentFacilityIds,
-                            currentEquipmentIds: currentEquipmentIds,
-                            shareFacilities: shareFacilities,
-                            shareEquipment: shareEquipment,
-                            shouldInclude: shareFacilities || shareEquipment
-                        });
-
-                        return shareFacilities || shareEquipment;
-                    });
-
-                    console.log('Filtered calendar events:', {
-                        totalRequests: allRequests.length,
-                        filteredRequests: filteredRequests.length,
-                        filteredRequestIds: filteredRequests.map(r => r.request_id)
-                    });
-
-                    // Add filtered events to calendar
-                    filteredRequests.forEach(req => {
-                        // Handle empty calendar title for filtered requests
-                        const calendarTitle = req.form_details.calendar_info.title || 'No Calendar Title';
-
-                        calendar.addEvent({
-                            title: calendarTitle,
-                            start: `${req.schedule.start_date}T${req.schedule.start_time}`,
-                            end: `${req.schedule.end_date}T${req.schedule.end_time}`,
-                            extendedProps: {
-                                status: req.form_details.status.name,
-                                requestId: req.request_id
-                            },
-                            description: req.form_details.calendar_info.description
-                        });
-                    });
-
-                    // Highlight current request with different styling
-                    const currentCalendarTitle = currentRequest.form_details.calendar_info.title || 'No Calendar Title';
-
-                    calendar.addEvent({
-                        title: 'Current Request',
-                        start: `${currentRequest.schedule.start_date}T${currentRequest.schedule.start_time}`,
-                        end: `${currentRequest.schedule.end_date}T${currentRequest.schedule.end_time}`,
-                        extendedProps: {
-                            status: currentRequest.form_details.status.name,
-                            requestId: currentRequest.request_id,
-                            isCurrent: true
-                        },
-                        color: '#FF6B35', // Different color for current request
-                        textColor: '#FFFFFF'
-                    });
+            if (request) {
+                // Special styling for current request
+                if (info.event.extendedProps.isCurrent) {
+                    info.el.style.backgroundColor = '#8164c4ff';
+                    info.el.style.borderColor = '#8164c4ff';
+                    info.el.style.color = '#FFFFFF';
+                    info.el.style.fontWeight = 'bold';
+                } else {
+                    info.el.style.backgroundColor = request.form_details.status.color;
+                    info.el.style.borderColor = request.form_details.status.color;
                 }
             }
+        },
+        datesSet: function (info) {
+            // Force refresh of calendar rendering
+            calendar.updateSize();
+        },
+        viewDidMount: function (info) {
+            // Ensure proper initial rendering
+            setTimeout(() => calendar.updateSize(), 0);
+        },
+        eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        },
+        slotMinTime: '00:00:00',
+        slotMaxTime: '24:00:00',
+        allDaySlot: false,
+        nowIndicator: true,
+        navLinks: true,
+        dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric' },
+        views: {
+            dayGridMonth: {
+                dayHeaderFormat: {
+                    weekday: 'short'
+                }
+            }
+        },
+        eventDisplay: 'block'
+    });
+
+    calendar.render();
+
+    // Update calendar with filtered events
+    if (calendar) {
+        calendar.removeAllEvents();
+
+        // Filter requests to exclude the specified statuses AND exclude current request from regular events
+        const filteredRequests = allRequests.filter(req => {
+            const statusName = req.form_details.status.name;
+            
+            // Skip if status is in excluded list
+            if (excludedStatuses.includes(statusName)) {
+                return false;
+            }
+            
+            // Skip the current request (we'll add it separately with special styling)
+            if (req.request_id == requestId) {
+                return false;
+            }
+            
+            // Include all other requests
+            return true;
+        });
+
+        console.log('Filtered calendar events:', {
+            totalRequests: allRequests.length,
+            filteredRequests: filteredRequests.length,
+            excludedStatuses: excludedStatuses,
+            filteredRequestIds: filteredRequests.map(r => r.request_id),
+            currentRequestId: requestId
+        });
+
+        // Add filtered events to calendar (excluding current request)
+        filteredRequests.forEach(req => {
+            const calendarTitle = req.form_details.calendar_info.title || 'No Calendar Title';
+
+            calendar.addEvent({
+                title: calendarTitle,
+                start: `${req.schedule.start_date}T${req.schedule.start_time}`,
+                end: `${req.schedule.end_date}T${req.schedule.end_time}`,
+                extendedProps: {
+                    status: req.form_details.status.name,
+                    requestId: req.request_id,
+                    isCurrent: false
+                },
+                description: req.form_details.calendar_info.description
+            });
+        });
+
+        // Add current request with special styling (only once)
+        const currentCalendarTitle = currentRequest.form_details.calendar_info.title || 'No Calendar Title';
+
+        calendar.addEvent({
+            title: 'Current Request', // You can change this to currentCalendarTitle if you prefer
+            start: `${currentRequest.schedule.start_date}T${currentRequest.schedule.start_time}`,
+            end: `${currentRequest.schedule.end_date}T${currentRequest.schedule.end_time}`,
+            extendedProps: {
+                status: currentRequest.form_details.status.name,
+                requestId: currentRequest.request_id,
+                isCurrent: true
+            },
+            color: '#FF6B35', // Different color for current request
+            textColor: '#FFFFFF',
+            description: currentRequest.form_details.calendar_info.description
+        });
+    }
+}
 
             // Function to show event details in modal
             function showEventModal(request) {
