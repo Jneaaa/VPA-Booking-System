@@ -2020,6 +2020,77 @@ class AdminApprovalController extends Controller
         return $breakdown;
     }
 
+    public function updateCalendarInfo(Request $request, $requestId)
+{
+    try {
+        \Log::debug('Updating calendar info', [
+            'request_id' => $requestId,
+            'admin_id' => auth()->id(),
+            'input_data' => $request->all()
+        ]);
+
+        $validatedData = $request->validate([
+            'calendar_title' => 'sometimes|string|max:50|nullable',
+            'calendar_description' => 'sometimes|string|max:100|nullable',
+        ]);
+
+        $adminId = auth()->id();
+        if (!$adminId) {
+            return response()->json(['error' => 'Admin not authenticated'], 401);
+        }
+
+        $form = RequisitionForm::findOrFail($requestId);
+
+        // Update only the provided fields
+        if (array_key_exists('calendar_title', $validatedData)) {
+            $form->calendar_title = $validatedData['calendar_title'];
+        }
+
+        if (array_key_exists('calendar_description', $validatedData)) {
+            $form->calendar_description = $validatedData['calendar_description'];
+        }
+
+        $form->save();
+
+        \Log::info('Calendar info updated successfully', [
+            'request_id' => $requestId,
+            'calendar_title' => $form->calendar_title,
+            'calendar_description' => $form->calendar_description,
+            'admin_id' => $adminId
+        ]);
+
+        return response()->json([
+            'message' => 'Calendar information updated successfully',
+            'calendar_title' => $form->calendar_title,
+            'calendar_description' => $form->calendar_description
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Calendar info update validation failed', [
+            'request_id' => $requestId,
+            'errors' => $e->errors()
+        ]);
+
+        return response()->json([
+            'error' => 'Validation failed',
+            'details' => $e->errors()
+        ], 422);
+
+    } catch (\Exception $e) {
+        \Log::error('Failed to update calendar info', [
+            'request_id' => $requestId,
+            'admin_id' => auth()->id(),
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'error' => 'Failed to update calendar information',
+            'details' => $e->getMessage()
+        ], 500);
+    }
+}
+
     // Completed Transactions // 
 
 

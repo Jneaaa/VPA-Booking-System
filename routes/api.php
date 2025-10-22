@@ -161,6 +161,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/notifications', [NotificationController::class, 'getNotifications']);
     Route::post('/admin/notifications/mark-read/{notificationId?}', [NotificationController::class, 'markAsRead']);
     Route::post('/admin/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+    Route::get('/feedback', [FeedbackController::class, 'index']);
 
     // ---------------- Equipment Management ---------------- //
     Route::post('admin/equipment', [EquipmentController::class, 'store']);
@@ -196,6 +197,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ---------------- Requisition Management ---------------- //
     Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'pendingRequests']);
     Route::get('/admin/requisition-forms/{requestId}', [AdminApprovalController::class, 'getRequisitionFormById']);
+    Route::put('admin/requisition-forms/{requestId}/calendar-info', [AdminApprovalController::class, 'updateCalendarInfo']);
     Route::get('/admin/simplified-forms', [AdminApprovalController::class, 'getSimplifiedForms']);
     Route::get('/admin/completed-requests', [AdminApprovalController::class, 'completedRequests']);
     Route::get('/admin/archives', [RequisitionFormController::class, 'getArchivedRequisitions']);

@@ -25,14 +25,24 @@
     }
 
     .unread-card {
-      border-left: 4px solid #007bff !important;
+      border-left: 4px solid #0f4580ff !important;
       background-color: #f8f9fa;
     }
 
     .btn-secondary {
-      background-color: #889096ff;
-      color: white;
+      background-color: #d6daddff;
+      color: #222324ff;
     }
+
+    .btn-secondary:hover {
+  background-color: #c3c8ccff; /* slightly darker */
+  color: #111214ff;
+}
+
+.btn-secondary:active {
+  background-color: #b0b6bbff; /* deeper shade for pressed effect */
+  color: #0f1011ff;
+}
 
     /* Filter bar styles */
     .filter-bar {
@@ -59,26 +69,22 @@
 
     .layout-toggle-btn.active {
       background-color: #e9ecef;
-      border-color: #0d6efd;
+      border-color: #6e7d94ff;
     }
 
     .content-area {
-      padding: 1.5rem;
+      padding-top: 1rem;
       width: 100%;
-      min-height: 400px;
     }
 
     .requisition-card {
       margin-bottom: 1rem;
-      height: auto;
       background-color: white;
       transition: background-color 0.3s ease;
-      /* smooth fade */
     }
 
     .requisition-card:hover {
       background-color: #f6f8faff;
-      /* slightly darker */
     }
 
 
@@ -96,10 +102,6 @@
       font-size: 0.875rem;
     }
 
-    .compact-card .card-label {
-      font-size: 0.8125rem;
-    }
-
     .compact-info-row {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -113,24 +115,11 @@
       padding: 0.35em 0.65em;
     }
 
-    .bg-pink {
-      background-color: #FF69B4;
-    }
-
-    .bg-purple {
-      background-color: #6f42c1;
-    }
-
     /* Grid layout for compact cards */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1rem;
-      overflow-y: auto;
-      max-height: calc(100vh - 300px);
-    }
-
-    .cards-container {
       overflow-y: auto;
       max-height: calc(100vh - 300px);
     }
@@ -154,62 +143,6 @@
       height: 200px;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 991.98px) {
-      .filter-bar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .filter-select {
-        min-width: 100%;
-      }
-    }
-
-    @media (max-width: 767.98px) {
-      .compact-info-row {
-        grid-template-columns: 1fr;
-      }
-
-      .content-area {
-        padding: 1rem;
-      }
-
-      .cards-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .filter-row {
-        flex-direction: column;
-      }
-
-      .search-container {
-        width: 100%;
-        margin-top: 0.5rem;
-      }
-
-      .search-container input {
-        width: 100% !important;
-      }
-    }
-
-    @media (max-width: 575.98px) {
-      .filter-bar {
-        padding: 0.75rem;
-      }
-
-      .content-area {
-        padding: 0.75rem;
-      }
-
-      #requisitionContainer {
-        max-height: none !important;
-      }
-
-      .cards-grid {
-        max-height: none !important;
-      }
-    }
 
     .compact-info-column>div {
       margin-bottom: 0.25rem;
@@ -245,38 +178,32 @@
       gap: 0.5rem;
       margin-left: auto;
     }
-
-    .search-container input {
-      width: 200px;
-    }
   </style>
 
-  <main id="main">
-    <!-- Main Content Container as Card -->
-    <div class="main-content-container card">
+  <main>
       <div class="card-header">
         <!-- Filter Bar with Search aligned right -->
         <div class="d-flex flex-column w-100">
           <div class="d-flex flex-wrap align-items-center justify-content-between w-100 gap-2 filter-row">
             <!-- Left side: filters + layout toggle -->
             <div class="d-flex flex-wrap align-items-center gap-2">
-              <select class="form-select form-select-sm filter-select" id="statusFilter">
+              <select class="form-select filter-select" id="statusFilter">
                 <option value="all">All Statuses</option>
-                <!-- Status options will be populated dynamically -->
+                <!-- Only Pending Approval and Awaiting Payment will be shown -->
               </select>
 
 
-              <select class="form-select form-select-sm filter-select" id="sortFilter">
-                <option value="status">By Status</option>
+              <select class="form-select filter-select" id="sortFilter">
+                <option value="status">By Date</option>
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
               </select>
 
               <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm layout-toggle-btn" data-layout="detailed">
+                <button type="button" class="btn layout-toggle-btn" data-layout="detailed">
                   <i class="bi bi-list-ul"></i> Detailed
                 </button>
-                <button type="button" class="btn btn-sm layout-toggle-btn active" data-layout="compact">
+                <button type="button" class="btn layout-toggle-btn active" data-layout="compact">
                   <i class="bi bi-grid"></i> Compact
                 </button>
               </div>
@@ -284,9 +211,9 @@
 
             <!-- Right side: search -->
             <div class="search-container">
-              <input type="search" class="form-control form-control-sm" id="searchInput"
+              <input type="search" class="form-control" id="searchInput"
                 placeholder="Search by request number...">
-              <button class="btn btn-primary btn-sm" id="searchButton">Search</button>
+              <button class="btn btn-primary" id="searchButton">Search</button>
             </div>
           </div>
         </div>
@@ -306,7 +233,6 @@
           </div>
         </div>
       </div>
-    </div>
 
     <!-- Modal definitions remain the same -->
     <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
@@ -317,15 +243,152 @@
       <!-- ... existing modal content ... -->
     </div>
 
-    <div class="modal fade" id="approvalHistoryModal" tabindex="-1" aria-hidden="true">
-      <!-- ... existing modal content ... -->
+<!-- Approval History Modal -->
+<div class="modal fade" id="approvalHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Approval History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="approvalHistoryTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="approvals-tab" data-bs-toggle="tab" data-bs-target="#approvals" type="button" role="tab" aria-controls="approvals" aria-selected="true">
+                            <i class="bi bi-hand-thumbs-up text-success me-1"></i>
+                            Approvals <span class="badge bg-success ms-1" id="approvalsTabCount">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="rejections-tab" data-bs-toggle="tab" data-bs-target="#rejections" type="button" role="tab" aria-controls="rejections" aria-selected="false">
+                            <i class="bi bi-hand-thumbs-down text-danger me-1"></i>
+                            Rejections <span class="badge bg-danger ms-1" id="rejectionsTabCount">0</span>
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3" id="approvalHistoryContent">
+                    <div class="tab-pane fade show active" id="approvals" role="tabpanel" aria-labelledby="approvals-tab">
+                        <div id="approvalsHistoryContent">
+                            <div class="text-center text-muted py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading approvals...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="rejections" role="tabpanel" aria-labelledby="rejections-tab">
+                        <div id="rejectionsHistoryContent">
+                            <div class="text-center text-muted py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading rejections...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
+</div>
   </main>
 
 @endsection
 
 @section('scripts')
   <script>
+
+    // Update the showApprovalHistory function
+function showApprovalHistory(requestId) {
+    const modal = new bootstrap.Modal(document.getElementById('approvalHistoryModal'));
+    loadApprovalHistory(requestId);
+    modal.show();
+}
+
+// Function to load approval history
+async function loadApprovalHistory(requestId) {
+    try {
+        const adminToken = localStorage.getItem('adminToken');
+        if (!adminToken) {
+            throw new Error('No authentication token found');
+        }
+
+        console.log('Fetching approval history for request:', requestId);
+        
+        const response = await fetch(`/api/admin/requisition/${requestId}/approval-history`, {
+            headers: {
+                'Authorization': `Bearer ${adminToken}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const approvalHistory = await response.json();
+        console.log('Approval history data:', approvalHistory);
+
+        // Separate approvals and rejections
+        const approvals = approvalHistory.filter(item => item.action === 'approved');
+        const rejections = approvalHistory.filter(item => item.action === 'rejected');
+
+        // Update tab counts
+        document.getElementById('approvalsTabCount').textContent = approvals.length;
+        document.getElementById('rejectionsTabCount').textContent = rejections.length;
+
+        // Update content
+        document.getElementById('approvalsHistoryContent').innerHTML = generateApprovalHistoryHTML(approvals);
+        document.getElementById('rejectionsHistoryContent').innerHTML = generateApprovalHistoryHTML(rejections);
+
+    } catch (error) {
+        console.error('Error loading approval history:', error);
+        const errorHtml = `<div class="text-center text-danger py-4">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Failed to load history: ${error.message}
+        </div>`;
+        document.getElementById('approvalsHistoryContent').innerHTML = errorHtml;
+        document.getElementById('rejectionsHistoryContent').innerHTML = errorHtml;
+    }
+}
+
+// Function to generate approval history HTML (same as in request-view.blade.php)
+function generateApprovalHistoryHTML(history) {
+    if (!history || history.length === 0) {
+        return '<div class="text-center text-muted py-4">No records found</div>';
+    }
+
+    return history.map(item => `
+        <div class="d-flex align-items-center mb-3 p-2 border rounded">
+            <div class="me-3 flex-shrink-0">
+                ${item.admin_photo ?
+                    `<img src="${item.admin_photo}" class="rounded-circle" width="45" height="45" alt="${item.admin_name}" style="object-fit: cover;">` :
+                    `<div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width: 45px; height: 45px;">
+                        ${item.admin_name.split(' ').map(n => n.charAt(0)).join('')}
+                    </div>`
+                }
+            </div>
+            <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong class="d-block">${item.admin_name}</strong>
+                        <small class="text-muted">
+                            <i class="fa ${item.action_icon} ${item.action_class} me-1"></i>
+                            ${item.action} this request
+                        </small>
+                        ${item.remarks ? `<div class="mt-1 small text-muted">"${item.remarks}"</div>` : ''}
+                    </div>
+                    <small class="text-muted text-end">${item.formatted_date}</small>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
     // Define handleManage globally so it can be accessed by onclick
     function handleManage(requestId) {
       if (!requestId) {
@@ -335,10 +398,47 @@
       window.location.href = `/admin/requisition/${requestId}`;
     }
 
-    function showApprovalHistory(requestId) {
-      // Implementation for showing approval history
-      console.log('Showing approval history for request:', requestId);
+   function showApprovalHistory(requestId) {
+    console.log('Showing approval history for request:', requestId);
+    
+    // Initialize the modal
+    const modalElement = document.getElementById('approvalHistoryModal');
+    if (!modalElement) {
+        console.error('Modal element not found');
+        return;
     }
+    
+    const modal = new bootstrap.Modal(modalElement);
+    
+    // Set loading state
+    document.getElementById('approvalsHistoryContent').innerHTML = `
+        <div class="text-center text-muted py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading approvals...</p>
+        </div>
+    `;
+    
+    document.getElementById('rejectionsHistoryContent').innerHTML = `
+        <div class="text-center text-muted py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading rejections...</p>
+        </div>
+    `;
+    
+    // Reset tab counts
+    document.getElementById('approvalsTabCount').textContent = '0';
+    document.getElementById('rejectionsTabCount').textContent = '0';
+    
+    // Show the modal first
+    modal.show();
+    
+    // Then load the data
+    loadApprovalHistory(requestId);
+}
 
     document.addEventListener('DOMContentLoaded', function () {
       const requisitionContainer = document.getElementById('requisitionContainer');
@@ -397,11 +497,11 @@
 
         if (forms.length === 0) {
           requisitionContainer.innerHTML = `
-              <div class="empty-state">
-                  <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                  <p class="mt-3 text-muted">No requisitions found matching your criteria.</p>
-              </div>
-          `;
+                <div class="empty-state">
+                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                    <p class="mt-3 text-muted">No requisitions found matching your criteria.</p>
+                </div>
+            `;
           return;
         }
 
@@ -424,83 +524,83 @@
 
           if (currentLayout === 'compact') {
             cardHtml = `
-                  <div class="card requisition-card compact-card mb-1 ${isUnread ? 'unread-card' : ''}" 
-                       data-request-id="${form.request_id}" style="cursor: pointer;">
-                      ${isUnread ? '<span class="request-badge"></span>' : ''}
-                      <div class="card-body p-1">
-                          <div class="d-flex justify-content-between align-items-center mb-1">
-                              <h5 class="card-title mb-0 fw-bold">Request #${requestNumber}</h5>
+                    <div class="card requisition-card compact-card mb-1 ${isUnread ? 'unread-card' : ''}" 
+                         data-request-id="${form.request_id}" style="cursor: pointer;">
+                        ${isUnread ? '<span class="request-badge"></span>' : ''}
+                        <div class="card-body p-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h5 class="card-title mb-0 fw-bold">Request #${requestNumber}</h5>
 
-                              <!-- Circle action buttons -->
-                              <div class="d-flex gap-1">
-                                  <button class="btn btn-sm btn-secondary circle-btn view-history-btn"
-                                          data-request-id="${form.request_id}" 
-                                          title="Approval History">
-                                      <i class="bi bi-clock-history"></i>
-                                  </button>
-                                  <button class="btn btn-sm btn-primary circle-btn manage-btn"
-                                          data-request-id="${form.request_id}" 
-                                          title="Manage Request">
-                                      <i class="bi bi-pencil"></i>
-                                  </button>
-                              </div>
-                          </div>
+                                <!-- Circle action buttons -->
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-secondary circle-btn view-history-btn"
+                                            data-request-id="${form.request_id}" 
+                                            title="Approval History">
+                                        <i class="bi bi-clock-history"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-primary circle-btn manage-btn"
+                                            data-request-id="${form.request_id}" 
+                                            title="Manage Request">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </div>
+                            </div>
 
-                          <div class="compact-info-column">
-                              <div>
-                                  <span class="card-label">Status:</span> 
-                                  <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
-                              </div>
-                              <div>
-                                  <span class="card-label">Requester:</span> ${form.requester || 'N/A'}
-                              </div>
-                              <div>
-                                  <span class="card-label">Purpose:</span> ${form.purpose || 'N/A'}
-                              </div>
-                              <div>
-                                  <span class="card-label">Approvals:</span> ${form.approvals || '0'}
-                              </div>
-                              <div>
-                                  <span class="card-label">Rejections:</span> ${form.rejections || '0'}
-                              </div>
-                          </div>
-                      </div>
+                            <div class="compact-info-column">
+                                <div>
+                                    <span class="card-label">Status:</span> 
+                                    <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
+                                </div>
+                                <div>
+                                    <span class="card-label">Requester:</span> ${form.requester || 'N/A'}
+                                </div>
+                                <div>
+                                    <span class="card-label">Purpose:</span> ${form.purpose || 'N/A'}
+                                </div>
+                                <div>
+                                    <span class="card-label">Approvals:</span> ${form.approvals || '0'}
+                                </div>
+                                <div>
+                                    <span class="card-label">Rejections:</span> ${form.rejections || '0'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+          } else {
+            cardHtml = `
+      <div class="card requisition-card ${isUnread ? 'unread-card' : ''}" 
+           data-request-id="${form.request_id}" style="cursor: pointer;">
+          ${isUnread ? '<span class="request-badge"></span>' : ''}
+          <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                  <h5 class="card-title mb-0">Request #${requestNumber}</h5>
+                  <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
+              </div>
+
+              <div class="row mb-3">
+                  <div class="col-md-6">
+                      <p class="mb-2"><span class="card-label">Requester:</span> ${form.requester}</p>
+                      <p class="mb-2"><span class="card-label">Purpose:</span> ${form.purpose}</p>
+                      <p class="mb-2"><span class="card-label">Schedule:</span> ${form.schedule}</p>
                   </div>
-              `;
-  } else {
-  cardHtml = `
-    <div class="card requisition-card ${isUnread ? 'unread-card' : ''}" 
-         data-request-id="${form.request_id}" style="cursor: pointer;">
-        ${isUnread ? '<span class="request-badge"></span>' : ''}
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <h5 class="card-title mb-0">Request #${requestNumber}</h5>
-                <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
-            </div>
+                  <div class="col-md-6">
+                      <p class="mb-2"><span class="card-label">Facilities:</span> ${form.requested_items}</p>
+                      <p class="mb-2"><span class="card-label">Tentative Fee:</span> ₱${form.tentative_fee}</p>
+                      <p class="mb-2"><span class="card-label">Approvals:</span> ${form.approvals}</p>
+                  </div>
+              </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <p class="mb-2"><span class="card-label">Requester:</span> ${form.requester}</p>
-                    <p class="mb-2"><span class="card-label">Purpose:</span> ${form.purpose}</p>
-                    <p class="mb-2"><span class="card-label">Schedule:</span> ${form.schedule}</p>
-                </div>
-                <div class="col-md-6">
-                    <p class="mb-2"><span class="card-label">Facilities:</span> ${form.requested_items}</p>
-                    <p class="mb-2"><span class="card-label">Tentative Fee:</span> ₱${form.tentative_fee}</p>
-                    <p class="mb-2"><span class="card-label">Approvals:</span> ${form.approvals}</p>
-                </div>
-            </div>
-
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary manage-btn" 
-                        data-request-id="${form.request_id}">Review Request</button>
-                <button class="btn btn-secondary view-history-btn" 
-                        data-request-id="${form.request_id}">View Approval History</button>
-            </div>
-        </div>
-    </div>
-  `;
-}
+              <div class="d-flex gap-2">
+                  <button class="btn btn-primary manage-btn" 
+                          data-request-id="${form.request_id}">Review Request</button>
+                  <button class="btn btn-secondary view-history-btn" 
+                          data-request-id="${form.request_id}">View Approval History</button>
+              </div>
+          </div>
+      </div>
+    `;
+          }
 
           requisitionContainer.innerHTML += cardHtml;
         });
@@ -592,12 +692,14 @@
           const statusData = await statusResponse.json();
           statusOptions = statusData;
 
-          // Populate status filter
+          // Populate status filter - only show Pending Approval and Awaiting Payment
           statusData.forEach(status => {
-            const option = document.createElement('option');
-            option.value = status.status_id;
-            option.textContent = status.status_name;
-            statusFilter.appendChild(option);
+            if (status.status_name === 'Pending Approval' || status.status_name === 'Awaiting Payment') {
+              const option = document.createElement('option');
+              option.value = status.status_id;
+              option.textContent = status.status_name;
+              statusFilter.appendChild(option);
+            }
           });
 
           // Load saved filters after options are populated
@@ -681,13 +783,13 @@
         try {
           if (showLoading) {
             requisitionContainer.innerHTML = `
-                    <div class="loading-spinner">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Loading Requisitions...</p>
-                    </div>
-                `;
+                      <div class="loading-spinner">
+                          <div class="spinner-border text-primary" role="status">
+                              <span class="visually-hidden">Loading...</span>
+                          </div>
+                          <p class="mt-2">Loading Requisitions...</p>
+                      </div>
+                  `;
           }
 
           const adminToken = localStorage.getItem('adminToken');

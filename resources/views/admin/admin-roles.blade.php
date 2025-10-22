@@ -489,7 +489,6 @@
       const selectedButtons = deptContainer.querySelectorAll('.btn.selected, .btn.active');
       const selectedDeptIds = Array.from(selectedButtons).map(btn => btn.dataset.deptId);
       hiddenInput.value = JSON.stringify(selectedDeptIds);
-      console.log('Updated selected departments:', selectedDeptIds);
     }
 
     // Function to auto-select all departments for specific roles - FIXED
@@ -499,7 +498,6 @@
 
       roleSelect.addEventListener('change', function () {
         const selectedRoleId = parseInt(this.value);
-        console.log('Role changed to:', selectedRoleId);
 
         // Role IDs that should auto-select all departments
         const autoSelectRoleIds = [1, 2]; // Head Admin and Vice President
@@ -510,13 +508,11 @@
         const allButtons = deptContainer.querySelectorAll('.department-btn');
 
         if (autoSelectRoleIds.includes(selectedRoleId)) {
-          console.log('Auto-selecting all departments for role:', selectedRoleId);
           allButtons.forEach(button => {
             button.classList.add('selected');
             button.classList.add('active');
           });
         } else {
-          console.log('Clearing department selection for role:', selectedRoleId);
           allButtons.forEach(button => {
             button.classList.remove('selected');
             button.classList.remove('active');
@@ -564,7 +560,6 @@
           }
 
           window.departmentsData = await response.json();
-          console.log('Departments loaded:', window.departmentsData);
         } catch (error) {
           console.error('Error loading departments:', error);
           window.departmentsData = [];
@@ -768,7 +763,6 @@
           }
 
           const roles = await response.json();
-          console.log('Fetched roles:', roles);
 
           // Populate add form role select
           roleSelect.innerHTML = '<option value="">Select a role</option>';
@@ -816,7 +810,6 @@
 
         // Get selected departments - FIXED: Check both classes
         const selectedDeptIds = JSON.parse(document.getElementById('add-selected-departments').value || '[]');
-        console.log('Selected departments for add:', selectedDeptIds);
 
         // Validate department selection for certain roles
         const roleId = parseInt(document.getElementById('role_id').value);
@@ -827,7 +820,6 @@
           selectAllDepartments('add-department-buttons-container');
           // Re-get the selected departments after auto-selection
           const updatedDeptIds = JSON.parse(document.getElementById('add-selected-departments').value || '[]');
-          console.log('Auto-selected departments:', updatedDeptIds);
         }
 
         // Final validation check
@@ -852,8 +844,6 @@
           wallpaper_url: null,
           wallpaper_public_id: null
         };
-
-        console.log('Submitting form data:', formData);
 
         try {
           const response = await fetch('/api/admins', {
@@ -900,7 +890,6 @@
           }
 
           const admin = await response.json();
-          console.log('Admin details for edit:', admin);
 
           // Populate form
           document.getElementById('edit_admin_id').value = admin.admin_id;
@@ -949,7 +938,6 @@
 
         // Get selected departments - FIXED: Check both classes
         const selectedDeptIds = JSON.parse(document.getElementById('edit-selected-departments').value || '[]');
-        console.log('Selected departments for edit:', selectedDeptIds);
 
         // Validate department selection for certain roles
         const roleId = parseInt(document.getElementById('edit_role_id').value);
@@ -960,7 +948,6 @@
           selectAllDepartments('edit-department-buttons-container');
           // Re-get the selected departments after auto-selection
           const updatedDeptIds = JSON.parse(document.getElementById('edit-selected-departments').value || '[]');
-          console.log('Auto-selected departments:', updatedDeptIds);
         }
 
         // Final validation check
@@ -982,8 +969,6 @@
           password: document.getElementById('edit_password').value || undefined,
           department_ids: finalSelectedDeptIds // Use the final selected departments
         };
-
-        console.log('Submitting edit form data:', formData);
 
         try {
           const response = await fetch(`/api/admins/${adminId}`, {
