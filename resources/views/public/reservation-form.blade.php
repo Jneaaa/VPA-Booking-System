@@ -1714,14 +1714,13 @@
       end_time: convertTo24Hour(document.getElementById('endTimeField').value),
       purpose_id: document.getElementById('activityPurposeField').value,
       num_participants: numParticipantsInput ? numParticipantsInput.value : 1,
+      endorser: document.querySelector('input[name="endorser"]')?.value || null,
+      date_endorsed: document.querySelector('input[name="date_endorsed"]')?.value || null,
       additional_requests: additionalRequestsInput ? additionalRequestsInput.value : '',
-      // Add these hidden fields to the submission
       formal_letter_url: document.getElementById('formal_letter_url').value,
       formal_letter_public_id: document.getElementById('formal_letter_public_id').value,
-      // Optional upload fields - explicitly set to null if not provided
       facility_layout_url: document.getElementById('facility_layout_url')?.value || null,
       facility_layout_public_id: document.getElementById('facility_layout_public_id')?.value || null,
-      // Include user info that was previously in session
       first_name: firstNameInput.value,
       last_name: lastNameInput.value,
       email: emailInput.value,
