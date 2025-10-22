@@ -33,7 +33,7 @@ class EquipmentSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
+            [ //3 
                 'equipment_name' => 'Additional Speakers',
                 'external_fee' => 5000.00,
                 'rate_type' => 'Per Hour',
@@ -44,7 +44,7 @@ class EquipmentSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
+            [ // 4
                 'equipment_name' => 'Additional Mics',
                 'external_fee' => 700.00, // Was null in image
                 'rate_type' => 'Per Hour',
@@ -57,7 +57,7 @@ class EquipmentSeeder extends Seeder
             ],
 
             // --- LIGHTS & EFFECTS ---
-            [
+            [ // 5
                 'equipment_name' => 'Lights (RGB Parled with Dimmer)',
                 'external_fee' => 600.00,
                 'rate_type' => 'Per Event', // Was 'Per Piece, Show'
@@ -68,7 +68,7 @@ class EquipmentSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
+            [ // 6
                 'equipment_name' => 'Moving Heads (with Controller)',
                 'external_fee' => 1200.00,
                 'rate_type' => 'Per Event', // Was 'Per Piece, Show'
@@ -79,7 +79,7 @@ class EquipmentSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
+            [ // 7
                 'equipment_name' => 'Smoke Machine',
                 'external_fee' => 600.00,
                 'rate_type' => 'Per Event', // Was 'Piece, Show'
@@ -90,7 +90,7 @@ class EquipmentSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
+            [ // 8
                 'equipment_name' => 'Follow Spot',
                 'external_fee' => 1500.00,
                 'rate_type' => 'Per Event', // Was 'Show'

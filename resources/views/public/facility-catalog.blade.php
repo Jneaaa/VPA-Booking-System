@@ -9,13 +9,14 @@
   <link rel="stylesheet" href="{{ asset('css/public/catalog.css') }}" />
   <style>
     /* Fix modal z-index for event details modal */
-#eventDetailModal {
-  z-index: 9999 !important;
-}
+    #eventDetailModal {
+      z-index: 9999 !important;
+    }
 
-#eventDetailModal .modal-dialog {
-  z-index: 10000;
-}
+    #eventDetailModal .modal-dialog {
+      z-index: 10000;
+    }
+
     /* Event Modal Styles */
     .event-details p {
       margin-bottom: 1rem;
@@ -439,22 +440,23 @@
     </div>
   </div>
   <!-- Availability Modal -->
-<div class="modal fade" id="availabilityModal" tabindex="-1" aria-labelledby="availabilityModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95%;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="availabilityModalLabel">Availability Schedule</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-3" style="min-height: 70vh;">
-        <div id="availabilityCalendar" style="height: 65vh;"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+  <div class="modal fade" id="availabilityModal" tabindex="-1" aria-labelledby="availabilityModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95%;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="availabilityModalLabel">Availability Schedule</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-3" style="min-height: 70vh;">
+          <div id="availabilityCalendar" style="height: 65vh;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 @endsection
 
 @section('scripts')
@@ -609,18 +611,18 @@
       toast.style.borderRadius = "0.3rem";
 
       toast.innerHTML = `
-              <div class="d-flex align-items-center px-3 py-1"> 
-                <i class="bi ${type === "success" ? "bi-check-circle-fill" : "bi-exclamation-circle-fill"} me-2"></i>
-                <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
-              <div class="loading-bar" style="
-                height: 3px;
-                background: rgba(255,255,255,0.7);
-                width: 100%;
-                transition: width ${duration}ms linear;
-              "></div>
-            `;
+                <div class="d-flex align-items-center px-3 py-1"> 
+                  <i class="bi ${type === "success" ? "bi-check-circle-fill" : "bi-exclamation-circle-fill"} me-2"></i>
+                  <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                  <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="loading-bar" style="
+                  height: 3px;
+                  background: rgba(255,255,255,0.7);
+                  width: 100%;
+                  transition: width ${duration}ms linear;
+                "></div>
+              `;
 
       document.body.appendChild(toast);
 
@@ -764,34 +766,34 @@
 
       if (isUnavailable) {
         return `
-              <button class="btn btn-secondary add-remove-btn" 
-              data-id="${facility.facility_id}" 
-              data-type="facility" 
-              disabled
-              style="cursor: not-allowed; opacity: 0.65;">
-              Unavailable
-              </button>
-              `;
+                <button class="btn btn-secondary add-remove-btn" 
+                data-id="${facility.facility_id}" 
+                data-type="facility" 
+                disabled
+                style="cursor: not-allowed; opacity: 0.65;">
+                Unavailable
+                </button>
+                `;
       }
 
       if (isSelected) {
         return `
-              <button class="btn btn-danger add-remove-btn" 
-              data-id="${facility.facility_id}" 
-              data-type="facility" 
-              data-action="remove">
-              Remove from form
-              </button>
-              `;
+                <button class="btn btn-danger add-remove-btn" 
+                data-id="${facility.facility_id}" 
+                data-type="facility" 
+                data-action="remove">
+                Remove from form
+                </button>
+                `;
       } else {
         return `
-              <button class="btn btn-primary add-remove-btn" 
-              data-id="${facility.facility_id}" 
-              data-type="facility" 
-              data-action="add">
-              Add to form
-              </button>
-              `;
+                <button class="btn btn-primary add-remove-btn" 
+                data-id="${facility.facility_id}" 
+                data-type="facility" 
+                data-action="add">
+                Add to form
+                </button>
+                `;
       }
     }
 
@@ -828,11 +830,11 @@
       const allCategoriesItem = document.createElement("div");
       allCategoriesItem.className = "category-item";
       allCategoriesItem.innerHTML = `
-            <div class="form-check">
-              <input class="form-check-input category-filter" type="checkbox" id="allCategories" value="All" checked disabled>
-              <label class="form-check-label" for="allCategories">All Categories</label>
-            </div>
-            `;
+              <div class="form-check">
+                <input class="form-check-input category-filter" type="checkbox" id="allCategories" value="All" checked disabled>
+                <label class="form-check-label" for="allCategories">All Categories</label>
+              </div>
+              `;
       categoryFilterList.appendChild(allCategoriesItem);
 
       // Render categories and subcategories
@@ -840,22 +842,22 @@
         const categoryItem = document.createElement("div");
         categoryItem.className = "category-item";
         categoryItem.innerHTML = `
-              <div class="form-check d-flex justify-content-between align-items-center">
-              <div>
-              <input class="form-check-input category-filter" type="checkbox" id="category${category.category_id}" value="${category.category_id}">
-              <label class="form-check-label" for="category${category.category_id}">${category.category_name}</label>
-              </div>
-              <i class="bi bi-chevron-up toggle-arrow" style="cursor:pointer"></i>
-              </div>
-              <div class="subcategory-list ms-3" style="overflow: hidden; max-height: 0; transition: max-height 0.3s ease;">
-              ${category.subcategories.map(sub => `
-              <div class="form-check">
-              <input class="form-check-input subcategory-filter" type="checkbox" id="subcategory${sub.subcategory_id}" value="${sub.subcategory_id}" data-category="${category.category_id}">
-              <label class="form-check-label" for="subcategory${sub.subcategory_id}">${sub.subcategory_name}</label>
-              </div>
-              `).join("")}
-              </div>
-            `;
+                <div class="form-check d-flex justify-content-between align-items-center">
+                <div>
+                <input class="form-check-input category-filter" type="checkbox" id="category${category.category_id}" value="${category.category_id}">
+                <label class="form-check-label" for="category${category.category_id}">${category.category_name}</label>
+                </div>
+                <i class="bi bi-chevron-up toggle-arrow" style="cursor:pointer"></i>
+                </div>
+                <div class="subcategory-list ms-3" style="overflow: hidden; max-height: 0; transition: max-height 0.3s ease;">
+                ${category.subcategories.map(sub => `
+                <div class="form-check">
+                <input class="form-check-input subcategory-filter" type="checkbox" id="subcategory${sub.subcategory_id}" value="${sub.subcategory_id}" data-category="${category.category_id}">
+                <label class="form-check-label" for="subcategory${sub.subcategory_id}">${sub.subcategory_name}</label>
+                </div>
+                `).join("")}
+                </div>
+              `;
         categoryFilterList.appendChild(categoryItem);
 
         // Toggle subcategory list
@@ -1014,37 +1016,53 @@
       return filteredItems;
     }
 
-    function renderItems(items) {
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
+function renderItems(items) {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
 
-      catalogItemsContainer.innerHTML = "";
+  catalogItemsContainer.innerHTML = "";
 
-      if (paginatedItems.length === 0) {
-        catalogItemsContainer.innerHTML = `
-              <div class="col-12 text-center py-5">
-              <i class="bi bi-building fs-1 text-muted"></i>
-              <h4>No facilities found</h4>
-              </div>
-              `;
-        return;
-      }
+  // handle empty state
+  if (paginatedItems.length === 0) {
+    catalogItemsContainer.classList.remove("grid-layout", "list-layout");
+    catalogItemsContainer.innerHTML = `
+      <div
+        style="
+          grid-column: 1 / -1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          min-height: 220px;
+          width: 100%;
+        "
+      >
+        <i class="bi bi-building fs-1 text-muted"></i>
+        <h4 class="mt-2">No facilities found</h4>
+      </div>
+    `;
+    return;
+  }
 
-      catalogItemsContainer.classList.remove("grid-layout", "list-layout");
-      catalogItemsContainer.classList.add(`${currentLayout}-layout`);
+  // normal render path
+  catalogItemsContainer.classList.remove("grid-layout", "list-layout");
+  catalogItemsContainer.classList.add(`${currentLayout}-layout`);
 
-      currentLayout === "grid"
-        ? renderFacilitiesGrid(paginatedItems)
-        : renderFacilitiesList(paginatedItems);
+  if (currentLayout === "grid") {
+    renderFacilitiesGrid(paginatedItems);
+  } else {
+    renderFacilitiesList(paginatedItems);
+  }
 
-      // Add event listeners to item name links
-      document.querySelectorAll(".catalog-card-details h5").forEach((title) => {
-        title.addEventListener("click", function () {
-          const id = this.getAttribute("data-id");
-          showFacilityDetails(id);
-        });
-      });
-    }
+  // add click events
+  document.querySelectorAll(".catalog-card-details h5").forEach((title) => {
+    title.addEventListener("click", function () {
+      const id = this.getAttribute("data-id");
+      showFacilityDetails(id);
+    });
+  });
+}
+
     function renderFacilitiesGrid(facilities) {
       catalogItemsContainer.innerHTML = facilities
         .map((facility) => {
@@ -1066,31 +1084,31 @@
             : "No description available.";
 
           return `
-          <div class="catalog-card">
-            <img src="${primaryImage}" 
-                 alt="${facility.facility_name}" 
-                 class="catalog-card-img"
-                 onerror="this.src='https://res.cloudinary.com/dn98ntlkd/image/upload/v1759850278/t4fyv56wog6pglhwvwtn.png'">
-            <div class="catalog-card-details">
-              <h5 data-id="${facility.facility_id}" title="${facility.facility_name}">${facilityName}</h5>
-              <span class="status-banner" style="background-color: ${facility.status.color_code}">
-                ${facility.status.status_name}
-              </span>
-              <div class="catalog-card-meta">
-                <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"}</span>
-                <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name || facility.category.category_name}</span>
+            <div class="catalog-card">
+              <img src="${primaryImage}" 
+                   alt="${facility.facility_name}" 
+                   class="catalog-card-img"
+                   onerror="this.src='https://res.cloudinary.com/dn98ntlkd/image/upload/v1759850278/t4fyv56wog6pglhwvwtn.png'">
+              <div class="catalog-card-details">
+                <h5 data-id="${facility.facility_id}" title="${facility.facility_name}">${facilityName}</h5>
+                <span class="status-banner" style="background-color: ${facility.status.color_code}">
+                  ${facility.status.status_name}
+                </span>
+                <div class="catalog-card-meta">
+                  <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"}</span>
+                  <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name || facility.category.category_name}</span>
+                </div>
+                <p class="facility-description" title="${facility.description || ''}">${description}</p>
+                <div class="catalog-card-fee">
+                  <i class="bi bi-cash-stack"></i> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})
+                </div>
               </div>
-              <p class="facility-description" title="${facility.description || ''}">${description}</p>
-              <div class="catalog-card-fee">
-                <i class="bi bi-cash-stack"></i> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})
+              <div class="catalog-card-actions">
+                ${getFacilityButtonHtml(facility)}
+                <button class="btn btn-light btn-custom">Check Availability</button>
               </div>
             </div>
-            <div class="catalog-card-actions">
-              ${getFacilityButtonHtml(facility)}
-              <button class="btn btn-light btn-custom">Check Availability</button>
-            </div>
-          </div>
-          `;
+            `;
         })
         .join("");
     }
@@ -1116,33 +1134,33 @@
             : "No description available.";
 
           return `
-          <div class="catalog-card">
-            <img src="${primaryImage}" 
-                 alt="${facility.facility_name}" 
-                 class="catalog-card-img"
-                 onerror="this.src='https://res.cloudinary.com/dn98ntlkd/image/upload/v1759850278/t4fyv56wog6pglhwvwtn.png'">
-            <div class="catalog-card-details">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 data-id="${facility.facility_id}" title="${facility.facility_name}">${facilityName}</h5>
-                <span class="status-banner" style="background-color: ${facility.status.color_code}">
-                  ${facility.status.status_name}
-                </span>
+            <div class="catalog-card">
+              <img src="${primaryImage}" 
+                   alt="${facility.facility_name}" 
+                   class="catalog-card-img"
+                   onerror="this.src='https://res.cloudinary.com/dn98ntlkd/image/upload/v1759850278/t4fyv56wog6pglhwvwtn.png'">
+              <div class="catalog-card-details">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h5 data-id="${facility.facility_id}" title="${facility.facility_name}">${facilityName}</h5>
+                  <span class="status-banner" style="background-color: ${facility.status.color_code}">
+                    ${facility.status.status_name}
+                  </span>
+                </div>
+                <div class="catalog-card-meta">
+                  <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"}</span>
+                  <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name || facility.category.category_name}</span>
+                </div>
+                <p class="facility-description" title="${facility.description || ''}">${description}</p>
               </div>
-              <div class="catalog-card-meta">
-                <span><i class="bi bi-people-fill"></i> ${facility.capacity || "N/A"}</span>
-                <span><i class="bi bi-tags-fill"></i> ${facility.subcategory?.subcategory_name || facility.category.category_name}</span>
+              <div class="catalog-card-actions">
+                <div class="catalog-card-fee mb-2 text-center">
+                  <i class="bi bi-cash-stack"></i> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})
+                </div>
+                ${getFacilityButtonHtml(facility)}
+                <button class="btn btn-outline-secondary">Check Availability</button>
               </div>
-              <p class="facility-description" title="${facility.description || ''}">${description}</p>
             </div>
-            <div class="catalog-card-actions">
-              <div class="catalog-card-fee mb-2 text-center">
-                <i class="bi bi-cash-stack"></i> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})
-              </div>
-              ${getFacilityButtonHtml(facility)}
-              <button class="btn btn-outline-secondary">Check Availability</button>
-            </div>
-          </div>
-          `;
+            `;
         })
         .join("");
     }
@@ -1311,33 +1329,33 @@
 
         document.getElementById("facilityDetailModalLabel").textContent = facility.facility_name;
         document.getElementById("facilityDetailContent").innerHTML = `
-              <div class="row">
-              <div class="col-md-6">
-              <img src="${primaryImage}" alt="${facility.facility_name}" class="facility-image img-fluid">
-              </div>
-              <div class="col-md-6">
-              <div class="facility-details">
-              <p><strong>Status:</strong> <span class="badge" style="background-color: ${facility.status.color_code}">${facility.status.status_name}</span></p>
-              <p><strong>Category:</strong> ${facility.category.category_name}</p>
-              <p><strong>Subcategory:</strong> ${facility.subcategory?.subcategory_name || "N/A"}</p>
-              <p><strong>Capacity:</strong> ${facility.capacity}</p>
-              <p><strong>Rate:</strong> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})</p>
-              <p><strong>Description:</strong></p>
-              <p>${facility.description || "No description available."}</p>
-              </div>
-              <div class="mt-3">
-              ${isUnavailable
+                <div class="row">
+                <div class="col-md-6">
+                <img src="${primaryImage}" alt="${facility.facility_name}" class="facility-image img-fluid">
+                </div>
+                <div class="col-md-6">
+                <div class="facility-details">
+                <p><strong>Status:</strong> <span class="badge" style="background-color: ${facility.status.color_code}">${facility.status.status_name}</span></p>
+                <p><strong>Category:</strong> ${facility.category.category_name}</p>
+                <p><strong>Subcategory:</strong> ${facility.subcategory?.subcategory_name || "N/A"}</p>
+                <p><strong>Capacity:</strong> ${facility.capacity}</p>
+                <p><strong>Rate:</strong> ₱${parseFloat(facility.external_fee).toLocaleString()} (${facility.rate_type})</p>
+                <p><strong>Description:</strong></p>
+                <p>${facility.description || "No description available."}</p>
+                </div>
+                <div class="mt-3">
+                ${isUnavailable
             ? `<button class="btn btn-secondary" disabled style="cursor: not-allowed; opacity: 0.65;">Unavailable</button>`
             : `<button class="btn ${isSelected ? "btn-danger" : "btn-primary"} add-remove-btn" 
-              data-id="${facility.facility_id}" 
-              data-type="facility" 
-              data-action="${isSelected ? "remove" : "add"}">
-              ${isSelected ? "Remove from Form" : "Add to Form"}
-              </button>`}
-              </div>
-              </div>
-              </div>
-            `;
+                data-id="${facility.facility_id}" 
+                data-type="facility" 
+                data-action="${isSelected ? "remove" : "add"}">
+                ${isSelected ? "Remove from Form" : "Add to Form"}
+                </button>`}
+                </div>
+                </div>
+                </div>
+              `;
         facilityDetailModal.show();
       } catch (error) {
         console.error("Error showing facility details:", error);
@@ -1346,237 +1364,237 @@
     }
 
 
-// Initialize availability calendar for specific item
-function initializeAvailabilityCalendar(itemId, itemType, itemName) {
-  const calendarEl = document.getElementById('availabilityCalendar');
-  if (!calendarEl) return;
+    // Initialize availability calendar for specific item
+    function initializeAvailabilityCalendar(itemId, itemType, itemName) {
+      const calendarEl = document.getElementById('availabilityCalendar');
+      if (!calendarEl) return;
 
-  // Clear any existing content first
-  calendarEl.innerHTML = '';
+      // Clear any existing content first
+      calendarEl.innerHTML = '';
 
-  // Create and show loading overlay
-  const loadingOverlay = document.createElement('div');
-  loadingOverlay.className = 'calendar-loading-overlay';
-  loadingOverlay.innerHTML = `
-    <div class="calendar-loading-content">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+      // Create and show loading overlay
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.className = 'calendar-loading-overlay';
+      loadingOverlay.innerHTML = `
+      <div class="calendar-loading-content">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading availability data...</p>
       </div>
-      <p class="mt-2">Loading availability data...</p>
-    </div>
-  `;
-  
-  // Add CSS for loading overlay
-  if (!document.querySelector('#calendarLoadingStyles')) {
-    const loadingStyles = document.createElement('style');
-    loadingStyles.id = 'calendarLoadingStyles';
-    loadingStyles.textContent = `
-      .calendar-loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        border-radius: 0.375rem;
-      }
-      .calendar-loading-content {
-        text-align: center;
-      }
-      .calendar-hidden {
-        visibility: hidden;
-        opacity: 0;
-      }
-      .calendar-visible {
-        visibility: visible;
-        opacity: 1;
-        transition: opacity 0.3s ease-in-out;
-      }
     `;
-    document.head.appendChild(loadingStyles);
-  }
 
-  // Add loading overlay to calendar container
-  calendarEl.style.position = 'relative';
-  calendarEl.appendChild(loadingOverlay);
+      // Add CSS for loading overlay
+      if (!document.querySelector('#calendarLoadingStyles')) {
+        const loadingStyles = document.createElement('style');
+        loadingStyles.id = 'calendarLoadingStyles';
+        loadingStyles.textContent = `
+        .calendar-loading-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          border-radius: 0.375rem;
+        }
+        .calendar-loading-content {
+          text-align: center;
+        }
+        .calendar-hidden {
+          visibility: hidden;
+          opacity: 0;
+        }
+        .calendar-visible {
+          visibility: visible;
+          opacity: 1;
+          transition: opacity 0.3s ease-in-out;
+        }
+      `;
+        document.head.appendChild(loadingStyles);
+      }
 
-  // Hide the calendar initially
-  calendarEl.classList.add('calendar-hidden');
+      // Add loading overlay to calendar container
+      calendarEl.style.position = 'relative';
+      calendarEl.appendChild(loadingOverlay);
 
-  const calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'dayGridMonth',
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay'
-    },
-    titleFormat: {
-      year: 'numeric',
-      month: 'short'
-    },
-    height: 'auto',
-    handleWindowResize: true,
-    windowResizeDelay: 100,
-    aspectRatio: 1.5,
-    expandRows: false,
-    events: function (fetchInfo, successCallback, failureCallback) {
-      // Ensure loading overlay is visible and calendar is hidden
-      loadingOverlay.style.display = 'flex';
+      // Hide the calendar initially
       calendarEl.classList.add('calendar-hidden');
-      
-      // Fetch events filtered by specific item
-      fetch(`/api/requisition-forms/calendar-events?${itemType}_id=${itemId}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            successCallback(data.data);
-          } else {
-            failureCallback(data.message);
-          }
-        })
-        .catch(error => {
-          failureCallback('Failed to load availability data');
-          console.error('Availability calendar error:', error);
-        })
-        .finally(() => {
-          // Hide loading overlay and show calendar when everything is ready
-          setTimeout(() => {
-            loadingOverlay.style.display = 'none';
-            calendarEl.classList.remove('calendar-hidden');
-            calendarEl.classList.add('calendar-visible');
-            calendar.updateSize();
-          }, 500); // Increased delay to ensure everything is rendered
-        });
-    },
-    loading: function(isLoading) {
-      // FullCalendar's built-in loading callback
-      if (isLoading) {
-        loadingOverlay.style.display = 'flex';
-        calendarEl.classList.add('calendar-hidden');
-      } else {
-        setTimeout(() => {
-          loadingOverlay.style.display = 'none';
-          calendarEl.classList.remove('calendar-hidden');
-          calendarEl.classList.add('calendar-visible');
-        }, 500);
-      }
-    },
-    eventClick: function (info) {
-      showEventModal(info.event);
-    },
-    eventDidMount: function (info) {
-      info.el.style.backgroundColor = info.event.backgroundColor;
-      info.el.style.borderColor = info.event.borderColor;
-      info.el.style.color = '#fff';
-      info.el.style.fontWeight = 'bold';
-      info.el.style.borderRadius = '4px';
-      info.el.style.padding = '2px 4px';
-      info.el.style.fontSize = '12px';
-    },
-    datesSet: function (info) {
-      // Ensure calendar stays hidden during date changes until fully loaded
-      if (loadingOverlay.style.display !== 'none') {
-        calendarEl.classList.add('calendar-hidden');
-      }
-      setTimeout(() => {
-        calendar.updateSize();
-      }, 50);
-    },
-    eventTimeFormat: {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    },
-    slotMinTime: '06:00:00',
-    slotMaxTime: '22:00:00',
-    allDaySlot: false,
-    nowIndicator: true,
-    navLinks: true,
-    dayHeaderFormat: {
-      weekday: 'long',
-      month: 'short',
-      day: 'numeric'
-    },
-    slotLabelFormat: {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    },
-    views: {
-      dayGridMonth: {
-        dayHeaderFormat: { weekday: 'short' },
-        fixedWeekCount: false
-      },
-      timeGridWeek: {
-        dayHeaderFormat: {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric'
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
-        slotMinTime: '00:00:00',
-        slotMaxTime: '24:00:00'
-      },
-      timeGridDay: {
+        titleFormat: {
+          year: 'numeric',
+          month: 'short'
+        },
+        height: 'auto',
+        handleWindowResize: true,
+        windowResizeDelay: 100,
+        aspectRatio: 1.5,
+        expandRows: false,
+        events: function (fetchInfo, successCallback, failureCallback) {
+          // Ensure loading overlay is visible and calendar is hidden
+          loadingOverlay.style.display = 'flex';
+          calendarEl.classList.add('calendar-hidden');
+
+          // Fetch events filtered by specific item
+          fetch(`/api/requisition-forms/calendar-events?${itemType}_id=${itemId}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                successCallback(data.data);
+              } else {
+                failureCallback(data.message);
+              }
+            })
+            .catch(error => {
+              failureCallback('Failed to load availability data');
+              console.error('Availability calendar error:', error);
+            })
+            .finally(() => {
+              // Hide loading overlay and show calendar when everything is ready
+              setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+                calendarEl.classList.remove('calendar-hidden');
+                calendarEl.classList.add('calendar-visible');
+                calendar.updateSize();
+              }, 500); // Increased delay to ensure everything is rendered
+            });
+        },
+        loading: function (isLoading) {
+          // FullCalendar's built-in loading callback
+          if (isLoading) {
+            loadingOverlay.style.display = 'flex';
+            calendarEl.classList.add('calendar-hidden');
+          } else {
+            setTimeout(() => {
+              loadingOverlay.style.display = 'none';
+              calendarEl.classList.remove('calendar-hidden');
+              calendarEl.classList.add('calendar-visible');
+            }, 500);
+          }
+        },
+        eventClick: function (info) {
+          showEventModal(info.event);
+        },
+        eventDidMount: function (info) {
+          info.el.style.backgroundColor = info.event.backgroundColor;
+          info.el.style.borderColor = info.event.borderColor;
+          info.el.style.color = '#fff';
+          info.el.style.fontWeight = 'bold';
+          info.el.style.borderRadius = '4px';
+          info.el.style.padding = '2px 4px';
+          info.el.style.fontSize = '12px';
+        },
+        datesSet: function (info) {
+          // Ensure calendar stays hidden during date changes until fully loaded
+          if (loadingOverlay.style.display !== 'none') {
+            calendarEl.classList.add('calendar-hidden');
+          }
+          setTimeout(() => {
+            calendar.updateSize();
+          }, 50);
+        },
+        eventTimeFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        },
+        slotMinTime: '06:00:00',
+        slotMaxTime: '22:00:00',
+        allDaySlot: false,
+        nowIndicator: true,
+        navLinks: true,
         dayHeaderFormat: {
           weekday: 'long',
           month: 'short',
           day: 'numeric'
         },
-        slotMinTime: '06:00:00',
-        slotMaxTime: '22:00:00'
-      }
-    },
-    eventDisplay: 'block',
-    dayMaxEvents: 3,
-    moreLinkClick: 'popover',
-    slotDuration: '01:00:00',
-    slotLabelInterval: '01:00:00'
-  });
+        slotLabelFormat: {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        },
+        views: {
+          dayGridMonth: {
+            dayHeaderFormat: { weekday: 'short' },
+            fixedWeekCount: false
+          },
+          timeGridWeek: {
+            dayHeaderFormat: {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric'
+            },
+            slotMinTime: '00:00:00',
+            slotMaxTime: '24:00:00'
+          },
+          timeGridDay: {
+            dayHeaderFormat: {
+              weekday: 'long',
+              month: 'short',
+              day: 'numeric'
+            },
+            slotMinTime: '06:00:00',
+            slotMaxTime: '22:00:00'
+          }
+        },
+        eventDisplay: 'block',
+        dayMaxEvents: 3,
+        moreLinkClick: 'popover',
+        slotDuration: '01:00:00',
+        slotLabelInterval: '01:00:00'
+      });
 
-  calendar.render();
-  
-  // Update modal title with item name
-  document.getElementById('availabilityModalLabel').textContent = `Availability - ${itemName}`;
+      calendar.render();
 
-  return calendar;
-}
+      // Update modal title with item name
+      document.getElementById('availabilityModalLabel').textContent = `Availability - ${itemName}`;
 
-function setupAvailabilityButtons() {
-  catalogItemsContainer.addEventListener("click", (e) => {
-    if ((e.target.classList.contains("btn-custom") || e.target.classList.contains("btn-outline-secondary")) && 
-        e.target.textContent === "Check Availability") {
-      const card = e.target.closest(".catalog-card");
-      const itemId = card.querySelector(".add-remove-btn")?.dataset.id;
-      const itemType = card.querySelector(".add-remove-btn")?.dataset.type;
-      const itemName = card.querySelector("h5")?.textContent.trim();
-      
-      if (itemId && itemType) {
-        showAvailabilityCalendar(itemId, itemType, itemName);
-      }
+      return calendar;
     }
-  });
-}
 
-// Function to show availability modal
-function showAvailabilityCalendar(itemId, itemType, itemName) {
-  const modal = new bootstrap.Modal(document.getElementById('availabilityModal'));
-  let availabilityCalendar = null;
-  
-  document.getElementById('availabilityModal').addEventListener('shown.bs.modal', function () {
-    if (!availabilityCalendar) {
-      availabilityCalendar = initializeAvailabilityCalendar(itemId, itemType, itemName);
-    } else {
-      availabilityCalendar.refetchEvents();
-      availabilityCalendar.updateSize();
+    function setupAvailabilityButtons() {
+      catalogItemsContainer.addEventListener("click", (e) => {
+        if ((e.target.classList.contains("btn-custom") || e.target.classList.contains("btn-outline-secondary")) &&
+          e.target.textContent === "Check Availability") {
+          const card = e.target.closest(".catalog-card");
+          const itemId = card.querySelector(".add-remove-btn")?.dataset.id;
+          const itemType = card.querySelector(".add-remove-btn")?.dataset.type;
+          const itemName = card.querySelector("h5")?.textContent.trim();
+
+          if (itemId && itemType) {
+            showAvailabilityCalendar(itemId, itemType, itemName);
+          }
+        }
+      });
     }
-  });
-  
-  modal.show();
-}
+
+    // Function to show availability modal
+    function showAvailabilityCalendar(itemId, itemType, itemName) {
+      const modal = new bootstrap.Modal(document.getElementById('availabilityModal'));
+      let availabilityCalendar = null;
+
+      document.getElementById('availabilityModal').addEventListener('shown.bs.modal', function () {
+        if (!availabilityCalendar) {
+          availabilityCalendar = initializeAvailabilityCalendar(itemId, itemType, itemName);
+        } else {
+          availabilityCalendar.refetchEvents();
+          availabilityCalendar.updateSize();
+        }
+      });
+
+      modal.show();
+    }
 
 
     // Main Initialization
@@ -1794,7 +1812,7 @@ function showAvailabilityCalendar(itemId, itemType, itemName) {
         });
       }
 
-      
+
     });
 
 
