@@ -4,6 +4,28 @@
 
 @section('content')
   <style>
+
+    /* Feedback item styles */
+.feedback-item {
+    border-left: 3px solid #007bff;
+    padding-left: 1rem;
+}
+
+.feedback-item:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.ratings-section .badge {
+    font-size: 0.7em;
+    padding: 0.25rem 0.5rem;
+}
+
+.log-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
     .card {
   border: 0 !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -268,25 +290,50 @@
         </div>
       </div>
 
-      <!-- System Log Section -->
-      <div class="card shadow-sm mt-3">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="fw-bold text-primary">System Log</h4>
-            <div class="d-flex gap-2">
-              <input type="date" class="form-control" id="logDateFilter" placeholder="Filter by Date">
-            </div>
-          </div>
+<!-- Feedback & System Log Section -->
+<div class="row mt-3">
+    <!-- Left Column: System Log -->
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold text-primary">System Log</h4>
+                    <div class="d-flex gap-2">
+                        <input type="date" class="form-control" id="logDateFilter" placeholder="Filter by Date">
+                    </div>
+                </div>
 
-          <!-- System log container -->
-          <div id="systemLog" class="border rounded p-3 log-container">
-            <div class="text-center text-muted py-4">
-              <div class="spinner-border spinner-border-sm" role="status"></div>
-              <div class="mt-2">Loading system log...</div>
+                <!-- System log container -->
+                <div id="systemLog" class="border rounded p-3 log-container">
+                    <div class="text-center text-muted py-4">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                        <div class="mt-2">Loading system log...</div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
+    </div>
+
+    <!-- Right Column: User Feedback -->
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold text-primary">User Feedback</h4>
+                    <span class="badge bg-primary" id="feedbackCount">0</span>
+                </div>
+
+                <!-- Feedback container -->
+                <div id="feedbackContainer" class="border rounded p-3 log-container">
+                    <div class="text-center text-muted py-4">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                        <div class="mt-2">Loading feedback...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     </main>
   </div>
@@ -482,12 +529,6 @@ function updateCalendarEvents() {
         return statusName === 'Scheduled' || statusName === 'Ongoing' || statusName === 'Late';
     });
 
-    console.log('Dashboard calendar events:', {
-        totalRequests: allRequests.length,
-        filteredRequests: filteredRequests.length,
-        filteredRequestIds: filteredRequests.map(r => r.request_id)
-    });
-
     // Add filtered events to calendar
     filteredRequests.forEach(req => {
         const calendarTitle = req.form_details.calendar_info?.title ||
@@ -561,7 +602,6 @@ function showEventModal(request) {
 async function fetchRequisitionFormsForCalendar() {
     try {
         const token = localStorage.getItem('adminToken');
-        console.log('Fetching requisition forms for calendar...');
 
         const response = await fetch('http://127.0.0.1:8000/api/admin/requisition-forms', {
             headers: {
@@ -575,11 +615,6 @@ async function fetchRequisitionFormsForCalendar() {
         }
 
         allRequests = await response.json();
-
-        console.log('Fetched calendar requisition forms:', {
-            totalRequests: allRequests.length,
-            requestIds: allRequests.map(r => r.request_id)
-        });
 
         // Initialize calendar after data is loaded
         initializeCalendar();
@@ -631,7 +666,6 @@ fetchRequisitionFormsForCalendar();
           return response.json();
         })
         .then(data => {
-          console.log('API Response:', data);
 
           let totalRequisitions = data.length;
           let pendingRequests = 0;
@@ -691,6 +725,171 @@ fetchRequisitionFormsForCalendar();
         });
       });
     });
+
+    // Fetch and display user feedback
+async function fetchUserFeedback() {
+    try {
+        const token = localStorage.getItem('adminToken');
+        console.log('Fetching user feedback...');
+
+        const response = await fetch('http://127.0.0.1:8000/api/feedback', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch feedback: ${response.status} ${response.statusText}`);
+        }
+
+        const feedbackData = await response.json();
+        console.log('Fetched feedback data:', feedbackData);
+        
+        displayUserFeedback(feedbackData);
+
+    } catch (error) {
+        console.error('Error fetching user feedback:', error);
+        document.getElementById('feedbackContainer').innerHTML = `
+            <div class="text-center text-danger py-4">
+                <i class="bi bi-exclamation-triangle fs-4"></i>
+                <div class="mt-2">Failed to load feedback</div>
+                <small class="text-muted">${error.message}</small>
+            </div>
+        `;
+    }
+}
+
+// Display user feedback in the container
+function displayUserFeedback(feedbackData) {
+    const feedbackContainer = document.getElementById('feedbackContainer');
+    const feedbackCount = document.getElementById('feedbackCount');
+
+    // Handle both array and object responses
+    let feedbackArray = [];
+    if (Array.isArray(feedbackData)) {
+        feedbackArray = feedbackData;
+    } else if (feedbackData.data && Array.isArray(feedbackData.data)) {
+        feedbackArray = feedbackData.data;
+    } else {
+        // If it's an object with feedback records, convert to array
+        feedbackArray = Object.values(feedbackData).filter(item => 
+            item && typeof item === 'object' && item.feedback_id
+        );
+    }
+
+    console.log('Processed feedback array:', feedbackArray);
+
+    if (feedbackArray.length === 0) {
+        feedbackContainer.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="bi bi-chat-square-text fs-4"></i>
+                <div class="mt-2">No feedback submitted yet</div>
+                <small class="text-muted">User feedback will appear here</small>
+            </div>
+        `;
+        feedbackCount.textContent = '0';
+        return;
+    }
+
+    // Update count
+    feedbackCount.textContent = `${feedbackArray.length} ${feedbackArray.length === 1 ? 'entry' : 'entries'}`;
+
+    // Sort by latest first
+    const sortedFeedback = feedbackArray.sort((a, b) => 
+        new Date(b.created_at || b.submitted_at || Date.now()) - new Date(a.created_at || a.submitted_at || Date.now())
+    );
+
+    // Create feedback items
+    const feedbackHTML = sortedFeedback.map(feedback => {
+        const email = feedback.email || '<span class="text-muted">No email provided</span>';
+        const additionalFeedback = feedback.additional_feedback || '<span class="text-muted">No additional feedback</span>';
+        const submittedDate = new Date(feedback.created_at || feedback.submitted_at || Date.now()).toLocaleDateString();
+        const submittedTime = new Date(feedback.created_at || feedback.submitted_at || Date.now()).toLocaleTimeString();
+
+        // Format ratings with badges
+        const formatRating = (rating) => {
+            const ratingClass = getRatingClass(rating);
+            return `<span class="badge ${ratingClass}">${rating}</span>`;
+        };
+
+        return `
+            <div class="feedback-item border-bottom pb-3 mb-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <strong class="small">${email}</strong>
+                            <small class="text-muted">• ${submittedDate} ${submittedTime}</small>
+                        </div>
+                        ${feedback.request_id ? 
+                            `<small class="text-muted">Request #${String(feedback.request_id).padStart(4, '0')}</small>` : 
+                            ''
+                        }
+                    </div>
+                </div>
+                
+                <div class="ratings-section mb-2">
+                    <div class="row g-1 small">
+                        <div class="col-6">
+                            <strong>System:</strong> ${formatRating(feedback.system_performance)}
+                        </div>
+                        <div class="col-6">
+                            <strong>Booking:</strong> ${formatRating(feedback.booking_experience)}
+                        </div>
+                        <div class="col-6">
+                            <strong>Ease of Use:</strong> ${formatRating(feedback.ease_of_use)}
+                        </div>
+                        <div class="col-6">
+                            <strong>Use Again:</strong> ${formatRating(feedback.useability)}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="additional-feedback">
+                    <strong class="small">Comments:</strong>
+                    <div class="mt-1 p-2 bg-light rounded small" style="max-height: 80px; overflow-y: auto;">
+                        ${additionalFeedback}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    feedbackContainer.innerHTML = feedbackHTML;
+}
+
+// Helper function to determine badge class based on rating
+function getRatingClass(rating) {
+    const ratingLower = rating.toLowerCase();
+    
+    // Positive ratings
+    if (ratingLower.includes('excellent') || 
+        ratingLower.includes('outstanding') || 
+        ratingLower.includes('very good') || 
+        ratingLower.includes('very easy') || 
+        ratingLower.includes('very likely') ||
+        ratingLower.includes('good')) {
+        return 'bg-success';
+    }
+    
+    // Neutral ratings
+    if (ratingLower.includes('satisfactory') || 
+        ratingLower.includes('neutral') || 
+        ratingLower.includes('fair')) {
+        return 'bg-warning text-dark';
+    }
+    
+    // Negative ratings
+    if (ratingLower.includes('poor') || 
+        ratingLower.includes('difficult') || 
+        ratingLower.includes('unlikely')) {
+        return 'bg-danger';
+    }
+    
+    return 'bg-secondary';
+}
+
+fetchUserFeedback();
 
     async function loadSystemLog(requisitionsData = null, roleFilter = 'all') {
       try {
@@ -941,7 +1140,6 @@ fetchRequisitionFormsForCalendar();
     }
 
     function fetchEquipmentData() {
-      console.log('Fetching equipment data...');
       fetch('http://127.0.0.1:8000/api/equipment', {
         method: 'GET',
         headers: {
@@ -950,14 +1148,12 @@ fetchRequisitionFormsForCalendar();
         }
       })
         .then(response => {
-          console.log('Equipment API response status:', response.status);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           return response.json();
         })
         .then(data => {
-          console.log('Equipment data received:', data);
           if (data && data.data) {
             displayEquipmentItems(data.data);
           } else {
@@ -980,12 +1176,10 @@ fetchRequisitionFormsForCalendar();
       const equipmentList = document.getElementById('equipmentList');
       const equipmentCount = document.getElementById('equipmentCount');
 
-      console.log('Displaying equipment items:', equipment);
 
       // Extract all items from all equipment
       const allItems = [];
       equipment.forEach(equip => {
-        console.log(`Processing equipment: ${equip.equipment_name}`, equip.items);
         if (equip.items && equip.items.length > 0) {
           equip.items.forEach(item => {
             allItems.push({
@@ -996,8 +1190,6 @@ fetchRequisitionFormsForCalendar();
           });
         }
       });
-
-      console.log('All items extracted:', allItems);
 
       if (allItems.length === 0) {
         equipmentList.innerHTML = `
@@ -1018,14 +1210,6 @@ fetchRequisitionFormsForCalendar();
         const conditionName = item.condition?.condition_name || 'Unknown';
         const conditionColor = item.condition?.color_code || '#6c757d';
         const equipmentId = item.equipment_id;
-
-        console.log(`Item ${index}:`, {
-          equipment_id: equipmentId,
-          equipment_name: item.equipment_name,
-          item_name: item.item_name,
-          condition: conditionName,
-          color: conditionColor
-        });
 
         return `
                       <div class="d-flex justify-content-between align-items-center py-2 border-bottom clickable-equipment-item" 
@@ -1051,7 +1235,6 @@ fetchRequisitionFormsForCalendar();
       addEquipmentItemClickListeners();
 
       // Debug: Check the rendered HTML
-      console.log('Rendered equipment list HTML:', equipmentList.innerHTML);
     }
 
     function addEquipmentItemClickListeners() {
@@ -1066,23 +1249,17 @@ fetchRequisitionFormsForCalendar();
           }
         });
       });
-
-      console.log(`Added click listeners to ${equipmentItems.length} equipment items`);
     }
 
     function displayPendingRequisitions(requisitions) {
       const requisitionList = document.getElementById('requisitionList');
       const requisitionCount = document.getElementById('requisitionCount');
 
-      console.log('Displaying pending requisitions:', requisitions);
-
       // Filter requisitions with status_id 1 and 2 (Pending Approval and Awaiting Payment)
       const pendingRequisitions = requisitions.filter(req => {
         const statusId = req.form_details.status.id;
         return statusId === 1 || statusId === 2;
       });
-
-      console.log('Filtered pending requisitions:', pendingRequisitions);
 
       if (pendingRequisitions.length === 0) {
         requisitionList.innerHTML = `
@@ -1132,8 +1309,6 @@ fetchRequisitionFormsForCalendar();
       // Enable Bootstrap tooltips (optional)
       const tooltipTriggerList = [].slice.call(requisitionList.querySelectorAll('[title]'));
       tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
-
-      console.log('Rendered requisition list HTML:', requisitionList.innerHTML);
     }
     function addRequisitionItemClickListeners() {
       const requisitionItems = document.querySelectorAll('.clickable-requisition-item');
@@ -1147,8 +1322,6 @@ fetchRequisitionFormsForCalendar();
           }
         });
       });
-
-      console.log(`Added click listeners to ${requisitionItems.length} requisition items`);
     }
   </script>
 @endsection

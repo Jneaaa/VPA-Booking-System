@@ -530,11 +530,11 @@
                                 <div class="input-group">
                                     <input type="text" class="form-control" id="barcode" name="barcode"
                                         placeholder="Generate barcode" readonly>
-                                    <button class="btn btn-outline-primary" type="button" id="generateBarcodeBtn">
+                                    <button class="btn btn-primary" type="button" id="generateBarcodeBtn">
                                         <i class="bi bi-upc-scan"></i> Generate
                                     </button>
                                     <!-- Download existing barcode button -->
-                                    <button class="btn btn-outline-success d-none" type="button"
+                                    <button class="btn btn-success d-none" type="button"
                                         id="downloadExistingBarcodeBtn">
                                         <i class="bi bi-download"></i> Download
                                     </button>
@@ -543,9 +543,8 @@
                                 <!-- Barcode Preview -->
                                 <div class="barcode-container d-none mt-3" id="barcodeContainer">
                                     <canvas id="barcodePreview" class="barcode-preview"></canvas>
-                                    <div class="barcode-number" id="barcodeNumberDisplay"></div>
                                     <div class="mt-2">
-                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                        <button type="button" class="btn btn-sm btn-secondary"
                                             id="downloadBarcodeBtn">
                                             <i class="bi bi-download"></i> Download
                                         </button>

@@ -3,44 +3,50 @@
 @section('title', 'Ongoing Events')
 @section('content')
   <style>
-        .card {
-  border: 0 !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  border-radius: 0.75rem; /* optional, for smoother corners */
-}
+    .card {
+      border: 0 !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      border-radius: 0.75rem;
+      /* optional, for smoother corners */
+    }
 
-.fc .fc-toolbar-chunk .fc-button:focus,
-.fc .fc-toolbar-chunk .fc-button:active {
-  outline: none !important;
-  box-shadow: none !important;
-}
+    .fc .fc-toolbar-chunk .fc-button:focus,
+    .fc .fc-toolbar-chunk .fc-button:active {
+      outline: none !important;
+      box-shadow: none !important;
+    }
 
-/* FullCalendar Toolbar Buttons */
-.fc .fc-toolbar-chunk .fc-button {
-  background-color: #ffffff !important; /* White background */
-  color: #6c757d !important;            /* Gray text */
-  border: none !important;              /* No border */
-  font-weight: 500;
-  border-radius: 6px !important;
-}
+    /* FullCalendar Toolbar Buttons */
+    .fc .fc-toolbar-chunk .fc-button {
+      background-color: #ffffff !important;
+      /* White background */
+      color: #6c757d !important;
+      /* Gray text */
+      border: none !important;
+      /* No border */
+      font-weight: 500;
+      border-radius: 6px !important;
+    }
 
-/* Hover state */
-.fc .fc-toolbar-chunk .fc-button:hover {
-  background-color: #f8f9fa !important; /* Slightly off-white hover */
-  color: #495057 !important;            /* Darker gray text on hover */
-  border: none !important;
-}
+    /* Hover state */
+    .fc .fc-toolbar-chunk .fc-button:hover {
+      background-color: #f8f9fa !important;
+      /* Slightly off-white hover */
+      color: #495057 !important;
+      /* Darker gray text on hover */
+      border: none !important;
+    }
 
-/* Active/Pressed state */
-.fc .fc-toolbar-chunk .fc-button.fc-button-active {
-  background-color: #4272b1ff !important;
-  color: #ffffffff !important;
-  border: none !important;
-}
+    /* Active/Pressed state */
+    .fc .fc-toolbar-chunk .fc-button.fc-button-active {
+      background-color: #4272b1ff !important;
+      color: #ffffffff !important;
+      border: none !important;
+    }
 
-.fc .fc-today-button {
-  text-transform: capitalize !important;
-}
+    .fc .fc-today-button {
+      text-transform: capitalize !important;
+    }
 
     /* Base checkbox style */
     .form-check-input {
@@ -378,8 +384,8 @@
                 <h6 class="fw-bold mb-3">Events Filter</h6>
 
                 <div class="form-check mb-2">
-                  <input class="form-check-input event-filter-checkbox scheduled-checkbox" type="checkbox" value="Scheduled"
-                    id="filterScheduled" checked>
+                  <input class="form-check-input event-filter-checkbox scheduled-checkbox" type="checkbox"
+                    value="Scheduled" id="filterScheduled" checked>
                   <label class="form-check-label" for="filterScheduled">Scheduled Events</label>
                 </div>
 
@@ -436,6 +442,49 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body" id="eventModalBody">
+            <!-- Calendar Title & Description Section -->
+            <div class="card border-0 shadow-none mb-0 py-1 px-3">
+              <div class="row">
+                <div class="col-12">
+                  <!-- Calendar Title -->
+                  <div class="mb-2">
+                    <label class="form-label fw-bold d-flex align-items-center mb-2">
+                      Calendar Title
+                      <i class="bi bi-pencil text-secondary ms-2" id="editCalendarTitleBtn" style="cursor: pointer;"></i>
+                      <div class="edit-actions ms-2 d-none" id="calendarTitleActions">
+                        <button type="button" class="btn btn-sm btn-success me-1" id="saveCalendarTitleBtn">
+                          <i class="bi bi-check"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" id="cancelCalendarTitleBtn">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                    </label>
+                    <input type="text" class="form-control text-secondary" id="modalCalendarTitle" readonly>
+                  </div>
+
+                  <!-- Calendar Description -->
+                  <div class="mb-0">
+                    <label class="form-label fw-bold d-flex align-items-center mb-2">
+                      Calendar Description
+                      <i class="bi bi-pencil text-secondary ms-2" id="editCalendarDescriptionBtn"
+                        style="cursor: pointer;"></i>
+                      <div class="edit-actions ms-2 d-none" id="calendarDescriptionActions">
+                        <button type="button" class="btn btn-sm btn-success me-1" id="saveCalendarDescriptionBtn">
+                          <i class="bi bi-check"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" id="cancelCalendarDescriptionBtn">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                    </label>
+                    <textarea class="form-control text-secondary" id="modalCalendarDescription" rows="2"
+                      readonly></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="card border-0 shadow-none mb-3 p-3">
               <table class="table table-bordered mb-0 w-100" style="table-layout: fixed; border: 1px solid #dee2e6;">
                 <thead>
@@ -524,12 +573,15 @@
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      let calendar;
-      let currentDate = new Date();
-      let allRequests = [];
-      let filteredRequests = [];
-      const adminToken = localStorage.getItem('adminToken');
-      const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+    let calendar;
+    let currentDate = new Date();
+    let allRequests = [];
+    let filteredRequests = [];
+    let currentRequestId = null;
+    let originalCalendarTitle = '';
+    let originalCalendarDescription = '';
+    const adminToken = localStorage.getItem('adminToken');
+    const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
 
       // Add loading class to body initially
       document.body.classList.add('loading');
@@ -688,7 +740,6 @@
         if (calendar) {
           calendar.gotoDate(date);
           calendar.changeView('timeGridDay');
-          console.log('Navigating to date:', date);
         }
       }
 
@@ -705,12 +756,12 @@
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           },
-                   buttonText: {
-    today: 'Today',
-    month: 'Month',
-    week: 'Week',
-    day: 'Day'
-  },
+          buttonText: {
+            today: 'Today',
+            month: 'Month',
+            week: 'Week',
+            day: 'Day'
+          },
           titleFormat: {
             year: 'numeric',
             month: 'short'
@@ -786,14 +837,8 @@
           const showLate = document.getElementById('filterLate').checked;
 
           return (statusName === 'Scheduled' && showScheduled) ||
-                (statusName === 'Ongoing' && showOngoing) ||
-                (statusName === 'Late' && showLate);
-        });
-
-        console.log('Filtered calendar events:', {
-          totalRequests: allRequests.length,
-          filteredRequests: filteredRequests.length,
-          filteredRequestIds: filteredRequests.map(r => r.request_id)
+            (statusName === 'Ongoing' && showOngoing) ||
+            (statusName === 'Late' && showLate);
         });
 
         // Add filtered events to calendar
@@ -818,23 +863,206 @@
         updateMiniCalendar();
       }
 
-      // Show event details in modal
-      function showEventModal(request) {
+// One-time event listener setup with protection
+let eventListenersSetup = false;
+
+function setupEventListeners() {
+
+    // Remove any existing event listeners by cloning elements
+    const elements = [
+        'editCalendarTitleBtn', 'editCalendarDescriptionBtn',
+        'saveCalendarTitleBtn', 'saveCalendarDescriptionBtn', 
+        'cancelCalendarTitleBtn', 'cancelCalendarDescriptionBtn'
+    ];
+
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            const newElement = element.cloneNode(true);
+            element.parentNode.replaceChild(newElement, element);
+        }
+    });
+
+    // Now attach fresh event listeners
+    document.getElementById('editCalendarTitleBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        enableEdit('title');
+    });
+    
+    document.getElementById('editCalendarDescriptionBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        enableEdit('description');
+    });
+    
+    document.getElementById('saveCalendarTitleBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        saveEdit('title');
+    });
+    
+    document.getElementById('saveCalendarDescriptionBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        saveEdit('description');
+    });
+    
+    document.getElementById('cancelCalendarTitleBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        cancelEdit('title');
+    });
+    
+    document.getElementById('cancelCalendarDescriptionBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        cancelEdit('description');
+    });
+}
+
+         // Reset all edit states
+    function resetEditStates() {
+        // Title field
+        document.getElementById('modalCalendarTitle').readOnly = true;
+        document.getElementById('editCalendarTitleBtn').classList.remove('d-none');
+        document.getElementById('calendarTitleActions').classList.add('d-none');
+
+        // Description field
+        document.getElementById('modalCalendarDescription').readOnly = true;
+        document.getElementById('editCalendarDescriptionBtn').classList.remove('d-none');
+        document.getElementById('calendarDescriptionActions').classList.add('d-none');
+    }
+
+          // Enable editing for a field
+    function enableEdit(fieldType) {
+        if (fieldType === 'title') {
+            document.getElementById('modalCalendarTitle').readOnly = false;
+            document.getElementById('modalCalendarTitle').focus();
+            document.getElementById('editCalendarTitleBtn').classList.add('d-none');
+            document.getElementById('calendarTitleActions').classList.remove('d-none');
+        } else if (fieldType === 'description') {
+            document.getElementById('modalCalendarDescription').readOnly = false;
+            document.getElementById('modalCalendarDescription').focus();
+            document.getElementById('editCalendarDescriptionBtn').classList.add('d-none');
+            document.getElementById('calendarDescriptionActions').classList.remove('d-none');
+        }
+    }
+
+          // Cancel editing and revert changes
+    function cancelEdit(fieldType) {
+        if (fieldType === 'title') {
+            document.getElementById('modalCalendarTitle').value = originalCalendarTitle;
+        } else if (fieldType === 'description') {
+            document.getElementById('modalCalendarDescription').value = originalCalendarDescription;
+        }
+        resetEditStates();
+    }
+
+
+// Save changes to database
+async function saveEdit(fieldType) {
+    const newTitle = document.getElementById('modalCalendarTitle').value.trim();
+    const newDescription = document.getElementById('modalCalendarDescription').value.trim();
+
+    // Validate title if we're saving title
+    if (fieldType === 'title' && !newTitle) {
+        showToast('Calendar title cannot be empty', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/api/admin/requisition-forms/${currentRequestId}/calendar-info`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${adminToken}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                calendar_title: newTitle,
+                calendar_description: newDescription
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to update calendar info: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        // Update original values
+        originalCalendarTitle = newTitle;
+        originalCalendarDescription = newDescription;
+
+        // UPDATE THE LOCAL allRequests ARRAY
+        const requestIndex = allRequests.findIndex(req => req.request_id === currentRequestId);
+        if (requestIndex !== -1) {
+            // Update the calendar info in the local array
+            if (!allRequests[requestIndex].form_details.calendar_info) {
+                allRequests[requestIndex].form_details.calendar_info = {};
+            }
+            allRequests[requestIndex].form_details.calendar_info.title = newTitle;
+            allRequests[requestIndex].form_details.calendar_info.description = newDescription;
+        }
+
+        // Update modal title if calendar title was changed
+        if (fieldType === 'title') {
+            document.getElementById('eventModalTitle').textContent = 
+                `Request ID #${String(currentRequestId).padStart(4, '0')} (${newTitle})`;
+        }
+
+        resetEditStates();
+        showToast(`Calendar ${fieldType} updated successfully`, 'success');
+
+        // Refresh calendar events to reflect changes
+        updateCalendarEvents();
+
+    } catch (error) {
+        console.error(`Error updating calendar ${fieldType}:`, error);
+        showToast(`Failed to update calendar ${fieldType}`, 'error');
+        
+        // Revert to original values on error
+        if (fieldType === 'title') {
+            document.getElementById('modalCalendarTitle').value = originalCalendarTitle;
+        } else {
+            document.getElementById('modalCalendarDescription').value = originalCalendarDescription;
+        }
+        resetEditStates();
+    }
+}
+
+  // Show event details in modal
+    function showEventModal(request) {
         const formattedRequestId = String(request.request_id).padStart(4, '0');
         const calendarTitle = request.form_details.calendar_info?.title || 'No Calendar Title';
+        const calendarDescription = request.form_details.calendar_info?.description || 'No description';
 
-        document.getElementById('eventModalTitle').textContent =
-          `Request ID #${formattedRequestId} (${calendarTitle})`;
+        document.getElementById('eventModalTitle').textContent = 
+            `Request ID #${formattedRequestId} (${calendarTitle})`;
 
-        document.getElementById('modalRequester').textContent =
-          `${request.user_details.first_name} ${request.user_details.last_name}`;
+        // Set calendar title and description
+        document.getElementById('modalCalendarTitle').value = calendarTitle;
+        document.getElementById('modalCalendarDescription').value = calendarDescription;
+
+        // Store current request ID and original values
+        currentRequestId = request.request_id;
+        originalCalendarTitle = calendarTitle;
+        originalCalendarDescription = calendarDescription;
+
+        // Reset edit states to ensure fields are read-only initially
+        resetEditStates();
+
+        // Set other modal content
+        document.getElementById('modalRequester').textContent = 
+            `${request.user_details.first_name} ${request.user_details.last_name}`;
         document.getElementById('modalPurpose').textContent = request.form_details.purpose;
         document.getElementById('modalParticipants').textContent = request.form_details.num_participants;
         document.getElementById('modalStatus').innerHTML = `
-                    <span class="badge" style="background-color: ${request.form_details.status.color}">
-                        ${request.form_details.status.name}
-                    </span>
-                `;
+            <span class="badge" style="background-color: ${request.form_details.status.color}">
+                ${request.form_details.status.name}
+            </span>
+        `;
         document.getElementById('modalFee').textContent = `₱${request.fees.approved_fee}`;
         document.getElementById('modalApprovals').textContent = `${request.approval_info.approval_count}`;
         document.getElementById('modalRejections').textContent = `${request.approval_info.rejection_count}`;
@@ -843,33 +1071,32 @@
         let itemsHtml = '';
 
         if (request.requested_items.facilities.length > 0) {
-          itemsHtml += '<div class="fw-bold small mb-1">Facilities:</div>';
-          itemsHtml += request.requested_items.facilities.map(f =>
-            `<div class="mb-1 small">• ${f.name} | ₱${f.fee}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}${f.is_waived ? ' <span class="text-muted">(Waived)</span>' : ''}</div>`
-          ).join('');
+            itemsHtml += '<div class="fw-bold small mb-1">Facilities:</div>';
+            itemsHtml += request.requested_items.facilities.map(f =>
+                `<div class="mb-1 small">• ${f.name} | ₱${f.fee}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}${f.is_waived ? ' <span class="text-muted">(Waived)</span>' : ''}</div>`
+            ).join('');
         }
 
         if (request.requested_items.equipment.length > 0) {
-          itemsHtml += '<div class="fw-bold small mt-2 mb-1">Equipment:</div>';
-          itemsHtml += request.requested_items.equipment.map(e =>
-            `<div class="mb-1 small">• ${e.name} × ${e.quantity || 1} | ₱${e.fee}${e.rate_type === 'Per Hour' ? '/hour' : '/event'}${e.is_waived ? ' <span class="text-muted">(Waived)</span>' : ''}</div>`
-          ).join('');
+            itemsHtml += '<div class="fw-bold small mt-2 mb-1">Equipment:</div>';
+            itemsHtml += request.requested_items.equipment.map(e =>
+                `<div class="mb-1 small">• ${e.name} × ${e.quantity || 1} | ₱${e.fee}${e.rate_type === 'Per Hour' ? '/hour' : '/event'}${e.is_waived ? ' <span class="text-muted">(Waived)</span>' : ''}</div>`
+            ).join('');
         }
 
         document.getElementById('modalItems').innerHTML = itemsHtml || '<p class="text-muted small">No items requested</p>';
 
         // Set up view details button
         document.getElementById('modalViewDetails').onclick = function () {
-          window.location.href = `/admin/requisition/${request.request_id}`;
+            window.location.href = `/admin/requisition/${request.request_id}`;
         };
 
         eventModal.show();
-      }
+    }
 
       // Fetch all requisition forms
       async function fetchRequisitionForms() {
         try {
-          console.log('Fetching requisition forms...');
 
           // Generate skeleton days immediately
           generateSkeletonDays();
@@ -886,11 +1113,6 @@
           }
 
           allRequests = await response.json();
-
-          console.log('Fetched requisition forms:', {
-            totalRequests: allRequests.length,
-            requestIds: allRequests.map(r => r.request_id)
-          });
 
           // Initialize calendars after data is loaded
           initializeMiniCalendar();
@@ -935,18 +1157,18 @@
         toast.style.borderRadius = '0.3rem';
 
         toast.innerHTML = `
-                    <div class="d-flex align-items-center px-3 py-1"> 
-                        <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                        <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="loading-bar" style="
-                        height: 3px;
-                        background: rgba(255,255,255,0.7);
-                        width: 100%;
-                        transition: width ${duration}ms linear;
-                    "></div>
-                `;
+                        <div class="d-flex align-items-center px-3 py-1"> 
+                            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                            <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                            <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="loading-bar" style="
+                            height: 3px;
+                            background: rgba(255,255,255,0.7);
+                            width: 100%;
+                            transition: width ${duration}ms linear;
+                        "></div>
+                    `;
 
         document.body.appendChild(toast);
 
@@ -976,6 +1198,9 @@
 
       // Initialize everything
       fetchRequisitionForms();
+    setTimeout(() => {
+        setupEventListeners();
+    }, 100);
     });
   </script>
 @endsection

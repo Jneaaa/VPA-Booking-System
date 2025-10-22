@@ -17,7 +17,29 @@ class FeedbackController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
-        public function store(Request $request)
+    /**
+     * Get all feedback records
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        try {
+            $feedback = Feedback::with('requisitionForm')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json($feedback);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch feedback',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function store(Request $request)
     {
         try {
             // Validate the incoming request
@@ -61,19 +83,19 @@ class FeedbackController extends Controller
     {
         try {
             $period = $request->query('period', 'all');
-            
+
             // Base query
             $query = Feedback::query();
-            
+
             // Apply period filter
             if ($period !== 'all') {
-                $days = (int)$period;
+                $days = (int) $period;
                 $query->where('created_at', '>=', now()->subDays($days));
             }
-            
+
             // Get all feedback data
             $feedbackData = $query->get();
-            
+
             // Prepare data structure for chart
             $chartData = [
                 'system_performance' => [],
@@ -85,30 +107,44 @@ class FeedbackController extends Controller
                 'response_rate' => 0,
                 'category_distribution' => []
             ];
-            
+
             // Initialize rating counts for each category
             $ratingCategories = [
                 'system_performance' => [
-                    'poor' => 0, 'fair' => 0, 'satisfactory' => 0, 
-                    'good' => 0, 'very good' => 0, 'excellent' => 0
+                    'poor' => 0,
+                    'fair' => 0,
+                    'satisfactory' => 0,
+                    'good' => 0,
+                    'very good' => 0,
+                    'excellent' => 0
                 ],
                 'booking_experience' => [
-                    'poor' => 0, 'fair' => 0, 'satisfactory' => 0, 
-                    'good' => 0, 'very good' => 0, 'excellent' => 0
+                    'poor' => 0,
+                    'fair' => 0,
+                    'satisfactory' => 0,
+                    'good' => 0,
+                    'very good' => 0,
+                    'excellent' => 0
                 ],
                 'ease_of_use' => [
-                    'very difficult' => 0, 'difficult' => 0, 'neutral' => 0, 
-                    'easy' => 0, 'very easy' => 0
+                    'very difficult' => 0,
+                    'difficult' => 0,
+                    'neutral' => 0,
+                    'easy' => 0,
+                    'very easy' => 0
                 ],
                 'useability' => [
-                    'very unlikely' => 0, 'unlikely' => 0, 'likely' => 0, 
-                    'very likely' => 0, 'outstanding' => 0
+                    'very unlikely' => 0,
+                    'unlikely' => 0,
+                    'likely' => 0,
+                    'very likely' => 0,
+                    'outstanding' => 0
                 ]
             ];
-            
+
             $totalRatings = 0;
             $ratingSum = 0;
-            
+
             // Count ratings for each category
             foreach ($feedbackData as $feedback) {
                 // System Performance
@@ -118,7 +154,7 @@ class FeedbackController extends Controller
                         $ratingCategories['system_performance'][$rating]++;
                     }
                 }
-                
+
                 // Booking Experience
                 if (isset($feedback->booking_experience)) {
                     $rating = strtolower($feedback->booking_experience);
@@ -126,7 +162,7 @@ class FeedbackController extends Controller
                         $ratingCategories['booking_experience'][$rating]++;
                     }
                 }
-                
+
                 // Ease of Use
                 if (isset($feedback->ease_of_use)) {
                     $rating = strtolower($feedback->ease_of_use);
@@ -134,7 +170,7 @@ class FeedbackController extends Controller
                         $ratingCategories['ease_of_use'][$rating]++;
                     }
                 }
-                
+
                 // Useability (Likely to Recommend)
                 if (isset($feedback->useability)) {
                     $rating = strtolower($feedback->useability);
@@ -142,7 +178,7 @@ class FeedbackController extends Controller
                         $ratingCategories['useability'][$rating]++;
                     }
                 }
-                
+
                 // Calculate average rating (convert textual ratings to numerical values)
                 if (isset($feedback->system_performance)) {
                     $ratingValue = $this->convertRatingToNumber($feedback->system_performance);
@@ -150,20 +186,20 @@ class FeedbackController extends Controller
                     $totalRatings++;
                 }
             }
-            
+
             // Calculate average rating
             $chartData['average_rating'] = $totalRatings > 0 ? $ratingSum / $totalRatings : 0;
-            
+
             // Calculate response rate (assuming we know total users who could provide feedback)
             $totalUsers = 100; // This should be replaced with actual user count
             $chartData['response_rate'] = $totalUsers > 0 ? round(($chartData['total_feedback'] / $totalUsers) * 100) : 0;
-            
+
             // Add rating counts to chart data
             $chartData['system_performance'] = $ratingCategories['system_performance'];
             $chartData['booking_experience'] = $ratingCategories['booking_experience'];
             $chartData['ease_of_use'] = $ratingCategories['ease_of_use'];
             $chartData['useability'] = $ratingCategories['useability'];
-            
+
             // Calculate category distribution
             $categoryDistribution = [
                 'System Performance' => array_sum($ratingCategories['system_performance']),
@@ -171,11 +207,11 @@ class FeedbackController extends Controller
                 'Ease of Use' => array_sum($ratingCategories['ease_of_use']),
                 'Likely to Recommend' => array_sum($ratingCategories['useability'])
             ];
-            
+
             $chartData['category_distribution'] = $categoryDistribution;
-            
+
             return response()->json($chartData);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to fetch feedback data',
@@ -183,7 +219,7 @@ class FeedbackController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * Convert textual rating to numerical value for average calculation
      *
@@ -193,7 +229,7 @@ class FeedbackController extends Controller
     private function convertRatingToNumber($rating)
     {
         $rating = strtolower($rating);
-        
+
         $ratingMap = [
             'poor' => 1,
             'fair' => 2,
@@ -212,10 +248,10 @@ class FeedbackController extends Controller
             'very likely' => 4,
             'outstanding' => 5
         ];
-        
+
         return $ratingMap[$rating] ?? 3; // Default to neutral if not found
     }
-    
+
     /**
      * Get feedback statistics for dashboard cards
      *
@@ -238,9 +274,9 @@ class FeedbackController extends Controller
                     ->orWhereIn('booking_experience', ['good', 'very good', 'excellent'])
                     ->count()
             ];
-            
+
             return response()->json($stats);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to fetch feedback statistics',

@@ -503,7 +503,6 @@ async function fetchEquipmentDetails(code) {
 
             // Called when a barcode/QR is decoded
             async function onScanSuccess(decodedText) {
-                console.log('Raw scanned text:', decodedText);
 
                 if (!decodedText) {
                     showToast("No barcode data detected", "error");
@@ -536,8 +535,6 @@ async function fetchEquipmentDetails(code) {
 
                 // Final cleanup - only allow alphanumeric and hyphen
                 cleanBarcode = cleanBarcode.replace(/[^A-Z0-9\-]/gi, '');
-
-                console.log('Cleaned barcode for lookup:', cleanBarcode);
 
                 // Store the current barcode for later use
                 currentBarcode = cleanBarcode;
@@ -757,8 +754,6 @@ async function handleReturn() {
             item_notes: document.getElementById('item-notes').value
         };
 
-        console.log('Updating item:', { itemId, formData }); // Debug log
-
         // Use the scanner update route
         const response = await fetch(`/api/scanner/update-item/${itemId}`, {
             method: 'PUT',
@@ -909,22 +904,6 @@ async function handleReturn() {
 
             // Initialize Dynamsoft Barcode Reader
             let scanner = null;
-            async function initDynamsoftScanner() {
-                try {
-                    // Configure Dynamsoft (free tier available)
-                    Dynamsoft.DBR.BarcodeReader.license = 'DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9';
-                    Dynamsoft.DBR.BarcodeReader.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.20/dist/";
-                    scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
-                    console.log('Dynamsoft Barcode Scanner initialized');
-                } catch (ex) {
-                    console.warn('Dynamsoft initialization failed, using Quagga fallback:', ex);
-                }
-            }
-
-            // Initialize on load
-            initDynamsoftScanner();
-
-
 
             async function scanWithQuagga(imageData) {
                 return new Promise((resolve) => {
@@ -969,10 +948,8 @@ async function handleReturn() {
 
                     Quagga.decodeSingle(config, function (result) {
                         if (result && result.codeResult && result.codeResult.code) {
-                            console.log('Quagga barcode result:', result.codeResult);
                             resolve(result.codeResult.code);
                         } else {
-                            console.log('No barcode found in first attempt');
                             resolve(null);
                         }
                     });
@@ -995,7 +972,6 @@ async function handleReturn() {
                 ];
 
                 for (let technique of processingTechniques) {
-                    console.log('Trying processing technique:', technique.method);
 
                     // Apply filter
                     ctx.filter = technique.filter;
@@ -1016,7 +992,6 @@ async function handleReturn() {
                     const result = await scanWithQuagga(processedImageData);
 
                     if (result) {
-                        console.log('Found barcode with technique:', technique.method);
                         return result;
                     }
 
