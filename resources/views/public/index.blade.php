@@ -139,7 +139,7 @@
       <div class="catalog-card">
         <img src="{{ asset('assets/facilities-pic2.JPG') }}" class="img-fluid rounded mb-2" alt="Facilities">
         <h6>Facilities</h6>
-        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
+        <p>Explore our venues to support every activity.</p>
         <a href="about-facilities" class="btn">Explore</a>
       </div>
       </div>
@@ -147,7 +147,7 @@
       <div class="catalog-card">
         <img src="{{ asset('assets/equipment-pic.jpg') }}" class="img-fluid rounded mb-2" alt="Equipment">
         <h6>Equipment</h6>
-        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
+        <p>Equip your activities with reliable resources.</p>
         <a href="about-equipment" class="btn">Explore</a>
       </div>
       </div>
@@ -155,7 +155,7 @@
       <div class="catalog-card">
         <img src="{{ asset('assets/services-pic.png') }}" class="img-fluid rounded mb-2" alt="Services">
         <h6>Extra Services</h6>
-        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.</p>
+        <p>Make your event seamless with extra services.</p>
         <a href="about-services" class="btn">Explore</a>
       </div>
       </div>
