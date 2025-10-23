@@ -203,6 +203,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/archives', [RequisitionFormController::class, 'getArchivedRequisitions']);
     Route::post('/admin/requisition/{requestId}/mark-scheduled', [AdminApprovalController::class, 'markAsScheduled']);
     Route::get('/admin/requisition/{requestId}/approval-history', [AdminApprovalController::class, 'getApprovalHistory']);
+    Route::get('/admin/requisition/{requestId}/equipment-status', [AdminApprovalController::class, 'getEquipmentStatus']);
 
     // Form Management
     Route::prefix('admin/requisition')->group(function () {

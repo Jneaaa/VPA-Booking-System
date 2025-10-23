@@ -1788,69 +1788,72 @@ class AdminApprovalController extends Controller
 
     // Add this method to AdminApprovalController.php
 
-    public function markAsScheduled(Request $request, $requestId)
-    {
-        try {
-            \Log::debug('Mark as scheduled request received', [
-                'request_id' => $requestId,
-                'admin_id' => auth()->id(),
-                'official_receipt_num' => $request->official_receipt_num
-            ]);
+   public function markAsScheduled(Request $request, $requestId)
+{
+    try {
+        \Log::debug('Mark as scheduled request received', [
+            'request_id' => $requestId,
+            'admin_id' => auth()->id(),
+            'official_receipt_num' => $request->official_receipt_num
+        ]);
 
-            $validatedData = $request->validate([
-                'official_receipt_num' => 'required|string|max:50|unique:requisition_forms,official_receipt_num',
-                'calendar_title' => 'sometimes|string|max:50|nullable',
-                'calendar_description' => 'sometimes|string|max:100|nullable',
-            ]);
+        $validatedData = $request->validate([
+            'official_receipt_num' => 'required|string|max:50|unique:requisition_forms,official_receipt_num',
+            'calendar_title' => 'sometimes|string|max:50|nullable',
+            'calendar_description' => 'sometimes|string|max:100|nullable',
+        ]);
 
-            $adminId = auth()->id();
-            if (!$adminId) {
-                return response()->json(['error' => 'Admin not authenticated'], 401);
-            }
+        $adminId = auth()->id();
+        if (!$adminId) {
+            return response()->json(['error' => 'Admin not authenticated'], 401);
+        }
 
-            $form = RequisitionForm::with([
-                'requestedFacilities.facility',
-                'requestedEquipment.equipment',
-                'requisitionFees',
-                'purpose',
-                'formStatus'
-            ])->findOrFail($requestId);
+        $form = RequisitionForm::with([
+            'requestedFacilities.facility',
+            'requestedEquipment.equipment',
+            'requisitionFees',
+            'purpose',
+            'formStatus'
+        ])->findOrFail($requestId);
 
-            // Update form with official receipt number and status
-            $scheduledStatus = FormStatus::where('status_name', 'Scheduled')->first();
-            if (!$scheduledStatus) {
-                throw new \Exception('Scheduled status not found');
-            }
+        // Update equipment conditions to "In Use"
+        $this->updateEquipmentConditions($form);
 
-            $form->official_receipt_num = $validatedData['official_receipt_num'];
-            $form->status_id = $scheduledStatus->status_id;
+        // Update form with official receipt number and status
+        $scheduledStatus = FormStatus::where('status_name', 'Scheduled')->first();
+        if (!$scheduledStatus) {
+            throw new \Exception('Scheduled status not found');
+        }
 
-            if (!empty($validatedData['calendar_title'])) {
-                $form->calendar_title = $validatedData['calendar_title'];
-            }
+        $form->official_receipt_num = $validatedData['official_receipt_num'];
+        $form->status_id = $scheduledStatus->status_id;
 
-            if (!empty($validatedData['calendar_description'])) {
-                $form->calendar_description = $validatedData['calendar_description'];
-            }
+        if (!empty($validatedData['calendar_title'])) {
+            $form->calendar_title = $validatedData['calendar_title'];
+        }
 
-            $form->save();
+        if (!empty($validatedData['calendar_description'])) {
+            $form->calendar_description = $validatedData['calendar_description'];
+        }
 
-            // Send confirmation email
-            $this->sendScheduledConfirmationEmail($form);
+        $form->save();
 
-            \Log::info('Form marked as scheduled successfully', [
-                'request_id' => $requestId,
-                'official_receipt_num' => $form->official_receipt_num,
-                'admin_id' => $adminId
-            ]);
+        // Send confirmation email
+        $this->sendScheduledConfirmationEmail($form);
 
-            return response()->json([
-                'message' => 'Form marked as scheduled successfully',
-                'official_receipt_num' => $form->official_receipt_num,
-                'new_status' => 'Scheduled'
-            ]);
+        \Log::info('Form marked as scheduled successfully', [
+            'request_id' => $requestId,
+            'official_receipt_num' => $form->official_receipt_num,
+            'admin_id' => $adminId
+        ]);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'message' => 'Form marked as scheduled successfully',
+            'official_receipt_num' => $form->official_receipt_num,
+            'new_status' => 'Scheduled'
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Mark as scheduled validation failed', [
                 'request_id' => $requestId,
                 'errors' => $e->errors()
@@ -1875,6 +1878,54 @@ class AdminApprovalController extends Controller
             ], 500);
         }
     }
+
+public function getEquipmentStatus($requestId)
+{
+    try {
+        $form = RequisitionForm::with([
+            'requestedEquipment.equipment.items.condition'
+        ])->findOrFail($requestId);
+
+        $equipmentStatus = [];
+
+        foreach ($form->requestedEquipment as $reqEquipment) {
+            $equipment = $reqEquipment->equipment;
+            
+            // Get items that are currently marked as "In Use" (condition_id = 6)
+            // for this equipment type (we assume they're being used for this request)
+            $inUseItems = \App\Models\EquipmentItem::where('equipment_id', $equipment->equipment_id)
+                ->where('condition_id', 6) // In Use
+                ->with('condition')
+                ->limit($reqEquipment->quantity) // Only show up to the requested quantity
+                ->get();
+
+            foreach ($inUseItems as $item) {
+                $equipmentStatus[] = [
+                    'equipment_name' => $equipment->equipment_name,
+                    'item_id' => $item->item_id,
+                    'condition_name' => $item->condition->condition_name,
+                    'condition_color' => $item->condition->color_code
+                ];
+            }
+        }
+
+        return response()->json([
+            'equipment_status' => $equipmentStatus,
+            'has_equipment' => count($equipmentStatus) > 0
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Failed to fetch equipment status', [
+            'request_id' => $requestId,
+            'error' => $e->getMessage()
+        ]);
+
+        return response()->json([
+            'error' => 'Failed to fetch equipment status',
+            'details' => $e->getMessage()
+        ], 500);
+    }
+}
 
     private function sendScheduledConfirmationEmail($form)
     {
@@ -2019,6 +2070,68 @@ class AdminApprovalController extends Controller
 
         return $breakdown;
     }
+
+private function updateEquipmentConditions($form)
+{
+    try {
+        \Log::debug('Updating equipment conditions for scheduled form', [
+            'request_id' => $form->request_id
+        ]);
+
+        // Get all requested equipment for this form
+        $requestedEquipment = $form->requestedEquipment;
+
+        foreach ($requestedEquipment as $reqEquipment) {
+            // Get the equipment type
+            $equipment = $reqEquipment->equipment;
+            
+            // Get available equipment items for this equipment type with conditions 1, 2, or 3
+            $availableItems = \App\Models\EquipmentItem::where('equipment_id', $equipment->equipment_id)
+                ->whereIn('condition_id', [1, 2, 3]) // New, Good, Fair
+                ->orderBy('condition_id', 'asc') // Prefer better condition first
+                ->limit($reqEquipment->quantity)
+                ->get();
+
+            \Log::debug('Found available equipment items', [
+                'equipment_id' => $equipment->equipment_id,
+                'required_quantity' => $reqEquipment->quantity,
+                'available_count' => $availableItems->count(),
+                'item_ids' => $availableItems->pluck('item_id')
+            ]);
+
+            if ($availableItems->count() < $reqEquipment->quantity) {
+                \Log::warning('Not enough available equipment items', [
+                    'equipment_id' => $equipment->equipment_id,
+                    'required' => $reqEquipment->quantity,
+                    'available' => $availableItems->count()
+                ]);
+                // Continue with available items
+            }
+
+            // Update each item to "In Use" (condition_id = 6)
+            foreach ($availableItems as $item) {
+                $item->condition_id = 6; // In Use
+                $item->save();
+                
+                \Log::debug('Updated equipment item condition', [
+                    'item_id' => $item->item_id,
+                    'old_condition' => $item->getOriginal('condition_id'),
+                    'new_condition' => $item->condition_id
+                ]);
+            }
+        }
+
+        return true;
+
+    } catch (\Exception $e) {
+        \Log::error('Failed to update equipment conditions', [
+            'request_id' => $form->request_id,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return false;
+    }
+}
 
     public function updateCalendarInfo(Request $request, $requestId)
 {
