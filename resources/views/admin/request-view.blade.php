@@ -216,14 +216,14 @@
                                     <div
                                         class="px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
                                         <i class="fa fa-money-bill me-2"></i>
-                                        <span class="fw-bold me-1" id="totalApprovedFee">0</span>
+                                        <span class="me-1" id="totalApprovedFee">0</span>
                                     </div>
 
                                     <!-- Comments Pill -->
                                     <div
                                         class="px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
                                         <i class="fa fa-commenting me-2"></i>
-                                        <span class="fw-bold me-1" id="commentCount">0</span>
+                                        <span class="me-1" id="commentCount">0</span>
                                     </div>
 
 
@@ -3300,7 +3300,7 @@
                     if (!equipmentStatusPill) {
                         const pill = document.createElement('div');
                         pill.id = 'equipmentStatusPill';
-                        pill.className = 'px-3 py-1 bg-info-subtle text-info rounded-pill d-inline-flex align-items-center hover-pointer';
+                        pill.className = 'px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center hover-pointer';
                         pill.setAttribute('role', 'button');
                         pill.setAttribute('data-bs-toggle', 'modal');
                         pill.setAttribute('data-bs-target', '#equipmentStatusModal');
