@@ -5,6 +5,7 @@
 @section('content')
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <style>
+    
     body {
       background-color: rgba(0, 0, 0, 0.4);
       background-image: url("{{ asset('assets/homepage.jpg') }}");
@@ -53,7 +54,7 @@
       background-color: white;
       margin-top: -100px;
       border-radius: 0.5rem;
-      padding: 3rem;
+      padding: 2rem;
       box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
       position: relative;
       z-index: 1;
@@ -67,7 +68,7 @@
 
     .catalog-section h4 {
       font-size: 1.8rem;
-      color: #333;
+      color: #003366;
     }
 
     .catalog-section p.text-muted {
@@ -76,89 +77,90 @@
       margin-bottom: 2rem;
     }
 
-    .catalog-card {
-      text-align: center;
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      background-color: #003366;
-      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+.catalog-card {
+  background-color: white;
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.2s ease;
+}
 
-    }
+.catalog-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); /* darker shadow, no lift */
+}
 
     .catalog-card img {
       width: 100%;
       height: 180px;
       object-fit: cover;
-      border-radius: 0.25rem;
-      margin-bottom: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem !important;
     }
 
     .catalog-card h6 {
       font-size: 1.25rem;
-      color: white;
+      color: #003366;
       margin-bottom: 0.5rem;
+    }
+
+    .catalog-card h6 a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .catalog-card h6 a:hover {
+      color: #004a94;
     }
 
     .catalog-card p {
       font-size: 0.9rem;
-      color: white;
-      flex-grow: 1;
-    }
-
-    .catalog-card .btn {
-      background-color: #f2b123;
       color: black;
-      border: none;
-      padding: 0.5rem 1.5rem;
-      font-size: 0.9rem;
-      font-weight: bold;
-      margin-top: 1rem;
-    }
-
-    .catalog-card .btn:hover {
-      background-color: #be8200;
+      flex-grow: 1;
+      margin-bottom: 0;
     }
   </style>
 
-    <section class="hero-section text-white text-center">
+  <section class="hero-section text-white text-center">
     <h2 class="fw-bold">Simplify the way you book university facilities,<br>equipment, and services — all in one
       platform,<br>anytime, anywhere.</h2>
     <a href="reservation-form" class="btn btn-warning mt-3 fw-bold">Start Booking</a>
-    </section>
+  </section>
 
-    <section class="catalog-section container text-center">
+  <section class="catalog-section container text-center">
     <h4 class="fw-bold mb-2">Explore Available Resources</h4>
     <p class="text-muted mb-4">Browse available facilities, equipment, and services for your next event or activity.
-      Everything’s up-to-date and ready to reserve.</p>
+      Everything's up-to-date and ready to reserve.</p>
     <div class="row">
       <div class="col-md-4 mb-4">
-      <div class="catalog-card">
-        <img src="{{ asset('assets/facilities-pic2.JPG') }}" class="img-fluid rounded mb-2" alt="Facilities">
-        <h6>Facilities</h6>
-        <p>Explore our venues to support every activity.</p>
-        <a href="about-facilities" class="btn">Explore</a>
-      </div>
-      </div>
-      <div class="col-md-4 mb-4">
-      <div class="catalog-card">
-        <img src="{{ asset('assets/equipment-pic.jpg') }}" class="img-fluid rounded mb-2" alt="Equipment">
-        <h6>Equipment</h6>
-        <p>Equip your activities with reliable resources.</p>
-        <a href="about-equipment" class="btn">Explore</a>
-      </div>
+        <div class="catalog-card">
+          <img src="{{ asset('assets/facilities-pic2.JPG') }}" class="img-fluid rounded mb-2" alt="Facilities">
+          <h6 class="fw-bold"><a href="about-facilities">Facilities</a></h6>
+          <p>Explore our venues to support every activity.</p>
+        </div>
       </div>
       <div class="col-md-4 mb-4">
-      <div class="catalog-card">
-        <img src="{{ asset('assets/services-pic.png') }}" class="img-fluid rounded mb-2" alt="Services">
-        <h6>Extra Services</h6>
-        <p>Make your event seamless with extra services.</p>
-        <a href="about-services" class="btn">Explore</a>
+        <div class="catalog-card">
+          <img src="{{ asset('assets/equipment-pic.jpg') }}" class="img-fluid rounded mb-2" alt="Equipment">
+          <h6 class="fw-bold"><a href="about-equipment">Equipment</a></h6>
+          <p>Equip your activities with reliable resources.</p>
+        </div>
       </div>
+      <div class="col-md-4 mb-4">
+        <div class="catalog-card">
+          <img
+            src="https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://images.ctfassets.net/wp1lcwdav1p1/5PbtVEidv28K3XNOywzVj3/fedb6ac03469ce4de8720bc0995df898/GettyImages-1620440886.jpg?w=1500&h=680&q=60&fit=fill&f=faces&fm=jpg&fl=progressive&auto=format%2Ccompress&dpr=1&w=1000"
+            class="img-fluid rounded mb-2" alt="Extra Services">
+          <h6 class="fw-bold"><a href="about-services">Extra Services</a></h6>
+          <p>Make your event seamless with extra services.</p>
+        </div>
       </div>
     </div>
-    </section>
-  @endsection
+  </section>
+@endsection
