@@ -11,19 +11,38 @@
             display: flex;
             flex-direction: column;
             margin: 0;
-
         }
 
         .hero-section {
-            background: url('{{ asset('assets/facilities-pic2.jpg') }}') center center / cover no-repeat;
+            position: relative;
+            flex-direction: column;
+            background: url('{{ asset('assets/homepage.jpg') }}') center center / cover no-repeat;
             height: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-            margin-bottom: 2rem;
             padding: 2rem;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            /* Adjust opacity for darker/lighter overlay */
+            z-index: 0;
+        }
+
+        .hero-section h1,
+        .hero-section h2,
+        .hero-section p,
+        .hero-section a {
+            position: relative;
+            z-index: 1;
+            /* Keeps text above the overlay */
         }
 
         .hero-section h1 {
@@ -33,11 +52,8 @@
             line-height: 1.2;
         }
 
-
         .section-content {
-            padding-bottom: 2rem;
             flex-grow: 1;
-
         }
 
         .card-img {
@@ -55,141 +71,84 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-        }
-
-
-        .pagination .page-link {
-            color: #003366;
-            border-color: #003366;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #003366;
-            border-color: #003366;
-            color: white;
-        }
-
-        .pagination .page-link:hover {
-            background-color: #f2b123;
-            border-color: #f2b123;
-            color: #003366;
-        }
-
-
-        footer {
-            background-color: #003366;
-            color: white;
-            text-align: center;
-            padding: 1rem 0;
-            margin-top: auto;
         }
     </style>
 
     <section class="hero-section">
         <h1>Facilities</h1>
+        <p class="mb-4">Explore a range of facilities designed to host events, meetings, trainings, and recreational activities with ease.</p>
     </section>
 
     <section class="section-content container">
-        <h2 class="mb-3">Our Available Facilities</h2>
-        <p class="mb-4">Explore a variety of spaces available for your events, meetings, and activities.</p>
         <div class="row mt-4">
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Meeting Room A">
+                    <img src="{{ asset('assets/frontend-pics/facilities/conference-room.jpeg') }}"
+                        class="card-img-top card-img" alt="Conference Room">
                     <div class="card-body">
-                        <h5 class="card-title">Meeting Room A</h5>
-                        <p class="card-text">A versatile space ideal for small group meetings and discussions.</p>
+                        <h5 class="card-title">Conference & Meeting Rooms</h5>
+                        <p class="card-text">Well-equipped spaces for group discussions, seminars, and formal meetings.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Lecture Hall B">
-                    <div class="card-body">
-                        <h5 class="card-title">Lecture Hall B</h5>
-                        <p class="card-text">Equipped for large presentations and lectures with ample seating.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Auditorium C">
-                    <div class="card-body">
-                        <h5 class="card-title">Auditorium C</h5>
-                        <p class="card-text">A grand hall perfect for ceremonies, performances, and major events.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Gymnasium">
-                    <div class="card-body">
-                        <h5 class="card-title">Gymnasium</h5>
-                        <p class="card-text">Multi-purpose facility for sports, large gatherings, and exhibitions.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img" alt="Library Annex">
-                    <div class="card-body">
-                        <h5 class="card-title">Library Annex</h5>
-                        <p class="card-text">A quiet study area or a spacious room for academic workshops.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Computer Lab 1">
-                    <div class="card-body">
-                        <h5 class="card-title">Computer Lab 1</h5>
-                        <p class="card-text">Fully equipped with computers for classes, training, and testing.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img"
-                    alt="Mary Thomas Computer Laboratory">
-                <div class="card-body">
-                    <h5 class="card-title">Mary Thomas Computer Laboratory</h5>
-                    <p class="card-text">Fully equipped with computers for classes, training, and testing.</p>
-                </div>
-            </div>
-        </div>
-        </div>
 
-        <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4">
-            <ul class="pagination">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/frontend-pics/facilities/lecture-hall.jpg') }}" class="card-img-top card-img"
+                        alt="Lecture Hall">
+                    <div class="card-body">
+                        <h5 class="card-title">Lecture & Training Halls</h5>
+                        <p class="card-text">Spacious venues ideal for lectures, presentations, and workshops.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/frontend-pics/facilities/auditorium.jpg') }}" class="card-img-top card-img"
+                        alt="Auditorium">
+                    <div class="card-body">
+                        <h5 class="card-title">Auditoriums</h5>
+                        <p class="card-text">Large venues designed for conferences, ceremonies, and cultural events.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/frontend-pics/facilities/court.jpg') }}" class="card-img-top card-img"
+                        alt="Gym Court">
+                    <div class="card-body">
+                        <h5 class="card-title">Sports & Gym Facilities</h5>
+                        <p class="card-text">Multipurpose gyms and courts for athletic events, exhibitions, and student
+                            activities.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/frontend-pics/facilities/study-area.jpg') }}" class="card-img-top card-img"
+                        alt="Libraries">
+                    <div class="card-body">
+                        <h5 class="card-title">Libraries & Study Areas</h5>
+                        <p class="card-text">Quiet spaces designed for research, study sessions, and academic gatherings.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ asset('assets/frontend-pics/facilities/comp-lab.jpg') }}" class="card-img-top card-img"
+                        alt="Computer Laboratories">
+                    <div class="card-body">
+                        <h5 class="card-title">Computer Laboratories</h5>
+                        <p class="card-text">Fully equipped labs for IT classes, training sessions, and technical workshops.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
-@endsection
-
-
-
-@section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const dropdownElements = document.querySelectorAll('.dropdown-toggle');
-        dropdownElements.forEach(dropdown => {
-            new bootstrap.Dropdown(dropdown);
-        });
-    });
-</script>
 @endsection

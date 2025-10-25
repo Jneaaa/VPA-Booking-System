@@ -21,6 +21,19 @@
       font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
     }
 
+    /* Form Sequencing Styles */
+.form-section {
+  display: none;
+}
+
+.form-section.active {
+  display: block;
+}
+
+#dynamicFormSections {
+  margin-bottom: 20px;
+}
+
     #termsModal .modal-header {
       padding-top: 0.5rem;
       padding-bottom: 0.25rem;
@@ -617,381 +630,382 @@
   <div class="container main-content">
     <form id="reservationForm" method="POST">
       @csrf
-      <!-- Complete Your Reservation Section -->
-      <div class="row">
-        <div class="col-12">
-          <style>
-            .btn-transparent {
-              background-color: transparent !important;
-              border: none !important;
-              box-shadow: none !important;
-            }
+      <style>
+        .btn-transparent {
+          background-color: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
 
-            .btn-transparent i {
-              display: inline-block;
-              /* Needed for transform to work */
-              color: #6c757d;
-              transition: transform 0.25s ease-in-out;
-            }
+        .btn-transparent i {
+          display: inline-block;
+          /* Needed for transform to work */
+          color: #6c757d;
+          transition: transform 0.25s ease-in-out;
+        }
 
-            button.btn-transparent[aria-expanded="true"] i.bi-chevron-down {
-              transform: rotate(0deg);
-            }
+        button.btn-transparent[aria-expanded="true"] i.bi-chevron-down {
+          transform: rotate(0deg);
+        }
 
-            button.btn-transparent[aria-expanded="false"] i.bi-chevron-down {
-              transform: rotate(180deg);
-            }
-          </style>
+        button.btn-transparent[aria-expanded="false"] i.bi-chevron-down {
+          transform: rotate(180deg);
+        }
+      </style>
 
-          <div class="form-section-card">
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Complete Your Reservation</h5>
-              <button id="toggleReservationBtn" type="button" class="btn btn-sm btn-secondary btn-transparent"
-                style="height: 100%; align-self: center" data-bs-toggle="collapse" data-bs-target="#reservationContent"
-                aria-expanded="true" aria-controls="reservationContent">
-                <i class="bi bi-chevron-down"></i>
-              </button>
-            </div>
-
-            <div id="reservationContent" class="collapse show" style="padding-top: 10px">
-              <p class="text-muted">
-                To confirm your request, please fill out the necessary details below.
-                We need this information to process your booking efficiently and provide
-                complete details on how to proceed. A confirmation email will be sent
-                to your registered email address once your submission is reviewed and approved.
-              </p>
-              <div class="d-flex justify-content-start gap-2 mb-4">
-                <a href="policies" class="btn btn-primary">Reservation Policies</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Two-column grid layout -->
-      <div class="row">
-        <div class="col-md-6 d-flex flex-column">
-          <div class="form-section-card flex-grow-1">
-            <h5>Your Contact Information</h5>
-            <div class="row">
-              <div class="col-md-12">
-                <label class="form-label">Applicant Type <span style="color: red;">*</span></label>
-                <select id="applicantType" name="user_type" class="form-select mb-2" aria-label="Type of Applicant"
-                  required>
-                  <option value="" selected disabled>Type of Applicant</option>
-                  <option value="Internal">Internal</option>
-                  <option value="External">External</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">
-                  First Name <span style="color: red;">*</span>
-                </label>
-                <input name="first_name" type="text" class="form-control" placeholder="First Name" required
-                  maxlength="50" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">
-                  Last Name <span style="color: red;">*</span>
-                </label>
-                <input name="last_name" type="text" class="form-control" placeholder="Last Name" required
-                  maxlength="50" />
-              </div>
-              <div id="studentIdField" class="col-md-6">
-                <label class="form-label">CPU Student ID <span id="schoolIdRequired"
-                    style="color:red;display:none">*</span></label>
-                <input name="school_id" id="school_id" type="text" class="form-control" placeholder="Student ID"
-                  maxlength="20" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Contact Number</label>
-                <input name="contact_number" type="text" class="form-control" placeholder="Contact Number"
-                  maxlength="15" pattern="\d{1,15}" inputmode="numeric" id="contactNumberField" autocomplete="off" />
-              </div>
-              <div class="col-md-12">
-                <label class="form-label">Email Address <span style="color: red;">*</span></label>
-                <input name="email" type="email" class="form-control mb-2" placeholder="Email Address" required
-                  maxlength="100" />
-              </div>
-              <div class="col-md-12">
-                <label class="form-label">Organization Name</label>
-                <input name="organization_name" type="text" class="form-control mb-2" placeholder="Organization Name"
-                  maxlength="100" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-6 d-flex flex-column">
-          <div class="form-section-card flex-grow-1" style="padding-bottom: 15px;">
-            <div class="d-flex justify-content-between align-items-center">
-              <h5>Booking Schedule</h5>
-            </div>
-            <div class="d-flex justify-content-center mt-2">
-              <i class="bi bi-calendar-check" style="font-size: 3rem; color:var(--cpu-primary);"></i>
-            </div>
-            <p id="selectedDateTime" class="text-muted">
-              No date and time selected.
-            </p>
-            <div class="row">
-              <div class="col-md-6">
-                <label for="startDateField" class="form-label">Start Date</label>
-                <input name="start_date" type="date" id="startDateField" class="form-control mb-2" />
-              </div>
-              <div class="col-md-6">
-                <label for="startTimeField" class="form-label">Start Time</label>
-                <select id="startTimeField" name="start_time" class="form-select mb-2" onchange="adjustEndTime()">
-                  <!-- Predefined 12-hour intervals -->
-                  <option value="12:00 AM">12:00 AM</option>
-                  <option value="12:30 AM">12:30 AM</option>
-                  <option value="01:00 AM">01:00 AM</option>
-                  <option value="01:30 AM">01:30 AM</option>
-                  <option value="02:00 AM">02:00 AM</option>
-                  <option value="02:30 AM">02:30 AM</option>
-                  <option value="03:00 AM">03:00 AM</option>
-                  <option value="03:30 AM">03:30 AM</option>
-                  <option value="04:00 AM">04:00 AM</option>
-                  <option value="04:30 AM">04:30 AM</option>
-                  <option value="05:00 AM">05:00 AM</option>
-                  <option value="05:30 AM">05:30 AM</option>
-                  <option value="06:00 AM">06:00 AM</option>
-                  <option value="06:30 AM">06:30 AM</option>
-                  <option value="07:00 AM">07:00 AM</option>
-                  <option value="07:30 AM">07:30 AM</option>
-                  <option value="08:00 AM">08:00 AM</option>
-                  <option value="08:30 AM">08:30 AM</option>
-                  <option value="09:00 AM">09:00 AM</option>
-                  <option value="09:30 AM">09:30 AM</option>
-                  <option value="10:00 AM">10:00 AM</option>
-                  <option value="10:30 AM">10:30 AM</option>
-                  <option value="11:00 AM">11:00 AM</option>
-                  <option value="11:30 AM">11:30 AM</option>
-                  <option value="12:00 PM">12:00 PM</option>
-                  <option value="12:30 PM">12:30 PM</option>
-                  <option value="01:00 PM">01:00 PM</option>
-                  <option value="01:30 PM">01:30 PM</option>
-                  <option value="02:00 PM">02:00 PM</option>
-                  <option value="02:30 PM">02:30 PM</option>
-                  <option value="03:00 PM">03:00 PM</option>
-                  <option value="03:30 PM">03:30 PM</option>
-                  <option value="04:00 PM">04:00 PM</option>
-                  <option value="04:30 PM">04:30 PM</option>
-                  <option value="05:00 PM">05:00 PM</option>
-                  <option value="05:30 PM">05:30 PM</option>
-                  <option value="06:00 PM">06:00 PM</option>
-                  <option value="06:30 PM">06:30 PM</option>
-                  <option value="07:00 PM">07:00 PM</option>
-                  <option value="07:30 PM">07:30 PM</option>
-                  <option value="08:00 PM">08:00 PM</option>
-                  <option value="08:30 PM">08:30 PM</option>
-                  <option value="09:00 PM">09:00 PM</option>
-                  <option value="09:30 PM">09:30 PM</option>
-                  <option value="10:00 PM">10:00 PM</option>
-                  <option value="10:30 PM">10:30 PM</option>
-                  <option value="11:00 PM">11:00 PM</option>
-                  <option value="11:30 PM">11:30 PM</option>
-                </select>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                <label for="endDateField" class="form-label">End Date</label>
-                <input name="end_date" type="date" id="endDateField" class="form-control mb-2" />
-              </div>
-              <div class="col-md-6">
-                <label for="endTimeField" class="form-label">End Time</label>
-                <select id="endTimeField" name="end_time" class="form-select mb-3">
-                  <!-- Predefined 12-hour intervals -->
-                  <option value="12:00 AM">12:00 AM</option>
-                  <option value="12:30 AM">12:30 AM</option>
-                  <option value="01:00 AM">01:00 AM</option>
-                  <option value="01:30 AM">01:30 AM</option>
-                  <option value="02:00 AM">02:00 AM</option>
-                  <option value="02:30 AM">02:30 AM</option>
-                  <option value="03:00 AM">03:00 AM</option>
-                  <option value="03:30 AM">03:30 AM</option>
-                  <option value="04:00 AM">04:00 AM</option>
-                  <option value="04:30 AM">04:30 AM</option>
-                  <option value="05:00 AM">05:00 AM</option>
-                  <option value="05:30 AM">05:30 AM</option>
-                  <option value="06:00 AM">06:00 AM</option>
-                  <option value="06:30 AM">06:30 AM</option>
-                  <option value="07:00 AM">07:00 AM</option>
-                  <option value="07:30 AM">07:30 AM</option>
-                  <option value="08:00 AM">08:00 AM</option>
-                  <option value="08:30 AM">08:30 AM</option>
-                  <option value="09:00 AM">09:00 AM</option>
-                  <option value="09:30 AM">09:30 AM</option>
-                  <option value="10:00 AM">10:00 AM</option>
-                  <option value="10:30 AM">10:30 AM</option>
-                  <option value="11:00 AM">11:00 AM</option>
-                  <option value="11:30 AM">11:30 AM</option>
-                  <option value="12:00 PM">12:00 PM</option>
-                  <option value="12:30 PM">12:30 PM</option>
-                  <option value="01:00 PM">01:00 PM</option>
-                  <option value="01:30 PM">01:30 PM</option>
-                  <option value="02:00 PM">02:00 PM</option>
-                  <option value="02:30 PM">02:30 PM</option>
-                  <option value="03:00 PM">03:00 PM</option>
-                  <option value="03:30 PM">03:30 PM</option>
-                  <option value="04:00 PM">04:00 PM</option>
-                  <option value="04:30 PM">04:30 PM</option>
-                  <option value="05:00 PM">05:00 PM</option>
-                  <option value="05:30 PM">05:30 PM</option>
-                  <option value="06:00 PM">06:00 PM</option>
-                  <option value="06:30 PM">06:30 PM</option>
-                  <option value="07:00 PM">07:00 PM</option>
-                  <option value="07:30 PM">07:30 PM</option>
-                  <option value="08:00 PM">08:00 PM</option>
-                  <option value="08:30 PM">08:30 PM</option>
-                  <option value="09:00 PM">09:00 PM</option>
-                  <option value="09:30 PM">09:30 PM</option>
-                  <option value="10:00 PM">10:00 PM</option>
-                  <option value="10:30 PM">10:30 PM</option>
-                  <option value="11:00 PM">11:00 PM</option>
-                  <option value="11:30 PM">11:30 PM</option>
-                </select>
-              </div>
-            </div>
-            <div class="d-flex justify-content-start gap-2">
-              <button id="clearSelectionBtn" class="btn btn-outline-secondary">
-                Clear Selection
-              </button>
-              <button id="checkAvailabilityBtn" type="button" class="btn btn-primary" onclick="checkAvailability()">
-                Check Availability
-              </button>
-              <span id="availabilityResult" style="margin-left: 1px; font-weight: bold;"></span>
-            </div>
-            <p class="text-muted mt-4" style="font-size: 0.875rem;">
-              In case of emergency, please ensure to cancel reservations at least 5 days before the scheduled date to
-              avoid complications.
-            </p>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Single column for Reservation Details -->
-      <div class="row">
-        <div class="col-12">
-          <div class="form-section-card">
-            <h5>Reservation Details</h5>
-            <div class="row">
-              <div class="col-md-6">
-                <label class="form-label">Number of Participants</label>
-                <input name="num_participants" type="number" class="form-control mb-2" value="1" min="1" required />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Activity/Purpose</label>
-                <select id="activityPurposeField" name="purpose_id" class="form-select mb-2"
-                  aria-label="Activity/Purpose" required>
-                  <option value="" selected disabled>Select Activity/Purpose</option>
-                  <option value="8">Alumni - Class Reunion</option>
-                  <option value="9">Alumni - Personal Events</option>
-                  <option value="7">Alumni-Organized Events</option>
-                  <option value="5">CPU Organization Led Activity</option>
-                  <option value="2">Equipment Rental</option>
-                  <option value="10">External Event</option>
-                  <option value="1">Facility Rental</option>
-                  <option value="6">Student-Organized Activity</option>
-                  <option value="3">Subject Requirement - Class, Seminar, Conference</option>
-                  <option value="4">University Program/Activity</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Endorser Name</label>
-                <input name="endorser" type="text" class="form-control" placeholder="Endorser Name" maxlength="50" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Date Endorsed</label>
-                <input name="date_endorsed" type="date" class="form-control mb-2" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Additional Requests</label>
-                <textarea name="additional_requests" class="form-control mb-2" rows="3" maxlength="250"
-                  placeholder="Write a brief description of any additional requests you may have."></textarea>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label mt-1">Attach Formal Letter</label>
-                <div class="position-relative">
-                  <input type="file" class="form-control mb-1" id="attachLetter" onchange="uploadToCloudinary(this)"
-                    required />
-                  <input type="hidden" name="formal_letter_url" id="formal_letter_url">
-                  <input type="hidden" name="formal_letter_public_id" id="formal_letter_public_id">
-                  <button type="button" id="removeAttachLetterBtn"
-                    class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 d-none"
-                    style="color: black; background: none; border: none"
-                    onclick="removeFile('attachLetter', 'removeAttachLetterBtn')">
-                    x
-                  </button>
-                </div>
-                <small class="text-muted" style="margin-top: -5px;">
-                  This file is required to explain the requisition's intent and serves as a formal request to the Vice
-                  President of Administration.
-                </small>
-                <div id="uploadProgress" class="progress mt-2 d-none">
-                  <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bottom 2-column grid -->
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-section-card">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="mb-0">Requested Facilities</h5>
-              <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
-                style="width: 36px; height: 36px;" type="button" onclick="navigateToCatalog('facility')">
-                <i class="bi bi-plus fs-4"></i>
-              </button>
-            </div>
-            <div id="facilityList" class="selected-items-container">
-              <!-- Facility items will be dynamically added here -->
-              <div class="text-muted empty-message">No facilities added yet.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-6">
-          <div class="form-section-card">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="mb-0">Requested Equipment</h5>
-              <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
-                style="width: 36px; height: 36px;" type="button" onclick="navigateToCatalog('equipment')">
-                <i class="bi bi-plus fs-4"></i>
-              </button>
-            </div>
-            <div id="equipmentList" class="selected-items-container">
-              <!-- Equipment items will be dynamically added here -->
-              <div class="text-muted empty-message">No equipment added yet.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fee Breakdown Section -->
-      <div class="row">
-        <div class="col-12">
-          <div class="form-section-card">
-            <h5>Fee Breakdown</h5>
-            <div id="feeDisplay" class="fee-breakdown">
-              <!-- Fee details will be dynamically added here -->
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Change the submit button to remove onclick and type="submit" -->
-      <div class="d-flex justify-content-center my-4">
-        <button id="submitFormBtn" type="button" class="btn btn-primary me-2">
-          Submit Form
+<!-- Complete Your Reservation Section -->
+<div class="row">
+  <div class="col-12">
+    <div class="form-section-card">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Complete Your Reservation</h5>
+        <button id="toggleReservationBtn" type="button" class="btn btn-sm btn-secondary btn-transparent"
+          style="height: 100%; align-self: center" data-bs-toggle="collapse" data-bs-target="#reservationContent"
+          aria-expanded="true" aria-controls="reservationContent">
+          <i class="bi bi-chevron-down"></i>
         </button>
       </div>
-    </form>
+      <div id="reservationContent" class="collapse show" style="padding-top: 10px">
+        <p class="text-muted">
+          To confirm your request, please fill out the necessary details below.
+          We need this information to process your booking efficiently and provide
+          complete details on how to proceed. A confirmation email will be sent
+          to your registered email address once your submission is reviewed and approved.
+        </p>
+        <div class="d-flex justify-content-start gap-2 mb-4">
+          <a href="policies" class="btn btn-primary">Reservation Policies</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content Row -->
+<div class="row">
+  <!-- LEFT COLUMN -->
+  <div class="col-md-8">
+    <!-- Dynamic Form Sections -->
+    <div id="dynamicFormSections">
+      <!-- Contact Information Section -->
+      <div class="form-section-card form-section active" id="contactSection">
+        <h5>Your Contact Information</h5>
+        <div class="row">
+          <div class="col-md-12">
+            <label class="form-label">Applicant Type <span style="color: red;">*</span></label>
+            <select id="applicantType" name="user_type" class="form-select mb-2" aria-label="Type of Applicant"
+              required>
+              <option value="" selected disabled>Type of Applicant</option>
+              <option value="Internal">Internal</option>
+              <option value="External">External</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">
+              First Name <span style="color: red;">*</span>
+            </label>
+            <input name="first_name" type="text" class="form-control" placeholder="First Name" required
+              maxlength="50" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">
+              Last Name <span style="color: red;">*</span>
+            </label>
+            <input name="last_name" type="text" class="form-control" placeholder="Last Name" required
+              maxlength="50" />
+          </div>
+          <div id="studentIdField" class="col-md-6">
+            <label class="form-label">CPU School ID <span id="schoolIdRequired"
+                style="color:red;display:none">*</span></label>
+            <input name="school_id" id="school_id" type="text" class="form-control" placeholder="School ID"
+              maxlength="20" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contact Number</label>
+            <input name="contact_number" type="text" class="form-control" placeholder="Contact Number"
+              maxlength="15" pattern="\d{1,15}" inputmode="numeric" id="contactNumberField" autocomplete="off" />
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">Email Address <span style="color: red;">*</span></label>
+            <input name="email" type="email" class="form-control mb-2" placeholder="Email Address" required
+              maxlength="100" />
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">Organization Name</label>
+            <input name="organization_name" type="text" class="form-control mb-2" placeholder="Organization Name"
+              maxlength="100" />
+          </div>
+        </div>
+      </div>
+
+
+       <!-- Booking Schedule Section -->
+      <div class="form-section-card form-section" id="scheduleSection">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5>Booking Schedule</h5>
+        </div>
+        <div class="d-flex justify-content-center mt-2">
+          <i class="bi bi-calendar-check" style="font-size: 3rem; color:var(--cpu-primary);"></i>
+        </div>
+        <p id="selectedDateTime" class="text-muted">
+          No date and time selected.
+        </p>
+        <div class="row">
+          <div class="col-md-6">
+            <label for="startDateField" class="form-label">Start Date</label>
+            <input name="start_date" type="date" id="startDateField" class="form-control mb-2" />
+          </div>
+          <div class="col-md-6">
+            <label for="startTimeField" class="form-label">Start Time</label>
+            <select id="startTimeField" name="start_time" class="form-select mb-2" onchange="adjustEndTime()">
+              <!-- Predefined 12-hour intervals -->
+              <option value="12:00 AM">12:00 AM</option>
+              <option value="12:30 AM">12:30 AM</option>
+              <option value="01:00 AM">01:00 AM</option>
+              <option value="01:30 AM">01:30 AM</option>
+              <option value="02:00 AM">02:00 AM</option>
+              <option value="02:30 AM">02:30 AM</option>
+              <option value="03:00 AM">03:00 AM</option>
+              <option value="03:30 AM">03:30 AM</option>
+              <option value="04:00 AM">04:00 AM</option>
+              <option value="04:30 AM">04:30 AM</option>
+              <option value="05:00 AM">05:00 AM</option>
+              <option value="05:30 AM">05:30 AM</option>
+              <option value="06:00 AM">06:00 AM</option>
+              <option value="06:30 AM">06:30 AM</option>
+              <option value="07:00 AM">07:00 AM</option>
+              <option value="07:30 AM">07:30 AM</option>
+              <option value="08:00 AM">08:00 AM</option>
+              <option value="08:30 AM">08:30 AM</option>
+              <option value="09:00 AM">09:00 AM</option>
+              <option value="09:30 AM">09:30 AM</option>
+              <option value="10:00 AM">10:00 AM</option>
+              <option value="10:30 AM">10:30 AM</option>
+              <option value="11:00 AM">11:00 AM</option>
+              <option value="11:30 AM">11:30 AM</option>
+              <option value="12:00 PM">12:00 PM</option>
+              <option value="12:30 PM">12:30 PM</option>
+              <option value="01:00 PM">01:00 PM</option>
+              <option value="01:30 PM">01:30 PM</option>
+              <option value="02:00 PM">02:00 PM</option>
+              <option value="02:30 PM">02:30 PM</option>
+              <option value="03:00 PM">03:00 PM</option>
+              <option value="03:30 PM">03:30 PM</option>
+              <option value="04:00 PM">04:00 PM</option>
+              <option value="04:30 PM">04:30 PM</option>
+              <option value="05:00 PM">05:00 PM</option>
+              <option value="05:30 PM">05:30 PM</option>
+              <option value="06:00 PM">06:00 PM</option>
+              <option value="06:30 PM">06:30 PM</option>
+              <option value="07:00 PM">07:00 PM</option>
+              <option value="07:30 PM">07:30 PM</option>
+              <option value="08:00 PM">08:00 PM</option>
+              <option value="08:30 PM">08:30 PM</option>
+              <option value="09:00 PM">09:00 PM</option>
+              <option value="09:30 PM">09:30 PM</option>
+              <option value="10:00 PM">10:00 PM</option>
+              <option value="10:30 PM">10:30 PM</option>
+              <option value="11:00 PM">11:00 PM</option>
+              <option value="11:30 PM">11:30 PM</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <label for="endDateField" class="form-label">End Date</label>
+            <input name="end_date" type="date" id="endDateField" class="form-control mb-2" />
+          </div>
+          <div class="col-md-6">
+            <label for="endTimeField" class="form-label">End Time</label>
+            <select id="endTimeField" name="end_time" class="form-select mb-3">
+              <!-- Predefined 12-hour intervals -->
+              <option value="12:00 AM">12:00 AM</option>
+              <option value="12:30 AM">12:30 AM</option>
+              <option value="01:00 AM">01:00 AM</option>
+              <option value="01:30 AM">01:30 AM</option>
+              <option value="02:00 AM">02:00 AM</option>
+              <option value="02:30 AM">02:30 AM</option>
+              <option value="03:00 AM">03:00 AM</option>
+              <option value="03:30 AM">03:30 AM</option>
+              <option value="04:00 AM">04:00 AM</option>
+              <option value="04:30 AM">04:30 AM</option>
+              <option value="05:00 AM">05:00 AM</option>
+              <option value="05:30 AM">05:30 AM</option>
+              <option value="06:00 AM">06:00 AM</option>
+              <option value="06:30 AM">06:30 AM</option>
+              <option value="07:00 AM">07:00 AM</option>
+              <option value="07:30 AM">07:30 AM</option>
+              <option value="08:00 AM">08:00 AM</option>
+              <option value="08:30 AM">08:30 AM</option>
+              <option value="09:00 AM">09:00 AM</option>
+              <option value="09:30 AM">09:30 AM</option>
+              <option value="10:00 AM">10:00 AM</option>
+              <option value="10:30 AM">10:30 AM</option>
+              <option value="11:00 AM">11:00 AM</option>
+              <option value="11:30 AM">11:30 AM</option>
+              <option value="12:00 PM">12:00 PM</option>
+              <option value="12:30 PM">12:30 PM</option>
+              <option value="01:00 PM">01:00 PM</option>
+              <option value="01:30 PM">01:30 PM</option>
+              <option value="02:00 PM">02:00 PM</option>
+              <option value="02:30 PM">02:30 PM</option>
+              <option value="03:00 PM">03:00 PM</option>
+              <option value="03:30 PM">03:30 PM</option>
+              <option value="04:00 PM">04:00 PM</option>
+              <option value="04:30 PM">04:30 PM</option>
+              <option value="05:00 PM">05:00 PM</option>
+              <option value="05:30 PM">05:30 PM</option>
+              <option value="06:00 PM">06:00 PM</option>
+              <option value="06:30 PM">06:30 PM</option>
+              <option value="07:00 PM">07:00 PM</option>
+              <option value="07:30 PM">07:30 PM</option>
+              <option value="08:00 PM">08:00 PM</option>
+              <option value="08:30 PM">08:30 PM</option>
+              <option value="09:00 PM">09:00 PM</option>
+              <option value="09:30 PM">09:30 PM</option>
+              <option value="10:00 PM">10:00 PM</option>
+              <option value="10:30 PM">10:30 PM</option>
+              <option value="11:00 PM">11:00 PM</option>
+              <option value="11:30 PM">11:30 PM</option>
+            </select>
+          </div>
+        </div>
+        <div class="d-flex justify-content-start gap-2">
+          <button id="clearSelectionBtn" class="btn btn-outline-secondary">
+            Clear Selection
+          </button>
+          <button id="checkAvailabilityBtn" type="button" class="btn btn-primary" onclick="checkAvailability()">
+            Check Availability
+          </button>
+          <span id="availabilityResult" style="margin-left: 1px; font-weight: bold;"></span>
+        </div>
+        <p class="text-muted mt-4" style="font-size: 0.875rem;">
+          In case of emergency, please ensure to cancel reservations at least 5 days before the scheduled date to
+          avoid complications.
+        </p>
+      </div>
+
+       <!-- Reservation Details Section -->
+      <div class="form-section-card form-section" id="detailsSection">
+        <h5>Reservation Details</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <label class="form-label">Number of Participants</label>
+            <input name="num_participants" type="number" class="form-control mb-2" value="1" min="1" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Activity/Purpose</label>
+            <select id="activityPurposeField" name="purpose_id" class="form-select mb-2"
+              aria-label="Activity/Purpose" required>
+              <option value="" selected disabled>Select Activity/Purpose</option>
+              <option value="8">Alumni - Class Reunion</option>
+              <option value="9">Alumni - Personal Events</option>
+              <option value="7">Alumni-Organized Events</option>
+              <option value="5">CPU Organization Led Activity</option>
+              <option value="2">Equipment Rental</option>
+              <option value="10">External Event</option>
+              <option value="1">Facility Rental</option>
+              <option value="6">Student-Organized Activity</option>
+              <option value="3">Subject Requirement - Class, Seminar, Conference</option>
+              <option value="4">University Program/Activity</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Endorser Name</label>
+            <input name="endorser" type="text" class="form-control" placeholder="Endorser Name" maxlength="50" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Date Endorsed</label>
+            <input name="date_endorsed" type="date" class="form-control mb-2" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Additional Requests</label>
+            <textarea name="additional_requests" class="form-control mb-2" rows="3" maxlength="250"
+              placeholder="Write a brief description of any additional requests you may have."></textarea>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label mt-1">Attach Formal Letter</label>
+            <div class="position-relative">
+              <input type="file" class="form-control mb-1" id="attachLetter" onchange="uploadToCloudinary(this)"
+                required />
+              <input type="hidden" name="formal_letter_url" id="formal_letter_url">
+              <input type="hidden" name="formal_letter_public_id" id="formal_letter_public_id">
+              <button type="button" id="removeAttachLetterBtn"
+                class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 d-none"
+                style="color: black; background: none; border: none"
+                onclick="removeFile('attachLetter', 'removeAttachLetterBtn')">
+                x
+              </button>
+            </div>
+            <small class="text-muted" style="margin-top: -5px;">
+              This file is required to explain the requisition's intent and serves as a formal request to the Vice
+              President of Administration.
+            </small>
+            <div id="uploadProgress" class="progress mt-2 d-none">
+              <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+        <!-- Navigation Buttons -->
+    <div class="form-section-card">
+      <div class="d-flex justify-content-between">
+        <button id="prevBtn" class="btn btn-outline-secondary" disabled>Previous</button>
+        <button id="nextBtn" class="btn btn-primary">Next</button>
+      </div>
+    </div>
+  </div>
+  
+
+  <!-- RIGHT COLUMN -->
+  <div class="col-md-4">
+    <!-- Requested Facilities -->
+    <div class="form-section-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Requested Facilities</h5>
+        <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+          style="width: 36px; height: 36px;" type="button" onclick="navigateToCatalog('facility')">
+          <i class="bi bi-plus fs-4"></i>
+        </button>
+      </div>
+      <div id="facilityList" class="selected-items-container">
+        <!-- Facility items will be dynamically added here -->
+        <div class="text-muted empty-message">No facilities added yet.</div>
+      </div>
+    </div>
+    
+    <!-- Requested Equipment -->
+    <div class="form-section-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Requested Equipment</h5>
+        <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+          style="width: 36px; height: 36px;" type="button" onclick="navigateToCatalog('equipment')">
+          <i class="bi bi-plus fs-4"></i>
+        </button>
+      </div>
+      <div id="equipmentList" class="selected-items-container">
+        <!-- Equipment items will be dynamically added here -->
+        <div class="text-muted empty-message">No equipment added yet.</div>
+      </div>
+    </div>
+
+    <!-- Fee Breakdown -->
+    <div class="form-section-card">
+      <h5>Fee Breakdown</h5>
+      <div id="feeDisplay" class="fee-breakdown">
+        <!-- Fee details will be dynamically added here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Submit Button (after sequencing) -->
+<div class="d-flex justify-content-center my-4">
+  <button id="submitFormBtn" type="button" class="btn btn-primary me-2">
+    Submit Form
+  </button>
+</div>
   </div>
 
   <!-- Success Modal -->
@@ -1147,13 +1161,13 @@
         schoolIdInput.required = true;
         schoolIdInput.disabled = false;
         schoolIdRequired.style.display = '';
-        schoolIdInput.placeholder = 'Student ID';
+        schoolIdInput.placeholder = 'School ID';
       } else {
         schoolIdInput.required = false;
         schoolIdInput.disabled = true;
         schoolIdRequired.style.display = 'none';
         schoolIdInput.value = '';
-        schoolIdInput.placeholder = 'Student ID';
+        schoolIdInput.placeholder = 'School ID';
       }
     });
     // Add this function to handle catalog navigation without triggering validation
@@ -1211,7 +1225,7 @@
         schoolIdInput.disabled = true;
         schoolIdRequired.style.display = 'none';
         schoolIdInput.value = '';
-        schoolIdInput.placeholder = 'Student ID';
+        schoolIdInput.placeholder = 'School ID';
       }
       const savedFormData = sessionStorage.getItem('reservationFormData');
       if (savedFormData) {
@@ -2337,9 +2351,6 @@
         // Only open modal if validation passes
         openTermsModal(e);
       });
-
-      // Remove the form submit handler since we're handling everything in the button click
-      // Keep the input/change handlers for clearing errors
       reservationForm.querySelectorAll('input, select, textarea').forEach(input => {
         input.addEventListener('input', function () {
           clearFieldError(this);
@@ -2348,9 +2359,101 @@
           clearFieldError(this);
         });
       });
-
-      // ...existing code...
     });
+    // Form Sequencing Logic
+document.addEventListener('DOMContentLoaded', function() {
+  const formSections = document.querySelectorAll('.form-section');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  let currentSectionIndex = 0;
+  
+  // Initialize first section as active
+  showSection(currentSectionIndex);
+  
+  // Next button click handler
+  nextBtn.addEventListener('click', function() {
+    if (validateCurrentSection()) {
+      if (currentSectionIndex < formSections.length - 1) {
+        currentSectionIndex++;
+        showSection(currentSectionIndex);
+      } else {
+        // Last section reached - show submit button
+        document.getElementById('submitFormBtn').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  });
+  
+  // Previous button click handler
+  prevBtn.addEventListener('click', function() {
+    if (currentSectionIndex > 0) {
+      currentSectionIndex--;
+      showSection(currentSectionIndex);
+    }
+  });
+  
+  // Show specific section
+  function showSection(index) {
+    formSections.forEach((section, i) => {
+      if (i === index) {
+        section.classList.add('active');
+      } else {
+        section.classList.remove('active');
+      }
+    });
+    
+    // Update button states
+    prevBtn.disabled = index === 0;
+    
+    if (index === formSections.length - 1) {
+      nextBtn.textContent = 'Review & Submit';
+    } else {
+      nextBtn.textContent = 'Next';
+    }
+    
+    // Scroll to the active section
+    formSections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  
+  // Validate current section before proceeding
+  function validateCurrentSection() {
+    const currentSection = formSections[currentSectionIndex];
+    const requiredFields = currentSection.querySelectorAll('[required]');
+    let isValid = true;
+    
+    // Clear previous errors
+    currentSection.querySelectorAll('.is-invalid').forEach(field => {
+      field.classList.remove('is-invalid');
+    });
+    
+    // Check required fields
+    requiredFields.forEach(field => {
+      if (!field.value) {
+        field.classList.add('is-invalid');
+        isValid = false;
+        
+        // Scroll to first invalid field
+        if (isValid) {
+          field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    });
+    
+    // Special validation for specific sections
+    if (currentSectionIndex === 1) { // Booking Schedule section
+      const scheduleValidation = validateBookingSchedule();
+      if (!scheduleValidation.valid) {
+        showToast(scheduleValidation.message, 'error');
+        isValid = false;
+      }
+    }
+    
+    if (!isValid) {
+      showToast('Please fill in all required fields in this section.', 'error');
+    }
+    
+    return isValid;
+  }
+});
   </script>
 </body>
 

@@ -15,16 +15,35 @@
 
 
         .hero-section {
-            background: url('{{ asset('assets/equipment-pic1.jpg') }}') center center / cover no-repeat;
+            position: relative;
+            flex-direction: column;
+            background: url('{{ asset('assets/homepage.jpg') }}') center center / cover no-repeat;
             height: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-            margin-bottom: 2rem;
             padding: 2rem;
+            overflow: hidden;
+        }
 
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            /* Adjust opacity for darker/lighter overlay */
+            z-index: 0;
+        }
+
+        .hero-section h1,
+        .hero-section h2,
+        .hero-section p,
+        .hero-section a {
+            position: relative;
+            z-index: 1;
+            /* Keeps text above the overlay */
         }
 
         .hero-section h1 {
@@ -36,7 +55,6 @@
         }
 
         .section-content {
-            padding-bottom: 2rem;
             flex-grow: 1;
         }
 
@@ -59,137 +77,87 @@
             flex-direction: column;
             justify-content: space-between;
         }
-
-        /* Styling for pagination */
-        .pagination .page-link {
-            color: #003366;
-            /* Dark blue color for links */
-            border-color: #003366;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #003366;
-            border-color: #003366;
-            color: white;
-        }
-
-        .pagination .page-link:hover {
-            background-color: #f2b123;
-            /* Gold hover effect */
-            border-color: #f2b123;
-            color: #003366;
-        }
-
-        footer {
-            background-color: #003366;
-            color: white;
-            text-align: center;
-            padding: 1rem 0;
-            margin-top: auto;
-        }
     </style>
-
     <section class="hero-section">
         <h1>Equipment</h1>
+        <p class="mb-4">Choose from a range of equipment categories designed to support academic, technical, and
+            event-related needs.</p>
     </section>
 
     <section class="section-content container">
-        <h2 class="mb-3">What You Can Borrow</h2>
-        <p class="mb-4">We offer various types of equipment such as projectors, microphones, and laptops to support
-            academic and
-            extracurricular activities. Browse through our available equipment below.</p>
         <div class="row mt-4">
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/mic.jpg') }}" class="card-img-top card-img" alt="Microphone">
+                    <img src="{{ asset('assets/frontend-pics/equipment/audio.jpg') }}" class="card-img-top card-img"
+                        alt="Audio Equipment">
                     <div class="card-body">
-                        <h5 class="card-title">Microphone</h5>
-                        <p class="card-text">Perfect for speaking engagements and presentations, ensuring clear
-                            audio.
-                        </p>
+                        <h5 class="card-title fw-bold">Audio Equipment</h5>
+                        <p class="card-text">Sound systems, microphones, speakers, and other audio support devices for
+                            events and presentations.</p>
                     </div>
                 </div>
             </div>
+
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/laptop.jpg') }}" class="card-img-top card-img" alt="Laptop">
+                    <img src="{{ asset('assets/frontend-pics/equipment/visual.webp') }}" class="card-img-top card-img"
+                        alt="Visual Equipment">
                     <div class="card-body">
-                        <h5 class="card-title">Laptop</h5>
-                        <p class="card-text">Available for academic use, research, and event hosting, fully
-                            equipped.
-                        </p>
+                        <h5 class="card-title fw-bold">Visual Equipment</h5>
+                        <p class="card-text">Projectors, screens, and display systems for lectures, meetings, and visual
+                            presentations.</p>
                     </div>
                 </div>
             </div>
+
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/projector.jpg') }}" class="card-img-top card-img" alt="Projector">
+                    <img src="{{ asset('assets/frontend-pics/equipment/lighting.jpg') }}" class="card-img-top card-img"
+                        alt="Lighting Equipment">
                     <div class="card-body">
-                        <h5 class="card-title">Projector</h5>
-                        <p class="card-text">High-resolution projectors for impactful presentations and large-scale
-                            screenings.</p>
+                        <h5 class="card-title fw-bold">Lighting Equipment</h5>
+                        <p class="card-text">Stage lights, spotlights, and adjustable lighting systems for indoor or outdoor
+                            events.</p>
                     </div>
                 </div>
             </div>
+
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/speaker.jpg') }}" class="card-img-top card-img" alt="Speaker">
+                    <img src="{{ asset('assets/frontend-pics/equipment/conference.jpg') }}" class="card-img-top card-img"
+                        alt="Conference Equipment">
                     <div class="card-body">
-                        <h5 class="card-title">Portable Speaker System</h5>
-                        <p class="card-text">Ideal for events requiring audio amplification in various settings.</p>
+                        <h5 class="card-title fw-bold">Conference Equipment</h5>
+                        <p class="card-text">Conference tools including microphones, display panels, and accessories for
+                            meetings.</p>
                     </div>
                 </div>
             </div>
+
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/camera.jpg') }}" class="card-img-top card-img" alt="Camera">
+                    <img src="{{ asset('assets/frontend-pics/equipment/event.png') }}" class="card-img-top card-img"
+                        alt="Event Equipment">
                     <div class="card-body">
-                        <h5 class="card-title">Digital Camera</h5>
-                        <p class="card-text">Capture high-quality photos and videos for academic projects or events.
-                        </p>
+                        <h5 class="card-title fw-bold">Event Equipment</h5>
+                        <p class="card-text">Essential event tools such as staging materials, podiums, and other event
+                            support gear.</p>
                     </div>
                 </div>
             </div>
+
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/whiteboard.jpg') }}" class="card-img-top card-img" alt="Whiteboard">
+                    <img src="{{ asset('assets/frontend-pics/equipment/it.jpg') }}" class="card-img-top card-img"
+                        class="card-img-top card-img" alt="IT Equipment">
                     <div class="card-body">
-                        <h5 class="card-title">Interactive Whiteboard</h5>
-                        <p class="card-text">Enhance your presentations and collaborative sessions with an
-                            interactive
-                            display.</p>
+                        <h5 class="card-title fw-bold">IT Equipment</h5>
+                        <p class="card-text">Laptops, computers, and communication devices for academic, research, and
+                            technical use.</p>
                     </div>
                 </div>
             </div>
         </div>
-
-        <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4">
-            <ul class="pagination">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
     </section>
-@endsection
 
-@section('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const dropdownElements = document.querySelectorAll('.dropdown-toggle');
-            dropdownElements.forEach(dropdown => {
-                new bootstrap.Dropdown(dropdown);
-            });
-        });
-    </script>
 @endsection
