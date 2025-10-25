@@ -96,7 +96,6 @@
     .catalog-card {
       background-color: #ffffffff;
       text-align: center;
-      padding: 1.5rem;
       border-radius: 0.5rem;
       height: 100%;
       display: flex;
@@ -105,6 +104,7 @@
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       transition: box-shadow 0.2s ease;
+      padding-bottom: 1rem; 
     }
 
     .catalog-card:hover {
@@ -116,7 +116,6 @@
       width: 100%;
       height: 180px;
       object-fit: cover;
-      border-radius: 0.5rem;
       margin-bottom: 1rem !important;
     }
 
@@ -141,6 +140,8 @@
       color: black;
       flex-grow: 1;
       margin-bottom: 0;
+      margin: 0 auto 0; 
+      max-width: 85%;
     }
   </style>
 
@@ -179,22 +180,29 @@
       </div>
     </div>
   </section>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const sections = document.querySelectorAll(".hero-section, .catalog-section");
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const heroSection = document.querySelector(".hero-section");
+    const catalogSection = document.querySelector(".catalog-section");
 
+    if (catalogSection) {
+      catalogSection.classList.add("visible");
+    }
+
+    if (heroSection) {
       const observer = new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add("visible");
-            obs.unobserve(entry.target); // trigger once per section
+            obs.unobserve(entry.target);
           }
         });
       }, { threshold: 0.2 });
 
-      sections.forEach(section => observer.observe(section));
-    });
-  </script>
+      observer.observe(heroSection);
+    }
+  });
+</script>
 
 
 @endsection
