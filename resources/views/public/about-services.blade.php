@@ -6,29 +6,44 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}">
     <style>
-        /* General Body Styles */
         body {
             background-color: #f4f4f4;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             margin: 0;
-            /* Ensure no default margin from browser */
         }
 
-        /* --- Hero Section Styles (simplified from equipment page format) --- */
         .hero-section {
-            background: url('{{ asset('assets/services-pic.png') }}') center center / cover no-repeat;
-            /* Using image from original file */
+            position: relative;
+            flex-direction: column;
+            background: url('{{ asset('assets/homepage.jpg') }}') center center / cover no-repeat;
             height: 200px;
-            /* Consistent hero height */
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-            margin-bottom: 2rem;
             padding: 2rem;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            /* Adjust opacity for darker/lighter overlay */
+            z-index: 0;
+        }
+
+        .hero-section h1,
+        .hero-section h2,
+        .hero-section p,
+        .hero-section a {
+            position: relative;
+            z-index: 1;
+            /* Keeps text above the overlay */
         }
 
         .hero-section h1 {
@@ -38,21 +53,16 @@
             line-height: 1.2;
         }
 
-        /* --- Section Content / Catalog Styles (from equipment page format) --- */
         .section-content {
-            padding-bottom: 2rem;
             flex-grow: 1;
-            /* Allows content section to grow and push footer down */
         }
 
         .card-img {
             height: 200px;
-            /* Consistent card image height */
             object-fit: cover;
             width: 100%;
         }
 
-        /* Ensure cards have consistent height */
         .card.h-100 {
             display: flex;
             flex-direction: column;
@@ -62,57 +72,26 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-        }
-
-        /* --- Pagination Styles (from equipment page format) --- */
-        .pagination .page-link {
-            color: #003366;
-            /* Dark blue color for links */
-            border-color: #003366;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #003366;
-            border-color: #003366;
-            color: white;
-        }
-
-        .pagination .page-link:hover {
-            background-color: #f2b123;
-            /* Gold hover effect */
-            border-color: #f2b123;
-            color: #003366;
-        }
-
-        /* --- Footer Styles --- */
-        footer {
-            background-color: #003366;
-            color: white;
-            text-align: center;
-            padding: 1rem 0;
-            margin-top: auto;
-            /* Pushes footer to the bottom */
         }
     </style>
 
 
-    <section class="hero-section">
+    <section class="hero-section text-center">
         <h1>Extra Services</h1>
+<p class="mb-4 mx-auto text-center" style="max-width: 700px;">
+    Access a range of support services designed to enhance event coordination, technical setup, and on-site management.
+</p>
+
     </section>
 
     <section class="section-content container">
-        <h2 class="mb-3">Event Support & Services</h2>
-        <p class="mb-4">Our staff are ready to assist your event needs. We offer services like technical support,
-            security personnel,
-            and logistics assistance to make sure your event runs smoothly.</p>
         <div class="row mt-4">
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img"
-                        alt="Security Personnel">
+                    <img src="{{ asset('assets/frontend-pics/services/security.jpg') }}" class="card-img-top card-img"
+                        alt="Security">
                     <div class="card-body">
-                        <h5 class="card-title">Security Personnel</h5>
+                        <h5 class="card-title fw-bold">Security Personnel</h5>
                         <p class="card-text">Professional staff to ensure safety and manage crowd control during your
                             event.</p>
                     </div>
@@ -120,9 +99,10 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/image_bf1def.jpg') }}" class="card-img-top card-img" alt="Technical Support">
+                    <img src="{{ asset('assets/frontend-pics/services/tech-support.jpg') }}" class="card-img-top card-img"
+                        alt="Technical Support">
                     <div class="card-body">
-                        <h5 class="card-title">Technical Support</h5>
+                        <h5 class="card-title fw-bold">Technical Support</h5>
                         <p class="card-text">Get help with setting up projectors, sound systems, and other technical
                             requirements.</p>
                     </div>
@@ -130,42 +110,15 @@
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{ asset('assets/image_cb5cef.jpg') }}" class="card-img-top card-img"
-                        alt="Logistics Assistance">
+                    <img src="{{ asset('assets/frontend-pics/services/logistics.jpg') }}" class="card-img-top card-img"
+                        alt="Logistics">
                     <div class="card-body">
-                        <h5 class="card-title">Logistics Assistance</h5>
+                        <h5 class="card-title fw-bold">Logistics Assistance</h5>
                         <p class="card-text">Help with event setup, decor, and general coordination for smooth
                             operations.</p>
                     </div>
                 </div>
             </div>
         </div>
-
-        <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4">
-            <ul class="pagination">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
     </section>
-@endsection
-
-@section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const dropdownElements = document.querySelectorAll('.dropdown-toggle');
-        dropdownElements.forEach(dropdown => {
-            new bootstrap.Dropdown(dropdown);
-        });
-    });
-</script>
 @endsection

@@ -5,7 +5,6 @@
 @section('content')
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <style>
-    
     body {
       background-color: rgba(0, 0, 0, 0.4);
       background-image: url("{{ asset('assets/homepage.jpg') }}");
@@ -38,6 +37,14 @@
       align-items: center;
       height: 70vh;
       margin-bottom: 50px;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .hero-section.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .hero-section h2 {
@@ -51,49 +58,59 @@
     }
 
     .catalog-section {
-      background-color: white;
+      background: #144270ff;
       margin-top: -100px;
+      border-top: solid 2px var(--cpu-secondary);
+      border-bottom: solid 2px var(--cpu-secondary);
       border-radius: 0.5rem;
       padding: 2rem;
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.28);
       position: relative;
       z-index: 1;
       margin-left: auto;
       margin-right: auto;
-      width: 90%;
+      width: 100%;
       margin-bottom: 5%;
       max-width: 1100px;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
 
+    .catalog-section.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .catalog-section h4 {
       font-size: 1.8rem;
-      color: #003366;
+      color: #fff;
     }
 
-    .catalog-section p.text-muted {
-      color: #666;
+    .catalog-section p {
+      color: #dfdfdfff;
       font-size: 1rem;
       margin-bottom: 2rem;
     }
 
-.catalog-card {
-  background-color: white;
-  text-align: center;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: box-shadow 0.2s ease;
-}
+    .catalog-card {
+      background-color: #ffffffff;
+      text-align: center;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: box-shadow 0.2s ease;
+    }
 
-.catalog-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); /* darker shadow, no lift */
-}
+    .catalog-card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.86);
+      /* darker shadow, no lift */
+    }
 
     .catalog-card img {
       width: 100%;
@@ -135,32 +152,49 @@
 
   <section class="catalog-section container text-center">
     <h4 class="fw-bold mb-2">Explore Available Resources</h4>
-    <p class="text-muted mb-4">Browse available facilities, equipment, and services for your next event or activity.
-      Everything's up-to-date and ready to reserve.</p>
-    <div class="row">
-      <div class="col-md-4 mb-4">
+    <p class="mb-4">Browse available facilities, equipment, and services for your next event or activity.</p>
+    <div class="row g-3">
+      <div class="col-md-4 mb-3">
         <div class="catalog-card">
           <img src="{{ asset('assets/facilities-pic2.JPG') }}" class="img-fluid rounded mb-2" alt="Facilities">
           <h6 class="fw-bold"><a href="about-facilities">Facilities</a></h6>
-          <p>Explore our venues to support every activity.</p>
+          <p class="text-muted">Explore our venues to support every activity.</p>
         </div>
       </div>
-      <div class="col-md-4 mb-4">
+      <div class="col-md-4 mb-3">
         <div class="catalog-card">
           <img src="{{ asset('assets/equipment-pic.jpg') }}" class="img-fluid rounded mb-2" alt="Equipment">
           <h6 class="fw-bold"><a href="about-equipment">Equipment</a></h6>
-          <p>Equip your activities with reliable resources.</p>
+          <p class="text-muted">Equip your activities with reliable resources.</p>
         </div>
       </div>
-      <div class="col-md-4 mb-4">
+      <div class="col-md-4 mb-3">
         <div class="catalog-card">
           <img
             src="https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://images.ctfassets.net/wp1lcwdav1p1/5PbtVEidv28K3XNOywzVj3/fedb6ac03469ce4de8720bc0995df898/GettyImages-1620440886.jpg?w=1500&h=680&q=60&fit=fill&f=faces&fm=jpg&fl=progressive&auto=format%2Ccompress&dpr=1&w=1000"
             class="img-fluid rounded mb-2" alt="Extra Services">
           <h6 class="fw-bold"><a href="about-services">Extra Services</a></h6>
-          <p>Make your event seamless with extra services.</p>
+          <p class="text-muted">Make your event seamless with extra services.</p>
         </div>
       </div>
     </div>
   </section>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const sections = document.querySelectorAll(".hero-section, .catalog-section");
+
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            obs.unobserve(entry.target); // trigger once per section
+          }
+        });
+      }, { threshold: 0.2 });
+
+      sections.forEach(section => observer.observe(section));
+    });
+  </script>
+
+
 @endsection

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,6 +12,8 @@ return new class extends Migration
     {
         Schema::create('requisition_forms', function (Blueprint $table) {
             $table->id('request_id');
+
+            // Contact information
             $table->enum('user_type', ['Internal', 'External'])->default('External');
             $table->string('first_name', 50);
             $table->string('last_name', 50);
@@ -21,12 +22,13 @@ return new class extends Migration
             $table->string('organization_name', 100)->nullable();
             $table->string('contact_number', 15)->nullable();
 
-
-            ///////
+            // Request details
             $table->string('access_code', 10);
             $table->integer('num_participants');
             $table->unsignedTinyInteger('purpose_id')->index();
             $table->string('additional_requests', 250)->nullable();
+            $table->unsignedInteger('num_tables')->default(0);
+            $table->unsignedInteger('num_chairs')->default(0);
 
             // User uploads
             $table->string('formal_letter_url');
@@ -58,7 +60,7 @@ return new class extends Migration
 
             // official receipt
             $table->string('official_receipt_num', 20)->nullable()->unique();
-        
+
             // fees set by admins
             $table->decimal('tentative_fee', 10, 2)->nullable();
             $table->decimal('approved_fee', 10, 2)->nullable();
