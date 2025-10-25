@@ -603,12 +603,14 @@ class RequisitionFormController extends Controller
             'contact_number' => ['nullable', 'regex:/^\d{1,15}$/', 'max:15'],
             'organization_name' => 'nullable|string|max:100',
             'num_participants' => 'required|integer|min:1',
+            'num_tables' => 'required|integer|min:0',
+            'num_chairs' => 'required|integer|min:0',
             'purpose_id' => 'required|exists:requisition_purposes,purpose_id',
             'additional_requests' => 'nullable|string|max:250',
             'endorser' => 'nullable|string|max:50',
             'date_endorsed' => 'nullable|date_format:Y-m-d',
-            'formal_letter_url' => 'required|url',
-            'formal_letter_public_id' => 'required|string|max:255',
+            'formal_letter_url' => 'nullable|url',
+            'formal_letter_public_id' => 'nullable|string|max:255',
             'facility_layout_url' => 'nullable|string|max:255',
             'facility_layout_public_id' => 'nullable|string|max:255',
         ]);
@@ -664,12 +666,7 @@ class RequisitionFormController extends Controller
             if (!$conflictData->success || !$conflictData->data->available) {
                 throw new \Exception($conflictData->message ?? 'Time slot no longer available. Please choose another.');
             }
-
-            // Get uploads - handle null case explicitly
-            if (!$request->formal_letter_url) {
-                throw new \Exception('A formal letter must be uploaded.');
-            }
-
+            
             $accessCode = Str::upper(Str::random(10));
             \Log::debug('Generated access code', ['code' => $accessCode]);
             \Log::debug('Submitting form data', [
@@ -691,11 +688,13 @@ class RequisitionFormController extends Controller
                 'access_code' => $accessCode,
                 'purpose_id' => $request->purpose_id,
                 'num_participants' => $request->num_participants,
+                'num_tables' => $request->num_tables ?? 0,
+                'num_chairs' => $request->num_chairs ?? 0,
                 'additional_requests' => $request->additional_requests,
                 'endorser' => $request->endorser, 
                 'date_endorsed' => $request->date_endorsed,
-                'formal_letter_url' => $request->formal_letter_url,
-                'formal_letter_public_id' => $request->formal_letter_public_id,
+                'formal_letter_url' => $request->formal_letter_url ?? null,
+                'formal_letter_public_id' => $request->formal_letter_public_id ?? null,
                 'facility_layout_url' => $request->facility_layout_url ?? null,
                 'facility_layout_public_id' => $request->facility_layout_public_id ?? null,
                 'upload_token' => Str::random(40),

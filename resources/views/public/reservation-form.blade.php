@@ -8,6 +8,8 @@
   <title>
     Reservation Form Submission
   </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -17,22 +19,43 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
     rel="stylesheet" />
   <style>
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 5px;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+
+    .fee-breakdown-section {
+      display: none;
+    }
+
+    label.required::after {
+      content: " *";
+      color: red;
+      margin-left: 2px;
+      font-weight: bold;
+    }
+
+    .selected-items-container .empty-message {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 200px;
+      margin: 0;
+      flex-grow: 1;
+    }
+
+
     body {
       font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
     }
-
-    /* Form Sequencing Styles */
-.form-section {
-  display: none;
-}
-
-.form-section.active {
-  display: block;
-}
-
-#dynamicFormSections {
-  margin-bottom: 20px;
-}
 
     #termsModal .modal-header {
       padding-top: 0.5rem;
@@ -611,401 +634,493 @@
     </div>
   </nav>
 
-  <script>
-    // Initialize Bootstrap dropdowns
-    document.addEventListener('DOMContentLoaded', function () {
-      const dropdownElements = document.querySelectorAll('.dropdown-toggle');
-      dropdownElements.forEach(dropdown => {
-        new bootstrap.Dropdown(dropdown);
-      });
-    });
-
-    // Fix 1: Define adjustEndTime to prevent ReferenceError
-    function adjustEndTime() {
-      // Optionally, implement logic to auto-adjust end time based on start time
-      // For now, just a stub to prevent JS error
-    }
-  </script>
-
   <div class="container main-content">
     <form id="reservationForm" method="POST">
       @csrf
-      <style>
-        .btn-transparent {
-          background-color: transparent !important;
-          border: none !important;
-          box-shadow: none !important;
-        }
 
-        .btn-transparent i {
-          display: inline-block;
-          /* Needed for transform to work */
-          color: #6c757d;
-          transition: transform 0.25s ease-in-out;
-        }
+      <!-- Complete Your Reservation Section -->
+      <div class="row">
+        <div class="col-12">
+          <style>
+            .btn-transparent {
+              background-color: transparent !important;
+              border: none !important;
+              box-shadow: none !important;
+            }
 
-        button.btn-transparent[aria-expanded="true"] i.bi-chevron-down {
-          transform: rotate(0deg);
-        }
+            .btn-transparent i {
+              display: inline-block;
+              color: #6c757d;
+              transition: transform 0.25s ease-in-out;
+            }
 
-        button.btn-transparent[aria-expanded="false"] i.bi-chevron-down {
-          transform: rotate(180deg);
-        }
-      </style>
+            button.btn-transparent[aria-expanded="true"] i.bi-chevron-down {
+              transform: rotate(0deg);
+            }
 
-<!-- Complete Your Reservation Section -->
-<div class="row">
-  <div class="col-12">
-    <div class="form-section-card">
-      <div class="d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Complete Your Reservation</h5>
-        <button id="toggleReservationBtn" type="button" class="btn btn-sm btn-secondary btn-transparent"
-          style="height: 100%; align-self: center" data-bs-toggle="collapse" data-bs-target="#reservationContent"
-          aria-expanded="true" aria-controls="reservationContent">
-          <i class="bi bi-chevron-down"></i>
-        </button>
-      </div>
-      <div id="reservationContent" class="collapse show" style="padding-top: 10px">
-        <p class="text-muted">
-          To confirm your request, please fill out the necessary details below.
-          We need this information to process your booking efficiently and provide
-          complete details on how to proceed. A confirmation email will be sent
-          to your registered email address once your submission is reviewed and approved.
-        </p>
-        <div class="d-flex justify-content-start gap-2 mb-4">
-          <a href="policies" class="btn btn-primary">Reservation Policies</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+            button.btn-transparent[aria-expanded="false"] i.bi-chevron-down {
+              transform: rotate(180deg);
+            }
 
-<!-- Main Content Row -->
-<div class="row">
-  <!-- LEFT COLUMN -->
-  <div class="col-md-8">
-    <!-- Dynamic Form Sections -->
-    <div id="dynamicFormSections">
-      <!-- Contact Information Section -->
-      <div class="form-section-card form-section active" id="contactSection">
-        <h5>Your Contact Information</h5>
-        <div class="row">
-          <div class="col-md-12">
-            <label class="form-label">Applicant Type <span style="color: red;">*</span></label>
-            <select id="applicantType" name="user_type" class="form-select mb-2" aria-label="Type of Applicant"
-              required>
-              <option value="" selected disabled>Type of Applicant</option>
-              <option value="Internal">Internal</option>
-              <option value="External">External</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">
-              First Name <span style="color: red;">*</span>
-            </label>
-            <input name="first_name" type="text" class="form-control" placeholder="First Name" required
-              maxlength="50" />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">
-              Last Name <span style="color: red;">*</span>
-            </label>
-            <input name="last_name" type="text" class="form-control" placeholder="Last Name" required
-              maxlength="50" />
-          </div>
-          <div id="studentIdField" class="col-md-6">
-            <label class="form-label">CPU School ID <span id="schoolIdRequired"
-                style="color:red;display:none">*</span></label>
-            <input name="school_id" id="school_id" type="text" class="form-control" placeholder="School ID"
-              maxlength="20" />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Contact Number</label>
-            <input name="contact_number" type="text" class="form-control" placeholder="Contact Number"
-              maxlength="15" pattern="\d{1,15}" inputmode="numeric" id="contactNumberField" autocomplete="off" />
-          </div>
-          <div class="col-md-12">
-            <label class="form-label">Email Address <span style="color: red;">*</span></label>
-            <input name="email" type="email" class="form-control mb-2" placeholder="Email Address" required
-              maxlength="100" />
-          </div>
-          <div class="col-md-12">
-            <label class="form-label">Organization Name</label>
-            <input name="organization_name" type="text" class="form-control mb-2" placeholder="Organization Name"
-              maxlength="100" />
-          </div>
-        </div>
-      </div>
+            .step-section {
+              display: none;
+            }
 
+            .step-section.active {
+              display: block;
+            }
 
-       <!-- Booking Schedule Section -->
-      <div class="form-section-card form-section" id="scheduleSection">
-        <div class="d-flex justify-content-between align-items-center">
-          <h5>Booking Schedule</h5>
-        </div>
-        <div class="d-flex justify-content-center mt-2">
-          <i class="bi bi-calendar-check" style="font-size: 3rem; color:var(--cpu-primary);"></i>
-        </div>
-        <p id="selectedDateTime" class="text-muted">
-          No date and time selected.
-        </p>
-        <div class="row">
-          <div class="col-md-6">
-            <label for="startDateField" class="form-label">Start Date</label>
-            <input name="start_date" type="date" id="startDateField" class="form-control mb-2" />
-          </div>
-          <div class="col-md-6">
-            <label for="startTimeField" class="form-label">Start Time</label>
-            <select id="startTimeField" name="start_time" class="form-select mb-2" onchange="adjustEndTime()">
-              <!-- Predefined 12-hour intervals -->
-              <option value="12:00 AM">12:00 AM</option>
-              <option value="12:30 AM">12:30 AM</option>
-              <option value="01:00 AM">01:00 AM</option>
-              <option value="01:30 AM">01:30 AM</option>
-              <option value="02:00 AM">02:00 AM</option>
-              <option value="02:30 AM">02:30 AM</option>
-              <option value="03:00 AM">03:00 AM</option>
-              <option value="03:30 AM">03:30 AM</option>
-              <option value="04:00 AM">04:00 AM</option>
-              <option value="04:30 AM">04:30 AM</option>
-              <option value="05:00 AM">05:00 AM</option>
-              <option value="05:30 AM">05:30 AM</option>
-              <option value="06:00 AM">06:00 AM</option>
-              <option value="06:30 AM">06:30 AM</option>
-              <option value="07:00 AM">07:00 AM</option>
-              <option value="07:30 AM">07:30 AM</option>
-              <option value="08:00 AM">08:00 AM</option>
-              <option value="08:30 AM">08:30 AM</option>
-              <option value="09:00 AM">09:00 AM</option>
-              <option value="09:30 AM">09:30 AM</option>
-              <option value="10:00 AM">10:00 AM</option>
-              <option value="10:30 AM">10:30 AM</option>
-              <option value="11:00 AM">11:00 AM</option>
-              <option value="11:30 AM">11:30 AM</option>
-              <option value="12:00 PM">12:00 PM</option>
-              <option value="12:30 PM">12:30 PM</option>
-              <option value="01:00 PM">01:00 PM</option>
-              <option value="01:30 PM">01:30 PM</option>
-              <option value="02:00 PM">02:00 PM</option>
-              <option value="02:30 PM">02:30 PM</option>
-              <option value="03:00 PM">03:00 PM</option>
-              <option value="03:30 PM">03:30 PM</option>
-              <option value="04:00 PM">04:00 PM</option>
-              <option value="04:30 PM">04:30 PM</option>
-              <option value="05:00 PM">05:00 PM</option>
-              <option value="05:30 PM">05:30 PM</option>
-              <option value="06:00 PM">06:00 PM</option>
-              <option value="06:30 PM">06:30 PM</option>
-              <option value="07:00 PM">07:00 PM</option>
-              <option value="07:30 PM">07:30 PM</option>
-              <option value="08:00 PM">08:00 PM</option>
-              <option value="08:30 PM">08:30 PM</option>
-              <option value="09:00 PM">09:00 PM</option>
-              <option value="09:30 PM">09:30 PM</option>
-              <option value="10:00 PM">10:00 PM</option>
-              <option value="10:30 PM">10:30 PM</option>
-              <option value="11:00 PM">11:00 PM</option>
-              <option value="11:30 PM">11:30 PM</option>
-            </select>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6">
-            <label for="endDateField" class="form-label">End Date</label>
-            <input name="end_date" type="date" id="endDateField" class="form-control mb-2" />
-          </div>
-          <div class="col-md-6">
-            <label for="endTimeField" class="form-label">End Time</label>
-            <select id="endTimeField" name="end_time" class="form-select mb-3">
-              <!-- Predefined 12-hour intervals -->
-              <option value="12:00 AM">12:00 AM</option>
-              <option value="12:30 AM">12:30 AM</option>
-              <option value="01:00 AM">01:00 AM</option>
-              <option value="01:30 AM">01:30 AM</option>
-              <option value="02:00 AM">02:00 AM</option>
-              <option value="02:30 AM">02:30 AM</option>
-              <option value="03:00 AM">03:00 AM</option>
-              <option value="03:30 AM">03:30 AM</option>
-              <option value="04:00 AM">04:00 AM</option>
-              <option value="04:30 AM">04:30 AM</option>
-              <option value="05:00 AM">05:00 AM</option>
-              <option value="05:30 AM">05:30 AM</option>
-              <option value="06:00 AM">06:00 AM</option>
-              <option value="06:30 AM">06:30 AM</option>
-              <option value="07:00 AM">07:00 AM</option>
-              <option value="07:30 AM">07:30 AM</option>
-              <option value="08:00 AM">08:00 AM</option>
-              <option value="08:30 AM">08:30 AM</option>
-              <option value="09:00 AM">09:00 AM</option>
-              <option value="09:30 AM">09:30 AM</option>
-              <option value="10:00 AM">10:00 AM</option>
-              <option value="10:30 AM">10:30 AM</option>
-              <option value="11:00 AM">11:00 AM</option>
-              <option value="11:30 AM">11:30 AM</option>
-              <option value="12:00 PM">12:00 PM</option>
-              <option value="12:30 PM">12:30 PM</option>
-              <option value="01:00 PM">01:00 PM</option>
-              <option value="01:30 PM">01:30 PM</option>
-              <option value="02:00 PM">02:00 PM</option>
-              <option value="02:30 PM">02:30 PM</option>
-              <option value="03:00 PM">03:00 PM</option>
-              <option value="03:30 PM">03:30 PM</option>
-              <option value="04:00 PM">04:00 PM</option>
-              <option value="04:30 PM">04:30 PM</option>
-              <option value="05:00 PM">05:00 PM</option>
-              <option value="05:30 PM">05:30 PM</option>
-              <option value="06:00 PM">06:00 PM</option>
-              <option value="06:30 PM">06:30 PM</option>
-              <option value="07:00 PM">07:00 PM</option>
-              <option value="07:30 PM">07:30 PM</option>
-              <option value="08:00 PM">08:00 PM</option>
-              <option value="08:30 PM">08:30 PM</option>
-              <option value="09:00 PM">09:00 PM</option>
-              <option value="09:30 PM">09:30 PM</option>
-              <option value="10:00 PM">10:00 PM</option>
-              <option value="10:30 PM">10:30 PM</option>
-              <option value="11:00 PM">11:00 PM</option>
-              <option value="11:30 PM">11:30 PM</option>
-            </select>
-          </div>
-        </div>
-        <div class="d-flex justify-content-start gap-2">
-          <button id="clearSelectionBtn" class="btn btn-outline-secondary">
-            Clear Selection
-          </button>
-          <button id="checkAvailabilityBtn" type="button" class="btn btn-primary" onclick="checkAvailability()">
-            Check Availability
-          </button>
-          <span id="availabilityResult" style="margin-left: 1px; font-weight: bold;"></span>
-        </div>
-        <p class="text-muted mt-4" style="font-size: 0.875rem;">
-          In case of emergency, please ensure to cancel reservations at least 5 days before the scheduled date to
-          avoid complications.
-        </p>
-      </div>
+            .navigation-buttons {
+              display: flex;
+              justify-content: space-between;
+              padding: 15px;
+              background-color: #fff;
+              border: 1px solid #dee2e6;
+              border-radius: 0.25rem;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+              margin-bottom: 1rem;
+            }
+          </style>
 
-       <!-- Reservation Details Section -->
-      <div class="form-section-card form-section" id="detailsSection">
-        <h5>Reservation Details</h5>
-        <div class="row">
-          <div class="col-md-6">
-            <label class="form-label">Number of Participants</label>
-            <input name="num_participants" type="number" class="form-control mb-2" value="1" min="1" required />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Activity/Purpose</label>
-            <select id="activityPurposeField" name="purpose_id" class="form-select mb-2"
-              aria-label="Activity/Purpose" required>
-              <option value="" selected disabled>Select Activity/Purpose</option>
-              <option value="8">Alumni - Class Reunion</option>
-              <option value="9">Alumni - Personal Events</option>
-              <option value="7">Alumni-Organized Events</option>
-              <option value="5">CPU Organization Led Activity</option>
-              <option value="2">Equipment Rental</option>
-              <option value="10">External Event</option>
-              <option value="1">Facility Rental</option>
-              <option value="6">Student-Organized Activity</option>
-              <option value="3">Subject Requirement - Class, Seminar, Conference</option>
-              <option value="4">University Program/Activity</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Endorser Name</label>
-            <input name="endorser" type="text" class="form-control" placeholder="Endorser Name" maxlength="50" />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Date Endorsed</label>
-            <input name="date_endorsed" type="date" class="form-control mb-2" />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Additional Requests</label>
-            <textarea name="additional_requests" class="form-control mb-2" rows="3" maxlength="250"
-              placeholder="Write a brief description of any additional requests you may have."></textarea>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label mt-1">Attach Formal Letter</label>
-            <div class="position-relative">
-              <input type="file" class="form-control mb-1" id="attachLetter" onchange="uploadToCloudinary(this)"
-                required />
-              <input type="hidden" name="formal_letter_url" id="formal_letter_url">
-              <input type="hidden" name="formal_letter_public_id" id="formal_letter_public_id">
-              <button type="button" id="removeAttachLetterBtn"
-                class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 d-none"
-                style="color: black; background: none; border: none"
-                onclick="removeFile('attachLetter', 'removeAttachLetterBtn')">
-                x
+          <div class="form-section-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Complete Your Reservation</h5>
+              <button id="toggleReservationBtn" type="button" class="btn btn-sm btn-secondary btn-transparent"
+                style="height: 100%; align-self: center" data-bs-toggle="collapse" data-bs-target="#reservationContent"
+                aria-expanded="true" aria-controls="reservationContent">
+                <i class="bi bi-chevron-down"></i>
               </button>
             </div>
-            <small class="text-muted" style="margin-top: -5px;">
-              This file is required to explain the requisition's intent and serves as a formal request to the Vice
-              President of Administration.
-            </small>
-            <div id="uploadProgress" class="progress mt-2 d-none">
-              <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+
+            <div id="reservationContent" class="collapse show" style="padding-top: 10px">
+              <p class="text-muted">
+                To confirm your request, please fill out the necessary details below.
+                We need this information to process your booking efficiently and provide
+                complete details on how to proceed. A confirmation email will be sent
+                to your registered email address once your submission is reviewed and approved.
+              </p>
+              <div class="d-flex justify-content-start gap-2">
+                <a href="policies" class="btn btn-primary">Reservation Policies</a>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-        <!-- Navigation Buttons -->
-    <div class="form-section-card">
-      <div class="d-flex justify-content-between">
-        <button id="prevBtn" class="btn btn-outline-secondary" disabled>Previous</button>
-        <button id="nextBtn" class="btn btn-primary">Next</button>
-      </div>
-    </div>
-  </div>
-  
+      <!-- Step 1: Requested Items & Booking Schedule -->
+      <div class="step-section active" id="step1">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-section-card" style="height: 400px; overflow-y: auto;">
 
-  <!-- RIGHT COLUMN -->
-  <div class="col-md-4">
-    <!-- Requested Facilities -->
-    <div class="form-section-card">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Requested Facilities</h5>
-        <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
-          style="width: 36px; height: 36px;" type="button" onclick="navigateToCatalog('facility')">
-          <i class="bi bi-plus fs-4"></i>
-        </button>
-      </div>
-      <div id="facilityList" class="selected-items-container">
-        <!-- Facility items will be dynamically added here -->
-        <div class="text-muted empty-message">No facilities added yet.</div>
-      </div>
-    </div>
-    
-    <!-- Requested Equipment -->
-    <div class="form-section-card">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Requested Equipment</h5>
-        <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
-          style="width: 36px; height: 36px;" type="button" onclick="navigateToCatalog('equipment')">
-          <i class="bi bi-plus fs-4"></i>
-        </button>
-      </div>
-      <div id="equipmentList" class="selected-items-container">
-        <!-- Equipment items will be dynamically added here -->
-        <div class="text-muted empty-message">No equipment added yet.</div>
-      </div>
-    </div>
+              <!-- Requested Facilities -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Requested Facilities</h5>
+                <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                  style="width: 26px; height: 26px;" type="button" onclick="navigateToCatalog('facility')">
+                  <i class="bi bi-plus fs-4"></i>
+                </button>
+              </div>
+              <div id="facilityList" class="selected-items-container mb-3">
+                <!-- Facility items will be dynamically added here -->
+                <div class="text-muted empty-message">No facilities added yet.</div>
+              </div>
 
-    <!-- Fee Breakdown -->
-    <div class="form-section-card">
-      <h5>Fee Breakdown</h5>
-      <div id="feeDisplay" class="fee-breakdown">
-        <!-- Fee details will be dynamically added here -->
+              <!-- Requested Equipment -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Requested Equipment</h5>
+                <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                  style="width: 26px; height: 26px;" type="button" onclick="navigateToCatalog('equipment')">
+                  <i class="bi bi-plus fs-4"></i>
+                </button>
+              </div>
+              <div id="equipmentList" class="selected-items-container">
+                <!-- Equipment items will be dynamically added here -->
+                <div class="text-muted empty-message">No equipment added yet.</div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="col-md-6">
+            <div class="form-section-card flex-grow-1" style="height: 400px; overflow-y: auto; padding-bottom: 15px;">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5>Step 1: Booking Schedule</h5>
+              </div>
+              <p id="selectedDateTime" class="text-muted">
+                Add items to form first in order to check schedule availability.
+              </p>
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="startDateField" class="form-label">Start Date</label>
+                  <input name="start_date" type="date" id="startDateField" class="form-control mb-2" />
+                </div>
+                <div class="col-md-6">
+                  <label for="startTimeField" class="form-label">Start Time</label>
+                  <select id="startTimeField" name="start_time" class="form-select mb-2" onchange="adjustEndTime()">
+                    <!-- Predefined 12-hour intervals -->
+                    <option value="12:00 AM">12:00 AM</option>
+                    <option value="12:30 AM">12:30 AM</option>
+                    <option value="01:00 AM">01:00 AM</option>
+                    <option value="01:30 AM">01:30 AM</option>
+                    <option value="02:00 AM">02:00 AM</option>
+                    <option value="02:30 AM">02:30 AM</option>
+                    <option value="03:00 AM">03:00 AM</option>
+                    <option value="03:30 AM">03:30 AM</option>
+                    <option value="04:00 AM">04:00 AM</option>
+                    <option value="04:30 AM">04:30 AM</option>
+                    <option value="05:00 AM">05:00 AM</option>
+                    <option value="05:30 AM">05:30 AM</option>
+                    <option value="06:00 AM">06:00 AM</option>
+                    <option value="06:30 AM">06:30 AM</option>
+                    <option value="07:00 AM">07:00 AM</option>
+                    <option value="07:30 AM">07:30 AM</option>
+                    <option value="08:00 AM">08:00 AM</option>
+                    <option value="08:30 AM">08:30 AM</option>
+                    <option value="09:00 AM">09:00 AM</option>
+                    <option value="09:30 AM">09:30 AM</option>
+                    <option value="10:00 AM">10:00 AM</option>
+                    <option value="10:30 AM">10:30 AM</option>
+                    <option value="11:00 AM">11:00 AM</option>
+                    <option value="11:30 AM">11:30 AM</option>
+                    <option value="12:00 PM">12:00 PM</option>
+                    <option value="12:30 PM">12:30 PM</option>
+                    <option value="01:00 PM">01:00 PM</option>
+                    <option value="01:30 PM">01:30 PM</option>
+                    <option value="02:00 PM">02:00 PM</option>
+                    <option value="02:30 PM">02:30 PM</option>
+                    <option value="03:00 PM">03:00 PM</option>
+                    <option value="03:30 PM">03:30 PM</option>
+                    <option value="04:00 PM">04:00 PM</option>
+                    <option value="04:30 PM">04:30 PM</option>
+                    <option value="05:00 PM">05:00 PM</option>
+                    <option value="05:30 PM">05:30 PM</option>
+                    <option value="06:00 PM">06:00 PM</option>
+                    <option value="06:30 PM">06:30 PM</option>
+                    <option value="07:00 PM">07:00 PM</option>
+                    <option value="07:30 PM">07:30 PM</option>
+                    <option value="08:00 PM">08:00 PM</option>
+                    <option value="08:30 PM">08:30 PM</option>
+                    <option value="09:00 PM">09:00 PM</option>
+                    <option value="09:30 PM">09:30 PM</option>
+                    <option value="10:00 PM">10:00 PM</option>
+                    <option value="10:30 PM">10:30 PM</option>
+                    <option value="11:00 PM">11:00 PM</option>
+                    <option value="11:30 PM">11:30 PM</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="endDateField" class="form-label">End Date</label>
+                  <input name="end_date" type="date" id="endDateField" class="form-control mb-2" />
+                </div>
+                <div class="col-md-6">
+                  <label for="endTimeField" class="form-label">End Time</label>
+                  <select id="endTimeField" name="end_time" class="form-select mb-3">
+                    <!-- Predefined 12-hour intervals -->
+                    <option value="12:00 AM">12:00 AM</option>
+                    <option value="12:30 AM">12:30 AM</option>
+                    <option value="01:00 AM">01:00 AM</option>
+                    <option value="01:30 AM">01:30 AM</option>
+                    <option value="02:00 AM">02:00 AM</option>
+                    <option value="02:30 AM">02:30 AM</option>
+                    <option value="03:00 AM">03:00 AM</option>
+                    <option value="03:30 AM">03:30 AM</option>
+                    <option value="04:00 AM">04:00 AM</option>
+                    <option value="04:30 AM">04:30 AM</option>
+                    <option value="05:00 AM">05:00 AM</option>
+                    <option value="05:30 AM">05:30 AM</option>
+                    <option value="06:00 AM">06:00 AM</option>
+                    <option value="06:30 AM">06:30 AM</option>
+                    <option value="07:00 AM">07:00 AM</option>
+                    <option value="07:30 AM">07:30 AM</option>
+                    <option value="08:00 AM">08:00 AM</option>
+                    <option value="08:30 AM">08:30 AM</option>
+                    <option value="09:00 AM">09:00 AM</option>
+                    <option value="09:30 AM">09:30 AM</option>
+                    <option value="10:00 AM">10:00 AM</option>
+                    <option value="10:30 AM">10:30 AM</option>
+                    <option value="11:00 AM">11:00 AM</option>
+                    <option value="11:30 AM">11:30 AM</option>
+                    <option value="12:00 PM">12:00 PM</option>
+                    <option value="12:30 PM">12:30 PM</option>
+                    <option value="01:00 PM">01:00 PM</option>
+                    <option value="01:30 PM">01:30 PM</option>
+                    <option value="02:00 PM">02:00 PM</option>
+                    <option value="02:30 PM">02:30 PM</option>
+                    <option value="03:00 PM">03:00 PM</option>
+                    <option value="03:30 PM">03:30 PM</option>
+                    <option value="04:00 PM">04:00 PM</option>
+                    <option value="04:30 PM">04:30 PM</option>
+                    <option value="05:00 PM">05:00 PM</option>
+                    <option value="05:30 PM">05:30 PM</option>
+                    <option value="06:00 PM">06:00 PM</option>
+                    <option value="06:30 PM">06:30 PM</option>
+                    <option value="07:00 PM">07:00 PM</option>
+                    <option value="07:30 PM">07:30 PM</option>
+                    <option value="08:00 PM">08:00 PM</option>
+                    <option value="08:30 PM">08:30 PM</option>
+                    <option value="09:00 PM">09:00 PM</option>
+                    <option value="09:30 PM">09:30 PM</option>
+                    <option value="10:00 PM">10:00 PM</option>
+                    <option value="10:30 PM">10:30 PM</option>
+                    <option value="11:00 PM">11:00 PM</option>
+                    <option value="11:30 PM">11:30 PM</option>
+                  </select>
+                </div>
+              </div>
+              <div class="d-flex justify-content-start gap-2">
+                <button id="clearSelectionBtn" class="btn btn-outline-secondary">
+                  Clear Selection
+                </button>
+                <button id="checkAvailabilityBtn" type="button" class="btn btn-primary" onclick="checkAvailability()">
+                  Check Availability
+                </button>
+                <span id="availabilityResult" style="margin-left: 1px; font-weight: bold;"></span>
+              </div>
+              <p class="text-muted mt-4" style="font-size: 0.875rem;">
+                In case of emergency, please ensure to cancel reservations at least 5 days before the scheduled date to
+                avoid complications.
+              </p>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons for Step 1 -->
+        <div class="navigation-buttons">
+          <button type="button" class="btn btn-secondary" disabled>Previous</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep(2)">Next</button>
+        </div>
       </div>
-    </div>
-  </div>
+
+      <!-- Step 2: Contact Information & Reservation Details -->
+      <div class="step-section" id="step2">
+        <div class="row">
+          <div class="col-md-6 d-flex flex-column">
+            <div class="form-section-card flex-grow-1" style="height: 485px;">
+              <h5>Step 2: Your Contact Information</h5>
+              <div class="row">
+                <div class="col-md-12">
+                  <label class="form-label">Applicant Type <span style="color: red;">*</span></label>
+                  <select id="applicantType" name="user_type" class="form-select mb-2" aria-label="Type of Applicant"
+                    required>
+                    <option value="" selected disabled>Type of Applicant</option>
+                    <option value="Internal">Internal</option>
+                    <option value="External">External</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">
+                    First Name <span style="color: red;">*</span>
+                  </label>
+                  <input name="first_name" type="text" class="form-control" placeholder="First Name" required
+                    maxlength="50" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">
+                    Last Name <span style="color: red;">*</span>
+                  </label>
+                  <input name="last_name" type="text" class="form-control" placeholder="Last Name" required
+                    maxlength="50" />
+                </div>
+                <div id="studentIdField" class="col-md-6">
+                  <label class="form-label">CPU Student ID <span id="schoolIdRequired"
+                      style="color:red;display:none">*</span></label>
+                  <input name="school_id" id="school_id" type="text" class="form-control" placeholder="Student ID"
+                    maxlength="20" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Contact Number</label>
+                  <input name="contact_number" type="text" class="form-control" placeholder="Contact Number"
+                    maxlength="15" pattern="\d{1,15}" inputmode="numeric" id="contactNumberField" autocomplete="off" />
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label">Email Address <span style="color: red;">*</span></label>
+                  <input name="email" type="email" class="form-control mb-2" placeholder="Email Address" required
+                    maxlength="100" />
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label">Organization Name</label>
+                  <input name="organization_name" type="text" class="form-control mb-2" placeholder="Organization Name"
+                    maxlength="100" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="form-section-card" style="height: 485px;">
+              <h5>Step 3: Reservation Details</h5>
+              <div class="row align-items-end g-2">
+                <div class="col-md-6">
+                  <label class="form-label required">Activity/Purpose</label>
+                  <select id="activityPurposeField" name="purpose_id" class="form-select mb-2"
+                    aria-label="Activity/Purpose" required>
+                    <option value="" selected disabled>Select Activity/Purpose</option>
+                    <option value="8">Alumni - Class Reunion</option>
+                    <option value="9">Alumni - Personal Events</option>
+                    <option value="7">Alumni-Organized Events</option>
+                    <option value="5">CPU Organization Led Activity</option>
+                    <option value="2">Equipment Rental</option>
+                    <option value="10">External Event</option>
+                    <option value="1">Facility Rental</option>
+                    <option value="6">Student-Organized Activity</option>
+                    <option value="3">Subject Requirement - Class, Seminar, Conference</option>
+                    <option value="4">University Program/Activity</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mt-1">Attach Formal Letter</label>
+                  <div class="position-relative">
+                    <input type="file" class="form-control mb-1" id="attachLetter" onchange="uploadToCloudinary(this)"
+                      required />
+                    <input type="hidden" name="formal_letter_url" id="formal_letter_url">
+                    <input type="hidden" name="formal_letter_public_id" id="formal_letter_public_id">
+                    <button type="button" id="removeAttachLetterBtn"
+                      class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 d-none"
+                      style="color: black; background: none; border: none"
+                      onclick="removeFile('attachLetter', 'removeAttachLetterBtn')">
+                      x
+                    </button>
+                  </div>
+                  <div id="uploadProgress" class="progress mt-2 d-none">
+                    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                  </div>
+                </div>
+
+<div class="col-4">
+    <label class="form-label required">No. of Participants</label>
+    <input name="num_participants" type="number" class="form-control mb-2" value="1" min="1" required />
+</div>
+<div class="col-4">
+    <label class="form-label required">No. of Chairs</label>
+    <input name="num_chairs" type="number" class="form-control mb-2" value="0" min="0" required />
+</div>
+<div class="col-4">
+    <label class="form-label required">No. of Tables</label>
+    <input name="num_tables" type="number" class="form-control mb-2" value="0" min="0" required />
 </div>
 
-<!-- Submit Button (after sequencing) -->
-<div class="d-flex justify-content-center my-4">
-  <button id="submitFormBtn" type="button" class="btn btn-primary me-2">
-    Submit Form
-  </button>
-</div>
+                <div class="col-md-6">
+                  <label class="form-label">Endorser Name</label>
+                  <input name="endorser" type="text" class="form-control" placeholder="Endorser Name" maxlength="50" />
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Date Endorsed</label>
+                  <input name="date_endorsed" type="date" class="form-control mb-2" style="padding-top: 0.5rem;" />
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label">Additional Requests</label>
+                  <textarea name="additional_requests" class="form-control mb-2" rows="4" maxlength="250"
+                    placeholder="Write a brief description of any additional requests you may have (e.g., WiFi, special seating arrangement, security personnel, technical support, logistics, etc.)."
+                    style="padding-top: 0.70rem;"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons for Step 2 -->
+        <div class="navigation-buttons">
+          <button type="button" class="btn btn-secondary" onclick="previousStep(1)">Previous</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep(3)">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Form Summary -->
+      <div class="step-section" id="step3">
+        <div class="row">
+          <div class="col-12">
+            <div class="form-section-card">
+              <h5 class="fw-bold text-center">Requisition Summary</h5>
+              <small class="d-block text-center text-muted" style="margin-bottom: 2rem;">
+                Please review all information carefully. Submitted requests cannot be edited.
+              </small>
+              <div class="row">
+                <!-- Contact Information Summary -->
+                <div class="col-md-6">
+                  <h6 class="border-bottom pb-2">Contact Information</h6>
+                  <div class="summary-item">
+                    <strong>Applicant Type:</strong>
+                    <span id="summary-applicant-type"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Name:</strong>
+                    <span id="summary-name"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Email:</strong>
+                    <span id="summary-email"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Contact Number:</strong>
+                    <span id="summary-contact"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Organization:</strong>
+                    <span id="summary-organization"></span>
+                  </div>
+                  <div class="summary-item" id="summary-school-id-container">
+                    <strong>Student ID:</strong>
+                    <span id="summary-school-id"></span>
+                  </div>
+                </div>
+
+                <!-- Reservation Details Summary -->
+                <div class="col-md-6">
+                  <h6 class="border-bottom pb-2">Reservation Details</h6>
+                  <div class="summary-item">
+                    <strong>Activity/Purpose:</strong>
+                    <span id="summary-purpose"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Schedule:</strong>
+                    <span id="summary-schedule"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Participants:</strong>
+                    <span id="summary-participants"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Chairs/Tables:</strong>
+                    <span id="summary-furniture"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Endorser:</strong>
+                    <span id="summary-endorser"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Additional Requests:</strong>
+                    <span id="summary-requests"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selected Items and Fee Breakdown in the same row -->
+              <div class="row">
+                <!-- Fee Breakdown Summary (Right Column) -->
+                <div class="col-12">
+                  <h6 class="border-bottom pb-2">Fee Breakdown</h6>
+                  <div id="summary-fees">
+                    <!-- Fees will be dynamically populated -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons for Step 3 -->
+        <div class="navigation-buttons">
+          <button type="button" class="btn btn-secondary" onclick="previousStep(2)">Previous</button>
+          <button type="button" class="btn btn-primary" onclick="openTermsModal(event)">Submit Form</button>
+        </div>
+      </div>
+    </form>
   </div>
 
   <!-- Success Modal -->
@@ -1151,71 +1266,372 @@
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // School ID required logic
+    // ========== GLOBAL VARIABLES ==========
+    let currentStep = 1;
+    const facilityList = document.getElementById('facilityList');
+    const equipmentList = document.getElementById('equipmentList');
+    const feeDisplay = document.getElementById('feeDisplay');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    // ========== STEP NAVIGATION FUNCTIONS ==========
+    function showStep(stepNumber) {
+      document.querySelectorAll('.step-section').forEach(section => {
+        section.classList.remove('active');
+      });
+
+      const stepElement = document.getElementById('step' + stepNumber);
+      if (stepElement) {
+        stepElement.classList.add('active');
+      }
+
+      currentStep = stepNumber;
+    }
+
+    function nextStep(nextStepNumber) {
+      if (nextStepNumber === 2 && !validateStep1()) {
+        return;
+      }
+
+      if (nextStepNumber === 3 && !validateStep2()) {
+        return;
+      }
+
+      if (nextStepNumber === 3) {
+        populateFormSummary();
+      }
+      showStep(nextStepNumber);
+    }
+
+    function previousStep(prevStepNumber) {
+      const reservationForm = document.getElementById('reservationForm');
+      reservationForm.querySelectorAll('.is-invalid').forEach(input => clearFieldError(input));
+      showStep(prevStepNumber);
+    }
+
+    // ========== VALIDATION FUNCTIONS ==========
+    function validateStep1() {
+      const startDate = document.getElementById('startDateField').value;
+      const endDate = document.getElementById('endDateField').value;
+      const startTime = document.getElementById('startTimeField').value;
+      const endTime = document.getElementById('endTimeField').value;
+
+      const errors = [];
+
+      if (!startDate) errors.push('Start Date is required');
+      if (!endDate) errors.push('End Date is required');
+      if (!startTime) errors.push('Start Time is required');
+      if (!endTime) errors.push('End Time is required');
+
+      if (errors.length > 0) {
+        showToast('Please complete the booking schedule:\n• ' + errors.join('\n• '), 'error');
+        return false;
+      }
+
+      if (endDate < startDate) {
+        showToast('End date cannot be before start date.', 'error');
+        return false;
+      }
+
+      if (startDate === endDate) {
+        const startDateTime = new Date(`${startDate}T${convertTo24Hour(startTime)}:00`);
+        const endDateTime = new Date(`${endDate}T${convertTo24Hour(endTime)}:00`);
+
+        if (endDateTime <= startDateTime) {
+          showToast('End time must be after start time when using the same date.', 'error');
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+   function validateStep2() {
+    const reservationForm = document.getElementById('reservationForm');
+    let valid = true;
+    let firstInvalid = null;
+    
+    // Add num_chairs and num_tables to required fields
+    const requiredFields = [
+        'user_type', 'first_name', 'last_name', 'email', 'num_participants', 'purpose_id', 'num_chairs', 'num_tables' 
+    ];
+
+    // Clear existing errors
+    reservationForm.querySelectorAll('.is-invalid').forEach(input => clearFieldError(input));
+
+    // Validate required fields
+    requiredFields.forEach(name => {
+        const input = reservationForm.querySelector(`[name="${name}"]`);
+        if (input) {
+            // Special handling for numeric fields that should be >= 0
+            if (name === 'num_chairs' || name === 'num_tables') {
+                if (input.value === '' || input.value === null || parseInt(input.value) < 0) {
+                    showFieldError(input, 'Please enter a valid number (0 or greater).');
+                    valid = false;
+                    if (!firstInvalid) firstInvalid = input;
+                }
+            }
+            else if (!input.value || 
+                (name === 'user_type' && input.value === '') || 
+                (name === 'purpose_id' && (input.value === '' || input.value === null))) {
+                showFieldError(input, 'Please fill in this field.');
+                valid = false;
+                if (!firstInvalid) firstInvalid = input;
+            }
+        }
+    });
+
+    // School ID validation for Internal applicants
     const applicantType = document.getElementById('applicantType');
     const schoolIdInput = document.getElementById('school_id');
-    const schoolIdRequired = document.getElementById('schoolIdRequired');
+    if (applicantType.value === 'Internal') {
+        clearFieldError(schoolIdInput);
+        if (!schoolIdInput.value) {
+            showFieldError(schoolIdInput, 'Please fill in this field.');
+            valid = false;
+            if (!firstInvalid) firstInvalid = schoolIdInput;
+        }
+    } else {
+        clearFieldError(schoolIdInput);
+    }
 
-    applicantType.addEventListener('change', function () {
-      if (this.value === 'Internal') {
-        schoolIdInput.required = true;
-        schoolIdInput.disabled = false;
-        schoolIdRequired.style.display = '';
-        schoolIdInput.placeholder = 'School ID';
-      } else {
-        schoolIdInput.required = false;
-        schoolIdInput.disabled = true;
-        schoolIdRequired.style.display = 'none';
-        schoolIdInput.value = '';
-        schoolIdInput.placeholder = 'School ID';
-      }
-    });
-    // Add this function to handle catalog navigation without triggering validation
-    function navigateToCatalog(type) {
-      // Store current form data in sessionStorage to preserve it
-      const formData = new FormData(document.getElementById('reservationForm'));
-      const formObject = Object.fromEntries(formData.entries());
-      sessionStorage.setItem('reservationFormData', JSON.stringify(formObject));
+    // Email format validation
+    const emailInput = reservationForm.querySelector('[name="email"]');
+    if (emailInput && emailInput.value) {
+        clearFieldError(emailInput);
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(emailInput.value)) {
+            showFieldError(emailInput, 'Please enter a valid email address.');
+            valid = false;
+            if (!firstInvalid) firstInvalid = emailInput;
+        }
+    }
 
-      // Navigate to the appropriate catalog
-      if (type === 'facility') {
-        window.location.href = '{{ asset("facility-catalog") }}';
-      } else {
-        window.location.href = '{{ asset("equipment-catalog") }}';
+    // Contact number validation
+    const contactNumberField = document.getElementById('contactNumberField');
+    if (contactNumberField && contactNumberField.value) {
+        clearFieldError(contactNumberField);
+        if (!/^\d{1,15}$/.test(contactNumberField.value)) {
+            showFieldError(contactNumberField, 'Contact number must be numbers only (max 15 digits).');
+            valid = false;
+            if (!firstInvalid) firstInvalid = contactNumberField;
+        }
+    } else {
+        clearFieldError(contactNumberField);
+    }
+
+    // Additional validation for numeric fields to ensure they're not negative
+    const numChairsInput = document.querySelector('input[name="num_chairs"]');
+    const numTablesInput = document.querySelector('input[name="num_tables"]');
+    
+    if (numChairsInput && numChairsInput.value !== '' && parseInt(numChairsInput.value) < 0) {
+        showFieldError(numChairsInput, 'Number of chairs cannot be negative.');
+        valid = false;
+        if (!firstInvalid) firstInvalid = numChairsInput;
+    }
+    
+    if (numTablesInput && numTablesInput.value !== '' && parseInt(numTablesInput.value) < 0) {
+        showFieldError(numTablesInput, 'Number of tables cannot be negative.');
+        valid = false;
+        if (!firstInvalid) firstInvalid = numTablesInput;
+    }
+
+    // Scroll to first invalid field
+    if (firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstInvalid.focus();
+    }
+
+    return valid;
+}
+
+    // ========== HELPER FUNCTIONS ==========
+    function showFieldError(input, message) {
+      input.classList.add('is-invalid');
+      input.setAttribute('title', message);
+      input.setAttribute('data-bs-toggle', 'tooltip');
+      input.setAttribute('data-bs-placement', 'top');
+
+      if (window.bootstrap) {
+        new bootstrap.Tooltip(input);
+        input.addEventListener('focus', function () {
+          bootstrap.Tooltip.getInstance(input)?.show();
+        });
       }
     }
 
-    // Clear selection button functionality
-    document.getElementById('clearSelectionBtn').addEventListener('click', function (e) {
-      e.preventDefault();
+    function clearFieldError(input) {
+      input.classList.remove('is-invalid');
+      input.removeAttribute('title');
+      input.removeAttribute('data-bs-toggle');
+      input.removeAttribute('data-bs-placement');
 
-      // Clear date fields
-      document.getElementById('startDateField').value = '';
-      document.getElementById('endDateField').value = '';
+      if (window.bootstrap) {
+        const tooltip = bootstrap.Tooltip.getInstance(input);
+        if (tooltip) tooltip.dispose();
+      }
+    }
 
-      // Clear time fields (reset to first option or empty)
-      document.getElementById('startTimeField').selectedIndex = 0;
-      document.getElementById('endTimeField').selectedIndex = 0;
+    window.convertTo24Hour = function (time12h) {
+      if (!time12h) return '';
 
-      // Clear availability result
-      document.getElementById('availabilityResult').textContent = '';
-      document.getElementById('availabilityResult').style.color = '';
+      if (time12h.includes(':')) {
+        const [timePart, modifier] = time12h.split(' ');
+        if (!modifier) return timePart;
 
-      // Update the selected date time display
-      document.getElementById('selectedDateTime').textContent = 'No date and time selected.';
+        let [hours, minutes] = timePart.split(':');
+        hours = parseInt(hours, 10);
 
-      // Recalculate fees (since schedule affects pricing)
-      if (typeof calculateAndDisplayFees === 'function') {
-        calculateAndDisplayFees();
+        if (modifier === 'PM' && hours !== 12) {
+          hours += 12;
+        } else if (modifier === 'AM' && hours === 12) {
+          hours = 0;
+        }
+
+        return `${hours.toString().padStart(2, '0')}:${minutes}`;
       }
 
-      // Show confirmation toast
-      showToast('Booking schedule cleared successfully', 'success');
-    });
+      return time12h;
+    };
 
-    // Add this code to restore form data when returning to the page
+    // ========== FORM SUMMARY FUNCTIONS ==========
+    function populateFormSummary() {
+      // Contact Information
+      const applicantType = document.getElementById('applicantType');
+      const firstName = document.querySelector('input[name="first_name"]');
+      const lastName = document.querySelector('input[name="last_name"]');
+      const email = document.querySelector('input[name="email"]');
+      const contactNumber = document.querySelector('input[name="contact_number"]');
+      const organizationName = document.querySelector('input[name="organization_name"]');
+      const schoolId = document.getElementById('school_id');
+
+      document.getElementById('summary-applicant-type').textContent = applicantType.value || 'Not specified';
+      document.getElementById('summary-name').textContent = `${firstName.value || ''} ${lastName.value || ''}`.trim() || 'Not specified';
+      document.getElementById('summary-email').textContent = email.value || 'Not specified';
+      document.getElementById('summary-contact').textContent = contactNumber.value || 'Not specified';
+      document.getElementById('summary-organization').textContent = organizationName.value || 'Not specified';
+
+      const schoolIdContainer = document.getElementById('summary-school-id-container');
+      if (applicantType.value === 'Internal' && schoolId.value) {
+        document.getElementById('summary-school-id').textContent = schoolId.value;
+        schoolIdContainer.style.display = 'flex';
+      } else {
+        schoolIdContainer.style.display = 'none';
+      }
+
+      // Reservation Details
+      const purposeSelect = document.getElementById('activityPurposeField');
+      const purposeText = purposeSelect.options[purposeSelect.selectedIndex]?.text || 'Not specified';
+      const startDate = document.getElementById('startDateField').value;
+      const endDate = document.getElementById('endDateField').value;
+      const startTime = document.getElementById('startTimeField').value;
+      const endTime = document.getElementById('endTimeField').value;
+      const numParticipants = document.querySelector('input[name="num_participants"]');
+      const numChairs = document.querySelector('input[name="num_chairs"]');
+      const numTables = document.querySelector('input[name="num_tables"]');
+      const endorser = document.querySelector('input[name="endorser"]');
+      const additionalRequests = document.querySelector('textarea[name="additional_requests"]');
+
+      document.getElementById('summary-purpose').textContent = purposeText;
+
+      if (startDate && endDate && startTime && endTime) {
+        const scheduleText = `${startDate} ${startTime} to ${endDate} ${endTime}`;
+        document.getElementById('summary-schedule').textContent = scheduleText;
+      } else {
+        document.getElementById('summary-schedule').textContent = 'Not specified';
+      }
+
+      document.getElementById('summary-participants').textContent = numParticipants.value || '0';
+      document.getElementById('summary-furniture').textContent = `${numChairs.value || '0'} chairs, ${numTables.value || '0'} tables`;
+      document.getElementById('summary-endorser').textContent = endorser.value || 'Not specified';
+      document.getElementById('summary-requests').textContent = additionalRequests.value || 'None';
+
+      // Generate fee breakdown
+      generateFeeBreakdownForSummary();
+    }
+
+    // ========== TOAST FUNCTION ==========
+    window.showToast = function (message, type = 'success', duration = 3000) {
+      const toast = document.createElement('div');
+      toast.className = `toast align-items-center border-0 position-fixed start-0 mb-2`;
+      toast.style.zIndex = '1100';
+      toast.style.bottom = '0';
+      toast.style.left = '0';
+      toast.style.margin = '1rem';
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(20px)';
+      toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+
+      const bgColor = type === 'success' ? '#004183ff' : '#dc3545';
+      toast.style.backgroundColor = bgColor;
+      toast.style.color = '#fff';
+      toast.style.minWidth = '250px';
+      toast.style.borderRadius = '0.3rem';
+
+      toast.innerHTML = `
+            <div class="d-flex align-items-center px-3 py-1"> 
+                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="loading-bar" style="
+                height: 3px;
+                background: rgba(255,255,255,0.7);
+                width: 100%;
+                transition: width ${duration}ms linear;
+            "></div>
+        `;
+
+      document.body.appendChild(toast);
+
+      const bsToast = new bootstrap.Toast(toast, { autohide: false });
+      bsToast.show();
+
+      requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+      });
+
+      const loadingBar = toast.querySelector('.loading-bar');
+      requestAnimationFrame(() => {
+        loadingBar.style.width = '0%';
+      });
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          bsToast.hide();
+          toast.remove();
+        }, 400);
+      }, duration);
+    };
+
+    // ========== INITIALIZATION ==========
     document.addEventListener('DOMContentLoaded', function () {
-      // Set initial state based on current selection
+      // Initialize step system
+      showStep(1);
+
+      // Set up applicant type change handler
+      const applicantType = document.getElementById('applicantType');
+      const schoolIdInput = document.getElementById('school_id');
+      const schoolIdRequired = document.getElementById('schoolIdRequired');
+
+      applicantType.addEventListener('change', function () {
+        if (this.value === 'Internal') {
+          schoolIdInput.required = true;
+          schoolIdInput.disabled = false;
+          schoolIdRequired.style.display = '';
+          schoolIdInput.placeholder = 'Student ID';
+        } else {
+          schoolIdInput.required = false;
+          schoolIdInput.disabled = true;
+          schoolIdRequired.style.display = 'none';
+          schoolIdInput.value = '';
+          schoolIdInput.placeholder = 'Student ID';
+        }
+      });
+
+      // Initialize applicant type state
       if (applicantType.value === 'Internal') {
         schoolIdInput.required = true;
         schoolIdInput.disabled = false;
@@ -1225,158 +1641,53 @@
         schoolIdInput.disabled = true;
         schoolIdRequired.style.display = 'none';
         schoolIdInput.value = '';
-        schoolIdInput.placeholder = 'School ID';
       }
-      const savedFormData = sessionStorage.getItem('reservationFormData');
-      if (savedFormData) {
-        const formData = JSON.parse(savedFormData);
-        for (const [key, value] of Object.entries(formData)) {
-          const field = document.querySelector(`[name="${key}"]`);
-          if (field) {
-            field.value = value;
-          }
+
+      // Set up clear selection button
+      document.getElementById('clearSelectionBtn').addEventListener('click', function (e) {
+        e.preventDefault();
+        document.getElementById('startDateField').value = '';
+        document.getElementById('endDateField').value = '';
+        document.getElementById('startTimeField').selectedIndex = 0;
+        document.getElementById('endTimeField').selectedIndex = 0;
+        document.getElementById('availabilityResult').textContent = '';
+        document.getElementById('availabilityResult').style.color = '';
+
+        if (typeof calculateAndDisplayFees === 'function') {
+          calculateAndDisplayFees();
         }
-        sessionStorage.removeItem('reservationFormData');
-      }
+
+        showToast('Booking schedule cleared successfully', 'success');
+      });
+
+      // Prevent non-numeric input in contact number field
+      const contactNumberField = document.getElementById('contactNumberField');
+      contactNumberField.addEventListener('input', function (e) {
+        this.value = this.value.replace(/\D/g, '');
+      });
+
+      // Initialize dropdowns
+      const dropdownElements = document.querySelectorAll('.dropdown-toggle');
+      dropdownElements.forEach(dropdown => {
+        new bootstrap.Dropdown(dropdown);
+      });
+
+      console.log('Form validation initialized successfully');
     });
+    // ========== CATALOG NAVIGATION ==========
+    function navigateToCatalog(type) {
+      const formData = new FormData(document.getElementById('reservationForm'));
+      const formObject = Object.fromEntries(formData.entries());
+      sessionStorage.setItem('reservationFormData', JSON.stringify(formObject));
 
-    // Cloudinary direct upload implementation
-    async function uploadToCloudinary(input) {
-      const file = input.files[0];
-      if (!file) return;
-
-      const progressBar = document.getElementById('progressBar');
-      const uploadProgress = document.getElementById('uploadProgress');
-      uploadProgress.classList.remove('d-none');
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', 'formal-letters'); // Your unsigned upload preset
-      formData.append('folder', 'user-uploads/user-letters'); // Optional folder organization
-
-      // ADD THIS LINE FOR PDF FILES - explicitly set resource type
-      if (file.type === 'application/pdf') {
-        formData.append('resource_type', 'raw');
+      if (type === 'facility') {
+        window.location.href = '{{ asset("facility-catalog") }}';
       } else {
-        formData.append('resource_type', 'auto');
-      }
-
-      try {
-        const response = await fetch(`https://api.cloudinary.com/v1_1/dn98ntlkd/auto/upload`, {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!response.ok) {
-          throw new Error('Upload failed with status: ' + response.status);
-        }
-
-        const data = await response.json();
-        console.log('Upload successful:', data);
-
-        // Store the Cloudinary response in hidden fields
-        document.getElementById('formal_letter_url').value = data.secure_url;
-        document.getElementById('formal_letter_public_id').value = data.public_id;
-
-        // Show success message
-        showToast('File uploaded successfully!', 'success');
-
-        // Show remove button
-        document.getElementById('removeAttachLetterBtn').classList.remove('d-none');
-
-      } catch (error) {
-        console.error('Upload error:', error);
-        showToast('File upload failed: ' + error.message, 'error');
-        input.value = ''; // Clear the file input
-      } finally {
-        uploadProgress.classList.add('d-none');
-        progressBar.style.width = '0%';
+        window.location.href = '{{ asset("equipment-catalog") }}';
       }
     }
 
-    function removeFile(inputId, buttonId) {
-      const input = document.getElementById(inputId);
-      const button = document.getElementById(buttonId);
-
-      input.value = '';
-      document.getElementById('formal_letter_url').value = '';
-      document.getElementById('formal_letter_public_id').value = '';
-      button.classList.add('d-none');
-
-      showToast('File removed', 'info');
-    }
-
-    // Global helper function for toast notifications
-    window.showToast = function (message, type = 'success', duration = 3000) {
-      const toast = document.createElement('div');
-
-      // Toast base styles
-      toast.className = `toast align-items-center border-0 position-fixed start-0 mb-2`;
-      toast.style.zIndex = '1100';
-      toast.style.bottom = '0';
-      toast.style.left = '0';
-      toast.style.margin = '1rem';
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(20px)';
-      toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-      toast.setAttribute('role', 'alert');
-      toast.setAttribute('aria-live', 'assertive');
-      toast.setAttribute('aria-atomic', 'true');
-
-      // Colors
-      const bgColor = type === 'success' ? '#004183ff' : '#dc3545';
-      toast.style.backgroundColor = bgColor;
-      toast.style.color = '#fff';
-      toast.style.minWidth = '250px';
-      toast.style.borderRadius = '0.3rem';
-
-      toast.innerHTML = `
-      <div class="d-flex align-items-center px-3 py-1"> 
-          <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-          <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-          <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="loading-bar" style="
-          height: 3px;
-          background: rgba(255,255,255,0.7);
-          width: 100%;
-          transition: width ${duration}ms linear;
-      "></div>
-  `;
-
-      document.body.appendChild(toast);
-
-      // Bootstrap toast instance
-      const bsToast = new bootstrap.Toast(toast, { autohide: false });
-      bsToast.show();
-
-      // Float up appear animation
-      requestAnimationFrame(() => {
-        toast.style.opacity = '1';
-        toast.style.transform = 'translateY(0)';
-      });
-
-      // Start loading bar animation
-      const loadingBar = toast.querySelector('.loading-bar');
-      requestAnimationFrame(() => {
-        loadingBar.style.width = '0%';
-      });
-
-      // Remove after duration
-      setTimeout(() => {
-        // Float down disappear animation
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
-
-        setTimeout(() => {
-          bsToast.hide();
-          toast.remove();
-        }, 400);
-      }, duration);
-    }
-
-
-
+    // ========== AVAILABILITY CHECK ==========
     window.checkAvailability = async function () {
       const checkBtn = document.getElementById('checkAvailabilityBtn');
       const originalText = checkBtn.innerHTML;
@@ -1393,7 +1704,6 @@
           return;
         }
 
-        // Check if end_date is before start_date
         if (endDate < startDate) {
           showToast('End date cannot be before start date.', 'error');
           return;
@@ -1423,7 +1733,7 @@
           return;
         }
 
-        // Prepare request data - modified to match controller expectations
+        // Prepare request data
         const requestData = {
           start_date: startDate,
           end_date: endDate,
@@ -1433,7 +1743,6 @@
             const itemData = {
               type: item.type
             };
-            // Add the correct ID field based on type
             if (item.type === 'facility') {
               itemData.facility_id = item.facility_id;
             } else {
@@ -1453,7 +1762,6 @@
           body: JSON.stringify(requestData)
         });
 
-        // Handle non-200 responses
         if (!checkResponse.ok) {
           let errorData;
           try {
@@ -1461,7 +1769,6 @@
           } catch {
             errorData = {};
           }
-          // Show all validation errors if present
           if (errorData.errors) {
             Object.values(errorData.errors).flat().forEach(msg => showToast(msg, 'error'));
           } else if (errorData.message) {
@@ -1482,19 +1789,19 @@
         const availabilityResult = document.getElementById('availabilityResult');
         if (result.data.available) {
           availabilityResult.innerHTML = `
-<span class="text-success">
-  <i class="bi bi-check-circle-fill" style="margin-right:5px;"></i>
-  Available
-</span>
-`;
+                    <span class="text-success">
+                        <i class="bi bi-check-circle-fill" style="margin-right:5px;"></i>
+                        Available
+                    </span>
+                `;
           showToast('Time slot is available!', 'success');
         } else {
           availabilityResult.innerHTML = `
-<span class="text-danger">
-  <i class="bi bi-x-circle-fill" style="margin-right:5px;"></i>
-  Conflict found!
-</span>
-`;
+                    <span class="text-danger">
+                        <i class="bi bi-x-circle-fill" style="margin-right:5px;"></i>
+                        Conflict found!
+                    </span>
+                `;
 
           const conflictItems = result.data.conflict_items.map(item =>
             `${item.type}: ${item.name}`
@@ -1507,58 +1814,436 @@
         console.error('Error checking availability:', error);
         showToast(error.message || 'Failed to check availability', 'error');
       } finally {
-        // Always reset button state, whether successful or error
         checkBtn.innerHTML = originalText;
         checkBtn.disabled = false;
       }
     };
 
-    function validateBookingSchedule() {
-      const startDate = document.getElementById('startDateField').value;
-      const endDate = document.getElementById('endDateField').value;
-      const startTime = document.getElementById('startTimeField').value;
-      const endTime = document.getElementById('endTimeField').value;
+    // ========== FEE BREAKDOWN FOR SUMMARY ==========
+    async function generateFeeBreakdownForSummary() {
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const response = await fetch('/requisition/get-items', {
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
 
-      const errors = [];
+        if (!response.ok) throw new Error('Failed to fetch items');
+        const data = await response.json();
+        const items = data.data?.selected_items || [];
+        const summaryFees = document.getElementById('summary-fees');
 
-      // Check if any field is empty
-      if (!startDate) errors.push('Start Date is required');
-      if (!endDate) errors.push('End Date is required');
-      if (!startTime) errors.push('Start Time is required');
-      if (!endTime) errors.push('End Time is required');
+        if (!summaryFees) return;
 
-      // If any field is empty, show detailed error
-      if (errors.length > 0) {
-        return {
-          valid: false,
-          message: 'Please complete the booking schedule:\n• ' + errors.join('\n• ')
-        };
-      }
+        if (items.length === 0) {
+          summaryFees.innerHTML = '<div class="text-muted">No items added yet.</div>';
+          return;
+        }
 
-      // Check if end date is before start date
-      if (endDate < startDate) {
-        return {
-          valid: false,
-          message: 'End date cannot be before start date.'
-        };
-      }
+        // Get schedule information
+        const startDate = document.getElementById('startDateField').value;
+        const endDate = document.getElementById('endDateField').value;
+        const startTime = document.getElementById('startTimeField').value;
+        const endTime = document.getElementById('endTimeField').value;
 
-      // Check if dates are the same but end time is before start time
-      if (startDate === endDate) {
-        const startDateTime = new Date(`${startDate}T${convertTo24Hour(startTime)}:00`);
-        const endDateTime = new Date(`${endDate}T${convertTo24Hour(endTime)}:00`);
+        // Calculate duration in hours
+        let durationHours = 0;
+        if (startDate && endDate && startTime && endTime) {
+          const startDateTime = new Date(`${startDate}T${convertTo24Hour(startTime)}:00`);
+          const endDateTime = new Date(`${endDate}T${convertTo24Hour(endTime)}:00`);
+          durationHours = (endDateTime - startDateTime) / (1000 * 60 * 60);
+          durationHours = Math.max(0, durationHours);
+        }
 
-        if (endDateTime <= startDateTime) {
-          return {
-            valid: false,
-            message: 'End time must be after start time when using the same date.'
-          };
+        let facilityTotal = 0;
+        let equipmentTotal = 0;
+        let htmlContent = '<div class="fee-items">';
+
+        // Facilities breakdown
+        const facilityItems = items.filter(i => i.type === 'facility');
+        if (facilityItems.length > 0) {
+          htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
+          facilityItems.forEach(item => {
+            let fee = parseFloat(item.external_fee);
+            if (item.rate_type === 'Per Hour' && durationHours > 0) {
+              fee = fee * durationHours;
+              htmlContent += `
+                            <div class="fee-item d-flex justify-content-between mb-2">
+                                <span>${item.name} (${durationHours.toFixed(1)} hrs)</span>
+                                <div class="text-end">
+                                    <small>₱${parseFloat(item.external_fee).toLocaleString()}/hr</small>
+                                    <div><strong>₱${fee.toLocaleString()}</strong></div>
+                                </div>
+                            </div>
+                        `;
+            } else {
+              htmlContent += `
+                            <div class="fee-item d-flex justify-content-between mb-2">
+                                <span>${item.name}</span>
+                                <span>₱${fee.toLocaleString()}</span>
+                            </div>
+                        `;
+            }
+            facilityTotal += fee;
+          });
+          htmlContent += `
+                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                        <strong>Subtotal</strong>
+                        <strong>₱${facilityTotal.toLocaleString()}</strong>
+                    </div>
+                </div>`;
+        }
+
+        // Equipment breakdown
+        const equipmentItems = items.filter(i => i.type === 'equipment');
+        if (equipmentItems.length > 0) {
+          htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
+          equipmentItems.forEach(item => {
+            let unitFee = parseFloat(item.external_fee);
+            const quantity = item.quantity || 1;
+            let itemTotal = unitFee * quantity;
+            if (item.rate_type === 'Per Hour' && durationHours > 0) {
+              itemTotal = itemTotal * durationHours;
+              htmlContent += `
+                            <div class="fee-item d-flex justify-content-between mb-2">
+                                <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''} (${durationHours.toFixed(1)} hrs)</span>
+                                <div class="text-end">
+                                    <small>₱${unitFee.toLocaleString()}/hr × ${quantity}</small>
+                                    <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                                </div>
+                            </div>
+                        `;
+            } else {
+              htmlContent += `
+                            <div class="fee-item d-flex justify-content-between mb-2">
+                                <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
+                                <div class="text-end">
+                                    <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
+                                    <strong>₱${itemTotal.toLocaleString()}</strong>
+                                </div>
+                            </div>
+                        `;
+            }
+            equipmentTotal += itemTotal;
+          });
+          htmlContent += `
+                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                        <strong>Subtotal</strong>
+                        <strong>₱${equipmentTotal.toLocaleString()}</strong>
+                    </div>
+                </div>`;
+        }
+
+        // Total
+        const total = facilityTotal + equipmentTotal;
+        if (total > 0) {
+          htmlContent += `
+                    <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
+                        <h6 class="mb-0">Total Amount</h6>
+                        <h6 class="mb-0">₱${total.toLocaleString()}</h6>
+                    </div>
+                `;
+        } else {
+          htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
+        }
+
+        htmlContent += '</div>';
+        summaryFees.innerHTML = htmlContent;
+
+      } catch (error) {
+        console.error('Error generating fee breakdown for summary:', error);
+        const summaryFees = document.getElementById('summary-fees');
+        if (summaryFees) {
+          summaryFees.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
         }
       }
-
-      return { valid: true };
     }
 
+    // ========== ITEM MANAGEMENT FUNCTIONS ==========
+    function pluralizeType(type) {
+      if (type.toLowerCase() === 'facility') return 'facilities';
+      if (type.toLowerCase() === 'equipment') return 'equipment';
+      return type + 's';
+    }
+
+    function renderItemsList(container, items, type) {
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (items.length === 0) {
+        container.innerHTML = `
+                <div class="empty-message text-center py-4">
+                    <p class="text-muted mb-0">No ${pluralizeType(type)} added yet.</p>
+                </div>
+            `;
+        return;
+      }
+
+      const cardContainer = document.createElement('div');
+      cardContainer.className = 'row row-cols-1 g-3';
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'col';
+        const displayImage = item.images?.find(img => img.image_type === "Primary") || item.images?.[0];
+
+        card.innerHTML = `
+                <div class="card h-100 border-0 shadow-sm mb-2">
+                    <div class="card-body p-2 d-flex align-items-center">
+                        ${displayImage ? `
+                            <img src="${displayImage.image_url}" 
+                                alt="${item.name}" 
+                                style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 12px;">
+                        ` : `
+                            <div style="width: 80px; height: 80px; background: #e9ecef; border-radius: 8px; margin-right: 12px;"></div>
+                        `}
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h6 class="mb-1 fw-semibold">${item.name}</h6>
+                                <button type="button" class="btn btn-sm btn-danger ms-2" 
+                                    onclick="removeSelectedItem(${type === 'facility' ? item.facility_id : item.equipment_id}, '${type}')">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <div>
+                                    <span class="badge bg-primary me-2">${item.rate_type || 'booking'}</span>
+                                    ${type === 'equipment' ? `<span class="badge bg-secondary">Qty: ${item.quantity || 1}</span>` : ''}
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-success">
+                                        ₱${parseFloat(item.external_fee * (type === 'equipment' ? (item.quantity || 1) : 1)).toLocaleString()}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        cardContainer.appendChild(card);
+      });
+
+      container.appendChild(cardContainer);
+    }
+
+    window.renderSelectedItems = async function () {
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const response = await fetch('/requisition/get-items', {
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch items');
+        const data = await response.json();
+        const items = data.data?.selected_items || [];
+
+        renderItemsList(facilityList, items.filter(i => i.type === 'facility'), 'facility');
+        renderItemsList(equipmentList, items.filter(i => i.type === 'equipment'), 'equipment');
+
+      } catch (error) {
+        console.error('Error rendering selected items:', error);
+        showToast('Failed to load selected items', 'error');
+      }
+    };
+
+    window.calculateAndDisplayFees = async function () {
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const response = await fetch('/requisition/get-items', {
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch items');
+        const data = await response.json();
+        const items = data.data?.selected_items || [];
+        const feeDisplay = document.getElementById('feeDisplay');
+
+        if (!feeDisplay) return;
+
+        if (items.length === 0) {
+          feeDisplay.innerHTML = '<div class="text-muted">No items added yet.</div>';
+          return;
+        }
+
+        // Get schedule information
+        const startDate = document.getElementById('startDateField').value;
+        const endDate = document.getElementById('endDateField').value;
+        const startTime = document.getElementById('startTimeField').value;
+        const endTime = document.getElementById('endTimeField').value;
+
+        let durationHours = 0;
+        if (startDate && endDate && startTime && endTime) {
+          const startDateTime = new Date(`${startDate}T${convertTo24Hour(startTime)}:00`);
+          const endDateTime = new Date(`${endDate}T${convertTo24Hour(endTime)}:00`);
+          durationHours = (endDateTime - startDateTime) / (1000 * 60 * 60);
+          durationHours = Math.max(0, durationHours);
+        }
+
+        let facilityTotal = 0;
+        let equipmentTotal = 0;
+        let htmlContent = '<div class="fee-items">';
+
+        // Facilities breakdown
+        const facilityItems = items.filter(i => i.type === 'facility');
+        if (facilityItems.length > 0) {
+          htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
+          facilityItems.forEach(item => {
+            let fee = parseFloat(item.external_fee);
+            if (item.rate_type === 'Per Hour' && durationHours > 0) {
+              fee = fee * durationHours;
+              htmlContent += `
+                            <div class="fee-item d-flex justify-content-between mb-2">
+                                <span>${item.name} (${durationHours.toFixed(1)} hrs)</span>
+                                <div class="text-end">
+                                    <small>₱${parseFloat(item.external_fee).toLocaleString()}/hr</small>
+                                    <div><strong>₱${fee.toLocaleString()}</strong></div>
+                                </div>
+                            </div>
+                        `;
+            } else {
+              htmlContent += `
+                            <div class="fee-item d-flex justify-content-between mb-2">
+                                <span>${item.name}</span>
+                                <span>₱${fee.toLocaleString()}</span>
+                            </div>
+                        `;
+            }
+            facilityTotal += fee;
+          });
+          htmlContent += `
+                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                        <strong>Subtotal</strong>
+                        <strong>₱${facilityTotal.toLocaleString()}</strong>
+                    </div>
+                </div>`;
+        }
+
+        // Equipment breakdown
+        const equipmentItems = items.filter(i => i.type === 'equipment');
+        if (equipmentItems.length > 0) {
+          htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
+          equipmentItems.forEach(item => {
+            let unitFee = parseFloat(item.external_fee);
+            const quantity = item.quantity || 1;
+            let itemTotal = unitFee * quantity;
+            if (item.rate_type === 'Per Hour' && durationHours > 0) {
+              itemTotal = itemTotal * durationHours;
+              htmlContent += `
+                            <div class="fee-item d-flex justify-content-between mb-2">
+                                <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''} (${durationHours.toFixed(1)} hrs)</span>
+                                <div class="text-end">
+                                    <small>₱${unitFee.toLocaleString()}/hr × ${quantity}</small>
+                                    <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                                </div>
+                            </div>
+                        `;
+            } else {
+              htmlContent += `
+                            <div class="fee-item d-flex justify-content-between mb-2">
+                                <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
+                                <div class="text-end">
+                                    <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
+                                    <strong>₱${itemTotal.toLocaleString()}</strong>
+                                </div>
+                            </div>
+                        `;
+            }
+            equipmentTotal += itemTotal;
+          });
+          htmlContent += `
+                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                        <strong>Subtotal</strong>
+                        <strong>₱${equipmentTotal.toLocaleString()}</strong>
+                    </div>
+                </div>`;
+        }
+
+        // Total
+        const total = facilityTotal + equipmentTotal;
+        if (total > 0) {
+          htmlContent += `
+                    <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
+                        <h6 class="mb-0">Total Amount</h6>
+                        <h6 class="mb-0">₱${total.toLocaleString()}</h6>
+                    </div>
+                `;
+        } else {
+          htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
+        }
+
+        htmlContent += '</div>';
+        feeDisplay.innerHTML = htmlContent;
+
+      } catch (error) {
+        console.error('Error calculating fees:', error);
+        const feeDisplay = document.getElementById('feeDisplay');
+        if (feeDisplay) {
+          feeDisplay.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
+        }
+      }
+    };
+
+    window.removeSelectedItem = async function (id, type) {
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const requestBody = {
+          type: type,
+          equipment_id: type === 'equipment' ? id : undefined,
+          facility_id: type === 'facility' ? id : undefined
+        };
+
+        const cleanedRequestBody = Object.fromEntries(
+          Object.entries(requestBody).filter(([_, v]) => v !== undefined)
+        );
+
+        const response = await fetch('/api/requisition/remove-item', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(cleanedRequestBody)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to remove item');
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          await Promise.all([
+            window.renderSelectedItems(),
+            window.calculateAndDisplayFees()
+          ]);
+          showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed successfully`, 'success');
+
+          if (typeof updateCartBadge === 'function') {
+            updateCartBadge();
+          }
+        } else {
+          throw new Error(result.message || 'Failed to remove item');
+        }
+      } catch (error) {
+        console.error('Error removing item:', error);
+        showToast(error.message || 'Failed to remove item', 'error');
+      }
+    }
+
+    // ========== FORM SUBMISSION FUNCTIONS ==========
     window.openTermsModal = function (event) {
       if (event) event.preventDefault();
 
@@ -1597,48 +2282,48 @@
       if (!modalEl) {
         // Create modal HTML
         const modalHTML = `
-<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="terms-content mb-4" style="max-height: 50vh; overflow-y: auto;">
-          <h6>Booking Terms and Conditions</h6>
-          <ol>
-            <li>All bookings are subject to approval by CPU Administration.</li>
-            <li>Payment must be made within 3 business days after approval.</li>
-            <li>Cancellations must be made at least 5 days before the event.</li>
-            <li>Damage to facilities/equipment will incur additional charges.</li>
-            <li>Alcohol and smoking are strictly prohibited on campus.</li>
-            <li>External users must provide valid identification.</li>
-            <li>CPU reserves the right to cancel bookings for violations.</li>
-          </ol>
-          <div class="form-check mt-3 text-center">
-            <input class="form-check-input me-2" type="checkbox" id="agreeTerms">
-            <label class="form-check-label" for="agreeTerms">
-              I agree to the terms and conditions
-            </label>
+          <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="terms-content mb-4" style="max-height: 50vh; overflow-y: auto;">
+                    <h6>Booking Terms and Conditions</h6>
+                    <ol>
+                      <li>All bookings are subject to approval by CPU Administration.</li>
+                      <li>Payment must be made within 3 business days after approval.</li>
+                      <li>Cancellations must be made at least 5 days before the event.</li>
+                      <li>Damage to facilities/equipment will incur additional charges.</li>
+                      <li>Alcohol and smoking are strictly prohibited on campus.</li>
+                      <li>External users must provide valid identification.</li>
+                      <li>CPU reserves the right to cancel bookings for violations.</li>
+                    </ol>
+                    <div class="form-check mt-3 text-center">
+                      <input class="form-check-input me-2" type="checkbox" id="agreeTerms">
+                      <label class="form-check-label" for="agreeTerms">
+                        I agree to the terms and conditions
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer justify-content-end">
+                  <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="confirmSubmitBtn" class="btn btn-primary" disabled>
+            <span class="btn-text">Submit Request</span>
+            <span class="btn-loading">
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              Submitting Request...
+            </span>
+          </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="modal-footer justify-content-end">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-<button type="button" id="confirmSubmitBtn" class="btn btn-primary" disabled>
-  <span class="btn-text">Submit Request</span>
-  <span class="btn-loading">
-    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-    Submitting Request...
-  </span>
-</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-    `;
+              `;
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         modalEl = document.getElementById('termsModal');
@@ -1690,105 +2375,99 @@
         showToast('Failed to open terms modal. Please try again.', 'error');
       }
     };
-    // Attach form submission handler
-    document.getElementById('reservationForm')?.addEventListener('submit', function (e) {
-      e.preventDefault();
-      openTermsModal(e);
-    });
 
-    window.submitForm = async function () {
-      try {
+  window.submitForm = async function() {
+    try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         const modal = document.getElementById('termsModal');
         const confirmBtn = document.getElementById('confirmSubmitBtn');
 
-        // Get or create modal instance
         let termsModalInstance = bootstrap.Modal.getInstance(modal);
         if (!termsModalInstance) {
-          termsModalInstance = new bootstrap.Modal(modal);
+            termsModalInstance = new bootstrap.Modal(modal);
         }
 
-        // Show loading state - ONLY on the button, remove submitStatus
+        // Show loading state
         confirmBtn.classList.add('loading');
         confirmBtn.disabled = true;
 
-        // Fix 2: Defensive checks for optional fields
+        // Define all form field variables INSIDE the function
         const schoolIdInput = document.querySelector('input[name="school_id"]');
         const numParticipantsInput = document.querySelector('input[name="num_participants"]');
+        const numChairsInput = document.querySelector('input[name="num_chairs"]');
+        const numTablesInput = document.querySelector('input[name="num_tables"]');
         const additionalRequestsInput = document.querySelector('textarea[name="additional_requests"]');
-
-        // Required fields
         const firstNameInput = document.querySelector('input[name="first_name"]');
         const lastNameInput = document.querySelector('input[name="last_name"]');
         const emailInput = document.querySelector('input[name="email"]');
+        const contactNumberInput = document.querySelector('input[name="contact_number"]');
+        const organizationNameInput = document.querySelector('input[name="organization_name"]');
+        const endorserInput = document.querySelector('input[name="endorser"]');
+        const dateEndorsedInput = document.querySelector('input[name="date_endorsed"]');
 
         if (!firstNameInput || !lastNameInput || !emailInput) {
-          throw new Error('Required contact fields are missing in the form.');
+            throw new Error('Required contact fields are missing in the form.');
         }
 
         const formData = {
-          start_date: document.getElementById('startDateField').value,
-          end_date: document.getElementById('endDateField').value,
-          start_time: convertTo24Hour(document.getElementById('startTimeField').value),
-          end_time: convertTo24Hour(document.getElementById('endTimeField').value),
-          purpose_id: document.getElementById('activityPurposeField').value,
-          num_participants: numParticipantsInput ? numParticipantsInput.value : 1,
-          endorser: document.querySelector('input[name="endorser"]')?.value || null,
-          date_endorsed: document.querySelector('input[name="date_endorsed"]')?.value || null,
-          additional_requests: additionalRequestsInput ? additionalRequestsInput.value : '',
-          formal_letter_url: document.getElementById('formal_letter_url').value,
-          formal_letter_public_id: document.getElementById('formal_letter_public_id').value,
-          facility_layout_url: document.getElementById('facility_layout_url')?.value || null,
-          facility_layout_public_id: document.getElementById('facility_layout_public_id')?.value || null,
-          first_name: firstNameInput.value,
-          last_name: lastNameInput.value,
-          email: emailInput.value,
-          contact_number: document.querySelector('input[name="contact_number"]')?.value || null,
-          organization_name: document.querySelector('input[name="organization_name"]')?.value || null,
-          user_type: document.getElementById('applicantType').value, // Use dropdown value directly
-          school_id: document.getElementById('applicantType').value === 'Internal'
-            ? (schoolIdInput ? schoolIdInput.value : null)
-            : null
+            start_date: document.getElementById('startDateField').value,
+            end_date: document.getElementById('endDateField').value,
+            start_time: convertTo24Hour(document.getElementById('startTimeField').value),
+            end_time: convertTo24Hour(document.getElementById('endTimeField').value),
+            purpose_id: document.getElementById('activityPurposeField').value,
+            num_participants: numParticipantsInput ? numParticipantsInput.value : 1,
+            // ADD THESE LINES - ensure they're included in the form data
+            num_chairs: numChairsInput ? parseInt(numChairsInput.value) || 0 : 0,
+            num_tables: numTablesInput ? parseInt(numTablesInput.value) || 0 : 0,
+            endorser: endorserInput?.value || null,
+            date_endorsed: dateEndorsedInput?.value || null,
+            additional_requests: additionalRequestsInput ? additionalRequestsInput.value : '',
+            formal_letter_url: document.getElementById('formal_letter_url').value || null,
+            formal_letter_public_id: document.getElementById('formal_letter_public_id').value || null,
+            facility_layout_url: document.getElementById('facility_layout_url')?.value || null,
+            facility_layout_public_id: document.getElementById('facility_layout_public_id')?.value || null,
+            first_name: firstNameInput.value,
+            last_name: lastNameInput.value,
+            email: emailInput.value,
+            contact_number: contactNumberInput?.value || null,
+            organization_name: organizationNameInput?.value || null,
+            user_type: document.getElementById('applicantType').value,
+            school_id: document.getElementById('applicantType').value === 'Internal'
+                ? (schoolIdInput ? schoolIdInput.value : null)
+                : null
         };
-
-        // Validate file upload
-        if (!formData.formal_letter_url) {
-          throw new Error('Formal letter is required');
-        }
 
         console.log('Submitting form data:', formData);
 
-        // Submit form with proper error handling
+        // Submit form
         const submitResponse = await fetch('/requisition/submit', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include'
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+            credentials: 'include'
         });
 
         if (!submitResponse.ok) {
-          const errorData = await submitResponse.json().catch(() => ({}));
-          throw new Error(errorData.message || 'Submission failed');
+            const errorData = await submitResponse.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Submission failed');
         }
 
         const result = await submitResponse.json();
 
         if (!result.success) {
-          throw new Error(result.message || 'Submission failed');
+            throw new Error(result.message || 'Submission failed');
         }
 
         // Hide the terms modal
         termsModalInstance.hide();
 
-        // Show success details in the success modal
+        // Show success details
         document.getElementById('successDetails').innerHTML =
-          `Your request ID: ${result.data.request_id}<br>Access Code: ${result.data.access_code}`;
+            `Your request ID: ${result.data.request_id}<br>Access Code: ${result.data.access_code}`;
 
-
-        // Add user's email to the success message
         document.getElementById('userEmail').textContent = formData.email;
 
         // Show the success modal
@@ -1797,10 +2476,10 @@
 
         // Clear session data
         await fetch('/requisition/clear-session', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': csrfToken
-          }
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            }
         });
 
         // Reset form
@@ -1810,297 +2489,104 @@
         await renderSelectedItems();
         await calculateAndDisplayFees();
 
-      } catch (error) {
+    } catch (error) {
         console.error('Error submitting form:', error);
         showToast(error.message || 'Failed to submit form', 'error');
 
         // Reset button state
         const confirmBtn = document.getElementById('confirmSubmitBtn');
         if (confirmBtn) {
-          confirmBtn.classList.remove('loading');
-          confirmBtn.disabled = false;
+            confirmBtn.classList.remove('loading');
+            confirmBtn.disabled = false;
         }
-      }
-    };
+    }
+};
 
-    window.convertTo24Hour = function (time12h) {
-      if (!time12h) return '';
+    // ========== FILE UPLOAD FUNCTIONS ==========
+    async function uploadToCloudinary(input) {
+      const file = input.files[0];
+      if (!file) return;
 
-      // Handle case where time might already be in 24-hour format
-      if (time12h.includes(':')) {
-        const [timePart, modifier] = time12h.split(' ');
+      const progressBar = document.getElementById('progressBar');
+      const uploadProgress = document.getElementById('uploadProgress');
+      uploadProgress.classList.remove('d-none');
 
-        // If no modifier (AM/PM), assume it's already 24-hour
-        if (!modifier) return timePart;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'formal-letters');
+      formData.append('folder', 'user-uploads/user-letters');
 
-        let [hours, minutes] = timePart.split(':');
-        hours = parseInt(hours, 10);
-
-        if (modifier === 'PM' && hours !== 12) {
-          hours += 12;
-        } else if (modifier === 'AM' && hours === 12) {
-          hours = 0;
-        }
-
-        return `${hours.toString().padStart(2, '0')}:${minutes}`;
+      if (file.type === 'application/pdf') {
+        formData.append('resource_type', 'raw');
+      } else {
+        formData.append('resource_type', 'auto');
       }
 
-      return time12h; // Return as-is if format is unexpected
-    };
-
-    document.addEventListener('DOMContentLoaded', function () {
-      // DOM Elements
-      const facilityList = document.getElementById('facilityList');
-      const equipmentList = document.getElementById('equipmentList');
-      const feeDisplay = document.getElementById('feeDisplay');
-      const submitBtn = document.getElementById('submitFormBtn');
-      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-
-      // --- Helper function: pluralizeType ---
-      function pluralizeType(type) {
-        if (type.toLowerCase() === 'facility') return 'facilities';
-        if (type.toLowerCase() === 'equipment') return 'equipment';
-        return type + 's';
-      }
-
-      // --- Helper function: renderItemsList ---
-      function renderItemsList(container, items, type) {
-        if (!container) return;
-
-        container.innerHTML = '';
-
-        if (items.length === 0) {
-          container.innerHTML = `<div class="text-muted empty-message">No ${pluralizeType(type)} added yet.</div>`;
-          return;
-        }
-
-        const cardContainer = document.createElement('div');
-        cardContainer.className = 'row row-cols-1 g-3';
-
-        items.forEach(item => {
-          const card = document.createElement('div');
-          card.className = 'col';
-
-          const displayImage = item.images?.find(img => img.image_type === "Primary") || item.images?.[0];
-
-          card.innerHTML = `
-        <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h5 class="card-title mb-1">${item.name}</h5>
-                        <p class="card-text text-muted mb-2">
-                            <small>${item.description || 'No description available'}</small>
-                        </p>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-danger" 
-                        onclick="removeSelectedItem(${type === 'facility' ? item.facility_id : item.equipment_id}, '${type}')">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-end mt-3">
-                    <div>
-                        <span class="badge bg-primary me-2">${item.rate_type || 'booking'}</span>
-                        ${type === 'equipment' ? `
-                            <span class="badge bg-secondary">Qty: ${item.quantity || 1}</span>
-                        ` : ''}
-                    </div>
-                    <div class="text-end">
-                        <div class="text-success fw-bold">
-                            ₱${parseFloat(item.external_fee * (type === 'equipment' ? (item.quantity || 1) : 1)).toLocaleString()}
-                        </div>
-                        ${type === 'equipment' ? `
-                            <small class="text-muted">${item.quantity || 1} × ₱${parseFloat(item.external_fee).toLocaleString()}</small>
-                        ` : ''}
-                    </div>
-                </div>
-            </div>
-            ${displayImage ? `
-                <img src="${displayImage.image_url}" class="card-img-bottom" 
-                    alt="${item.name}" style="height: 150px; object-fit: cover;">
-            ` : ''}
-        </div>
-      `;
-          cardContainer.appendChild(card);
+      try {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/dn98ntlkd/auto/upload`, {
+          method: 'POST',
+          body: formData
         });
 
-        container.appendChild(cardContainer);
+        if (!response.ok) {
+          throw new Error('Upload failed with status: ' + response.status);
+        }
+
+        const data = await response.json();
+        console.log('Upload successful:', data);
+
+        document.getElementById('formal_letter_url').value = data.secure_url;
+        document.getElementById('formal_letter_public_id').value = data.public_id;
+
+        showToast('File uploaded successfully!', 'success');
+        document.getElementById('removeAttachLetterBtn').classList.remove('d-none');
+
+      } catch (error) {
+        console.error('Upload error:', error);
+        showToast('File upload failed: ' + error.message, 'error');
+        input.value = '';
+      } finally {
+        uploadProgress.classList.add('d-none');
+        progressBar.style.width = '0%';
       }
+    }
 
-      // --- Global functions ---
-      window.renderSelectedItems = async function () {
-        try {
-          const response = await fetch('/requisition/get-items', {
-            headers: {
-              'X-CSRF-TOKEN': csrfToken,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            }
-          });
+    function removeFile(inputId, buttonId) {
+      const input = document.getElementById(inputId);
+      const button = document.getElementById(buttonId);
 
-          if (!response.ok) throw new Error('Failed to fetch items');
+      input.value = '';
+      document.getElementById('formal_letter_url').value = '';
+      document.getElementById('formal_letter_public_id').value = '';
+      button.classList.add('d-none');
 
-          const data = await response.json();
-          const items = data.data?.selected_items || [];
+      showToast('File removed', 'info');
+    }
 
-          renderItemsList(facilityList, items.filter(i => i.type === 'facility'), 'facility');
-          renderItemsList(equipmentList, items.filter(i => i.type === 'equipment'), 'equipment');
+    // ========== INITIALIZE FORM ITEMS ==========
+    async function initForm() {
+      try {
+        await Promise.all([
+          window.renderSelectedItems(),
+          window.calculateAndDisplayFees()
+        ]);
+      } catch (error) {
+        console.error('Error initializing form:', error);
+        showToast('Failed to initialize form', 'error');
+      }
+    }
 
-        } catch (error) {
-          console.error('Error rendering selected items:', error);
-          showToast('Failed to load selected items', 'error');
-        }
-      };
+    // Initialize form when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function () {
 
-      window.calculateAndDisplayFees = async function () {
-        try {
-          const response = await fetch('/requisition/get-items', {
-            headers: {
-              'X-CSRF-TOKEN': csrfToken,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            }
-          });
 
-          if (!response.ok) throw new Error('Failed to fetch items');
+      // Add this to initialize form items
+      initForm();
 
-          const data = await response.json();
-          const items = data.data?.selected_items || [];
-
-          // Get schedule information
-          const startDate = document.getElementById('startDateField').value;
-          const endDate = document.getElementById('endDateField').value;
-          const startTime = document.getElementById('startTimeField').value;
-          const endTime = document.getElementById('endTimeField').value;
-
-          // Calculate duration in hours if schedule is selected
-          let durationHours = 0;
-          if (startDate && endDate && startTime && endTime) {
-            const startDateTime = new Date(`${startDate}T${convertTo24Hour(startTime)}:00`);
-            const endDateTime = new Date(`${endDate}T${convertTo24Hour(endTime)}:00`);
-            durationHours = (endDateTime - startDateTime) / (1000 * 60 * 60); // Convert ms to hours
-            durationHours = Math.max(0, durationHours); // Ensure positive value
-          }
-
-          let facilityTotal = 0;
-          let equipmentTotal = 0;
-          let htmlContent = '<div class="fee-items">';
-
-          // Facilities breakdown
-          const facilityItems = items.filter(i => i.type === 'facility');
-          if (facilityItems.length > 0) {
-            htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
-
-            facilityItems.forEach(item => {
-              let fee = parseFloat(item.external_fee);
-
-              // Calculate fee based on rate type and duration
-              if (item.rate_type === 'Per Hour' && durationHours > 0) {
-                fee = fee * durationHours;
-                htmlContent += `
-                          <div class="fee-item d-flex justify-content-between mb-2">
-                              <span>${item.name} (${durationHours.toFixed(1)} hrs)</span>
-                              <div class="text-end">
-                                  <small>₱${parseFloat(item.external_fee).toLocaleString()}/hr</small>
-                                  <div><strong>₱${fee.toLocaleString()}</strong></div>
-                              </div>
-                          </div>
-                      `;
-              } else {
-                htmlContent += `
-                          <div class="fee-item d-flex justify-content-between mb-2">
-                              <span>${item.name}</span>
-                              <span>₱${fee.toLocaleString()}</span>
-                          </div>
-                      `;
-              }
-
-              facilityTotal += fee;
-            });
-
-            htmlContent += `
-                  <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                      <strong>Subtotal</strong>
-                      <strong>₱${facilityTotal.toLocaleString()}</strong>
-                  </div>
-              </div>`;
-          }
-
-          // Equipment breakdown
-          const equipmentItems = items.filter(i => i.type === 'equipment');
-          if (equipmentItems.length > 0) {
-            htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
-
-            equipmentItems.forEach(item => {
-              let unitFee = parseFloat(item.external_fee);
-              const quantity = item.quantity || 1;
-              let itemTotal = unitFee * quantity;
-
-              // Calculate fee based on rate type and duration
-              if (item.rate_type === 'Per Hour' && durationHours > 0) {
-                itemTotal = itemTotal * durationHours;
-                htmlContent += `
-                          <div class="fee-item d-flex justify-content-between mb-2">
-                              <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''} (${durationHours.toFixed(1)} hrs)</span>
-                              <div class="text-end">
-                                  <small>₱${unitFee.toLocaleString()}/hr × ${quantity}</small>
-                                  <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
-                              </div>
-                          </div>
-                      `;
-              } else {
-                htmlContent += `
-                          <div class="fee-item d-flex justify-content-between mb-2">
-                              <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
-                              <div class="text-end">
-                                  <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
-                                  <strong>₱${itemTotal.toLocaleString()}</strong>
-                              </div>
-                          </div>
-                      `;
-              }
-
-              equipmentTotal += itemTotal;
-            });
-
-            htmlContent += `
-                  <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                      <strong>Subtotal</strong>
-                      <strong>₱${equipmentTotal.toLocaleString()}</strong>
-                  </div>
-              </div>`;
-          }
-
-          // Total
-          const total = facilityTotal + equipmentTotal;
-          if (total > 0) {
-            htmlContent += `
-                  <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
-                      <h6 class="mb-0">Total Amount</h6>
-                      <h6 class="mb-0">₱${total.toLocaleString()}</h6>
-                  </div>
-              `;
-          } else {
-            htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
-          }
-
-          htmlContent += '</div>';
-          feeDisplay.innerHTML = htmlContent;
-
-        } catch (error) {
-          console.error('Error calculating fees:', error);
-          showToast('Failed to calculate fees', 'error');
-          feeDisplay.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
-        }
-      };
-
-      // Add event listeners to schedule fields to recalculate fees when they change
+      // Set up schedule field change listeners for fee calculation
       const scheduleFields = [
         'startDateField', 'endDateField', 'startTimeField', 'endTimeField'
       ];
-
       scheduleFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) {
@@ -2109,351 +2595,7 @@
           });
         }
       });
-
-      // --- Remove items from selection ---
-      window.removeSelectedItem = async function (id, type) {
-        try {
-          const requestBody = {
-            type: type,
-            equipment_id: type === 'equipment' ? id : undefined,
-            facility_id: type === 'facility' ? id : undefined
-          };
-
-          const cleanedRequestBody = Object.fromEntries(
-            Object.entries(requestBody).filter(([_, v]) => v !== undefined)
-          );
-
-          const response = await fetch('/api/requisition/remove-item', {
-            method: 'POST',
-            headers: {
-              'X-CSRF-TOKEN': csrfToken,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify(cleanedRequestBody)
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to remove item');
-          }
-
-          const result = await response.json();
-
-          if (result.success) {
-            await Promise.all([
-              window.renderSelectedItems(),
-              window.calculateAndDisplayFees()
-            ]);
-            showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed successfully`, 'success');
-
-            if (typeof updateCartBadge === 'function') {
-              updateCartBadge();
-            }
-          } else {
-            throw new Error(result.message || 'Failed to remove item');
-          }
-        } catch (error) {
-          console.error('Error removing item:', error);
-          showToast(error.message || 'Failed to remove item', 'error');
-        }
-      }
-
-      // --- School ID required logic ---
-      const applicantType = document.getElementById('applicantType');
-      const schoolIdInput = document.getElementById('school_id');
-      const schoolIdRequired = document.getElementById('schoolIdRequired');
-      applicantType.addEventListener('change', function () {
-        if (this.value === 'Internal') {
-          schoolIdInput.required = true;
-          schoolIdRequired.style.display = '';
-        } else {
-          schoolIdInput.required = false;
-          schoolIdRequired.style.display = 'none';
-          schoolIdInput.value = '';
-        }
-      });
-
-      // --- Now call initForm after all functions are defined ---
-      initForm();
-
-      async function initForm() {
-        try {
-          await Promise.all([
-            window.renderSelectedItems(),
-            window.calculateAndDisplayFees()
-          ]);
-        } catch (error) {
-          console.error('Error initializing form:', error);
-          showToast('Failed to initialize form', 'error');
-        }
-      }
     });
-  </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      // Prevent non-numeric input in contact number field
-      const contactNumberField = document.getElementById('contactNumberField');
-      contactNumberField.addEventListener('input', function (e) {
-        this.value = this.value.replace(/\D/g, '');
-      });
-
-      const reservationForm = document.getElementById('reservationForm');
-      const submitFormBtn = document.getElementById('submitFormBtn');
-
-      function showFieldError(input, message) {
-        input.classList.add('is-invalid');
-        input.setAttribute('title', message);
-        input.setAttribute('data-bs-toggle', 'tooltip');
-        input.setAttribute('data-bs-placement', 'top');
-        if (window.bootstrap) {
-          new bootstrap.Tooltip(input);
-          input.addEventListener('focus', function () {
-            bootstrap.Tooltip.getInstance(input)?.show();
-          });
-        }
-      }
-
-      function clearFieldError(input) {
-        input.classList.remove('is-invalid');
-        input.removeAttribute('title');
-        input.removeAttribute('data-bs-toggle');
-        input.removeAttribute('data-bs-placement');
-        if (window.bootstrap) {
-          const tooltip = bootstrap.Tooltip.getInstance(input);
-          if (tooltip) tooltip.dispose();
-        }
-      }
-
-      function validateFormFields() {
-        let valid = true;
-        let firstInvalid = null;
-        const requiredFields = [
-          'user_type', 'first_name', 'last_name', 'email', 'num_participants', 'purpose_id'
-        ];
-
-        // Clear any existing tooltips first
-        reservationForm.querySelectorAll('.is-invalid').forEach(input => clearFieldError(input));
-
-        // Check formal letter first, before any other validation
-        if (!document.getElementById('formal_letter_url').value) {
-          showToast('Formal Letter Required.', 'error');
-          return { valid: false, firstInvalid: null, isMissingLetter: true };
-        }
-
-        // Validate booking schedule
-        const scheduleValidation = validateBookingSchedule();
-        if (!scheduleValidation.valid) {
-          showToast(scheduleValidation.message, 'error');
-
-          // Highlight the first empty/invalid schedule field
-          const startDateField = document.getElementById('startDateField');
-          const endDateField = document.getElementById('endDateField');
-          const startTimeField = document.getElementById('startTimeField');
-          const endTimeField = document.getElementById('endTimeField');
-
-          if (!startDateField.value) {
-            showFieldError(startDateField, 'Start Date is required');
-            firstInvalid = startDateField;
-          } else if (!endDateField.value) {
-            showFieldError(endDateField, 'End Date is required');
-            firstInvalid = endDateField;
-          } else if (!startTimeField.value) {
-            showFieldError(startTimeField, 'Start Time is required');
-            firstInvalid = startTimeField;
-          } else if (!endTimeField.value) {
-            showFieldError(endTimeField, 'End Time is required');
-            firstInvalid = endTimeField;
-          }
-
-          return { valid: false, firstInvalid, isMissingLetter: false, isInvalidSchedule: true };
-        }
-
-        requiredFields.forEach(name => {
-          const input = reservationForm.querySelector(`[name="${name}"]`);
-          if (input) {
-            if (
-              !input.value ||
-              (name === 'user_type' && input.value === '') ||
-              (name === 'purpose_id' && (input.value === '' || input.value === null))
-            ) {
-              showFieldError(input, 'Please fill in this field.');
-              valid = false;
-              if (!firstInvalid) firstInvalid = input;
-            }
-          }
-        });
-
-        // School ID required for Internal
-        const applicantType = document.getElementById('applicantType');
-        const schoolIdInput = document.getElementById('school_id');
-        if (applicantType.value === 'Internal') {
-          clearFieldError(schoolIdInput);
-          if (!schoolIdInput.value) {
-            showFieldError(schoolIdInput, 'Please fill in this field.');
-            valid = false;
-            if (!firstInvalid) firstInvalid = schoolIdInput;
-          }
-        } else {
-          clearFieldError(schoolIdInput);
-        }
-
-        // Email format
-        const emailInput = reservationForm.querySelector('[name="email"]');
-        if (emailInput && emailInput.value) {
-          clearFieldError(emailInput);
-          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailPattern.test(emailInput.value)) {
-            showFieldError(emailInput, 'Please enter a valid email address.');
-            valid = false;
-            if (!firstInvalid) firstInvalid = emailInput;
-          }
-        }
-
-        // Contact number format (only digits, max 15)
-        if (contactNumberField && contactNumberField.value) {
-          clearFieldError(contactNumberField);
-          if (!/^\d{1,15}$/.test(contactNumberField.value)) {
-            showFieldError(contactNumberField, 'Contact number must be numbers only (max 15 digits).');
-            valid = false;
-            if (!firstInvalid) firstInvalid = contactNumberField;
-          }
-        } else {
-          clearFieldError(contactNumberField);
-        }
-
-        return { valid, firstInvalid, isMissingLetter: false };
-      }
-
-      // Single click handler for submit button
-      submitFormBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const { valid, firstInvalid, isMissingLetter, isInvalidSchedule } = validateFormFields();
-
-        if (!valid) {
-          if (!isMissingLetter && !isInvalidSchedule) {
-            showToast('Please fill in all required fields correctly.', 'error');
-            if (firstInvalid) {
-              firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              setTimeout(() => {
-                firstInvalid.focus();
-                if (window.bootstrap) {
-                  bootstrap.Tooltip.getInstance(firstInvalid)?.show();
-                }
-              }, 400);
-            }
-          }
-          return false;
-        }
-
-        // Only open modal if validation passes
-        openTermsModal(e);
-      });
-      reservationForm.querySelectorAll('input, select, textarea').forEach(input => {
-        input.addEventListener('input', function () {
-          clearFieldError(this);
-        });
-        input.addEventListener('change', function () {
-          clearFieldError(this);
-        });
-      });
-    });
-    // Form Sequencing Logic
-document.addEventListener('DOMContentLoaded', function() {
-  const formSections = document.querySelectorAll('.form-section');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  let currentSectionIndex = 0;
-  
-  // Initialize first section as active
-  showSection(currentSectionIndex);
-  
-  // Next button click handler
-  nextBtn.addEventListener('click', function() {
-    if (validateCurrentSection()) {
-      if (currentSectionIndex < formSections.length - 1) {
-        currentSectionIndex++;
-        showSection(currentSectionIndex);
-      } else {
-        // Last section reached - show submit button
-        document.getElementById('submitFormBtn').scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  });
-  
-  // Previous button click handler
-  prevBtn.addEventListener('click', function() {
-    if (currentSectionIndex > 0) {
-      currentSectionIndex--;
-      showSection(currentSectionIndex);
-    }
-  });
-  
-  // Show specific section
-  function showSection(index) {
-    formSections.forEach((section, i) => {
-      if (i === index) {
-        section.classList.add('active');
-      } else {
-        section.classList.remove('active');
-      }
-    });
-    
-    // Update button states
-    prevBtn.disabled = index === 0;
-    
-    if (index === formSections.length - 1) {
-      nextBtn.textContent = 'Review & Submit';
-    } else {
-      nextBtn.textContent = 'Next';
-    }
-    
-    // Scroll to the active section
-    formSections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-  
-  // Validate current section before proceeding
-  function validateCurrentSection() {
-    const currentSection = formSections[currentSectionIndex];
-    const requiredFields = currentSection.querySelectorAll('[required]');
-    let isValid = true;
-    
-    // Clear previous errors
-    currentSection.querySelectorAll('.is-invalid').forEach(field => {
-      field.classList.remove('is-invalid');
-    });
-    
-    // Check required fields
-    requiredFields.forEach(field => {
-      if (!field.value) {
-        field.classList.add('is-invalid');
-        isValid = false;
-        
-        // Scroll to first invalid field
-        if (isValid) {
-          field.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }
-    });
-    
-    // Special validation for specific sections
-    if (currentSectionIndex === 1) { // Booking Schedule section
-      const scheduleValidation = validateBookingSchedule();
-      if (!scheduleValidation.valid) {
-        showToast(scheduleValidation.message, 'error');
-        isValid = false;
-      }
-    }
-    
-    if (!isValid) {
-      showToast('Please fill in all required fields in this section.', 'error');
-    }
-    
-    return isValid;
-  }
-});
   </script>
 </body>
 

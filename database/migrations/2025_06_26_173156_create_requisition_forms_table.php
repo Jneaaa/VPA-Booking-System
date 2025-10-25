@@ -31,8 +31,8 @@ return new class extends Migration {
             $table->unsignedInteger('num_chairs')->default(0);
 
             // User uploads
-            $table->string('formal_letter_url');
-            $table->string('formal_letter_public_id');
+            $table->string('formal_letter_url')->nullable();
+            $table->string('formal_letter_public_id')->nullable();
             $table->string('facility_layout_url')->nullable();
             $table->string('facility_layout_public_id')->nullable();
             $table->string('proof_of_payment_url')->nullable();

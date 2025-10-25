@@ -19,6 +19,8 @@ class RequisitionForm extends Model
         'organization_name',
         'contact_number',
         'num_participants',
+        'num_chairs',
+        'num_tables',
         'purpose_id',
         'additional_requests',
         'status_id',

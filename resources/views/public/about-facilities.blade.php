@@ -86,7 +86,7 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/conference-room.jpeg') }}"
                         class="card-img-top card-img" alt="Conference Room">
                     <div class="card-body">
-                        <h5 class="card-title">Conference & Meeting Rooms</h5>
+                        <h5 class="card-title fw-bold">Conference & Meeting Rooms</h5>
                         <p class="card-text">Well-equipped spaces for group discussions, seminars, and formal meetings.</p>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/lecture-hall.jpg') }}" class="card-img-top card-img"
                         alt="Lecture Hall">
                     <div class="card-body">
-                        <h5 class="card-title">Lecture & Training Halls</h5>
+                        <h5 class="card-title fw-bold">Lecture & Training Halls</h5>
                         <p class="card-text">Spacious venues ideal for lectures, presentations, and workshops.</p>
                     </div>
                 </div>
@@ -108,7 +108,7 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/auditorium.jpg') }}" class="card-img-top card-img"
                         alt="Auditorium">
                     <div class="card-body">
-                        <h5 class="card-title">Auditoriums</h5>
+                        <h5 class="card-title fw-bold">Auditoriums</h5>
                         <p class="card-text">Large venues designed for conferences, ceremonies, and cultural events.</p>
                     </div>
                 </div>
@@ -119,7 +119,7 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/court.jpg') }}" class="card-img-top card-img"
                         alt="Gym Court">
                     <div class="card-body">
-                        <h5 class="card-title">Sports & Gym Facilities</h5>
+                        <h5 class="card-title fw-bold">Sports & Gym Facilities</h5>
                         <p class="card-text">Multipurpose gyms and courts for athletic events, exhibitions, and student
                             activities.</p>
                     </div>
@@ -131,7 +131,7 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/study-area.jpg') }}" class="card-img-top card-img"
                         alt="Libraries">
                     <div class="card-body">
-                        <h5 class="card-title">Libraries & Study Areas</h5>
+                        <h5 class="card-title fw-bold">Libraries & Study Areas</h5>
                         <p class="card-text">Quiet spaces designed for research, study sessions, and academic gatherings.
                         </p>
                     </div>
@@ -143,7 +143,7 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/comp-lab.jpg') }}" class="card-img-top card-img"
                         alt="Computer Laboratories">
                     <div class="card-body">
-                        <h5 class="card-title">Computer Laboratories</h5>
+                        <h5 class="card-title fw-bold">Computer Laboratories</h5>
                         <p class="card-text">Fully equipped labs for IT classes, training sessions, and technical workshops.
                         </p>
                     </div>
