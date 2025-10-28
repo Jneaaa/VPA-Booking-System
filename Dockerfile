@@ -2,12 +2,14 @@ FROM php:8.2-apache
 
 WORKDIR /var/www/html
 
-# Install system dependencies including GD requirements
+# Install system dependencies including ALL required libraries
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
+    libonig-dev \
+    libxml2-dev \
     zip \
     unzip \
     git \
@@ -21,6 +23,8 @@ RUN docker-php-ext-install gd
 RUN docker-php-ext-install pdo_mysql
 RUN docker-php-ext-install mbstring
 RUN docker-php-ext-install zip
+RUN docker-php-ext-install xml
+RUN docker-php-ext-install exif
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
