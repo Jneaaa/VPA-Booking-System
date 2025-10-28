@@ -2,7 +2,27 @@ FROM php:8.2-apache
 
 WORKDIR /var/www/html
 
-# Install Composer only
+# Install system dependencies including GD requirements
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    git \
+    curl
+
+# Install GD extension properly
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install gd
+
+# Install other essential PHP extensions
+RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install mbstring
+RUN docker-php-ext-install zip
+
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Enable Apache mod_rewrite
@@ -15,7 +35,9 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 
 # Set permissions
-RUN chmod -R 775 storage bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage \
+    && chmod -R 775 bootstrap/cache
 
 # Copy Apache configuration
 COPY .docker/apache.conf /etc/apache2/sites-available/000-default.conf
