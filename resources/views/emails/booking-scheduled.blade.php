@@ -101,10 +101,12 @@
                 Central Philippine University Administration</p>
         </div>
 
-        <div class="footer">
-            <p>Central Philippine University &copy; {{ date('Y') }}</p>
-            <p>This is an automated message. Please do not reply to this email.</p>
-        </div>
+<div class="footer">
+    <p>For inquiries, please contact us at (033) 329-1971 local 1234</p>
+    <p>Central Philippine University &copy; {{ date('Y') }}</p>
+    <p>This is an automated message. Please do not reply to this email.</p>
+</div>
+
     </div>
 </body>
 

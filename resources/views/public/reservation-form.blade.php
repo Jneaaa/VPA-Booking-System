@@ -926,9 +926,9 @@
                     maxlength="50" />
                 </div>
                 <div id="studentIdField" class="col-md-6">
-                  <label class="form-label">CPU Student ID <span id="schoolIdRequired"
+                  <label class="form-label">CPU School ID <span id="schoolIdRequired"
                       style="color:red;display:none">*</span></label>
-                  <input name="school_id" id="school_id" type="text" class="form-control" placeholder="Student ID"
+                  <input name="school_id" id="school_id" type="text" class="form-control" placeholder="School ID"
                     maxlength="20" />
                 </div>
                 <div class="col-md-6">
@@ -1065,7 +1065,7 @@
               <span id="summary-organization"></span>
             </div>
             <div class="summary-item" id="summary-school-id-container">
-              <strong>Student ID:</strong>
+              <strong>School ID:</strong>
               <span id="summary-school-id"></span>
             </div>
           </div>
@@ -1641,13 +1641,13 @@ function populateFormSummary() {
           schoolIdInput.required = true;
           schoolIdInput.disabled = false;
           schoolIdRequired.style.display = '';
-          schoolIdInput.placeholder = 'Student ID';
+          schoolIdInput.placeholder = 'School ID';
         } else {
           schoolIdInput.required = false;
           schoolIdInput.disabled = true;
           schoolIdRequired.style.display = 'none';
           schoolIdInput.value = '';
-          schoolIdInput.placeholder = 'Student ID';
+          schoolIdInput.placeholder = 'School ID';
         }
       });
 

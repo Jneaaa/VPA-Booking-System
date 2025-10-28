@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Requisition Form Received - Central Philippine University</title>
+    <title>Late Penalty Notice - Central Philippine University</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -51,14 +51,15 @@
             font-size: 12px;
         }
 
-        .access-code {
+        .penalty-info {
             background: white;
             padding: 15px;
             margin: 15px 0;
-            border-left: 4px solid #003366;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
+            border-left: 4px solid #cc0000;
+        }
+
+        .penalty-info strong {
+            color: #cc0000;
         }
     </style>
 </head>
@@ -74,30 +75,27 @@
         <div class="content">
             <p>Dear {{ $first_name }} {{ $last_name }},</p>
 
-            <p>We have successfully received your requisition form for the use of CPU facilities and/or equipment. An
-                administrator will now review your request. Once your form has been evaluated and approved, you will
-                receive another email with the results.</p>
+            <p>Your requisition form has been marked as <strong>Late/Damaged</strong>. The booking is currently ongoing, and as a result, a penalty fee must be settled to formally close your request record.</p>
 
-            <p>Please note that you may cancel your request within 5 days should an emergency arise.</p>
+            <div class="penalty-info">
+                <p><strong>Penalty Fee:</strong> ₱{{ number_format($penalty_fee, 2) }}</p>
 
-            <p>To monitor and track the status of your request, you can enter your code in the "Your Bookings" tab on
-                the booking website.</p>
-
-            <div class="access-code">
-                Your Request Code:<br>
-                <strong>{{ $access_code }}</strong>
             </div>
+            
+                            <p>Please settle this amount at the <strong>CPU Business Office</strong> at your earliest convenience.</p>
 
-            <p>Thank you for using the CPU Facility and Equipment Booking System.</p>
+            <p>Once payment has been made, the administration will verify your record and close the transaction in the system.</p>
+
+            <p>Thank you for your cooperation and understanding.</p>
 
             <p>Sincerely,<br>
                 Central Philippine University Administration</p>
         </div>
 
         <div class="footer">
-            <p>For inquiries, please contact us at (033) 329-1971 local 1234</p>
-            <p>Central Philippine University &copy; {{ date('Y') }}</p>
-            <p>This is an automated message. Please do not reply to this email.</p>
+            <p>For inquiries, call (033) 329-1971 loc. 1234</p>
+            <p>&copy; {{ date('Y') }} Central Philippine University</p>
+            <p>Automated message. Do not reply.</p>
         </div>
     </div>
 </body>

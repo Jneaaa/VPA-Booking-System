@@ -20,6 +20,9 @@ return new class extends Migration
             $table->string('first_name', 50);
             $table->string('last_name', 50);
             $table->string('middle_name', 50)->nullable();
+            $table->string('title', 100)->nullable();
+            $table->string('signature_url')->nullable();
+            $table->string('signature_public_id')->nullable();
             $table->unsignedTinyInteger('role_id');
             $table->string('school_id', 20)->nullable();
             $table->string('email', 150)->unique();

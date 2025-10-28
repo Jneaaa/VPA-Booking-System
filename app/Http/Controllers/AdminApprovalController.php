@@ -1162,133 +1162,133 @@ class AdminApprovalController extends Controller
     }
 
 
-  public function finalizeForm(Request $request, $requestId)
-{
-    try {
-        \Log::debug('Finalize form attempt', [
-            'request_id' => $requestId,
-            'admin_id' => auth()->id(),
-            'input_data' => $request->all()
-        ]);
-
-        // Remove 'remarks' from validation
-        $validatedData = $request->validate([
-            'calendar_title' => 'sometimes|string|max:50|nullable',
-            'calendar_description' => 'sometimes|string|max:100|nullable',
-        ]);
-
-        \Log::debug('Validation passed', ['validated_data' => $validatedData]);
-
-        $adminId = auth()->id();
-
-        if (!$adminId) {
-            \Log::warning('Admin not authenticated during finalization');
-            return response()->json(['error' => 'Admin not authenticated'], 401);
-        }
-
-        $form = RequisitionForm::with([
-            'requestedFacilities.facility',
-            'requestedEquipment.equipment',
-            'requisitionFees'
-        ])->findOrFail($requestId);
-
-        \Log::debug('Form found', [
-            'current_status' => $form->status_id,
-            'is_finalized' => $form->is_finalized,
-            'current_approved_fee' => $form->approved_fee
-        ]);
-
-        // Update form fields
-        $form->is_finalized = true;
-        $form->finalized_at = now();
-        $form->finalized_by = $adminId;
-        $form->status_id = FormStatus::where('status_name', 'Awaiting Payment')->first()->status_id;
-
-        if (!empty($validatedData['calendar_title'])) {
-            $form->calendar_title = $validatedData['calendar_title'];
-        }
-
-        if (!empty($validatedData['calendar_description'])) {
-            $form->calendar_description = $validatedData['calendar_description'];
-        }
-
-        $form->approved_fee = $this->calculateApprovedFee($form);
-        $form->save();
-
-        \Log::debug('Form finalized successfully', [
-            'new_status' => $form->status_id,
-            'calendar_title' => $form->calendar_title,
-            'approved_fee' => $form->approved_fee
-        ]);
-
-        // Email notification
+    public function finalizeForm(Request $request, $requestId)
+    {
         try {
-            $userName = $form->first_name . ' ' . $form->last_name;
-            $userEmail = $form->email;
-
-            $emailData = [
-                'user_name' => $userName,
+            \Log::debug('Finalize form attempt', [
                 'request_id' => $requestId,
-                'approved_fee' => $form->approved_fee,
-                'payment_deadline' => now()->addDays(5)->format('F j, Y'),
-                'access_code' => $form->access_code // Add access_code to email data
-            ];
+                'admin_id' => auth()->id(),
+                'input_data' => $request->all()
+            ]);
 
-            \Log::debug('Sending email with data', $emailData);
+            // Remove 'remarks' from validation
+            $validatedData = $request->validate([
+                'calendar_title' => 'sometimes|string|max:50|nullable',
+                'calendar_description' => 'sometimes|string|max:100|nullable',
+            ]);
 
-            \Mail::send('emails.booking-approved', $emailData, function ($message) use ($userEmail, $userName) {
-                $message->to($userEmail, $userName)
-                    ->subject('Your Booking Request Has Been Approved – Payment Required');
-            });
+            \Log::debug('Validation passed', ['validated_data' => $validatedData]);
 
-            \Log::debug('Approval email sent successfully', [
-                'recipient' => $userEmail,
-                'request_id' => $requestId,
+            $adminId = auth()->id();
+
+            if (!$adminId) {
+                \Log::warning('Admin not authenticated during finalization');
+                return response()->json(['error' => 'Admin not authenticated'], 401);
+            }
+
+            $form = RequisitionForm::with([
+                'requestedFacilities.facility',
+                'requestedEquipment.equipment',
+                'requisitionFees'
+            ])->findOrFail($requestId);
+
+            \Log::debug('Form found', [
+                'current_status' => $form->status_id,
+                'is_finalized' => $form->is_finalized,
+                'current_approved_fee' => $form->approved_fee
+            ]);
+
+            // Update form fields
+            $form->is_finalized = true;
+            $form->finalized_at = now();
+            $form->finalized_by = $adminId;
+            $form->status_id = FormStatus::where('status_name', 'Awaiting Payment')->first()->status_id;
+
+            if (!empty($validatedData['calendar_title'])) {
+                $form->calendar_title = $validatedData['calendar_title'];
+            }
+
+            if (!empty($validatedData['calendar_description'])) {
+                $form->calendar_description = $validatedData['calendar_description'];
+            }
+
+            $form->approved_fee = $this->calculateApprovedFee($form);
+            $form->save();
+
+            \Log::debug('Form finalized successfully', [
+                'new_status' => $form->status_id,
+                'calendar_title' => $form->calendar_title,
                 'approved_fee' => $form->approved_fee
             ]);
 
-        } catch (\Exception $emailError) {
-            \Log::error('Failed to send approval email', [
-                'request_id' => $requestId,
-                'error' => $emailError->getMessage(),
-                'recipient' => $form->email,
-                'trace' => $emailError->getTraceAsString()
+            // Email notification
+            try {
+                $userName = $form->first_name . ' ' . $form->last_name;
+                $userEmail = $form->email;
+
+                $emailData = [
+                    'user_name' => $userName,
+                    'request_id' => $requestId,
+                    'approved_fee' => $form->approved_fee,
+                    'payment_deadline' => now()->addDays(5)->format('F j, Y'),
+                    'access_code' => $form->access_code // Add access_code to email data
+                ];
+
+                \Log::debug('Sending email with data', $emailData);
+
+                \Mail::send('emails.booking-approved', $emailData, function ($message) use ($userEmail, $userName) {
+                    $message->to($userEmail, $userName)
+                        ->subject('Your Booking Request Has Been Approved – Payment Required');
+                });
+
+                \Log::debug('Approval email sent successfully', [
+                    'recipient' => $userEmail,
+                    'request_id' => $requestId,
+                    'approved_fee' => $form->approved_fee
+                ]);
+
+            } catch (\Exception $emailError) {
+                \Log::error('Failed to send approval email', [
+                    'request_id' => $requestId,
+                    'error' => $emailError->getMessage(),
+                    'recipient' => $form->email,
+                    'trace' => $emailError->getTraceAsString()
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Form finalized successfully',
+                'new_status' => 'Awaiting Payment',
+                'approved_fee' => $form->approved_fee
             ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Finalize form validation failed', [
+                'request_id' => $requestId,
+                'errors' => $e->errors(),
+                'input_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'error' => 'Validation failed',
+                'details' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to finalize form', [
+                'request_id' => $requestId,
+                'admin_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'input_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to finalize form',
+                'details' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'message' => 'Form finalized successfully',
-            'new_status' => 'Awaiting Payment',
-            'approved_fee' => $form->approved_fee
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        \Log::error('Finalize form validation failed', [
-            'request_id' => $requestId,
-            'errors' => $e->errors(),
-            'input_data' => $request->all()
-        ]);
-
-        return response()->json([
-            'error' => 'Validation failed',
-            'details' => $e->errors()
-        ], 422);
-
-    } catch (\Exception $e) {
-        \Log::error('Failed to finalize form', [
-            'request_id' => $requestId,
-            'admin_id' => auth()->id(),
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-            'input_data' => $request->all()
-        ]);
-
-        return response()->json([
-            'error' => 'Failed to finalize form',
-            'details' => $e->getMessage()
-        ], 500);
     }
-}
 
 
     // Add this method to the AdminApprovalController class
@@ -1562,6 +1562,11 @@ class AdminApprovalController extends Controller
 
             $form->save();
 
+            // Send email notification if status changed to Late
+            if ($validatedData['status_name'] === 'Late') {
+                $this->sendLatePenaltyEmail($form);
+            }
+
             // Recalculate approved fee after status change
             $form->load(['requestedFacilities', 'requestedEquipment', 'requisitionFees']);
             $approvedFee = $this->calculateApprovedFee($form);
@@ -1611,6 +1616,44 @@ class AdminApprovalController extends Controller
                 'error' => 'Failed to update status',
                 'details' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    private function sendLatePenaltyEmail($form)
+    {
+        try {
+            $userName = $form->first_name . ' ' . $form->last_name;
+            $userEmail = $form->email;
+
+            $emailData = [
+                'first_name' => $form->first_name,
+                'last_name' => $form->last_name,
+                'penalty_fee' => $form->late_penalty_fee
+            ];
+
+            \Log::debug('Sending late penalty email', [
+                'recipient' => $userEmail,
+                'request_id' => $form->request_id,
+                'penalty_fee' => $form->late_penalty_fee
+            ]);
+
+            \Mail::send('emails.booking-late', $emailData, function ($message) use ($userEmail, $userName) {
+                $message->to($userEmail, $userName)
+                    ->subject('Late Penalty Notice - Central Philippine University');
+            });
+
+            \Log::debug('Late penalty email sent successfully', [
+                'recipient' => $userEmail,
+                'request_id' => $form->request_id
+            ]);
+
+        } catch (\Exception $emailError) {
+            \Log::error('Failed to send late penalty email', [
+                'request_id' => $form->request_id,
+                'error' => $emailError->getMessage(),
+                'recipient' => $form->email,
+                'trace' => $emailError->getTraceAsString()
+            ]);
         }
     }
     // Calculate & Finalize fees //
@@ -1786,74 +1829,72 @@ class AdminApprovalController extends Controller
         return $totalDiscount;
     }
 
-    // Add this method to AdminApprovalController.php
+    public function markAsScheduled(Request $request, $requestId)
+    {
+        try {
+            \Log::debug('Mark as scheduled request received', [
+                'request_id' => $requestId,
+                'admin_id' => auth()->id(),
+                'official_receipt_num' => $request->official_receipt_num
+            ]);
 
-   public function markAsScheduled(Request $request, $requestId)
-{
-    try {
-        \Log::debug('Mark as scheduled request received', [
-            'request_id' => $requestId,
-            'admin_id' => auth()->id(),
-            'official_receipt_num' => $request->official_receipt_num
-        ]);
+            $validatedData = $request->validate([
+                'official_receipt_num' => 'required|string|max:50|unique:requisition_forms,official_receipt_num',
+                'calendar_title' => 'sometimes|string|max:50|nullable',
+                'calendar_description' => 'sometimes|string|max:100|nullable',
+            ]);
 
-        $validatedData = $request->validate([
-            'official_receipt_num' => 'required|string|max:50|unique:requisition_forms,official_receipt_num',
-            'calendar_title' => 'sometimes|string|max:50|nullable',
-            'calendar_description' => 'sometimes|string|max:100|nullable',
-        ]);
+            $adminId = auth()->id();
+            if (!$adminId) {
+                return response()->json(['error' => 'Admin not authenticated'], 401);
+            }
 
-        $adminId = auth()->id();
-        if (!$adminId) {
-            return response()->json(['error' => 'Admin not authenticated'], 401);
-        }
+            $form = RequisitionForm::with([
+                'requestedFacilities.facility',
+                'requestedEquipment.equipment',
+                'requisitionFees',
+                'purpose',
+                'formStatus'
+            ])->findOrFail($requestId);
 
-        $form = RequisitionForm::with([
-            'requestedFacilities.facility',
-            'requestedEquipment.equipment',
-            'requisitionFees',
-            'purpose',
-            'formStatus'
-        ])->findOrFail($requestId);
+            // Update equipment conditions to "In Use"
+            $this->updateEquipmentConditions($form);
 
-        // Update equipment conditions to "In Use"
-        $this->updateEquipmentConditions($form);
+            // Update form with official receipt number and status
+            $scheduledStatus = FormStatus::where('status_name', 'Scheduled')->first();
+            if (!$scheduledStatus) {
+                throw new \Exception('Scheduled status not found');
+            }
 
-        // Update form with official receipt number and status
-        $scheduledStatus = FormStatus::where('status_name', 'Scheduled')->first();
-        if (!$scheduledStatus) {
-            throw new \Exception('Scheduled status not found');
-        }
+            $form->official_receipt_num = $validatedData['official_receipt_num'];
+            $form->status_id = $scheduledStatus->status_id;
 
-        $form->official_receipt_num = $validatedData['official_receipt_num'];
-        $form->status_id = $scheduledStatus->status_id;
+            if (!empty($validatedData['calendar_title'])) {
+                $form->calendar_title = $validatedData['calendar_title'];
+            }
 
-        if (!empty($validatedData['calendar_title'])) {
-            $form->calendar_title = $validatedData['calendar_title'];
-        }
+            if (!empty($validatedData['calendar_description'])) {
+                $form->calendar_description = $validatedData['calendar_description'];
+            }
 
-        if (!empty($validatedData['calendar_description'])) {
-            $form->calendar_description = $validatedData['calendar_description'];
-        }
+            $form->save();
 
-        $form->save();
+            // Send confirmation email
+            $this->sendScheduledConfirmationEmail($form);
 
-        // Send confirmation email
-        $this->sendScheduledConfirmationEmail($form);
+            \Log::info('Form marked as scheduled successfully', [
+                'request_id' => $requestId,
+                'official_receipt_num' => $form->official_receipt_num,
+                'admin_id' => $adminId
+            ]);
 
-        \Log::info('Form marked as scheduled successfully', [
-            'request_id' => $requestId,
-            'official_receipt_num' => $form->official_receipt_num,
-            'admin_id' => $adminId
-        ]);
+            return response()->json([
+                'message' => 'Form marked as scheduled successfully',
+                'official_receipt_num' => $form->official_receipt_num,
+                'new_status' => 'Scheduled'
+            ]);
 
-        return response()->json([
-            'message' => 'Form marked as scheduled successfully',
-            'official_receipt_num' => $form->official_receipt_num,
-            'new_status' => 'Scheduled'
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Mark as scheduled validation failed', [
                 'request_id' => $requestId,
                 'errors' => $e->errors()
@@ -1879,53 +1920,53 @@ class AdminApprovalController extends Controller
         }
     }
 
-public function getEquipmentStatus($requestId)
-{
-    try {
-        $form = RequisitionForm::with([
-            'requestedEquipment.equipment.items.condition'
-        ])->findOrFail($requestId);
+    public function getEquipmentStatus($requestId)
+    {
+        try {
+            $form = RequisitionForm::with([
+                'requestedEquipment.equipment.items.condition'
+            ])->findOrFail($requestId);
 
-        $equipmentStatus = [];
+            $equipmentStatus = [];
 
-        foreach ($form->requestedEquipment as $reqEquipment) {
-            $equipment = $reqEquipment->equipment;
-            
-            // Get items that are currently marked as "In Use" (condition_id = 6)
-            // for this equipment type (we assume they're being used for this request)
-            $inUseItems = \App\Models\EquipmentItem::where('equipment_id', $equipment->equipment_id)
-                ->where('condition_id', 6) // In Use
-                ->with('condition')
-                ->limit($reqEquipment->quantity) // Only show up to the requested quantity
-                ->get();
+            foreach ($form->requestedEquipment as $reqEquipment) {
+                $equipment = $reqEquipment->equipment;
 
-            foreach ($inUseItems as $item) {
-                $equipmentStatus[] = [
-                    'equipment_name' => $equipment->equipment_name,
-                    'item_id' => $item->item_id,
-                    'condition_name' => $item->condition->condition_name,
-                    'condition_color' => $item->condition->color_code
-                ];
+                // Get items that are currently marked as "In Use" (condition_id = 6)
+                // for this equipment type (we assume they're being used for this request)
+                $inUseItems = \App\Models\EquipmentItem::where('equipment_id', $equipment->equipment_id)
+                    ->where('condition_id', 6) // In Use
+                    ->with('condition')
+                    ->limit($reqEquipment->quantity) // Only show up to the requested quantity
+                    ->get();
+
+                foreach ($inUseItems as $item) {
+                    $equipmentStatus[] = [
+                        'equipment_name' => $equipment->equipment_name,
+                        'item_id' => $item->item_id,
+                        'condition_name' => $item->condition->condition_name,
+                        'condition_color' => $item->condition->color_code
+                    ];
+                }
             }
+
+            return response()->json([
+                'equipment_status' => $equipmentStatus,
+                'has_equipment' => count($equipmentStatus) > 0
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to fetch equipment status', [
+                'request_id' => $requestId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to fetch equipment status',
+                'details' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'equipment_status' => $equipmentStatus,
-            'has_equipment' => count($equipmentStatus) > 0
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('Failed to fetch equipment status', [
-            'request_id' => $requestId,
-            'error' => $e->getMessage()
-        ]);
-
-        return response()->json([
-            'error' => 'Failed to fetch equipment status',
-            'details' => $e->getMessage()
-        ], 500);
     }
-}
 
     private function sendScheduledConfirmationEmail($form)
     {
@@ -1965,65 +2006,96 @@ public function getEquipmentStatus($requestId)
             ]);
         }
     }
-    public function generateOfficialReceipt($requestId)
-    {
-        try {
-            \Log::debug('=== GENERATE OFFICIAL RECEIPT CALLED ===', [
-                'request_id' => $requestId,
-                'full_url' => request()->fullUrl(),
-                'method' => request()->method()
-            ]);
+public function generateOfficialReceipt($requestId)
+{
+    try {
+        \Log::debug('=== GENERATE OFFICIAL RECEIPT CALLED ===', [
+            'request_id' => $requestId,
+            'full_url' => request()->fullUrl(),
+            'method' => request()->method()
+        ]);
 
-            $form = RequisitionForm::with([
-                'requestedFacilities.facility',
-                'requestedEquipment.equipment',
-                'purpose',
-                'requisitionFees',
-                'formStatus'
-            ])->findOrFail($requestId);
+        $form = RequisitionForm::with([
+            'requestedFacilities.facility',
+            'requestedEquipment.equipment',
+            'purpose',
+            'requisitionFees',
+            'formStatus',
+            'requisitionApprovals.approvedBy' // Load the approval relationships
+        ])->findOrFail($requestId);
 
-            // Check if official receipt number exists
-            if (empty($form->official_receipt_num)) {
-                abort(404, 'Official receipt not generated yet');
-            }
-
-            // Calculate total fee
-            $totalFee = $form->approved_fee;
-
-            // Prepare receipt data
-            $receiptData = [
-                'official_receipt_num' => $form->official_receipt_num,
-                'user_name' => $form->first_name . ' ' . $form->last_name,
-                'user_email' => $form->email,
-                'organization_name' => $form->organization_name,
-                'contact_number' => $form->contact_number,
-                'request_id' => $form->request_id,
-                'facility_name' => $form->requestedFacilities->first()->facility->facility_name ?? 'N/A',
-                'purpose' => $form->purpose->purpose_name,
-                'num_participants' => $form->num_participants,
-                'total_fee' => $totalFee,
-                'issued_date' => $form->updated_at->format('F j, Y'),
-                'schedule' => Carbon::parse($form->start_date)->format('F j, Y') . ' — ' .
-                    Carbon::parse($form->start_time)->format('g:i A') . ' to ' .
-                    Carbon::parse($form->end_time)->format('g:i A'),
-                'start_schedule' => Carbon::parse($form->start_date)->format('F j, Y') . ' — ' .
-                    Carbon::parse($form->start_time)->format('g:i A'),
-                'end_schedule' => Carbon::parse($form->end_date)->format('F j, Y') . ' — ' .
-                    Carbon::parse($form->end_time)->format('g:i A'),
-                'fee_breakdown' => $this->getFeeBreakdown($form)
-            ];
-
-            return view('public.official-receipt', compact('receiptData'));
-
-        } catch (\Exception $e) {
-            \Log::error('Failed to generate official receipt', [
-                'request_id' => $requestId,
-                'error' => $e->getMessage()
-            ]);
-
-            abort(404, 'Receipt not found');
+        // Check if official receipt number exists
+        if (empty($form->official_receipt_num)) {
+            abort(404, 'Official receipt not generated yet');
         }
+
+        // Calculate total fee
+        $totalFee = $form->approved_fee;
+
+        // Get all admins who approved this request with their approval dates
+        $approvingAdmins = $form->requisitionApprovals
+            ->whereNotNull('approved_by')
+            ->map(function ($approval) {
+                return [
+                    'admin' => $approval->approvedBy,
+                    'date_approved' => $approval->date_updated ? Carbon::parse($approval->date_updated)->format('M j, Y') : 'N/A'
+                ];
+            })
+            ->filter(function ($item) {
+                return !is_null($item['admin']); // Remove null admins
+            })
+            ->unique(function ($item) {
+                return $item['admin']->admin_id; // Remove duplicates by admin_id
+            });
+
+        // Prepare receipt data
+        $receiptData = [
+            'official_receipt_num' => $form->official_receipt_num,
+            'user_name' => $form->first_name . ' ' . $form->last_name,
+            'user_email' => $form->email,
+            'organization_name' => $form->organization_name,
+            'contact_number' => $form->contact_number,
+            'request_id' => $form->request_id,
+            'facility_name' => $form->requestedFacilities->first()->facility->facility_name ?? 'N/A',
+            'purpose' => $form->purpose->purpose_name,
+            'num_participants' => $form->num_participants,
+            'total_fee' => $totalFee,
+            'issued_date' => $form->updated_at->format('F j, Y'),
+            'schedule' => Carbon::parse($form->start_date)->format('F j, Y') . ' — ' .
+                Carbon::parse($form->start_time)->format('g:i A') . ' to ' .
+                Carbon::parse($form->end_time)->format('g:i A'),
+            'start_schedule' => Carbon::parse($form->start_date)->format('F j, Y') . ' — ' .
+                Carbon::parse($form->start_time)->format('g:i A'),
+            'end_schedule' => Carbon::parse($form->end_date)->format('F j, Y') . ' — ' .
+                Carbon::parse($form->end_time)->format('g:i A'),
+            'fee_breakdown' => $this->getFeeBreakdown($form),
+            'approving_admins' => $approvingAdmins->map(function ($item) {
+                return [
+                    'name' => $item['admin']->first_name . ' ' . $item['admin']->last_name,
+                    'title' => $item['admin']->title ?? 'Administrator',
+                    'signature_url' => $item['admin']->signature_url,
+                    'date_approved' => $item['date_approved']
+                ];
+            })->toArray()
+        ];
+
+        \Log::debug('Approving admins found', [
+            'count' => count($receiptData['approving_admins']),
+            'admins' => $receiptData['approving_admins']
+        ]);
+
+        return view('public.official-receipt', compact('receiptData'));
+
+    } catch (\Exception $e) {
+        \Log::error('Failed to generate official receipt', [
+            'request_id' => $requestId,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        abort(404, 'Receipt not found');
     }
+}
 
     private function getFeeBreakdown($form)
     {
@@ -2071,138 +2143,138 @@ public function getEquipmentStatus($requestId)
         return $breakdown;
     }
 
-private function updateEquipmentConditions($form)
-{
-    try {
-        \Log::debug('Updating equipment conditions for scheduled form', [
-            'request_id' => $form->request_id
-        ]);
-
-        // Get all requested equipment for this form
-        $requestedEquipment = $form->requestedEquipment;
-
-        foreach ($requestedEquipment as $reqEquipment) {
-            // Get the equipment type
-            $equipment = $reqEquipment->equipment;
-            
-            // Get available equipment items for this equipment type with conditions 1, 2, or 3
-            $availableItems = \App\Models\EquipmentItem::where('equipment_id', $equipment->equipment_id)
-                ->whereIn('condition_id', [1, 2, 3]) // New, Good, Fair
-                ->orderBy('condition_id', 'asc') // Prefer better condition first
-                ->limit($reqEquipment->quantity)
-                ->get();
-
-            \Log::debug('Found available equipment items', [
-                'equipment_id' => $equipment->equipment_id,
-                'required_quantity' => $reqEquipment->quantity,
-                'available_count' => $availableItems->count(),
-                'item_ids' => $availableItems->pluck('item_id')
+    private function updateEquipmentConditions($form)
+    {
+        try {
+            \Log::debug('Updating equipment conditions for scheduled form', [
+                'request_id' => $form->request_id
             ]);
 
-            if ($availableItems->count() < $reqEquipment->quantity) {
-                \Log::warning('Not enough available equipment items', [
+            // Get all requested equipment for this form
+            $requestedEquipment = $form->requestedEquipment;
+
+            foreach ($requestedEquipment as $reqEquipment) {
+                // Get the equipment type
+                $equipment = $reqEquipment->equipment;
+
+                // Get available equipment items for this equipment type with conditions 1, 2, or 3
+                $availableItems = \App\Models\EquipmentItem::where('equipment_id', $equipment->equipment_id)
+                    ->whereIn('condition_id', [1, 2, 3]) // New, Good, Fair
+                    ->orderBy('condition_id', 'asc') // Prefer better condition first
+                    ->limit($reqEquipment->quantity)
+                    ->get();
+
+                \Log::debug('Found available equipment items', [
                     'equipment_id' => $equipment->equipment_id,
-                    'required' => $reqEquipment->quantity,
-                    'available' => $availableItems->count()
+                    'required_quantity' => $reqEquipment->quantity,
+                    'available_count' => $availableItems->count(),
+                    'item_ids' => $availableItems->pluck('item_id')
                 ]);
-                // Continue with available items
+
+                if ($availableItems->count() < $reqEquipment->quantity) {
+                    \Log::warning('Not enough available equipment items', [
+                        'equipment_id' => $equipment->equipment_id,
+                        'required' => $reqEquipment->quantity,
+                        'available' => $availableItems->count()
+                    ]);
+                    // Continue with available items
+                }
+
+                // Update each item to "In Use" (condition_id = 6)
+                foreach ($availableItems as $item) {
+                    $item->condition_id = 6; // In Use
+                    $item->save();
+
+                    \Log::debug('Updated equipment item condition', [
+                        'item_id' => $item->item_id,
+                        'old_condition' => $item->getOriginal('condition_id'),
+                        'new_condition' => $item->condition_id
+                    ]);
+                }
             }
 
-            // Update each item to "In Use" (condition_id = 6)
-            foreach ($availableItems as $item) {
-                $item->condition_id = 6; // In Use
-                $item->save();
-                
-                \Log::debug('Updated equipment item condition', [
-                    'item_id' => $item->item_id,
-                    'old_condition' => $item->getOriginal('condition_id'),
-                    'new_condition' => $item->condition_id
-                ]);
-            }
+            return true;
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to update equipment conditions', [
+                'request_id' => $form->request_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
         }
-
-        return true;
-
-    } catch (\Exception $e) {
-        \Log::error('Failed to update equipment conditions', [
-            'request_id' => $form->request_id,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-        return false;
     }
-}
 
     public function updateCalendarInfo(Request $request, $requestId)
-{
-    try {
-        \Log::debug('Updating calendar info', [
-            'request_id' => $requestId,
-            'admin_id' => auth()->id(),
-            'input_data' => $request->all()
-        ]);
+    {
+        try {
+            \Log::debug('Updating calendar info', [
+                'request_id' => $requestId,
+                'admin_id' => auth()->id(),
+                'input_data' => $request->all()
+            ]);
 
-        $validatedData = $request->validate([
-            'calendar_title' => 'sometimes|string|max:50|nullable',
-            'calendar_description' => 'sometimes|string|max:100|nullable',
-        ]);
+            $validatedData = $request->validate([
+                'calendar_title' => 'sometimes|string|max:50|nullable',
+                'calendar_description' => 'sometimes|string|max:100|nullable',
+            ]);
 
-        $adminId = auth()->id();
-        if (!$adminId) {
-            return response()->json(['error' => 'Admin not authenticated'], 401);
+            $adminId = auth()->id();
+            if (!$adminId) {
+                return response()->json(['error' => 'Admin not authenticated'], 401);
+            }
+
+            $form = RequisitionForm::findOrFail($requestId);
+
+            // Update only the provided fields
+            if (array_key_exists('calendar_title', $validatedData)) {
+                $form->calendar_title = $validatedData['calendar_title'];
+            }
+
+            if (array_key_exists('calendar_description', $validatedData)) {
+                $form->calendar_description = $validatedData['calendar_description'];
+            }
+
+            $form->save();
+
+            \Log::info('Calendar info updated successfully', [
+                'request_id' => $requestId,
+                'calendar_title' => $form->calendar_title,
+                'calendar_description' => $form->calendar_description,
+                'admin_id' => $adminId
+            ]);
+
+            return response()->json([
+                'message' => 'Calendar information updated successfully',
+                'calendar_title' => $form->calendar_title,
+                'calendar_description' => $form->calendar_description
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Calendar info update validation failed', [
+                'request_id' => $requestId,
+                'errors' => $e->errors()
+            ]);
+
+            return response()->json([
+                'error' => 'Validation failed',
+                'details' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to update calendar info', [
+                'request_id' => $requestId,
+                'admin_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to update calendar information',
+                'details' => $e->getMessage()
+            ], 500);
         }
-
-        $form = RequisitionForm::findOrFail($requestId);
-
-        // Update only the provided fields
-        if (array_key_exists('calendar_title', $validatedData)) {
-            $form->calendar_title = $validatedData['calendar_title'];
-        }
-
-        if (array_key_exists('calendar_description', $validatedData)) {
-            $form->calendar_description = $validatedData['calendar_description'];
-        }
-
-        $form->save();
-
-        \Log::info('Calendar info updated successfully', [
-            'request_id' => $requestId,
-            'calendar_title' => $form->calendar_title,
-            'calendar_description' => $form->calendar_description,
-            'admin_id' => $adminId
-        ]);
-
-        return response()->json([
-            'message' => 'Calendar information updated successfully',
-            'calendar_title' => $form->calendar_title,
-            'calendar_description' => $form->calendar_description
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        \Log::error('Calendar info update validation failed', [
-            'request_id' => $requestId,
-            'errors' => $e->errors()
-        ]);
-
-        return response()->json([
-            'error' => 'Validation failed',
-            'details' => $e->errors()
-        ], 422);
-
-    } catch (\Exception $e) {
-        \Log::error('Failed to update calendar info', [
-            'request_id' => $requestId,
-            'admin_id' => auth()->id(),
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'error' => 'Failed to update calendar information',
-            'details' => $e->getMessage()
-        ], 500);
     }
-}
 
     // Completed Transactions // 
 
@@ -2359,92 +2431,92 @@ private function updateEquipmentConditions($form)
     }
 
     // Get form by access code (Requester side)
-public function getFormByAccessCode($accessCode)
-{
-    try {
-        $form = RequisitionForm::with([
-            'formStatus:status_id,status_name,color_code',
-            'requestedFacilities.facility:facility_id,facility_name,external_fee,rate_type',
-            'requestedEquipment.equipment:equipment_id,equipment_name,external_fee,rate_type',
-            'purpose:purpose_id,purpose_name',
-            'requisitionFees'
-        ])->where('access_code', $accessCode)->firstOrFail();
+    public function getFormByAccessCode($accessCode)
+    {
+        try {
+            $form = RequisitionForm::with([
+                'formStatus:status_id,status_name,color_code',
+                'requestedFacilities.facility:facility_id,facility_name,external_fee,rate_type',
+                'requestedEquipment.equipment:equipment_id,equipment_name,external_fee,rate_type',
+                'purpose:purpose_id,purpose_name',
+                'requisitionFees'
+            ])->where('access_code', $accessCode)->firstOrFail();
 
-        // Calculate fees like in the admin method
-        $facilityFees = $form->requestedFacilities->sum(function ($facility) {
-            return $facility->is_waived ? 0 : $facility->facility->external_fee;
-        });
+            // Calculate fees like in the admin method
+            $facilityFees = $form->requestedFacilities->sum(function ($facility) {
+                return $facility->is_waived ? 0 : $facility->facility->external_fee;
+            });
 
-        $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
-            return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
-        });
+            $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
+                return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
+            });
 
-        $totalTentativeFee = $facilityFees + $equipmentFees;
-        if ($form->is_late) {
-            $totalTentativeFee += $form->late_penalty_fee;
+            $totalTentativeFee = $facilityFees + $equipmentFees;
+            if ($form->is_late) {
+                $totalTentativeFee += $form->late_penalty_fee;
+            }
+
+            // Calculate approved fee including requisition fees
+            $approvedFee = $this->calculateApprovedFee($form);
+
+            // Transform response
+            $result = [
+                'request_id' => $form->request_id,
+                'user_type' => $form->user_type,
+                'first_name' => $form->first_name,
+                'last_name' => $form->last_name,
+                'email' => $form->email,
+                'organization_name' => $form->organization_name,
+                'contact_number' => $form->contact_number,
+                'access_code' => $form->access_code,
+                'num_participants' => $form->num_participants,
+                'start_date' => $form->start_date,
+                'end_date' => $form->end_date,
+                'start_time' => $form->start_time,
+                'end_time' => $form->end_time,
+                'calendar_title' => $form->calendar_title,
+                'calendar_description' => $form->calendar_description,
+
+                // Include fee data in facilities and equipment
+                'requested_facilities' => $form->requestedFacilities->map(fn($rf) => [
+                    'facility_name' => $rf->facility->facility_name,
+                    'external_fee' => $rf->facility->external_fee,
+                    'rate_type' => $rf->facility->rate_type,
+                    'is_waived' => $rf->is_waived
+                ]),
+
+                'requested_equipment' => $form->requestedEquipment->map(fn($re) => [
+                    'equipment_name' => $re->equipment->equipment_name,
+                    'external_fee' => $re->equipment->external_fee,
+                    'rate_type' => $re->equipment->rate_type,
+                    'quantity' => $re->quantity,
+                    'is_waived' => $re->is_waived
+                ]),
+
+                'form_status' => $form->formStatus,
+                'purpose' => $form->purpose,
+
+                // Use the same fees structure as admin API
+                'fees' => [
+                    'tentative_fee' => $totalTentativeFee,
+                    'approved_fee' => $approvedFee,
+                    'late_penalty_fee' => $form->late_penalty_fee,
+                    'is_late' => $form->is_late
+                ],
+
+                // Keep total_fee for backward compatibility
+                'total_fee' => $approvedFee
+            ];
+
+            return response()->json($result);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Form not found',
+                'details' => $e->getMessage()
+            ], 404);
         }
-
-        // Calculate approved fee including requisition fees
-        $approvedFee = $this->calculateApprovedFee($form);
-
-        // Transform response
-        $result = [
-            'request_id' => $form->request_id,
-            'user_type' => $form->user_type,
-            'first_name' => $form->first_name,
-            'last_name' => $form->last_name,
-            'email' => $form->email,
-            'organization_name' => $form->organization_name,
-            'contact_number' => $form->contact_number,
-            'access_code' => $form->access_code,
-            'num_participants' => $form->num_participants,
-            'start_date' => $form->start_date,
-            'end_date' => $form->end_date,
-            'start_time' => $form->start_time,
-            'end_time' => $form->end_time,
-            'calendar_title' => $form->calendar_title,
-            'calendar_description' => $form->calendar_description,
-
-            // Include fee data in facilities and equipment
-            'requested_facilities' => $form->requestedFacilities->map(fn($rf) => [
-                'facility_name' => $rf->facility->facility_name,
-                'external_fee' => $rf->facility->external_fee,
-                'rate_type' => $rf->facility->rate_type,
-                'is_waived' => $rf->is_waived
-            ]),
-
-            'requested_equipment' => $form->requestedEquipment->map(fn($re) => [
-                'equipment_name' => $re->equipment->equipment_name,
-                'external_fee' => $re->equipment->external_fee,
-                'rate_type' => $re->equipment->rate_type,
-                'quantity' => $re->quantity,
-                'is_waived' => $re->is_waived
-            ]),
-
-            'form_status' => $form->formStatus,
-            'purpose' => $form->purpose,
-
-            // Use the same fees structure as admin API
-            'fees' => [
-                'tentative_fee' => $totalTentativeFee,
-                'approved_fee' => $approvedFee,
-                'late_penalty_fee' => $form->late_penalty_fee,
-                'is_late' => $form->is_late
-            ],
-
-            // Keep total_fee for backward compatibility
-            'total_fee' => $approvedFee
-        ];
-
-        return response()->json($result);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => 'Form not found',
-            'details' => $e->getMessage()
-        ], 404);
     }
-}
     public function uploadPaymentReceipt(Request $request, $requestId)
     {
         try {
@@ -2549,10 +2621,17 @@ public function getFormByAccessCode($accessCode)
                             'current_time' => now()
                         ]);
 
-                        // Update form to late status
+                        // Set default penalty fee for automated detection
+                        $defaultPenaltyFee = 500.00; // You can adjust this amount
+
+                        // Update form to late status with penalty fee
                         $form->status_id = $lateStatus->status_id;
                         $form->is_late = true;
+                        $form->late_penalty_fee = $defaultPenaltyFee; // Add this line
                         $form->save();
+
+                        // Send AUTOMATED late penalty email (corrected method call)
+                        $this->sendAutoLatePenaltyEmail($form, $defaultPenaltyFee);
 
                         $markedLateCount++;
 
@@ -2561,6 +2640,7 @@ public function getFormByAccessCode($accessCode)
                             'request_id' => $form->request_id,
                             'requester' => $form->first_name . ' ' . $form->last_name,
                             'original_end' => $endDateTime,
+                            'penalty_fee' => $defaultPenaltyFee, // Log the penalty fee
                             'marked_late_at' => now()
                         ]);
                     }
@@ -2595,6 +2675,206 @@ public function getFormByAccessCode($accessCode)
                 'details' => $e->getMessage(),
                 'processed' => 0,
                 'marked_late' => 0
+            ], 500);
+        }
+    }
+
+    private function sendAutoLatePenaltyEmail($form, $penaltyFee)
+    {
+        try {
+            $userName = $form->first_name . ' ' . $form->last_name;
+            $userEmail = $form->email;
+
+            $endDateTime = Carbon::parse($form->end_date . ' ' . $form->end_time);
+            $gracePeriodEnd = $endDateTime->copy()->addHours(4);
+
+            $emailData = [
+                'first_name' => $form->first_name,
+                'last_name' => $form->last_name,
+                'penalty_fee' => $penaltyFee,
+                'original_end_time' => $endDateTime->format('F j, Y g:i A'),
+                'detected_late_time' => now()->format('F j, Y g:i A')
+            ];
+
+            \Log::debug('Sending automated late penalty email', [
+                'recipient' => $userEmail,
+                'request_id' => $form->request_id,
+                'penalty_fee' => $penaltyFee
+            ]);
+
+            \Mail::send('emails.booking-late-auto', $emailData, function ($message) use ($userEmail, $userName) {
+                $message->to($userEmail, $userName)
+                    ->subject('Automatic Late Penalty Notice - Central Philippine University');
+            });
+
+            \Log::debug('Automated late penalty email sent successfully', [
+                'recipient' => $userEmail,
+                'request_id' => $form->request_id
+            ]);
+
+        } catch (\Exception $emailError) {
+            \Log::error('Failed to send automated late penalty email', [
+                'request_id' => $form->request_id,
+                'error' => $emailError->getMessage(),
+                'recipient' => $form->email,
+                'trace' => $emailError->getTraceAsString()
+            ]);
+        }
+    }
+
+    public function autoMarkOngoingForms()
+    {
+        try {
+            \Log::info('Starting automatic ongoing form detection');
+
+            // Get forms that are in Scheduled status
+            $scheduledStatus = FormStatus::where('status_name', 'Scheduled')->first();
+            $ongoingStatus = FormStatus::where('status_name', 'Ongoing')->first();
+
+            if (!$scheduledStatus || !$ongoingStatus) {
+                \Log::error('Required statuses not found');
+                return response()->json([
+                    'error' => 'Required statuses not found',
+                    'processed' => 0,
+                    'marked_ongoing' => 0
+                ], 500);
+            }
+
+            $formsToMarkOngoing = RequisitionForm::where('status_id', $scheduledStatus->status_id)
+                ->get();
+
+            $markedOngoingCount = 0;
+
+            foreach ($formsToMarkOngoing as $form) {
+                try {
+                    // Calculate start datetime
+                    $startDateTime = Carbon::parse($form->start_date . ' ' . $form->start_time);
+
+                    // Check if start time has begun (current time is equal to or after start time)
+                    if (now()->greaterThanOrEqualTo($startDateTime)) {
+                        \Log::info('Marking form as ongoing automatically', [
+                            'request_id' => $form->request_id,
+                            'start_datetime' => $startDateTime,
+                            'current_time' => now()
+                        ]);
+
+                        // Update form to ongoing status
+                        $form->status_id = $ongoingStatus->status_id;
+                        $form->save();
+
+                        // Optional: Send notification email for status change
+                        $this->sendOngoingStatusEmail($form);
+
+                        $markedOngoingCount++;
+
+                        // Log the automatic action
+                        \Log::info('Form automatically marked as ongoing', [
+                            'request_id' => $form->request_id,
+                            'requester' => $form->first_name . ' ' . $form->last_name,
+                            'original_start' => $startDateTime,
+                            'marked_ongoing_at' => now()
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error processing form for ongoing marking', [
+                        'request_id' => $form->request_id,
+                        'error' => $e->getMessage()
+                    ]);
+                    continue;
+                }
+            }
+
+            \Log::info('Automatic ongoing form detection completed', [
+                'processed' => $formsToMarkOngoing->count(),
+                'marked_ongoing' => $markedOngoingCount
+            ]);
+
+            return response()->json([
+                'message' => 'Automatic ongoing detection completed',
+                'processed' => $formsToMarkOngoing->count(),
+                'marked_ongoing' => $markedOngoingCount
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to automatically mark ongoing forms', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to automatically mark ongoing forms',
+                'details' => $e->getMessage(),
+                'processed' => 0,
+                'marked_ongoing' => 0
+            ], 500);
+        }
+    }
+
+    // Email notification method for ongoing status
+    private function sendOngoingStatusEmail($form)
+    {
+        try {
+            $userName = $form->first_name . ' ' . $form->last_name;
+            $userEmail = $form->email;
+
+            $emailData = [
+                'first_name' => $form->first_name,
+                'last_name' => $form->last_name,
+                'request_id' => $form->request_id,
+                'start_time' => Carbon::parse($form->start_date . ' ' . $form->start_time)->format('F j, Y g:i A'),
+                'end_time' => Carbon::parse($form->end_date . ' ' . $form->end_time)->format('F j, Y g:i A'),
+                'facilities' => $form->requestedFacilities->pluck('facility.facility_name')->implode(', '),
+                'access_code' => $form->access_code
+            ];
+
+            \Log::debug('Sending ongoing status email', [
+                'recipient' => $userEmail,
+                'request_id' => $form->request_id
+            ]);
+
+            \Mail::send('emails.booking-ongoing', $emailData, function ($message) use ($userEmail, $userName) {
+                $message->to($userEmail, $userName)
+                    ->subject('Your Booking is Now Ongoing - Central Philippine University');
+            });
+
+            \Log::debug('Ongoing status email sent successfully', [
+                'recipient' => $userEmail,
+                'request_id' => $form->request_id
+            ]);
+
+        } catch (\Exception $emailError) {
+            \Log::error('Failed to send ongoing status email', [
+                'request_id' => $form->request_id,
+                'error' => $emailError->getMessage(),
+                'recipient' => $form->email,
+                'trace' => $emailError->getTraceAsString()
+            ]);
+        }
+    }
+
+    public function autoUpdateAllStatuses()
+    {
+        try {
+            \Log::info('Starting automatic status updates for all forms');
+
+            // Run both automated methods
+            $ongoingResult = $this->autoMarkOngoingForms();
+            $lateResult = $this->autoMarkLateForms();
+
+            return response()->json([
+                'message' => 'Automatic status updates completed',
+                'ongoing_forms' => json_decode($ongoingResult->getContent(), true),
+                'late_forms' => json_decode($lateResult->getContent(), true)
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to run automatic status updates', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to run automatic status updates',
+                'details' => $e->getMessage()
             ], 500);
         }
     }
