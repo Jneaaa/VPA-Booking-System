@@ -7,6 +7,28 @@
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <link rel="stylesheet" href="{{ asset('css/public/catalog.css') }}" />
   <style>
+    
+    /* Ensure modal and calendar have proper dimensions */
+#availabilityModal .modal-body {
+  min-height: 70vh;
+  padding: 1rem;
+}
+
+#availabilityCalendar {
+  height: 65vh;
+  min-height: 400px;
+}
+
+/* Make sure FullCalendar container is visible */
+.fc .fc-toolbar {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.fc .fc-header-toolbar {
+  margin-bottom: 1em !important;
+}
         /* Fix modal z-index for event details modal */
 #eventDetailModal {
   z-index: 9999 !important;
@@ -1127,16 +1149,17 @@ function renderEquipmentList(equipmentList) {
       });
     }
 
-    
+   
 // Initialize availability calendar for specific item
 function initializeAvailabilityCalendar(itemId, itemType, itemName) {
   const calendarEl = document.getElementById('availabilityCalendar');
   if (!calendarEl) return;
 
-  // Clear any existing content first
-  calendarEl.innerHTML = '';
+  // Clear any existing content first and ensure proper structure
+  calendarEl.innerHTML = '<div class="calendar-inner-container" style="height: 100%; position: relative;"></div>';
+  const calendarInner = calendarEl.querySelector('.calendar-inner-container');
 
-  // Create and show loading overlay
+  // Create and show loading overlay - append to inner container
   const loadingOverlay = document.createElement('div');
   loadingOverlay.className = 'calendar-loading-overlay';
   loadingOverlay.innerHTML = `
@@ -1147,49 +1170,14 @@ function initializeAvailabilityCalendar(itemId, itemType, itemName) {
       <p class="mt-2">Loading availability data...</p>
     </div>
   `;
-  
-  // Add CSS for loading overlay
-  if (!document.querySelector('#calendarLoadingStyles')) {
-    const loadingStyles = document.createElement('style');
-    loadingStyles.id = 'calendarLoadingStyles';
-    loadingStyles.textContent = `
-      .calendar-loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        border-radius: 0.375rem;
-      }
-      .calendar-loading-content {
-        text-align: center;
-      }
-      .calendar-hidden {
-        visibility: hidden;
-        opacity: 0;
-      }
-      .calendar-visible {
-        visibility: visible;
-        opacity: 1;
-        transition: opacity 0.3s ease-in-out;
-      }
-    `;
-    document.head.appendChild(loadingStyles);
-  }
 
-  // Add loading overlay to calendar container
-  calendarEl.style.position = 'relative';
-  calendarEl.appendChild(loadingOverlay);
+  // Add loading overlay to INNER container (not outer)
+  calendarInner.appendChild(loadingOverlay);
 
   // Hide the calendar initially
-  calendarEl.classList.add('calendar-hidden');
+  calendarInner.classList.add('calendar-hidden');
 
-  const calendar = new FullCalendar.Calendar(calendarEl, {
+  const calendar = new FullCalendar.Calendar(calendarInner, {
     initialView: 'dayGridMonth',
     headerToolbar: {
       left: 'prev,next today',
@@ -1198,17 +1186,23 @@ function initializeAvailabilityCalendar(itemId, itemType, itemName) {
     },
     titleFormat: {
       year: 'numeric',
-      month: 'short'
+      month: 'long'
     },
-    height: 'auto',
+    buttonText: {
+      today: 'Today',
+      month: 'Month',
+      week: 'Week',
+      day: 'Day'
+    },
+    height: '100%',
     handleWindowResize: true,
     windowResizeDelay: 100,
     aspectRatio: 1.5,
-    expandRows: false,
+    expandRows: true,
     events: function (fetchInfo, successCallback, failureCallback) {
       // Ensure loading overlay is visible and calendar is hidden
       loadingOverlay.style.display = 'flex';
-      calendarEl.classList.add('calendar-hidden');
+      calendarInner.classList.add('calendar-hidden');
       
       // Fetch events filtered by specific item
       fetch(`/api/requisition-forms/calendar-events?${itemType}_id=${itemId}`)
@@ -1228,22 +1222,21 @@ function initializeAvailabilityCalendar(itemId, itemType, itemName) {
           // Hide loading overlay and show calendar when everything is ready
           setTimeout(() => {
             loadingOverlay.style.display = 'none';
-            calendarEl.classList.remove('calendar-hidden');
-            calendarEl.classList.add('calendar-visible');
+            calendarInner.classList.remove('calendar-hidden');
+            calendarInner.classList.add('calendar-visible');
             calendar.updateSize();
-          }, 500); // Increased delay to ensure everything is rendered
+          }, 500);
         });
     },
     loading: function(isLoading) {
-      // FullCalendar's built-in loading callback
       if (isLoading) {
         loadingOverlay.style.display = 'flex';
-        calendarEl.classList.add('calendar-hidden');
+        calendarInner.classList.add('calendar-hidden');
       } else {
         setTimeout(() => {
           loadingOverlay.style.display = 'none';
-          calendarEl.classList.remove('calendar-hidden');
-          calendarEl.classList.add('calendar-visible');
+          calendarInner.classList.remove('calendar-hidden');
+          calendarInner.classList.add('calendar-visible');
         }, 500);
       }
     },
@@ -1260,13 +1253,14 @@ function initializeAvailabilityCalendar(itemId, itemType, itemName) {
       info.el.style.fontSize = '12px';
     },
     datesSet: function (info) {
-      // Ensure calendar stays hidden during date changes until fully loaded
-      if (loadingOverlay.style.display !== 'none') {
-        calendarEl.classList.add('calendar-hidden');
-      }
       setTimeout(() => {
         calendar.updateSize();
       }, 50);
+    },
+    viewDidMount: function (info) {
+      setTimeout(() => {
+        calendar.updateSize();
+      }, 100);
     },
     eventTimeFormat: {
       hour: '2-digit',
