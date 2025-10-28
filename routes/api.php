@@ -94,7 +94,6 @@ Route::prefix('requester')->group(function () {
 Route::post('/feedback', [FeedbackController::class, 'store']);
 Route::post('/requester/requisition/{requestId}/cancel', [AdminApprovalController::class, 'cancelRequestPublic']);
 Route::post('/requester/requisition/{requestId}/upload-receipt', [AdminApprovalController::class, 'uploadPaymentReceipt']);
-Route::post('/admin/requisition/auto-mark-late', [AdminApprovalController::class, 'autoMarkLateForms']);
 
 // ---------------- Scanner Routes ---------------- //
 Route::prefix('scanner')->group(function () {
@@ -109,14 +108,14 @@ Route::post('/admin/generate-barcode', function (Request $request) {
     try {
         $equipmentId = $request->input('equipment_id');
         $itemId = $request->input('item_id');
-        
+
         $barcodeValue = \App\Services\BarcodeService::generateEquipmentBarcode($equipmentId, $itemId);
-        
+
         return response()->json([
             'status' => 'success',
             'barcode' => $barcodeValue
         ]);
-        
+
     } catch (\Exception $e) {
         return response()->json([
             'status' => 'error',
@@ -162,21 +161,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/notifications/mark-read/{notificationId?}', [NotificationController::class, 'markAsRead']);
     Route::post('/admin/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
     Route::get('/feedback', [FeedbackController::class, 'index']);
-    Route::post('/admin/notifications/requisition/{requisitionId}/mark-as-read', [NotificationController::class, 'markRequisitionAsRead'])
-    ->middleware('auth:admin');
+    Route::post('/admin/notifications/requisition/{requisitionId}/mark-as-read', [NotificationController::class, 'markRequisitionAsRead']);
 
     // ---------------- Equipment Management ---------------- //
     Route::post('admin/equipment', [EquipmentController::class, 'store']);
     Route::put('admin/equipment/{equipmentId}', [EquipmentController::class, 'update']);
     Route::delete('/admin/equipment/{equipmentId}', [EquipmentController::class, 'destroy']);
-    
+
     // Equipment Images
     Route::post('/admin/upload', [EquipmentController::class, 'uploadImage']);
     Route::post('/admin/bulk-upload', [EquipmentController::class, 'uploadMultipleImages']);
     Route::delete('/admin/equipment/{equipmentId}/images/{imageId}', [EquipmentController::class, 'deleteImage']);
     Route::post('/admin/reorder', [EquipmentController::class, 'reorderImages']);
     Route::post('/admin/equipment/{equipmentId}/images/save', [EquipmentController::class, 'saveImageReference']);
-    
+
     // Equipment Items
     Route::get('admin/equipment/{equipmentId}/items', [EquipmentController::class, 'getItems']);
     Route::post('admin/equipment/{equipmentId}/items', [EquipmentController::class, 'storeItem']);
@@ -188,7 +186,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('admin/facilities/{facilityId}', [FacilityController::class, 'update']);
     Route::delete('/admin/facilities/{facilityId}', [FacilityController::class, 'destroy']);
     Route::get('facilities/get-categories', [FacilityController::class, 'create']);
-    
+
     // Facility Images
     Route::post('/admin/upload', [FacilityController::class, 'uploadImage']);
     Route::post('/admin/bulk-upload', [FacilityController::class, 'uploadMultipleImages']);
@@ -226,6 +224,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{requestId}/finalize', [AdminApprovalController::class, 'finalizeForm']);
         Route::post('/{requestId}/close', [AdminApprovalController::class, 'closeForm']);
         Route::post('/{requestId}/mark-returned', [AdminApprovalController::class, 'markReturned']);
+
+        // Automatic status update routes
+        Route::post('/admin/auto-mark-ongoing', [AdminApprovalController::class, 'autoMarkOngoingForms']);
+        Route::post('/admin/auto-mark-late', [AdminApprovalController::class, 'autoMarkLateForms']);
+        Route::post('/admin/auto-update-all', [AdminApprovalController::class, 'autoUpdateAllStatuses']);
 
         // Comments
         Route::post('/{requestId}/comment', [AdminCommentsController::class, 'addComment']);

@@ -7,6 +7,15 @@
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <link rel="stylesheet" href="{{ asset('css/public/catalog.css') }}" />
   <style>
+
+    .quantity-input.is-invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.quantity-error {
+  font-size: 0.75rem;
+}
     
     /* Ensure modal and calendar have proper dimensions */
 #availabilityModal .modal-body {
@@ -966,36 +975,54 @@ function renderEquipmentList(equipmentList) {
       }
     }
 
-    // Add item to form
-    async function addToForm(id, type, quantity = 1) {
-      try {
-        const requestBody = {
-          type: type,
-          equipment_id: type === 'equipment' ? parseInt(id) : undefined,
-          facility_id: type === 'facility' ? parseInt(id) : undefined,
-          quantity: parseInt(quantity)
-        };
-
-        const response = await fetchData("/api/requisition/add-item", {
-          method: "POST",
-          body: JSON.stringify(requestBody)
-        });
-
-        if (!response.success) {
-          throw new Error(response.message || "Failed to add item");
-        }
-
-        selectedItems = response.data.selected_items || [];
-        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} added to form`);
-        await updateAllUI();
-
-        // Trigger storage event for cross-page sync
-        localStorage.setItem('formUpdated', Date.now().toString());
-      } catch (error) {
-        console.error("Error adding item:", error);
-        showToast(error.message || "Error adding item to form", "error");
-      }
+// Add item to form with quantity validation
+async function addToForm(id, type, quantity = 1) {
+  try {
+    // Find the equipment item to check available quantity
+    const equipmentItem = allEquipment.find(item => item.equipment_id === parseInt(id));
+    
+    if (!equipmentItem) {
+      throw new Error("Equipment item not found");
     }
+    
+    // Validate quantity against available quantity
+    const availableQty = equipmentItem.available_quantity || 0;
+    if (quantity > availableQty) {
+      throw new Error(`Cannot add ${quantity} items. Only ${availableQty} available.`);
+    }
+    
+    // Validate minimum quantity
+    if (quantity < 1) {
+      throw new Error("Quantity must be at least 1");
+    }
+
+    const requestBody = {
+      type: type,
+      equipment_id: type === 'equipment' ? parseInt(id) : undefined,
+      facility_id: type === 'facility' ? parseInt(id) : undefined,
+      quantity: parseInt(quantity)
+    };
+
+    const response = await fetchData("/api/requisition/add-item", {
+      method: "POST",
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to add item");
+    }
+
+    selectedItems = response.data.selected_items || [];
+    showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} added to form`);
+    await updateAllUI();
+
+    // Trigger storage event for cross-page sync
+    localStorage.setItem('formUpdated', Date.now().toString());
+  } catch (error) {
+    console.error("Error adding item:", error);
+    showToast(error.message || "Error adding item to form", "error");
+  }
+}
 
     // Remove item from form
     async function removeFromForm(id, type) {
@@ -1042,43 +1069,45 @@ function renderEquipmentList(equipmentList) {
   const isUnavailable = equipment.status.status_id !== 1 || maxQty === 0;
 
   if (isUnavailable) {
-    return `
-    <div class="d-flex gap-2 align-items-center">
-      <input type="number" 
-       class="form-control quantity-input" 
-       value="${currentQty}" 
-       min="1" 
-       max="${maxQty}"
-       style="width: 70px;"
-       disabled>
-      <button class="btn btn-secondary add-remove-btn form-action-btn" 
-      data-id="${equipment.equipment_id}" 
-      data-type="equipment" 
-      disabled
-      style="cursor: not-allowed; opacity: 0.65;">
-      ${maxQty === 0 ? 'Out of Stock' : 'Unavailable'}
-      </button>
-    </div>
-    `;
+return `
+<div class="d-flex gap-2 align-items-center">
+  <input type="number" 
+   class="form-control quantity-input" 
+   value="${currentQty}" 
+   min="1" 
+   max="${maxQty}"
+   style="width: 70px;"
+   ${isUnavailable ? 'disabled' : ''}>
+  <button class="btn btn-primary add-remove-btn form-action-btn" 
+  data-id="${equipment.equipment_id}" 
+  data-type="equipment" 
+  data-action="add"
+  ${isUnavailable ? 'disabled' : ''}>
+  Add
+  </button>
+</div>
+`;
   }
 
   if (isSelected) {
-    return `
-    <div class="d-flex gap-2 align-items-center">
-      <input type="number" 
-       class="form-control quantity-input" 
-       value="${currentQty}" 
-       min="1" 
-       max="${maxQty}"
-       style="width: 70px;">
-      <button class="btn btn-danger add-remove-btn form-action-btn" 
-      data-id="${equipment.equipment_id}" 
-      data-type="equipment" 
-      data-action="remove">
-      Remove
-      </button>
-    </div>
-    `;
+return `
+<div class="d-flex gap-2 align-items-center">
+  <input type="number" 
+   class="form-control quantity-input" 
+   value="${currentQty}" 
+   min="1" 
+   max="${maxQty}"
+   style="width: 70px;"
+   ${isUnavailable ? 'disabled' : ''}>
+  <button class="btn btn-primary add-remove-btn form-action-btn" 
+  data-id="${equipment.equipment_id}" 
+  data-type="equipment" 
+  data-action="add"
+  ${isUnavailable ? 'disabled' : ''}>
+  Add
+  </button>
+</div>
+`;
   } else {
     return `
     <div class="d-flex gap-2 align-items-center">
@@ -1130,23 +1159,85 @@ function renderEquipmentList(equipmentList) {
         }
       });
 
-      // Handle quantity changes
-      catalogItemsContainer.addEventListener('change', async (e) => {
-        if (e.target.classList.contains('quantity-input')) {
-          const card = e.target.closest('.catalog-card');
-          const button = card.querySelector('.add-remove-btn');
-          const id = button.dataset.id;
-          const type = button.dataset.type;
-          const action = button.dataset.action;
-          const quantity = parseInt(e.target.value) || 1;
 
-          if (action === 'remove') {
-            await removeFromForm(id, type);
-            await addToForm(id, type, quantity);
-            await updateAllUI();
-          }
+// Handle quantity changes with validation
+catalogItemsContainer.addEventListener('change', async (e) => {
+  if (e.target.classList.contains('quantity-input')) {
+    const card = e.target.closest('.catalog-card');
+    const button = card.querySelector('.add-remove-btn');
+    const id = button.dataset.id;
+    const type = button.dataset.type;
+    const action = button.dataset.action;
+    const quantity = parseInt(e.target.value) || 1;
+    
+    // Find the equipment item
+    const equipmentItem = allEquipment.find(item => item.equipment_id === parseInt(id));
+    
+    if (equipmentItem) {
+      const availableQty = equipmentItem.available_quantity || 0;
+      
+      // Validate quantity
+      if (quantity > availableQty) {
+        showToast(`Cannot select ${quantity} items. Only ${availableQty} available.`, "error");
+        // Reset to previous valid quantity or available max
+        const selectedItem = selectedItems.find(
+          item => item.type === 'equipment' && parseInt(item.equipment_id) === parseInt(id)
+        );
+        e.target.value = selectedItem ? selectedItem.quantity : Math.min(1, availableQty);
+        return;
+      }
+      
+      if (quantity < 1) {
+        showToast("Quantity must be at least 1", "error");
+        e.target.value = 1;
+        return;
+      }
+    }
+
+    if (action === 'remove') {
+      await removeFromForm(id, type);
+      await addToForm(id, type, quantity);
+      await updateAllUI();
+    }
+  }
+});
+
+catalogItemsContainer.addEventListener('input', (e) => {
+  if (e.target.classList.contains('quantity-input')) {
+    const card = e.target.closest('.catalog-card');
+    const button = card.querySelector('.add-remove-btn');
+    const id = button.dataset.id;
+    const quantity = parseInt(e.target.value) || 0;
+    
+    // Find the equipment item
+    const equipmentItem = allEquipment.find(item => item.equipment_id === parseInt(id));
+    
+    if (equipmentItem) {
+      const availableQty = equipmentItem.available_quantity || 0;
+      
+      // Validate in real-time
+      if (quantity > availableQty) {
+        e.target.classList.add('is-invalid');
+        // Show inline error message
+        let errorMsg = card.querySelector('.quantity-error');
+        if (!errorMsg) {
+          errorMsg = document.createElement('div');
+          errorMsg.className = 'quantity-error text-danger small mt-1';
+          e.target.parentNode.appendChild(errorMsg);
         }
-      });
+        errorMsg.textContent = `Max: ${availableQty}`;
+      } else {
+        e.target.classList.remove('is-invalid');
+        const errorMsg = card.querySelector('.quantity-error');
+        if (errorMsg) errorMsg.remove();
+      }
+      
+      if (quantity < 1) {
+        e.target.classList.add('is-invalid');
+      }
+    }
+  }
+});
     }
 
    
@@ -1357,34 +1448,34 @@ function showAvailabilityCalendar(itemId, itemType, itemName) {
 
     // Main Initialization
 
-    async function init() {
-      try {
-        const [equipmentData, categoriesData, selectedItemsResponse] = await Promise.all([
-          fetchData('/api/equipment'),
-          fetchData('/api/equipment-categories'),
-          fetchData('/api/requisition/get-items')
-        ]);
+async function init() {
+  try {
+    const [equipmentData, categoriesData, selectedItemsResponse] = await Promise.all([
+      fetchData('/api/equipment'),
+      fetchData('/api/equipment-categories'),
+      fetchData('/api/requisition/get-items')
+    ]);
 
-        // Only keep equipment with status_id 1 (Available) and available_quantity > 0
-        allEquipment = equipmentData.data || [];
+    // Store the complete equipment data for validation
+    allEquipment = equipmentData.data || [];
 
-        equipmentCategories = categoriesData || [];
-        selectedItems = selectedItemsResponse.data?.selected_items || [];
+    equipmentCategories = categoriesData || [];
+    selectedItems = selectedItemsResponse.data?.selected_items || [];
 
-        renderCategoryFilters();
-        filterAndRenderItems();
-        setupEventListeners();
-        updateCartBadge();
-        setupAvailabilityButtons();
+    renderCategoryFilters();
+    filterAndRenderItems();
+    setupEventListeners();
+    updateCartBadge();
+    setupAvailabilityButtons();
 
-        catalogItemsContainer.classList.remove("d-none");
-      } catch (error) {
-        console.error("Error initializing page:", error);
-        showToast("Failed to initialize the page. Please try again.", "error");
-      } finally {
-        loadingIndicator.style.display = "none";
-      }
-    }
+    catalogItemsContainer.classList.remove("d-none");
+  } catch (error) {
+    console.error("Error initializing page:", error);
+    showToast("Failed to initialize the page. Please try again.", "error");
+  } finally {
+    loadingIndicator.style.display = "none";
+  }
+}
 
     // Initialize when DOM is loaded
     document.addEventListener("DOMContentLoaded", init);

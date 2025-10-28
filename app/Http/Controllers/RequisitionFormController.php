@@ -592,175 +592,174 @@ class RequisitionFormController extends Controller
     }
 
     // ----- Submit requisition form with overbooking protection ----- //
-    public function submitForm(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_type' => 'required|in:Internal,External',
-            'school_id' => 'required_if:user_type,Internal|nullable|string|max:20',
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'email' => 'required|email|max:100',
-            'contact_number' => ['nullable', 'regex:/^\d{1,15}$/', 'max:15'],
-            'organization_name' => 'nullable|string|max:100',
-            'num_participants' => 'required|integer|min:1',
-            'num_tables' => 'required|integer|min:0',
-            'num_chairs' => 'required|integer|min:0',
-            'purpose_id' => 'required|exists:requisition_purposes,purpose_id',
-            'additional_requests' => 'nullable|string|max:250',
-            'endorser' => 'nullable|string|max:50',
-            'date_endorsed' => 'nullable|date_format:Y-m-d',
-            'formal_letter_url' => 'nullable|url',
-            'formal_letter_public_id' => 'nullable|string|max:255',
-            'facility_layout_url' => 'nullable|string|max:255',
-            'facility_layout_public_id' => 'nullable|string|max:255',
+public function submitForm(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'user_type' => 'required|in:Internal,External',
+        'school_id' => 'required_if:user_type,Internal|nullable|string|max:20',
+        'first_name' => 'required|string|max:50',
+        'last_name' => 'required|string|max:50',
+        'email' => 'required|email|max:100',
+        'contact_number' => ['nullable', 'regex:/^\d{1,15}$/', 'max:15'],
+        'organization_name' => 'nullable|string|max:100',
+        'num_participants' => 'required|integer|min:1',
+        'num_tables' => 'required|integer|min:0',
+        'num_chairs' => 'required|integer|min:0',
+        'purpose_id' => 'required|exists:requisition_purposes,purpose_id',
+        'additional_requests' => 'nullable|string|max:250',
+        'endorser' => 'nullable|string|max:50',
+        'date_endorsed' => 'nullable|date_format:Y-m-d',
+        'formal_letter_url' => 'nullable|url',
+        'formal_letter_public_id' => 'nullable|string|max:255',
+        'facility_layout_url' => 'nullable|string|max:255',
+        'facility_layout_public_id' => 'nullable|string|max:255',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()->toArray()
+        ], 422);
+    }
+
+    DB::beginTransaction();
+
+    try {
+        $selectedItems = session('selected_items', []);
+        if (empty($selectedItems)) {
+            throw new \Exception('Your booking cart is empty. Add items before submitting.');
+        }
+
+        \Log::debug('Selected items structure', ['items' => $selectedItems]);
+        
+        \Log::debug('Submission session data', [
+            'request_info' => session('request_info'),
+            'selected_items' => session('selected_items'),
+            'temp_uploads' => session('temp_uploads'),
+            'all_session' => session()->all()
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()->toArray() // Return full error details
-            ], 422);
+        $requestInfo = session('request_info');
+        $selectedItems = session('selected_items', []);
+        $tempUploads = session('temp_uploads', []);
+
+        if (!$request->first_name || !$request->last_name || !$request->email) {
+            throw new \Exception('User information not found. Please fill in all required fields.');
         }
 
-        DB::beginTransaction();
+        $conflictCheck = $this->checkAvailability(new Request([
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'items' => array_map(function ($item) {
+                return [
+                    'type' => $item['type'],
+                    $item['type'] . '_id' => $item[$item['type'] . '_id']
+                ];
+            }, $selectedItems)
+        ]));
 
-        try {
+        $conflictData = $conflictCheck->getData();
+        if (!$conflictData->success || !$conflictData->data->available) {
+            throw new \Exception($conflictData->message ?? 'Time slot no longer available. Please choose another.');
+        }
+        
+        $accessCode = Str::upper(Str::random(10));
+        \Log::debug('Generated access code', ['code' => $accessCode]);
 
-            // Get selected items from session (still needed)
-            $selectedItems = session('selected_items', []);
-            if (empty($selectedItems)) {
-                throw new \Exception('Your booking cart is empty. Add items before submitting.');
-            }
+        // Create requisition form
+        $requisitionForm = RequisitionForm::create([
+            'user_type' => $request->user_type,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'contact_number' => $request->contact_number,
+            'organization_name' => $request->organization_name,
+            'school_id' => $request->school_id,
+            'access_code' => $accessCode,
+            'purpose_id' => $request->purpose_id,
+            'num_participants' => $request->num_participants,
+            'num_tables' => $request->num_tables ?? 0,
+            'num_chairs' => $request->num_chairs ?? 0,
+            'additional_requests' => $request->additional_requests,
+            'endorser' => $request->endorser, 
+            'date_endorsed' => $request->date_endorsed,
+            'formal_letter_url' => $request->formal_letter_url ?? null,
+            'formal_letter_public_id' => $request->formal_letter_public_id ?? null,
+            'facility_layout_url' => $request->facility_layout_url ?? null,
+            'facility_layout_public_id' => $request->facility_layout_public_id ?? null,
+            'upload_token' => Str::random(40),
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'status_id' => FormStatus::where('status_name', 'Pending Approval')->value('status_id'),
+            'tentative_fee' => session('fee_summary.total_fee', 0),
+        ]);
 
-            // Debug session data
-            \Log::debug('Submission session data', [
-                'request_info' => session('request_info'),
-                'selected_items' => session('selected_items'),
-                'temp_uploads' => session('temp_uploads'),
-                'all_session' => session()->all()
-            ]);
+        // Save selected items - SIMPLIFIED VERSION
+        foreach ($selectedItems as $item) {
+            if ($item['type'] === 'facility') {
+                RequestedFacility::create([
+                    'request_id' => $requisitionForm->request_id,
+                    'facility_id' => $item['facility_id'] ?? $item['id'],
+                    'is_waived' => false,
+                ]);
+            } elseif ($item['type'] === 'equipment') {
+                $equipmentId = $item['equipment_id'] ?? $item['id'];
+                $quantity = $item['quantity'] ?? 1;
+                
+                \Log::debug('Processing equipment', [
+                    'equipment_id' => $equipmentId,
+                    'quantity' => $quantity,
+                    'item_structure' => $item
+                ]);
 
-            $requestInfo = session('request_info');
-            $selectedItems = session('selected_items', []);
-            $tempUploads = session('temp_uploads', []);
+                // Check availability using the same logic as publicIndex()
+                $availableCount = EquipmentItem::where('equipment_id', $equipmentId)
+                    ->where('status_id', 1) // Available status
+                    ->whereIn('condition_id', [1, 2, 3]) // Good conditions
+                    ->count();
 
-            if (!$request->first_name || !$request->last_name || !$request->email) {
-                throw new \Exception('User information not found. Please fill in all required fields.');
-            }
-
-            $conflictCheck = $this->checkAvailability(new Request([
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
-                'items' => array_map(function ($item) {
-                    return [
-                        'type' => $item['type'],
-                        $item['type'] . '_id' => $item[$item['type'] . '_id']
-                    ];
-                }, $selectedItems)
-            ]));
-
-            $conflictData = $conflictCheck->getData();
-            if (!$conflictData->success || !$conflictData->data->available) {
-                throw new \Exception($conflictData->message ?? 'Time slot no longer available. Please choose another.');
-            }
-            
-            $accessCode = Str::upper(Str::random(10));
-            \Log::debug('Generated access code', ['code' => $accessCode]);
-            \Log::debug('Submitting form data', [
-                'facility_layout_url' => $request->facility_layout_url,
-                'facility_layout_public_id' => $request->facility_layout_public_id,
-                'all_data' => $request->all()
-            ]);
-
-
-            // Create requisition form
-            $requisitionForm = RequisitionForm::create([
-                'user_type' => $request->user_type,
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'email' => $request->email,
-                'contact_number' => $request->contact_number,
-                'organization_name' => $request->organization_name,
-                'school_id' => $request->school_id,
-                'access_code' => $accessCode,
-                'purpose_id' => $request->purpose_id,
-                'num_participants' => $request->num_participants,
-                'num_tables' => $request->num_tables ?? 0,
-                'num_chairs' => $request->num_chairs ?? 0,
-                'additional_requests' => $request->additional_requests,
-                'endorser' => $request->endorser, 
-                'date_endorsed' => $request->date_endorsed,
-                'formal_letter_url' => $request->formal_letter_url ?? null,
-                'formal_letter_public_id' => $request->formal_letter_public_id ?? null,
-                'facility_layout_url' => $request->facility_layout_url ?? null,
-                'facility_layout_public_id' => $request->facility_layout_public_id ?? null,
-                'upload_token' => Str::random(40),
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
-                'status_id' => FormStatus::where('status_name', 'Pending Approval')->value('status_id'),
-                'tentative_fee' => session('fee_summary.total_fee', 0),
-            ]);
-
-            // Save selected items
-            foreach ($selectedItems as $item) {
-                if ($item['type'] === 'facility') {
-                    RequestedFacility::create([
-                        'request_id' => $requisitionForm->request_id,
-                        'facility_id' => $item['facility_id'] ?? $item['id'], // Handle both formats
-                        'is_waived' => false,
-                    ]);
-                } elseif ($item['type'] === 'equipment') {
-                    $equipmentItems = \App\Models\EquipmentItem::where('equipment_id', $item['equipment_id'] ?? $item['id'])
-                        ->whereIn('condition_id', [1, 2, 3])
-                        ->limit($item['quantity'] ?? 1)
-                        ->get();
-
-                    if ($equipmentItems->count() < ($item['quantity'] ?? 1)) {
-                        throw new \Exception("Not enough items available for equipment ID {$item['id']}.");
-                    }
-
-                    foreach ($equipmentItems as $equipmentItem) {
-                        RequestedEquipment::create([
-                            'request_id' => $requisitionForm->request_id,
-                            'equipment_id' => $item['equipment_id'],
-                            'item_id' => $equipmentItem->item_id,
-                            'is_waived' => false,
-                        ]);
-
-                        DB::table('equipment_items')
-                            ->where('item_id', $equipmentItem->item_id)
-                        ;
-                    }
+                if ($availableCount < $quantity) {
+                    throw new \Exception("Not enough available items for {$item['name']}. Requested: {$quantity}, Available: {$availableCount}");
                 }
+
+                // Create ONE RequestedEquipment record with the quantity
+                RequestedEquipment::create([
+                    'request_id' => $requisitionForm->request_id,
+                    'equipment_id' => $equipmentId,
+                    'quantity' => $quantity,
+                    'is_waived' => false,
+                ]);
+                // No reservation logic - equipment items remain available until admin schedules
             }
-
-            // Send confirmation email to requester
-            $this->sendConfirmationEmail($requisitionForm);
-
-            // Notify admins about new requisition
-            \App\Services\NotificationService::notifyNewRequisition($requisitionForm);
-
-            // Clear session
-            session()->forget(['request_info', 'selected_items', 'fee_summary', 'temp_uploads']);
-
-            DB::commit();
-
-            return $this->jsonResponse(true, 'Requisition submitted successfully!', [
-                'access_code' => $requisitionForm->access_code,
-                'request_id' => $requisitionForm->request_id,
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Submission error: ' . $e->getMessage());
-            return $this->jsonResponse(false, 'Submission failed: ' . $e->getMessage(), [], 500);
         }
+
+        // Send confirmation email to requester
+        $this->sendConfirmationEmail($requisitionForm);
+
+        // Notify admins about new requisition
+        \App\Services\NotificationService::notifyNewRequisition($requisitionForm);
+
+        // Clear session
+        session()->forget(['request_info', 'selected_items', 'fee_summary', 'temp_uploads']);
+
+        DB::commit();
+
+        return $this->jsonResponse(true, 'Requisition submitted successfully!', [
+            'access_code' => $requisitionForm->access_code,
+            'request_id' => $requisitionForm->request_id,
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Submission error: ' . $e->getMessage());
+        return $this->jsonResponse(false, 'Submission failed: ' . $e->getMessage(), [], 500);
     }
+}
 
     protected function sendConfirmationEmail(RequisitionForm $requisitionForm)
     {

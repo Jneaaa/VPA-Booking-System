@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +26,7 @@
         }
 
         .permit-container {
-             max-width: 800px; 
+            max-width: 800px;
             margin: 20px auto;
             background: #fff;
             padding: 40px;
@@ -103,13 +104,36 @@
             color: #666;
         }
 
-        .signature-block {
-            margin-top: 15px;
-            text-align: center;
-            border-top: 1px dashed #ccc;
-            padding-top: 10px;
-            line-height: 1.2;
-        }
+.signature-block {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.signature-block > div {
+    flex: 0 0 auto;
+    min-width: 200px; /* Increased from 160px to give more space for 3 per row */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.signature-image-container {
+    width: 160px; /* Slightly increased to match the new min-width */
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+.signature-image-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
 
         .signature-block img {
             width: 140px;
@@ -138,6 +162,18 @@
         .print-button-container {
             text-align: center;
             margin: 30px 0;
+        }
+
+        .signature-block {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .signature-block>div {
+            flex: 0 0 auto;
+            min-width: 160px;
         }
     </style>
 </head>
@@ -215,7 +251,8 @@
 
         <div class="document-section text-center">
             <h6>Permit Issued To:</h6>
-            <p class="name" style="font-size: 1.3rem; font-weight: bold; text-transform: uppercase; margin-bottom: 20px;">
+            <p class="name"
+                style="font-size: 1.3rem; font-weight: bold; text-transform: uppercase; margin-bottom: 20px;">
                 {{ $receiptData['organization_name'] ?? $receiptData['user_name'] ?? 'N/A' }}
             </p>
         </div>
@@ -283,7 +320,8 @@
                             <td>
                                 <div class="field-group">
                                     <strong>Request ID</strong>
-                                    <div>#{{ str_pad($receiptData['request_id'] ?? '0000', 4, '0', STR_PAD_LEFT) }}</div>
+                                    <div>#{{ str_pad($receiptData['request_id'] ?? '0000', 4, '0', STR_PAD_LEFT) }}
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -300,15 +338,103 @@
             </tr>
         </table>
 
-        <div class="document-section">
-            <div class="signature-block text-center">
-                <img src="https://cdn.shopify.com/s/files/1/0605/4156/7220/files/example_28.jpg?v=1683798724"
-                    alt="Signature" style="width: 180px; height: auto; ">
-                <p><span class="name">Engr. Dany C. Molina</span></p>
-                <p class="title">VP for Administration</p>
-                <p><small class="text-muted">Date Approved: {{ $receiptData['issued_date'] ?? date('F j, Y') }}</small></p>
-            </div>
+<div class="document-section">
+    <div class="signature-block">
+        <!-- Dynamic Approving Admins - First Row (3 admins) -->
+        @if(isset($receiptData['approving_admins']) && count($receiptData['approving_admins']) > 0)
+            @foreach($receiptData['approving_admins'] as $index => $admin)
+                @if($index < 3) <!-- Limit to 3 admins per row -->
+                    <div>
+                        <div class="signature-image-container">
+                            @if(!empty($admin['signature_url']))
+                                <img src="{{ $admin['signature_url'] }}" alt="Signature">
+                            @else
+                                <div style="width: 100%; height: 100%; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
+                                    <small class="text-muted">No Signature</small>
+                                </div>
+                            @endif
+                        </div>
+                        <p class="name">{{ $admin['name'] }}</p>
+                        <p class="title">{{ $admin['title'] }}</p>
+                        <p><small class="text-muted">Date approved: {{ $admin['date_approved'] ?? 'N/A' }}</small></p>
+                    </div>
+                @endif
+            @endforeach
+        @endif
+    </div>
+
+    <!-- Second row for additional admins if there are more than 3 -->
+    @if(isset($receiptData['approving_admins']) && count($receiptData['approving_admins']) > 3)
+        <div class="signature-block" style="margin-top: 20px;">
+            @foreach($receiptData['approving_admins'] as $index => $admin)
+                @if($index >= 3 && $index < 6) <!-- Second row, limit to 3 more -->
+                    <div>
+                        <div class="signature-image-container">
+                            @if(!empty($admin['signature_url']))
+                                <img src="{{ $admin['signature_url'] }}" alt="Signature">
+                            @else
+                                <div style="width: 100%; height: 100%; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
+                                    <small class="text-muted">No Signature</small>
+                                </div>
+                            @endif
+                        </div>
+                        <p class="name">{{ $admin['name'] }}</p>
+                        <p class="title">{{ $admin['title'] }}</p>
+                        <p><small class="text-muted">Date approved: {{ $admin['date_approved'] ?? 'N/A' }}</small></p>
+                    </div>
+                @endif
+            @endforeach
         </div>
+    @endif
+
+    <!-- Third row for additional admins if there are more than 6 -->
+    @if(isset($receiptData['approving_admins']) && count($receiptData['approving_admins']) > 6)
+        <div class="signature-block" style="margin-top: 20px;">
+            @foreach($receiptData['approving_admins'] as $index => $admin)
+                @if($index >= 6 && $index < 9) <!-- Third row, limit to 3 more -->
+                    <div>
+                        <div class="signature-image-container">
+                            @if(!empty($admin['signature_url']))
+                                <img src="{{ $admin['signature_url'] }}" alt="Signature">
+                            @else
+                                <div style="width: 100%; height: 100%; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
+                                    <small class="text-muted">No Signature</small>
+                                </div>
+                            @endif
+                        </div>
+                        <p class="name">{{ $admin['name'] }}</p>
+                        <p class="title">{{ $admin['title'] }}</p>
+                        <p><small class="text-muted">Date approved: {{ $admin['date_approved'] ?? 'N/A' }}</small></p>
+                    </div>
+                @endif
+            @endforeach
+        </div>
+    @endif
+</div>
+    <!-- Third row for additional admins if there are more than 6 -->
+    @if(isset($receiptData['approving_admins']) && count($receiptData['approving_admins']) > 6)
+        <div class="signature-block" style="margin-top: 20px;">
+            @foreach($receiptData['approving_admins'] as $index => $admin)
+                @if($index >= 6 && $index < 9) <!-- Third row, limit to 3 more -->
+                    <div>
+                        <div class="signature-image-container">
+                            @if(!empty($admin['signature_url']))
+                                <img src="{{ $admin['signature_url'] }}" alt="Signature">
+                            @else
+                                <div style="width: 100%; height: 100%; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
+                                    <small class="text-muted">No Signature</small>
+                                </div>
+                            @endif
+                        </div>
+                        <p class="name">{{ $admin['name'] }}</p>
+                        <p class="title">{{ $admin['title'] }}</p>
+                        <p><small class="text-muted">Date approved: {{ $admin['date_approved'] ?? 'N/A' }}</small></p>
+                    </div>
+                @endif
+            @endforeach
+        </div>
+    @endif
+</div>
     </div>
 
     <small class="text-center mt-4 text-muted d-block">
@@ -317,17 +443,19 @@
     </small>
 
     <div class="print-button-container">
-        <button type="button" class="btn btn-secondary me-2" onclick="window.history.back()">Back to My Bookings</button>
+        <button type="button" class="btn btn-secondary me-2" onclick="window.history.back()">Back to My
+            Bookings</button>
         <button type="button" class="btn btn-primary me-2" onclick="window.print()">Print Receipt & Permit</button>
         <button type="button" class="btn btn-success" id="downloadPdf">Download as PDF</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('downloadPdf').addEventListener('click', function() {
+        document.getElementById('downloadPdf').addEventListener('click', function () {
             // Implement PDF download functionality here
             window.print(); // Temporary solution - replace with proper PDF generation
         });
     </script>
 </body>
+
 </html>
