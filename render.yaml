@@ -1,0 +1,13 @@
+services: 
+  - type: web 
+    name: laravel-app 
+    env: docker 
+    docker: 
+      dockerfile: Dockerfile 
+    envVars: 
+      - key: APP_ENV 
+        value: production 
+      - key: APP_DEBUG 
+        value: false 
+      - key: APP_KEY 
+        fromSecret: app_key 
