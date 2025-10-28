@@ -8,6 +8,29 @@
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <link rel="stylesheet" href="{{ asset('css/public/catalog.css') }}" />
   <style>
+
+    /* Ensure modal and calendar have proper dimensions */
+#availabilityModal .modal-body {
+  min-height: 70vh;
+  padding: 1rem;
+}
+
+#availabilityCalendar {
+  height: 65vh;
+  min-height: 400px;
+}
+
+/* Make sure FullCalendar container is visible */
+.fc .fc-toolbar {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.fc .fc-header-toolbar {
+  margin-bottom: 1em !important;
+}
+    
     /* Fix modal z-index for event details modal */
     #eventDetailModal {
       z-index: 9999 !important;
@@ -461,6 +484,7 @@
 
 @section('scripts')
   <script>
+
 
     // Show event details in modal
     function showEventModal(event) {
@@ -1255,7 +1279,6 @@ function renderItems(items) {
 
     // Set initial layoutDropdown button text and active class on DOMContentLoaded
     document.addEventListener("DOMContentLoaded", function () {
-      // ...existing code...
       // Set initial layoutDropdown button text and active class
       const layoutDropdownBtn = document.getElementById("layoutDropdown");
       if (currentLayout === "grid") {
@@ -1271,7 +1294,6 @@ function renderItems(items) {
           else opt.classList.remove("active");
         });
       }
-      // ...existing code...
     });
 
     // Status dropdown filter
@@ -1364,237 +1386,218 @@ function renderItems(items) {
     }
 
 
-    // Initialize availability calendar for specific item
-    function initializeAvailabilityCalendar(itemId, itemType, itemName) {
-      const calendarEl = document.getElementById('availabilityCalendar');
-      if (!calendarEl) return;
+// Initialize availability calendar for specific item
+function initializeAvailabilityCalendar(itemId, itemType, itemName) {
+  const calendarEl = document.getElementById('availabilityCalendar');
+  if (!calendarEl) return;
 
-      // Clear any existing content first
-      calendarEl.innerHTML = '';
+  // Clear any existing content first and ensure proper structure
+  calendarEl.innerHTML = '<div class="calendar-inner-container" style="height: 100%; position: relative;"></div>';
+  const calendarInner = calendarEl.querySelector('.calendar-inner-container');
 
-      // Create and show loading overlay
-      const loadingOverlay = document.createElement('div');
-      loadingOverlay.className = 'calendar-loading-overlay';
-      loadingOverlay.innerHTML = `
-      <div class="calendar-loading-content">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="mt-2">Loading availability data...</p>
+  // Create and show loading overlay - append to inner container
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.className = 'calendar-loading-overlay';
+  loadingOverlay.innerHTML = `
+    <div class="calendar-loading-content">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
-    `;
+      <p class="mt-2">Loading availability data...</p>
+    </div>
+  `;
 
-      // Add CSS for loading overlay
-      if (!document.querySelector('#calendarLoadingStyles')) {
-        const loadingStyles = document.createElement('style');
-        loadingStyles.id = 'calendarLoadingStyles';
-        loadingStyles.textContent = `
-        .calendar-loading-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: #ffffff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-          border-radius: 0.375rem;
-        }
-        .calendar-loading-content {
-          text-align: center;
-        }
-        .calendar-hidden {
-          visibility: hidden;
-          opacity: 0;
-        }
-        .calendar-visible {
-          visibility: visible;
-          opacity: 1;
-          transition: opacity 0.3s ease-in-out;
-        }
-      `;
-        document.head.appendChild(loadingStyles);
-      }
+  // Add loading overlay to INNER container (not outer)
+  calendarInner.appendChild(loadingOverlay);
 
-      // Add loading overlay to calendar container
-      calendarEl.style.position = 'relative';
-      calendarEl.appendChild(loadingOverlay);
+  // Hide the calendar initially
+  calendarInner.classList.add('calendar-hidden');
 
-      // Hide the calendar initially
-      calendarEl.classList.add('calendar-hidden');
-
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        titleFormat: {
-          year: 'numeric',
-          month: 'short'
-        },
-        height: 'auto',
-        handleWindowResize: true,
-        windowResizeDelay: 100,
-        aspectRatio: 1.5,
-        expandRows: false,
-        events: function (fetchInfo, successCallback, failureCallback) {
-          // Ensure loading overlay is visible and calendar is hidden
-          loadingOverlay.style.display = 'flex';
-          calendarEl.classList.add('calendar-hidden');
-
-          // Fetch events filtered by specific item
-          fetch(`/api/requisition-forms/calendar-events?${itemType}_id=${itemId}`)
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                successCallback(data.data);
-              } else {
-                failureCallback(data.message);
-              }
-            })
-            .catch(error => {
-              failureCallback('Failed to load availability data');
-              console.error('Availability calendar error:', error);
-            })
-            .finally(() => {
-              // Hide loading overlay and show calendar when everything is ready
-              setTimeout(() => {
-                loadingOverlay.style.display = 'none';
-                calendarEl.classList.remove('calendar-hidden');
-                calendarEl.classList.add('calendar-visible');
-                calendar.updateSize();
-              }, 500); // Increased delay to ensure everything is rendered
-            });
-        },
-        loading: function (isLoading) {
-          // FullCalendar's built-in loading callback
-          if (isLoading) {
-            loadingOverlay.style.display = 'flex';
-            calendarEl.classList.add('calendar-hidden');
+  const calendar = new FullCalendar.Calendar(calendarInner, {
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    titleFormat: {
+      year: 'numeric',
+      month: 'long'
+    },
+    buttonText: {
+      today: 'Today',
+      month: 'Month',
+      week: 'Week',
+      day: 'Day'
+    },
+    height: '100%',
+    handleWindowResize: true,
+    windowResizeDelay: 100,
+    aspectRatio: 1.5,
+    expandRows: true,
+    events: function (fetchInfo, successCallback, failureCallback) {
+      // Ensure loading overlay is visible and calendar is hidden
+      loadingOverlay.style.display = 'flex';
+      calendarInner.classList.add('calendar-hidden');
+      
+      // Fetch events filtered by specific item
+      fetch(`/api/requisition-forms/calendar-events?${itemType}_id=${itemId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            successCallback(data.data);
           } else {
-            setTimeout(() => {
-              loadingOverlay.style.display = 'none';
-              calendarEl.classList.remove('calendar-hidden');
-              calendarEl.classList.add('calendar-visible');
-            }, 500);
+            failureCallback(data.message);
           }
-        },
-        eventClick: function (info) {
-          showEventModal(info.event);
-        },
-        eventDidMount: function (info) {
-          info.el.style.backgroundColor = info.event.backgroundColor;
-          info.el.style.borderColor = info.event.borderColor;
-          info.el.style.color = '#fff';
-          info.el.style.fontWeight = 'bold';
-          info.el.style.borderRadius = '4px';
-          info.el.style.padding = '2px 4px';
-          info.el.style.fontSize = '12px';
-        },
-        datesSet: function (info) {
-          // Ensure calendar stays hidden during date changes until fully loaded
-          if (loadingOverlay.style.display !== 'none') {
-            calendarEl.classList.add('calendar-hidden');
-          }
+        })
+        .catch(error => {
+          failureCallback('Failed to load availability data');
+          console.error('Availability calendar error:', error);
+        })
+        .finally(() => {
+          // Hide loading overlay and show calendar when everything is ready
           setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+            calendarInner.classList.remove('calendar-hidden');
+            calendarInner.classList.add('calendar-visible');
             calendar.updateSize();
-          }, 50);
+          }, 500);
+        });
+    },
+    loading: function(isLoading) {
+      if (isLoading) {
+        loadingOverlay.style.display = 'flex';
+        calendarInner.classList.add('calendar-hidden');
+      } else {
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+          calendarInner.classList.remove('calendar-hidden');
+          calendarInner.classList.add('calendar-visible');
+        }, 500);
+      }
+    },
+    eventClick: function (info) {
+      showEventModal(info.event);
+    },
+    eventDidMount: function (info) {
+      info.el.style.backgroundColor = info.event.backgroundColor;
+      info.el.style.borderColor = info.event.borderColor;
+      info.el.style.color = '#fff';
+      info.el.style.fontWeight = 'bold';
+      info.el.style.borderRadius = '4px';
+      info.el.style.padding = '2px 4px';
+      info.el.style.fontSize = '12px';
+    },
+    datesSet: function (info) {
+      setTimeout(() => {
+        calendar.updateSize();
+      }, 50);
+    },
+    viewDidMount: function (info) {
+      setTimeout(() => {
+        calendar.updateSize();
+      }, 100);
+    },
+    eventTimeFormat: {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    },
+    slotMinTime: '06:00:00',
+    slotMaxTime: '22:00:00',
+    allDaySlot: false,
+    nowIndicator: true,
+    navLinks: true,
+    dayHeaderFormat: {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric'
+    },
+    slotLabelFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    },
+    views: {
+      dayGridMonth: {
+        dayHeaderFormat: { weekday: 'short' },
+        fixedWeekCount: false
+      },
+      timeGridWeek: {
+        dayHeaderFormat: {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric'
         },
-        eventTimeFormat: {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        },
-        slotMinTime: '06:00:00',
-        slotMaxTime: '22:00:00',
-        allDaySlot: false,
-        nowIndicator: true,
-        navLinks: true,
+        slotMinTime: '00:00:00',
+        slotMaxTime: '24:00:00'
+      },
+      timeGridDay: {
         dayHeaderFormat: {
           weekday: 'long',
           month: 'short',
           day: 'numeric'
         },
-        slotLabelFormat: {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true
-        },
-        views: {
-          dayGridMonth: {
-            dayHeaderFormat: { weekday: 'short' },
-            fixedWeekCount: false
-          },
-          timeGridWeek: {
-            dayHeaderFormat: {
-              weekday: 'short',
-              month: 'short',
-              day: 'numeric'
-            },
-            slotMinTime: '00:00:00',
-            slotMaxTime: '24:00:00'
-          },
-          timeGridDay: {
-            dayHeaderFormat: {
-              weekday: 'long',
-              month: 'short',
-              day: 'numeric'
-            },
-            slotMinTime: '06:00:00',
-            slotMaxTime: '22:00:00'
-          }
-        },
-        eventDisplay: 'block',
-        dayMaxEvents: 3,
-        moreLinkClick: 'popover',
-        slotDuration: '01:00:00',
-        slotLabelInterval: '01:00:00'
-      });
+        slotMinTime: '06:00:00',
+        slotMaxTime: '22:00:00'
+      }
+    },
+    eventDisplay: 'block',
+    dayMaxEvents: 3,
+    moreLinkClick: 'popover',
+    slotDuration: '01:00:00',
+    slotLabelInterval: '01:00:00'
+  });
 
-      calendar.render();
+  calendar.render();
+  
+  // Update modal title with item name
+  document.getElementById('availabilityModalLabel').textContent = `Availability - ${itemName}`;
 
-      // Update modal title with item name
-      document.getElementById('availabilityModalLabel').textContent = `Availability - ${itemName}`;
+  return calendar;
+}
 
-      return calendar;
+function setupAvailabilityButtons() {
+  catalogItemsContainer.addEventListener("click", (e) => {
+    if ((e.target.classList.contains("btn-custom") || e.target.classList.contains("btn-outline-secondary")) && 
+        e.target.textContent === "Check Availability") {
+      const card = e.target.closest(".catalog-card");
+      const itemId = card.querySelector(".add-remove-btn")?.dataset.id;
+      const itemType = card.querySelector(".add-remove-btn")?.dataset.type;
+      const itemName = card.querySelector("h5")?.textContent.trim();
+      
+      if (itemId && itemType) {
+        showAvailabilityCalendar(itemId, itemType, itemName);
+      }
     }
+  });
+}
 
-    function setupAvailabilityButtons() {
-      catalogItemsContainer.addEventListener("click", (e) => {
-        if ((e.target.classList.contains("btn-custom") || e.target.classList.contains("btn-outline-secondary")) &&
-          e.target.textContent === "Check Availability") {
-          const card = e.target.closest(".catalog-card");
-          const itemId = card.querySelector(".add-remove-btn")?.dataset.id;
-          const itemType = card.querySelector(".add-remove-btn")?.dataset.type;
-          const itemName = card.querySelector("h5")?.textContent.trim();
+// Function to show availability modal
+function showAvailabilityCalendar(itemId, itemType, itemName) {
+  const modalElement = document.getElementById('availabilityModal');
+  const modal = new bootstrap.Modal(modalElement);
+  let availabilityCalendar = null;
 
-          if (itemId && itemType) {
-            showAvailabilityCalendar(itemId, itemType, itemName);
-          }
-        }
-      });
+  // Clear previous calendar on hide
+  modalElement.addEventListener('hidden.bs.modal', function () {
+    if (availabilityCalendar) {
+      availabilityCalendar.destroy();
+      availabilityCalendar = null;
+      document.getElementById('availabilityCalendar').innerHTML = '';
     }
+  });
 
-    // Function to show availability modal
-    function showAvailabilityCalendar(itemId, itemType, itemName) {
-      const modal = new bootstrap.Modal(document.getElementById('availabilityModal'));
-      let availabilityCalendar = null;
+  // Initialize calendar when modal is shown
+  modalElement.addEventListener('shown.bs.modal', function () {
+    // Small delay to ensure modal is fully visible
+    setTimeout(() => {
+      availabilityCalendar = initializeAvailabilityCalendar(itemId, itemType, itemName);
+    }, 50);
+  });
 
-      document.getElementById('availabilityModal').addEventListener('shown.bs.modal', function () {
-        if (!availabilityCalendar) {
-          availabilityCalendar = initializeAvailabilityCalendar(itemId, itemType, itemName);
-        } else {
-          availabilityCalendar.refetchEvents();
-          availabilityCalendar.updateSize();
-        }
-      });
-
-      modal.show();
-    }
+  modal.show();
+}
 
 
     // Main Initialization

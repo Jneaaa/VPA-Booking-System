@@ -25,6 +25,7 @@ class NotificationController extends Controller
         ]);
     }
 
+
     public function markAsRead(Request $request, $notificationId = null)
     {
         $adminId = $request->user()->admin_id;
@@ -38,6 +39,25 @@ class NotificationController extends Controller
             'unread_count' => $unreadCount
         ]);
     }
+
+    public function markRequisitionAsRead(Request $request, $requisitionId)
+{
+    $adminId = $request->user()->admin_id;
+    
+    // Mark notifications for this specific requisition as read
+    \App\Models\Notification::where('admin_id', $adminId)
+        ->whereHas('requisition', function($query) use ($requisitionId) {
+            $query->where('request_id', $requisitionId);
+        })
+        ->update(['is_read' => true]);
+
+    $unreadCount = NotificationService::getUnreadCount($adminId);
+
+    return response()->json([
+        'success' => true,
+        'unread_count' => $unreadCount
+    ]);
+}
 
     public function markAllAsRead(Request $request)
     {

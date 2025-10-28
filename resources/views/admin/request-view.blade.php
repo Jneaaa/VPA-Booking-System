@@ -995,6 +995,56 @@
             let allRequests = [];
             let currentComments = [];
             let currentFees = [];
+              const requestId = {{ $requestId }}; // This will work here because $requestId is passed to this view
+    
+    // Mark notification as read when viewing the request
+    markNotificationAsRead(requestId);
+});
+
+async function markNotificationAsRead(requestId) {
+    try {
+        const adminToken = localStorage.getItem('adminToken');
+        if (!adminToken) {
+            console.error('No authentication token found');
+            return;
+        }
+
+        const response = await fetch(`/api/admin/notifications/requisition/${requestId}/mark-as-read`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${adminToken}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            console.log(`Notification for request ${requestId} marked as read`);
+            // Update the global unread count
+            updateGlobalUnreadCount();
+        } else {
+            console.error('Failed to mark notification as read');
+        }
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+    }
+}
+
+function updateGlobalUnreadCount() {
+    // This would update any global notification badge in the layout
+    const navBadge = document.getElementById('requisitionNotificationBadge');
+    if (navBadge) {
+        // You might want to fetch the updated count from the server
+        // or decrement the current count
+        const currentCount = parseInt(navBadge.textContent) || 0;
+        if (currentCount > 0) {
+            navBadge.textContent = currentCount - 1;
+            if (currentCount - 1 === 0) {
+                navBadge.style.display = 'none';
+            }
+        }
+    }
+}
 
 
             // Initialize Bootstrap modal

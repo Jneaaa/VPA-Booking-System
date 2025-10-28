@@ -991,18 +991,18 @@
                   </div>
                 </div>
 
-<div class="col-4">
-    <label class="form-label required">No. of Participants</label>
-    <input name="num_participants" type="number" class="form-control mb-2" value="1" min="1" required />
-</div>
-<div class="col-4">
-    <label class="form-label required">No. of Chairs</label>
-    <input name="num_chairs" type="number" class="form-control mb-2" value="0" min="0" required />
-</div>
-<div class="col-4">
-    <label class="form-label required">No. of Tables</label>
-    <input name="num_tables" type="number" class="form-control mb-2" value="0" min="0" required />
-</div>
+                <div class="col-4">
+                  <label class="form-label required">No. of Participants</label>
+                  <input name="num_participants" type="number" class="form-control mb-2" value="1" min="1" required />
+                </div>
+                <div class="col-4">
+                  <label class="form-label required">No. of Chairs</label>
+                  <input name="num_chairs" type="number" class="form-control mb-2" value="0" min="0" required />
+                </div>
+                <div class="col-4">
+                  <label class="form-label required">No. of Tables</label>
+                  <input name="num_tables" type="number" class="form-control mb-2" value="0" min="0" required />
+                </div>
 
                 <div class="col-md-6">
                   <label class="form-label">Endorser Name</label>
@@ -1031,95 +1031,99 @@
         </div>
       </div>
 
-      <!-- Step 3: Form Summary -->
-      <div class="step-section" id="step3">
+<!-- Step 3: Form Summary -->
+<div class="step-section" id="step3">
+  <div class="row">
+    <div class="col-12">
+      <div class="form-section-card">
+        <h5 class="fw-bold text-center">Requisition Summary</h5>
+        <small class="d-block text-center text-muted" style="margin-bottom: 2rem;">
+          Please review all information carefully. Submitted requests cannot be edited.
+        </small>
         <div class="row">
-          <div class="col-12">
-            <div class="form-section-card">
-              <h5 class="fw-bold text-center">Requisition Summary</h5>
-              <small class="d-block text-center text-muted" style="margin-bottom: 2rem;">
-                Please review all information carefully. Submitted requests cannot be edited.
-              </small>
-              <div class="row">
-                <!-- Contact Information Summary -->
-                <div class="col-md-6">
-                  <h6 class="border-bottom pb-2">Contact Information</h6>
-                  <div class="summary-item">
-                    <strong>Applicant Type:</strong>
-                    <span id="summary-applicant-type"></span>
-                  </div>
-                  <div class="summary-item">
-                    <strong>Name:</strong>
-                    <span id="summary-name"></span>
-                  </div>
-                  <div class="summary-item">
-                    <strong>Email:</strong>
-                    <span id="summary-email"></span>
-                  </div>
-                  <div class="summary-item">
-                    <strong>Contact Number:</strong>
-                    <span id="summary-contact"></span>
-                  </div>
-                  <div class="summary-item">
-                    <strong>Organization:</strong>
-                    <span id="summary-organization"></span>
-                  </div>
-                  <div class="summary-item" id="summary-school-id-container">
-                    <strong>Student ID:</strong>
-                    <span id="summary-school-id"></span>
-                  </div>
-                </div>
+          <!-- Contact Information Summary -->
+          <div class="col-md-6">
+            <h6 class="border-bottom pb-2">Contact Information</h6>
+            <div class="summary-item">
+              <strong>Applicant Type:</strong>
+              <span id="summary-applicant-type"></span>
+            </div>
+            <div class="summary-item">
+              <strong>Name:</strong>
+              <span id="summary-name"></span>
+            </div>
+            <div class="summary-item">
+              <strong>Email:</strong>
+              <span id="summary-email"></span>
+            </div>
+            <div class="summary-item">
+              <strong>Contact Number:</strong>
+              <span id="summary-contact"></span>
+            </div>
+            <div class="summary-item">
+              <strong>Organization:</strong>
+              <span id="summary-organization"></span>
+            </div>
+            <div class="summary-item" id="summary-school-id-container">
+              <strong>Student ID:</strong>
+              <span id="summary-school-id"></span>
+            </div>
+          </div>
 
-                <!-- Reservation Details Summary -->
-                <div class="col-md-6">
-                  <h6 class="border-bottom pb-2">Reservation Details</h6>
-                  <div class="summary-item">
-                    <strong>Activity/Purpose:</strong>
-                    <span id="summary-purpose"></span>
-                  </div>
-                  <div class="summary-item">
-                    <strong>Schedule:</strong>
-                    <span id="summary-schedule"></span>
-                  </div>
-                  <div class="summary-item">
-                    <strong>Participants:</strong>
-                    <span id="summary-participants"></span>
-                  </div>
-                  <div class="summary-item">
-                    <strong>Chairs/Tables:</strong>
-                    <span id="summary-furniture"></span>
-                  </div>
-                  <div class="summary-item">
-                    <strong>Endorser:</strong>
-                    <span id="summary-endorser"></span>
-                  </div>
-                  <div class="summary-item">
-                    <strong>Additional Requests:</strong>
-                    <span id="summary-requests"></span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Selected Items and Fee Breakdown in the same row -->
-              <div class="row">
-                <!-- Fee Breakdown Summary (Right Column) -->
-                <div class="col-12">
-                  <h6 class="border-bottom pb-2">Fee Breakdown</h6>
-                  <div id="summary-fees">
-                    <!-- Fees will be dynamically populated -->
-                  </div>
-                </div>
-              </div>
+          <!-- Reservation Details Summary -->
+          <div class="col-md-6">
+            <h6 class="border-bottom pb-2">Reservation Details</h6>
+            <div class="summary-item">
+              <strong>Activity/Purpose:</strong>
+              <span id="summary-purpose"></span>
+            </div>
+            <div class="summary-item">
+              <strong>Start Date & Time:</strong>
+              <span id="summary-start"></span>
+            </div>
+            <div class="summary-item">
+              <strong>End Date & Time:</strong>
+              <span id="summary-end"></span>
+            </div>
+            <div class="summary-item">
+              <strong>Participants:</strong>
+              <span id="summary-participants"></span>
+            </div>
+            <div class="summary-item">
+              <strong>Chairs/Tables:</strong>
+              <span id="summary-furniture"></span>
+            </div>
+            <div class="summary-item">
+              <strong>Endorser:</strong>
+              <span id="summary-endorser"></span>
+            </div>
+            <div class="summary-item">
+              <strong>Additional Requests:</strong>
+              <span id="summary-requests"></span>
             </div>
           </div>
         </div>
 
-        <!-- Navigation Buttons for Step 3 -->
-        <div class="navigation-buttons">
-          <button type="button" class="btn btn-secondary" onclick="previousStep(2)">Previous</button>
-          <button type="button" class="btn btn-primary" onclick="openTermsModal(event)">Submit Form</button>
+        <!-- Selected Items and Fee Breakdown in the same row -->
+        <div class="row">
+          <!-- Fee Breakdown Summary (Right Column) -->
+          <div class="col-12">
+            <h6 class="border-bottom pb-2">Fee Breakdown</h6>
+            <div id="summary-fees">
+              <!-- Fees will be dynamically populated -->
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Navigation Buttons for Step 3 -->
+  <div class="navigation-buttons">
+    <button type="button" class="btn btn-secondary" onclick="previousStep(2)">Previous</button>
+    <button type="button" class="btn btn-primary" onclick="openTermsModal(event)">Submit Form</button>
+  </div>
+</div>
     </form>
   </div>
 
@@ -1345,104 +1349,104 @@
       return true;
     }
 
-   function validateStep2() {
-    const reservationForm = document.getElementById('reservationForm');
-    let valid = true;
-    let firstInvalid = null;
-    
-    // Add num_chairs and num_tables to required fields
-    const requiredFields = [
-        'user_type', 'first_name', 'last_name', 'email', 'num_participants', 'purpose_id', 'num_chairs', 'num_tables' 
-    ];
+    function validateStep2() {
+      const reservationForm = document.getElementById('reservationForm');
+      let valid = true;
+      let firstInvalid = null;
 
-    // Clear existing errors
-    reservationForm.querySelectorAll('.is-invalid').forEach(input => clearFieldError(input));
+      // Add num_chairs and num_tables to required fields
+      const requiredFields = [
+        'user_type', 'first_name', 'last_name', 'email', 'num_participants', 'purpose_id', 'num_chairs', 'num_tables'
+      ];
 
-    // Validate required fields
-    requiredFields.forEach(name => {
+      // Clear existing errors
+      reservationForm.querySelectorAll('.is-invalid').forEach(input => clearFieldError(input));
+
+      // Validate required fields
+      requiredFields.forEach(name => {
         const input = reservationForm.querySelector(`[name="${name}"]`);
         if (input) {
-            // Special handling for numeric fields that should be >= 0
-            if (name === 'num_chairs' || name === 'num_tables') {
-                if (input.value === '' || input.value === null || parseInt(input.value) < 0) {
-                    showFieldError(input, 'Please enter a valid number (0 or greater).');
-                    valid = false;
-                    if (!firstInvalid) firstInvalid = input;
-                }
+          // Special handling for numeric fields that should be >= 0
+          if (name === 'num_chairs' || name === 'num_tables') {
+            if (input.value === '' || input.value === null || parseInt(input.value) < 0) {
+              showFieldError(input, 'Please enter a valid number (0 or greater).');
+              valid = false;
+              if (!firstInvalid) firstInvalid = input;
             }
-            else if (!input.value || 
-                (name === 'user_type' && input.value === '') || 
-                (name === 'purpose_id' && (input.value === '' || input.value === null))) {
-                showFieldError(input, 'Please fill in this field.');
-                valid = false;
-                if (!firstInvalid) firstInvalid = input;
-            }
+          }
+          else if (!input.value ||
+            (name === 'user_type' && input.value === '') ||
+            (name === 'purpose_id' && (input.value === '' || input.value === null))) {
+            showFieldError(input, 'Please fill in this field.');
+            valid = false;
+            if (!firstInvalid) firstInvalid = input;
+          }
         }
-    });
+      });
 
-    // School ID validation for Internal applicants
-    const applicantType = document.getElementById('applicantType');
-    const schoolIdInput = document.getElementById('school_id');
-    if (applicantType.value === 'Internal') {
+      // School ID validation for Internal applicants
+      const applicantType = document.getElementById('applicantType');
+      const schoolIdInput = document.getElementById('school_id');
+      if (applicantType.value === 'Internal') {
         clearFieldError(schoolIdInput);
         if (!schoolIdInput.value) {
-            showFieldError(schoolIdInput, 'Please fill in this field.');
-            valid = false;
-            if (!firstInvalid) firstInvalid = schoolIdInput;
+          showFieldError(schoolIdInput, 'Please fill in this field.');
+          valid = false;
+          if (!firstInvalid) firstInvalid = schoolIdInput;
         }
-    } else {
+      } else {
         clearFieldError(schoolIdInput);
-    }
+      }
 
-    // Email format validation
-    const emailInput = reservationForm.querySelector('[name="email"]');
-    if (emailInput && emailInput.value) {
+      // Email format validation
+      const emailInput = reservationForm.querySelector('[name="email"]');
+      if (emailInput && emailInput.value) {
         clearFieldError(emailInput);
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(emailInput.value)) {
-            showFieldError(emailInput, 'Please enter a valid email address.');
-            valid = false;
-            if (!firstInvalid) firstInvalid = emailInput;
+          showFieldError(emailInput, 'Please enter a valid email address.');
+          valid = false;
+          if (!firstInvalid) firstInvalid = emailInput;
         }
-    }
+      }
 
-    // Contact number validation
-    const contactNumberField = document.getElementById('contactNumberField');
-    if (contactNumberField && contactNumberField.value) {
+      // Contact number validation
+      const contactNumberField = document.getElementById('contactNumberField');
+      if (contactNumberField && contactNumberField.value) {
         clearFieldError(contactNumberField);
         if (!/^\d{1,15}$/.test(contactNumberField.value)) {
-            showFieldError(contactNumberField, 'Contact number must be numbers only (max 15 digits).');
-            valid = false;
-            if (!firstInvalid) firstInvalid = contactNumberField;
+          showFieldError(contactNumberField, 'Contact number must be numbers only (max 15 digits).');
+          valid = false;
+          if (!firstInvalid) firstInvalid = contactNumberField;
         }
-    } else {
+      } else {
         clearFieldError(contactNumberField);
-    }
+      }
 
-    // Additional validation for numeric fields to ensure they're not negative
-    const numChairsInput = document.querySelector('input[name="num_chairs"]');
-    const numTablesInput = document.querySelector('input[name="num_tables"]');
-    
-    if (numChairsInput && numChairsInput.value !== '' && parseInt(numChairsInput.value) < 0) {
+      // Additional validation for numeric fields to ensure they're not negative
+      const numChairsInput = document.querySelector('input[name="num_chairs"]');
+      const numTablesInput = document.querySelector('input[name="num_tables"]');
+
+      if (numChairsInput && numChairsInput.value !== '' && parseInt(numChairsInput.value) < 0) {
         showFieldError(numChairsInput, 'Number of chairs cannot be negative.');
         valid = false;
         if (!firstInvalid) firstInvalid = numChairsInput;
-    }
-    
-    if (numTablesInput && numTablesInput.value !== '' && parseInt(numTablesInput.value) < 0) {
+      }
+
+      if (numTablesInput && numTablesInput.value !== '' && parseInt(numTablesInput.value) < 0) {
         showFieldError(numTablesInput, 'Number of tables cannot be negative.');
         valid = false;
         if (!firstInvalid) firstInvalid = numTablesInput;
-    }
+      }
 
-    // Scroll to first invalid field
-    if (firstInvalid) {
+      // Scroll to first invalid field
+      if (firstInvalid) {
         firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
         firstInvalid.focus();
-    }
+      }
 
-    return valid;
-}
+      return valid;
+    }
 
     // ========== HELPER FUNCTIONS ==========
     function showFieldError(input, message) {
@@ -1494,60 +1498,76 @@
     };
 
     // ========== FORM SUMMARY FUNCTIONS ==========
-    function populateFormSummary() {
-      // Contact Information
-      const applicantType = document.getElementById('applicantType');
-      const firstName = document.querySelector('input[name="first_name"]');
-      const lastName = document.querySelector('input[name="last_name"]');
-      const email = document.querySelector('input[name="email"]');
-      const contactNumber = document.querySelector('input[name="contact_number"]');
-      const organizationName = document.querySelector('input[name="organization_name"]');
-      const schoolId = document.getElementById('school_id');
+function populateFormSummary() {
+    // Contact Information
+    const applicantType = document.getElementById('applicantType');
+    const firstName = document.querySelector('input[name="first_name"]');
+    const lastName = document.querySelector('input[name="last_name"]');
+    const email = document.querySelector('input[name="email"]');
+    const contactNumber = document.querySelector('input[name="contact_number"]');
+    const organizationName = document.querySelector('input[name="organization_name"]');
+    const schoolId = document.getElementById('school_id');
 
-      document.getElementById('summary-applicant-type').textContent = applicantType.value || 'Not specified';
-      document.getElementById('summary-name').textContent = `${firstName.value || ''} ${lastName.value || ''}`.trim() || 'Not specified';
-      document.getElementById('summary-email').textContent = email.value || 'Not specified';
-      document.getElementById('summary-contact').textContent = contactNumber.value || 'Not specified';
-      document.getElementById('summary-organization').textContent = organizationName.value || 'Not specified';
+    document.getElementById('summary-applicant-type').textContent = applicantType.value || 'Not specified';
+    document.getElementById('summary-name').textContent = `${firstName.value || ''} ${lastName.value || ''}`.trim() || 'Not specified';
+    document.getElementById('summary-email').textContent = email.value || 'Not specified';
+    document.getElementById('summary-contact').textContent = contactNumber.value || 'Not specified';
+    document.getElementById('summary-organization').textContent = organizationName.value || 'Not specified';
 
-      const schoolIdContainer = document.getElementById('summary-school-id-container');
-      if (applicantType.value === 'Internal' && schoolId.value) {
+    const schoolIdContainer = document.getElementById('summary-school-id-container');
+    if (applicantType.value === 'Internal' && schoolId.value) {
         document.getElementById('summary-school-id').textContent = schoolId.value;
         schoolIdContainer.style.display = 'flex';
-      } else {
+    } else {
         schoolIdContainer.style.display = 'none';
-      }
-
-      // Reservation Details
-      const purposeSelect = document.getElementById('activityPurposeField');
-      const purposeText = purposeSelect.options[purposeSelect.selectedIndex]?.text || 'Not specified';
-      const startDate = document.getElementById('startDateField').value;
-      const endDate = document.getElementById('endDateField').value;
-      const startTime = document.getElementById('startTimeField').value;
-      const endTime = document.getElementById('endTimeField').value;
-      const numParticipants = document.querySelector('input[name="num_participants"]');
-      const numChairs = document.querySelector('input[name="num_chairs"]');
-      const numTables = document.querySelector('input[name="num_tables"]');
-      const endorser = document.querySelector('input[name="endorser"]');
-      const additionalRequests = document.querySelector('textarea[name="additional_requests"]');
-
-      document.getElementById('summary-purpose').textContent = purposeText;
-
-      if (startDate && endDate && startTime && endTime) {
-        const scheduleText = `${startDate} ${startTime} to ${endDate} ${endTime}`;
-        document.getElementById('summary-schedule').textContent = scheduleText;
-      } else {
-        document.getElementById('summary-schedule').textContent = 'Not specified';
-      }
-
-      document.getElementById('summary-participants').textContent = numParticipants.value || '0';
-      document.getElementById('summary-furniture').textContent = `${numChairs.value || '0'} chairs, ${numTables.value || '0'} tables`;
-      document.getElementById('summary-endorser').textContent = endorser.value || 'Not specified';
-      document.getElementById('summary-requests').textContent = additionalRequests.value || 'None';
-
-      // Generate fee breakdown
-      generateFeeBreakdownForSummary();
     }
+
+    // Reservation Details
+    const purposeSelect = document.getElementById('activityPurposeField');
+    const purposeText = purposeSelect.options[purposeSelect.selectedIndex]?.text || 'Not specified';
+    const startDate = document.getElementById('startDateField').value;
+    const endDate = document.getElementById('endDateField').value;
+    const startTime = document.getElementById('startTimeField').value;
+    const endTime = document.getElementById('endTimeField').value;
+    const numParticipants = document.querySelector('input[name="num_participants"]');
+    const numChairs = document.querySelector('input[name="num_chairs"]');
+    const numTables = document.querySelector('input[name="num_tables"]');
+    const endorser = document.querySelector('input[name="endorser"]');
+    const additionalRequests = document.querySelector('textarea[name="additional_requests"]');
+
+    document.getElementById('summary-purpose').textContent = purposeText;
+
+    // Format dates to "January 1, 2025" format and split into start/end
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
+    if (startDate && startTime) {
+        const formattedStartDate = formatDate(startDate);
+        document.getElementById('summary-start').textContent = `${formattedStartDate} ${startTime}`;
+    } else {
+        document.getElementById('summary-start').textContent = 'Not specified';
+    }
+
+    if (endDate && endTime) {
+        const formattedEndDate = formatDate(endDate);
+        document.getElementById('summary-end').textContent = `${formattedEndDate} ${endTime}`;
+    } else {
+        document.getElementById('summary-end').textContent = 'Not specified';
+    }
+
+    document.getElementById('summary-participants').textContent = numParticipants.value || '0';
+    document.getElementById('summary-furniture').textContent = `${numChairs.value || '0'} chairs, ${numTables.value || '0'} tables`;
+    document.getElementById('summary-endorser').textContent = endorser.value || 'Not specified';
+    document.getElementById('summary-requests').textContent = additionalRequests.value || 'None';
+
+    // Generate fee breakdown
+    generateFeeBreakdownForSummary();
+}
 
     // ========== TOAST FUNCTION ==========
     window.showToast = function (message, type = 'success', duration = 3000) {
@@ -1843,11 +1863,31 @@
           return;
         }
 
-        // Get schedule information
+        // Get schedule informations
         const startDate = document.getElementById('startDateField').value;
         const endDate = document.getElementById('endDateField').value;
         const startTime = document.getElementById('startTimeField').value;
         const endTime = document.getElementById('endTimeField').value;
+
+        // Format dates to "January 1, 2025" format
+        let formattedStartDate = '';
+        let formattedEndDate = '';
+
+        if (startDate) {
+          formattedStartDate = new Date(startDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+        }
+
+        if (endDate) {
+          formattedEndDate = new Date(endDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+        }
 
         // Calculate duration in hours
         let durationHours = 0;
@@ -1865,42 +1905,42 @@
         // Facilities breakdown
         const facilityItems = items.filter(i => i.type === 'facility');
         if (facilityItems.length > 0) {
-          htmlContent += '<div class="fee-section"><h6 class="mb-3">Facilities</h6>';
+          htmlContent += '<div class="fee-section"><p class="mb-3 text-primary">Facilities</p>';
           facilityItems.forEach(item => {
             let fee = parseFloat(item.external_fee);
             if (item.rate_type === 'Per Hour' && durationHours > 0) {
               fee = fee * durationHours;
               htmlContent += `
-                            <div class="fee-item d-flex justify-content-between mb-2">
-                                <span>${item.name} (${durationHours.toFixed(1)} hrs)</span>
-                                <div class="text-end">
-                                    <small>₱${parseFloat(item.external_fee).toLocaleString()}/hr</small>
-                                    <div><strong>₱${fee.toLocaleString()}</strong></div>
-                                </div>
+                        <div class="fee-item d-flex justify-content-between mb-2">
+                            <span>${item.name} (${durationHours.toFixed(1)} hrs)</span>
+                            <div class="text-end">
+                                <small>₱${parseFloat(item.external_fee).toLocaleString()}/hr</small>
+                                <div><strong>₱${fee.toLocaleString()}</strong></div>
                             </div>
-                        `;
+                        </div>
+                    `;
             } else {
               htmlContent += `
-                            <div class="fee-item d-flex justify-content-between mb-2">
-                                <span>${item.name}</span>
-                                <span>₱${fee.toLocaleString()}</span>
-                            </div>
-                        `;
+                        <div class="fee-item d-flex justify-content-between mb-2">
+                            <span>${item.name}</span>
+                            <span>₱${fee.toLocaleString()}</span>
+                        </div>
+                    `;
             }
             facilityTotal += fee;
           });
           htmlContent += `
-                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                        <strong>Subtotal</strong>
-                        <strong>₱${facilityTotal.toLocaleString()}</strong>
-                    </div>
-                </div>`;
+                <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                    <strong>Subtotal</strong>
+                    <strong>₱${facilityTotal.toLocaleString()}</strong>
+                </div>
+            </div>`;
         }
 
         // Equipment breakdown
         const equipmentItems = items.filter(i => i.type === 'equipment');
         if (equipmentItems.length > 0) {
-          htmlContent += '<div class="fee-section mt-3"><h6 class="mb-3">Equipment</h6>';
+          htmlContent += '<div class="fee-section mt-3"><p class="mb-3 text-primary">Equipment</p>';
           equipmentItems.forEach(item => {
             let unitFee = parseFloat(item.external_fee);
             const quantity = item.quantity || 1;
@@ -1908,44 +1948,44 @@
             if (item.rate_type === 'Per Hour' && durationHours > 0) {
               itemTotal = itemTotal * durationHours;
               htmlContent += `
-                            <div class="fee-item d-flex justify-content-between mb-2">
-                                <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''} (${durationHours.toFixed(1)} hrs)</span>
-                                <div class="text-end">
-                                    <small>₱${unitFee.toLocaleString()}/hr × ${quantity}</small>
-                                    <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
-                                </div>
+                        <div class="fee-item d-flex justify-content-between mb-2">
+                            <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''} (${durationHours.toFixed(1)} hrs)</span>
+                            <div class="text-end">
+                                <small>₱${unitFee.toLocaleString()}/hr × ${quantity}</small>
+                                <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
                             </div>
-                        `;
+                        </div>
+                    `;
             } else {
               htmlContent += `
-                            <div class="fee-item d-flex justify-content-between mb-2">
-                                <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
-                                <div class="text-end">
-                                    <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
-                                    <strong>₱${itemTotal.toLocaleString()}</strong>
-                                </div>
+                        <div class="fee-item d-flex justify-content-between mb-2">
+                            <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
+                            <div class="text-end">
+                                <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
+                                <strong>₱${itemTotal.toLocaleString()}</strong>
                             </div>
-                        `;
+                        </div>
+                    `;
             }
             equipmentTotal += itemTotal;
           });
           htmlContent += `
-                    <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                        <strong>Subtotal</strong>
-                        <strong>₱${equipmentTotal.toLocaleString()}</strong>
-                    </div>
-                </div>`;
+                <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                    <strong>Subtotal</strong>
+                    <strong>₱${equipmentTotal.toLocaleString()}</strong>
+                </div>
+            </div>`;
         }
 
         // Total
         const total = facilityTotal + equipmentTotal;
         if (total > 0) {
           htmlContent += `
-                    <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
-                        <h6 class="mb-0">Total Amount</h6>
-                        <h6 class="mb-0">₱${total.toLocaleString()}</h6>
-                    </div>
-                `;
+                <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
+                    <h6 class="mb-0">Total Amount</h6>
+                    <h6 class="mb-0">₱${total.toLocaleString()}</h6>
+                </div>
+            `;
         } else {
           htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
         }
@@ -2376,15 +2416,15 @@
       }
     };
 
-  window.submitForm = async function() {
-    try {
+    window.submitForm = async function () {
+      try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         const modal = document.getElementById('termsModal');
         const confirmBtn = document.getElementById('confirmSubmitBtn');
 
         let termsModalInstance = bootstrap.Modal.getInstance(modal);
         if (!termsModalInstance) {
-            termsModalInstance = new bootstrap.Modal(modal);
+          termsModalInstance = new bootstrap.Modal(modal);
         }
 
         // Show loading state
@@ -2406,59 +2446,59 @@
         const dateEndorsedInput = document.querySelector('input[name="date_endorsed"]');
 
         if (!firstNameInput || !lastNameInput || !emailInput) {
-            throw new Error('Required contact fields are missing in the form.');
+          throw new Error('Required contact fields are missing in the form.');
         }
 
         const formData = {
-            start_date: document.getElementById('startDateField').value,
-            end_date: document.getElementById('endDateField').value,
-            start_time: convertTo24Hour(document.getElementById('startTimeField').value),
-            end_time: convertTo24Hour(document.getElementById('endTimeField').value),
-            purpose_id: document.getElementById('activityPurposeField').value,
-            num_participants: numParticipantsInput ? numParticipantsInput.value : 1,
-            // ADD THESE LINES - ensure they're included in the form data
-            num_chairs: numChairsInput ? parseInt(numChairsInput.value) || 0 : 0,
-            num_tables: numTablesInput ? parseInt(numTablesInput.value) || 0 : 0,
-            endorser: endorserInput?.value || null,
-            date_endorsed: dateEndorsedInput?.value || null,
-            additional_requests: additionalRequestsInput ? additionalRequestsInput.value : '',
-            formal_letter_url: document.getElementById('formal_letter_url').value || null,
-            formal_letter_public_id: document.getElementById('formal_letter_public_id').value || null,
-            facility_layout_url: document.getElementById('facility_layout_url')?.value || null,
-            facility_layout_public_id: document.getElementById('facility_layout_public_id')?.value || null,
-            first_name: firstNameInput.value,
-            last_name: lastNameInput.value,
-            email: emailInput.value,
-            contact_number: contactNumberInput?.value || null,
-            organization_name: organizationNameInput?.value || null,
-            user_type: document.getElementById('applicantType').value,
-            school_id: document.getElementById('applicantType').value === 'Internal'
-                ? (schoolIdInput ? schoolIdInput.value : null)
-                : null
+          start_date: document.getElementById('startDateField').value,
+          end_date: document.getElementById('endDateField').value,
+          start_time: convertTo24Hour(document.getElementById('startTimeField').value),
+          end_time: convertTo24Hour(document.getElementById('endTimeField').value),
+          purpose_id: document.getElementById('activityPurposeField').value,
+          num_participants: numParticipantsInput ? numParticipantsInput.value : 1,
+          // ADD THESE LINES - ensure they're included in the form data
+          num_chairs: numChairsInput ? parseInt(numChairsInput.value) || 0 : 0,
+          num_tables: numTablesInput ? parseInt(numTablesInput.value) || 0 : 0,
+          endorser: endorserInput?.value || null,
+          date_endorsed: dateEndorsedInput?.value || null,
+          additional_requests: additionalRequestsInput ? additionalRequestsInput.value : '',
+          formal_letter_url: document.getElementById('formal_letter_url').value || null,
+          formal_letter_public_id: document.getElementById('formal_letter_public_id').value || null,
+          facility_layout_url: document.getElementById('facility_layout_url')?.value || null,
+          facility_layout_public_id: document.getElementById('facility_layout_public_id')?.value || null,
+          first_name: firstNameInput.value,
+          last_name: lastNameInput.value,
+          email: emailInput.value,
+          contact_number: contactNumberInput?.value || null,
+          organization_name: organizationNameInput?.value || null,
+          user_type: document.getElementById('applicantType').value,
+          school_id: document.getElementById('applicantType').value === 'Internal'
+            ? (schoolIdInput ? schoolIdInput.value : null)
+            : null
         };
 
         console.log('Submitting form data:', formData);
 
         // Submit form
         const submitResponse = await fetch('/requisition/submit', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-            credentials: 'include'
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+          credentials: 'include'
         });
 
         if (!submitResponse.ok) {
-            const errorData = await submitResponse.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Submission failed');
+          const errorData = await submitResponse.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Submission failed');
         }
 
         const result = await submitResponse.json();
 
         if (!result.success) {
-            throw new Error(result.message || 'Submission failed');
+          throw new Error(result.message || 'Submission failed');
         }
 
         // Hide the terms modal
@@ -2466,7 +2506,7 @@
 
         // Show success details
         document.getElementById('successDetails').innerHTML =
-            `Your request ID: ${result.data.request_id}<br>Access Code: ${result.data.access_code}`;
+          `Your request ID: ${result.data.request_id}<br>Access Code: ${result.data.access_code}`;
 
         document.getElementById('userEmail').textContent = formData.email;
 
@@ -2476,10 +2516,10 @@
 
         // Clear session data
         await fetch('/requisition/clear-session', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
-            }
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken
+          }
         });
 
         // Reset form
@@ -2489,18 +2529,18 @@
         await renderSelectedItems();
         await calculateAndDisplayFees();
 
-    } catch (error) {
+      } catch (error) {
         console.error('Error submitting form:', error);
         showToast(error.message || 'Failed to submit form', 'error');
 
         // Reset button state
         const confirmBtn = document.getElementById('confirmSubmitBtn');
         if (confirmBtn) {
-            confirmBtn.classList.remove('loading');
-            confirmBtn.disabled = false;
+          confirmBtn.classList.remove('loading');
+          confirmBtn.disabled = false;
         }
-    }
-};
+      }
+    };
 
     // ========== FILE UPLOAD FUNCTIONS ==========
     async function uploadToCloudinary(input) {
