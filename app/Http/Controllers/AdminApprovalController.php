@@ -2359,61 +2359,92 @@ private function updateEquipmentConditions($form)
     }
 
     // Get form by access code (Requester side)
-    public function getFormByAccessCode($accessCode)
-    {
-        try {
-            $form = RequisitionForm::with([
-                'formStatus:status_id,status_name,color_code',
-                'requestedFacilities.facility:facility_id,facility_name',
-                'requestedEquipment.equipment:equipment_id,equipment_name',
-                'purpose:purpose_id,purpose_name',
-                'requisitionFees'
-            ])->where('access_code', $accessCode)->firstOrFail();
+public function getFormByAccessCode($accessCode)
+{
+    try {
+        $form = RequisitionForm::with([
+            'formStatus:status_id,status_name,color_code',
+            'requestedFacilities.facility:facility_id,facility_name,external_fee,rate_type',
+            'requestedEquipment.equipment:equipment_id,equipment_name,external_fee,rate_type',
+            'purpose:purpose_id,purpose_name',
+            'requisitionFees'
+        ])->where('access_code', $accessCode)->firstOrFail();
 
-            // Transform response
-            $result = [
-                'request_id' => $form->request_id,
-                'user_type' => $form->user_type,
-                'first_name' => $form->first_name,
-                'last_name' => $form->last_name,
-                'email' => $form->email,
-                'organization_name' => $form->organization_name,
-                'contact_number' => $form->contact_number,
-                'access_code' => $form->access_code,
-                'num_participants' => $form->num_participants,
-                'start_date' => $form->start_date,
-                'end_date' => $form->end_date,
-                'start_time' => $form->start_time,
-                'end_time' => $form->end_time,
-                'calendar_title' => $form->calendar_title,
-                'calendar_description' => $form->calendar_description,
+        // Calculate fees like in the admin method
+        $facilityFees = $form->requestedFacilities->sum(function ($facility) {
+            return $facility->is_waived ? 0 : $facility->facility->external_fee;
+        });
 
-                // Only names
-                'requested_facilities' => $form->requestedFacilities->map(fn($rf) => [
-                    'facility_name' => $rf->facility->facility_name
-                ]),
+        $equipmentFees = $form->requestedEquipment->sum(function ($equipment) {
+            return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
+        });
 
-                'requested_equipment' => $form->requestedEquipment->map(fn($re) => [
-                    'equipment_name' => $re->equipment->equipment_name
-                ]),
-
-                'form_status' => $form->formStatus,
-                'purpose' => $form->purpose,
-
-                // Use the approved fee
-                'total_fee' => $form->approved_fee
-            ];
-
-            return response()->json($result);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Form not found',
-                'details' => $e->getMessage()
-            ], 404);
+        $totalTentativeFee = $facilityFees + $equipmentFees;
+        if ($form->is_late) {
+            $totalTentativeFee += $form->late_penalty_fee;
         }
-    }
 
+        // Calculate approved fee including requisition fees
+        $approvedFee = $this->calculateApprovedFee($form);
+
+        // Transform response
+        $result = [
+            'request_id' => $form->request_id,
+            'user_type' => $form->user_type,
+            'first_name' => $form->first_name,
+            'last_name' => $form->last_name,
+            'email' => $form->email,
+            'organization_name' => $form->organization_name,
+            'contact_number' => $form->contact_number,
+            'access_code' => $form->access_code,
+            'num_participants' => $form->num_participants,
+            'start_date' => $form->start_date,
+            'end_date' => $form->end_date,
+            'start_time' => $form->start_time,
+            'end_time' => $form->end_time,
+            'calendar_title' => $form->calendar_title,
+            'calendar_description' => $form->calendar_description,
+
+            // Include fee data in facilities and equipment
+            'requested_facilities' => $form->requestedFacilities->map(fn($rf) => [
+                'facility_name' => $rf->facility->facility_name,
+                'external_fee' => $rf->facility->external_fee,
+                'rate_type' => $rf->facility->rate_type,
+                'is_waived' => $rf->is_waived
+            ]),
+
+            'requested_equipment' => $form->requestedEquipment->map(fn($re) => [
+                'equipment_name' => $re->equipment->equipment_name,
+                'external_fee' => $re->equipment->external_fee,
+                'rate_type' => $re->equipment->rate_type,
+                'quantity' => $re->quantity,
+                'is_waived' => $re->is_waived
+            ]),
+
+            'form_status' => $form->formStatus,
+            'purpose' => $form->purpose,
+
+            // Use the same fees structure as admin API
+            'fees' => [
+                'tentative_fee' => $totalTentativeFee,
+                'approved_fee' => $approvedFee,
+                'late_penalty_fee' => $form->late_penalty_fee,
+                'is_late' => $form->is_late
+            ],
+
+            // Keep total_fee for backward compatibility
+            'total_fee' => $approvedFee
+        ];
+
+        return response()->json($result);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Form not found',
+            'details' => $e->getMessage()
+        ], 404);
+    }
+}
     public function uploadPaymentReceipt(Request $request, $requestId)
     {
         try {

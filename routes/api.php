@@ -162,6 +162,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/notifications/mark-read/{notificationId?}', [NotificationController::class, 'markAsRead']);
     Route::post('/admin/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
     Route::get('/feedback', [FeedbackController::class, 'index']);
+    Route::post('/admin/notifications/requisition/{requisitionId}/mark-as-read', [NotificationController::class, 'markRequisitionAsRead'])
+    ->middleware('auth:admin');
 
     // ---------------- Equipment Management ---------------- //
     Route::post('admin/equipment', [EquipmentController::class, 'store']);

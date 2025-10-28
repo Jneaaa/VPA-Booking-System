@@ -122,6 +122,7 @@
       gap: 1rem;
       overflow-y: auto;
       max-height: calc(100vh - 300px);
+      padding: 1rem; /* Added padding for requisitionContainer */
     }
 
     /* Center content for empty state */
@@ -395,6 +396,7 @@ function generateApprovalHistoryHTML(history) {
         console.error('No request ID provided');
         return;
       }
+      // Mark as read when managing the request
       window.location.href = `/admin/requisition/${requestId}`;
     }
 
@@ -447,8 +449,7 @@ function generateApprovalHistoryHTML(history) {
       const sortFilter = document.getElementById('sortFilter');
       const searchInput = document.getElementById('searchInput');
       const searchButton = document.getElementById('searchButton');
-
-
+      
       let unreadRequests = new Set();
       let currentLayout = 'compact'; // Set compact as default
       let formsData = []; // Store forms data to avoid refetching
@@ -512,6 +513,7 @@ function generateApprovalHistoryHTML(history) {
           requisitionContainer.classList.remove('cards-grid');
           requisitionContainer.classList.add('overflow-auto');
           requisitionContainer.style.maxHeight = 'calc(100vh - 300px)';
+          requisitionContainer.style.padding = '1rem'; // Added padding for detailed layout
         }
 
         forms.forEach(form => {
@@ -525,7 +527,7 @@ function generateApprovalHistoryHTML(history) {
           if (currentLayout === 'compact') {
             cardHtml = `
                     <div class="card requisition-card compact-card mb-1 ${isUnread ? 'unread-card' : ''}" 
-                         data-request-id="${form.request_id}" style="cursor: pointer;">
+                         data-request-id="${form.request_id}">
                         ${isUnread ? '<span class="request-badge"></span>' : ''}
                         <div class="card-body p-1">
                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -570,7 +572,7 @@ function generateApprovalHistoryHTML(history) {
           } else {
             cardHtml = `
       <div class="card requisition-card ${isUnread ? 'unread-card' : ''}" 
-           data-request-id="${form.request_id}" style="cursor: pointer;">
+           data-request-id="${form.request_id}">
           ${isUnread ? '<span class="request-badge"></span>' : ''}
           <div class="card-body">
               <div class="d-flex justify-content-between align-items-start mb-3">
@@ -608,24 +610,18 @@ function generateApprovalHistoryHTML(history) {
       }
 
       function addCardEventListeners() {
-        // Card click to mark as read
-        document.querySelectorAll('.requisition-card').forEach(card => {
-          card.addEventListener('click', function () {
-            const requestId = this.getAttribute('data-request-id');
-            markRequestAsRead(requestId);
-          });
-        });
+        // REMOVED: Card click to mark as read - now only the manage button will mark as read
 
-        // Manage button
-        document.querySelectorAll('.manage-btn').forEach(btn => {
-          btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            const requestId = this.getAttribute('data-request-id');
-            handleManage(requestId);
-          });
-        });
+        // Manage button - now marks as read
+document.querySelectorAll('.manage-btn').forEach(btn => {
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    const requestId = this.getAttribute('data-request-id');
+    handleManage(requestId);
+  });
+});
 
-        // History button
+        // History button - does NOT mark as read
         document.querySelectorAll('.view-history-btn').forEach(btn => {
           btn.addEventListener('click', function (e) {
             e.stopPropagation();
