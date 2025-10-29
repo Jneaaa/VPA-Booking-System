@@ -5,56 +5,6 @@
 @section('content')
 
     <style>
-        /* Equipment Item Image Styles */
-        #equipment-image-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 1rem 0;
-            padding: 0.40rem;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.36);
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        #equipment-item-image {
-            max-width: 200px;
-            max-height: 150px;
-            border-radius: 8px;
-            border: 2px solid #e9ecef;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Button disabled states */
-        .button-small:disabled {
-            opacity: 0.6;
-            cursor: not-allowed !important;
-        }
-
-        .button-small:disabled:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Ensure both status badges display inline and have proper spacing */
-        .info-item .badge-status {
-            display: inline-block;
-            padding: 0.3rem 0.75rem;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-
-        /* Make sure the info items have proper spacing */
-        .info-item {
-            margin: 0.5rem 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
 
         /* Scanner layout */
         #scannerContainer {
@@ -238,13 +188,6 @@
             }
         }
     </style>
-    <!-- Pass conditions data from backend to frontend -->
-    @php
-        $conditions = \App\Models\LookupTables\Condition::all()->pluck('condition_name', 'condition_id')->toArray();
-    @endphp
-    <script>
-        window.conditions = @json($conditions);
-    </script>
 
     <main>
         <div id="scannerContainer">
@@ -265,33 +208,28 @@
                 </div>
             </div>
 
-        <!-- Equipment Details Section -->
-<div class="info-box" id="equipment-info" style="display:none;">
-    <h5>Equipment Details</h5>
+            <!-- Equipment Details Section -->
+            <div class="info-box" id="equipment-info" style="display:none;">
+                <h5>Equipment Details</h5>
+                <div class="info-item"><span class="info-label">Name:</span> <span class="info-value" id="eq-name"></span>
+                </div>
+                <div class="info-item"><span class="info-label">Department:</span> <span class="info-value"
+                        id="eq-department"></span></div>
+                <div class="info-item"><span class="info-label">Status:</span> <span class="info-value"><span id="eq-status"
+                            class="badge-status"></span></span></div>
+                <div class="info-item"><span class="info-label">Available Stock:</span> <span class="info-value"
+                        id="eq-stock"></span></div>
+                <div class="info-item"><span class="info-label">Price:</span> <span class="info-value">₱<span
+                            id="eq-price"></span></span></div>
+                <div class="info-item"><span class="info-label">Description:</span> <span class="info-value"
+                        id="eq-description"></span></div>
 
-    <!-- Equipment Item Image -->
-    <div id="equipment-image-container">
-        <img id="equipment-item-image" src="" alt="Equipment Item" style="display:none;">
-    </div>
-
-    <div class="info-item"><span class="info-label">Name:</span> <span class="info-value" id="eq-name"></span></div>
-    <div class="info-item"><span class="info-label">Department:</span> <span class="info-value" id="eq-department"></span></div>
-
-    <!-- Condition Status -->
-    <div class="info-item"><span class="info-label">Condition:</span> <span class="info-value"><span id="eq-condition" class="badge-status"></span></span></div>
-
-    <div class="info-item"><span class="info-label">Available Stock:</span> <span class="info-value" id="eq-stock"></span></div>
-    <div class="info-item"><span class="info-label">Price:</span> <span class="info-value">₱<span id="eq-price"></span></span></div>
-    
-    <!-- Changed from "Description" to "Item Notes" -->
-    <div class="info-item"><span class="info-label">Item Notes:</span> <span class="info-value" id="eq-description"></span></div>
-
-    <!-- Action buttons -->
-    <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
-        <button id="borrow-btn" class="button-small" style="background: #28a745; color: white;">Borrow</button>
-        <button id="return-btn" class="button-small" style="background: #17a2b8; color: white;">Return</button>
-    </div>
-</div>
+                <!-- Action buttons -->
+                <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+                    <button id="borrow-btn" class="button-small" style="background: #28a745; color: white;">Borrow</button>
+                    <button id="return-btn" class="button-small" style="background: #17a2b8; color: white;">Return</button>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -316,10 +254,6 @@
             const eqStock = document.getElementById("eq-stock");
             const eqPrice = document.getElementById("eq-price");
             const eqDescription = document.getElementById("eq-description");
-            const eqCondition = document.getElementById("eq-condition");
-            const equipmentImage = document.getElementById("equipment-item-image");
-            const equipmentImageContainer = document.getElementById("equipment-image-container");
-
 
             const stopBtn = document.getElementById("stop-scan");
             const resumeBtn = document.getElementById("resume-scan");
@@ -337,172 +271,80 @@
             // Choose prefix used in your system. Change if different.
             const SYSTEM_PREFIX = "EQ-";
 
-            function getConditionName(conditionId) {
-                // Use the conditions data passed from Laravel
-                return window.conditions[conditionId] || "Unknown";
-            }
-
-            function getStatusClass(conditionName) {
-                if (!conditionName) return "status-unavailable";
-
-                // Map condition names to appropriate status classes
-                const conditionMap = {
-                    'new': 'status-available',
-                    'good': 'status-available',
-                    'fair': 'status-available',
-                    'available': 'status-available',
-                    'needs maintenance': 'status-maintenance',
-                    'under maintenance': 'status-maintenance',
-                    'damaged': 'status-unavailable',
-                    'in use': 'status-used',
-                    'unavailable': 'status-unavailable'
-                };
-
-                const normalizedCondition = conditionName.toLowerCase().trim();
-                return conditionMap[normalizedCondition] || "status-unavailable";
-            }
-
-async function fetchEquipmentDetails(code) {
-    try {
-        const response = await fetch(`/api/scanner/scan`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ barcode: code })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Equipment not found");
-        }
-
-        if (data.status === 'error') {
-            throw new Error(data.message);
-        }
-
-        // Update to match the response structure from ScannerController
-        const item = data.item;
-        const equipment = item.equipment_details;
-
-        // FIX: Use item_name from equipment_items table instead of equipment name
-        eqName.textContent = item.item_name || "N/A";
-        eqDepartment.textContent = equipment.department_id || "N/A";
-
-        // Display Condition Status
-        const conditionName = item.condition_name || getConditionName(item.condition_id);
-        eqCondition.textContent = conditionName;
-        eqCondition.className = "badge-status " + getConditionStatusClass(conditionName);
-
-        // FIX: Use the accurate stock calculation
-        eqStock.textContent = data.available_stock + " / " + data.total_stock;
-        eqPrice.textContent = equipment.external_fee || "0.00";
-        
-        // Display item_notes instead of equipment description
-        eqDescription.textContent = item.item_notes || "No notes available";
-
-        // Display Equipment Item Image
-        displayEquipmentItemImage(item);
-
-        // Update action buttons based on item condition
-        updateActionButtons(item);
-
-        // STORE THE EQUIPMENT ID FOR LATER USE IN UPDATE FUNCTION
-        window.currentEquipmentId = equipment.equipment_id;
-
-        infoBox.style.display = "block";
-
-    } catch (error) {
-        console.error("Error fetching equipment:", error);
-        eqName.textContent = "Not Found";
-        eqDepartment.textContent = "-";
-        eqCondition.textContent = "Unknown";
-        eqCondition.className = "badge-status status-unavailable";
-        eqStock.textContent = "0";
-        eqPrice.textContent = "0.00";
-        eqDescription.textContent = error.message || "No notes available";
-
-        // Hide image on error
-        equipmentImage.style.display = "none";
-
-        infoBox.style.display = "block";
-        showToast(error.message || 'Equipment not found in database', 'error');
-    }
-}
-            function displayEquipmentItemImage(item) {
-                if (item.cloudinary_public_id && item.cloudinary_public_id !== 'oxvsxogzu9koqhctnf7s') {
-                    // Construct Cloudinary URL with transformations
-                    const imageUrl = `https://res.cloudinary.com/dn98ntlkd/image/upload/w_300,h_200,c_fill/${item.cloudinary_public_id}.webp`;
-
-                    equipmentImage.src = imageUrl;
-                    equipmentImage.alt = item.item_name || 'Equipment Item';
-                    equipmentImage.style.display = 'block';
-
-                    // Add error handling for broken images
-                    equipmentImage.onerror = function () {
-                        console.warn('Failed to load equipment item image, using fallback');
-                        equipmentImage.style.display = 'none';
-                    };
-                } else {
-                    // Hide image if no valid public_id or using default placeholder
-                    equipmentImage.style.display = 'none';
+            function getStatusClass(status) {
+                if (!status) return "status-unavailable";
+                switch (status.toLowerCase()) {
+                    case "available": return "status-available";
+                    case "used": return "status-used";
+                    case "under maintenance": return "status-maintenance";
+                    case "unavailable": return "status-unavailable";
+                    default: return "status-unavailable";
                 }
             }
 
-            function getConditionStatusClass(conditionName) {
-                if (!conditionName) return "status-unavailable";
+            async function fetchEquipmentDetails(code) {
+                try {
+                    const response = await fetch(`/api/scanner/scan`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ barcode: code })
+                    });
 
-                // Map condition names to appropriate status classes
-                const conditionMap = {
-                    'new': 'status-available',
-                    'good': 'status-available',
-                    'fair': 'status-available',
-                    'needs maintenance': 'status-maintenance',
-                    'damaged': 'status-unavailable',
-                    'in use': 'status-used'
-                };
+                    const data = await response.json();
 
-                const normalizedCondition = conditionName.toLowerCase().trim();
-                return conditionMap[normalizedCondition] || "status-unavailable";
-            }
+                    if (!response.ok) {
+                        throw new Error(data.message || "Equipment not found");
+                    }
 
-            function updateActionButtons(itemData) {
-                const borrowBtn = document.getElementById('borrow-btn');
-                const returnBtn = document.getElementById('return-btn');
+                    if (data.status === 'error') {
+                        throw new Error(data.message);
+                    }
 
-                // Disable borrow button if condition is 'In Use' (condition_id = 6)
-                if (itemData.condition_id === 6) {
-                    borrowBtn.disabled = true;
-                    borrowBtn.style.opacity = '0.6';
-                    borrowBtn.style.cursor = 'not-allowed';
-                    borrowBtn.title = 'Cannot borrow - Item is already in use';
-                } else {
-                    borrowBtn.disabled = false;
-                    borrowBtn.style.opacity = '1';
-                    borrowBtn.style.cursor = 'pointer';
-                    borrowBtn.title = 'Borrow this item';
-                }
+                    // Update to match the response structure from ScannerController
+                    const item = data.item;
+                    const equipment = item.equipment_details;
 
-                // Enable return button only if item is "In Use" (condition_id = 6)
-                if (itemData.condition_id === 6) {
-                    returnBtn.disabled = false;
-                    returnBtn.style.opacity = '1';
-                    returnBtn.style.cursor = 'pointer';
-                    returnBtn.title = 'Return this item';
-                } else {
-                    returnBtn.disabled = true;
-                    returnBtn.style.opacity = '0.6';
-                    returnBtn.style.cursor = 'not-allowed';
-                    returnBtn.title = 'Cannot return - Item is not in use';
+                    eqName.textContent = equipment.name || "N/A";
+                    eqDepartment.textContent = equipment.department_id || "N/A";
+                    eqStatus.textContent = item.availability_status?.status_name || "Unavailable";
+                    eqStatus.className = "badge-status " + getStatusClass(item.availability_status?.status_name || "");
+                    eqStock.textContent = data.available_stock + " / " + data.total_stock;
+                    eqPrice.textContent = equipment.external_fee || "0.00";
+                    eqDescription.textContent = equipment.description || "No description";
+
+                    // Show current bookings if any
+                    if (data.current_bookings && data.current_bookings.length > 0) {
+                        eqDescription.textContent += `\n\nCurrent Bookings:`;
+                        data.current_bookings.forEach(booking => {
+                            eqDescription.textContent += `\n• ${booking.requester} (${booking.start_date} to ${booking.end_date})`;
+                        });
+                    }
+
+                    infoBox.style.display = "block";
+                    showToast('Equipment found successfully!', 'success');
+
+                } catch (error) {
+                    console.error("Error fetching equipment:", error);
+                    eqName.textContent = "Not Found";
+                    eqDepartment.textContent = "-";
+                    eqStatus.textContent = "Unavailable";
+                    eqStatus.className = "badge-status status-unavailable";
+                    eqStock.textContent = "0";
+                    eqPrice.textContent = "0.00";
+                    eqDescription.textContent = error.message || "No data available";
+                    infoBox.style.display = "block";
+                    showToast(error.message || 'Equipment not found in database', 'error');
                 }
             }
 
             // Called when a barcode/QR is decoded
             async function onScanSuccess(decodedText) {
+                console.log('Raw scanned text:', decodedText);
 
                 if (!decodedText) {
                     showToast("No barcode data detected", "error");
@@ -535,6 +377,8 @@ async function fetchEquipmentDetails(code) {
 
                 // Final cleanup - only allow alphanumeric and hyphen
                 cleanBarcode = cleanBarcode.replace(/[^A-Z0-9\-]/gi, '');
+
+                console.log('Cleaned barcode for lookup:', cleanBarcode);
 
                 // Store the current barcode for later use
                 currentBarcode = cleanBarcode;
@@ -595,6 +439,7 @@ async function fetchEquipmentDetails(code) {
                 }
             }
 
+            // Borrow function
             async function handleBorrow() {
                 if (!currentBarcode) return;
 
@@ -607,196 +452,63 @@ async function fetchEquipmentDetails(code) {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({
-                            barcode: currentBarcode
+                            barcode: currentBarcode,
+                            quantity: 1,
+                            requisition_form_id: 1 // You'll need to get this from somewhere
                         })
                     });
 
-                    // Check if response is OK before parsing JSON
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
                     const data = await response.json();
 
-                    if (data.status === 'success') {
-                        showToast(data.message || 'Item borrowed successfully.', 'success');
+                    if (data.status === 'confirmation_required') {
+                        // Show confirmation UI with countdown
+                        showConfirmationUI('borrow', data.confirmation_timeout);
+                    } else if (data.status === 'success') {
+                        alert('Item borrowed successfully!');
                         fetchEquipmentDetails(currentBarcode); // Refresh data
                     } else {
-                        throw new Error(data.message || 'Unknown error occurred');
+                        alert('Error: ' + data.message);
                     }
                 } catch (error) {
                     console.error('Borrow error:', error);
-                    showToast('Failed to process borrow request: ' + error.message, 'error');
+                    alert('Failed to process borrow request');
                 }
             }
 
-async function handleReturn() {
-    if (!currentBarcode) return;
+            // Return function
+            async function handleReturn() {
+                if (!currentBarcode) return;
 
-    try {
-        const response = await fetch('/api/scanner/return', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({
-                barcode: currentBarcode
-            })
-        });
+                try {
+                    const response = await fetch('/api/scanner/return', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            barcode: currentBarcode,
+                            quantity: 1
+                        })
+                    });
 
-        // Check if response is OK before parsing JSON
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+                    const data = await response.json();
 
-        const data = await response.json();
-
-        if (data.status === 'success') {
-            showUpdateItemModal(data.item);
-            
-        } else {
-            throw new Error(data.message || 'Unknown error occurred');
-        }
-    } catch (error) {
-        console.error('Return error:', error);
-        showToast('Failed to process return request: ' + error.message, 'error');
-    }
-}
-
-            // Function to show update item modal
-      function showUpdateItemModal(itemData) {
-    // Store the item data for later use
-    window.currentItemData = itemData;
-    
-    // Create Bootstrap modal if it doesn't exist
-    let updateModal = document.getElementById('update-item-modal');
-    if (!updateModal) {
-        updateModal = document.createElement('div');
-        updateModal.id = 'update-item-modal';
-        updateModal.className = 'modal fade';
-        updateModal.tabIndex = -1;
-        updateModal.innerHTML = `
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Update Equipment Item</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="update-item-form">
-                            <div class="mb-3">
-                                <label class="form-label">Item Name:</label>
-                                <input type="text" id="item-name" name="item_name" class="form-control" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Condition:</label>
-                                <select id="item-condition" name="condition_id" class="form-select">
-                                    <option value="1">New</option>
-                                    <option value="2">Good</option>
-                                    <option value="3">Fair</option>
-                                    <option value="4">Needs Maintenance</option>
-                                    <option value="5">Damaged</option>
-                                    <option value="6">In Use</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Item Notes:</label>
-                                <textarea id="item-notes" name="item_notes" class="form-control" rows="3"></textarea>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" id="save-update" class="btn btn-primary">Save Changes</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(updateModal);
-
-        // Add event listener for save button
-        document.getElementById('save-update').addEventListener('click', async () => {
-            await updateItem(window.currentItemData.item_id);
-        });
-
-        // Remove the old hidden.bs.modal event listener and add a new one
-        updateModal.addEventListener('hidden.bs.modal', function () {
-            // Only refresh if we didn't just save changes (handled in updateItem)
-            if (!window.itemWasJustUpdated) {
-                fetchEquipmentDetails(currentBarcode);
+                    if (data.status === 'confirmation_required') {
+                        // Show confirmation UI with countdown
+                        showConfirmationUI('return', data.confirmation_timeout);
+                    } else if (data.status === 'success') {
+                        alert('Item returned successfully!');
+                        fetchEquipmentDetails(currentBarcode); // Refresh data
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Return error:', error);
+                    alert('Failed to process return request');
+                }
             }
-            window.itemWasJustUpdated = false;
-        });
-    }
-
-    // Populate form with current item data
-    document.getElementById('item-name').value = itemData.item_name || '';
-    document.getElementById('item-condition').value = itemData.condition_id || 2;
-    document.getElementById('item-notes').value = itemData.item_notes || '';
-
-    // Reset the update flag
-    window.itemWasJustUpdated = false;
-
-    // Show the modal using Bootstrap
-    const bootstrapModal = new bootstrap.Modal(updateModal);
-    bootstrapModal.show();
-}
-            // Function to update item
-    async function updateItem(itemId) {
-    try {
-        const formData = {
-            item_name: document.getElementById('item-name').value,
-            condition_id: parseInt(document.getElementById('item-condition').value),
-            item_notes: document.getElementById('item-notes').value
-        };
-
-        // Use the scanner update route
-        const response = await fetch(`/api/scanner/update-item/${itemId}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(formData)
-        });
-
-        // Check if response is OK before parsing JSON
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Server response:', errorText);
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.status === 'success') {
-            showToast('Item updated successfully.', 'success');
-            
-            // Hide the modal using Bootstrap
-            const updateModal = document.getElementById('update-item-modal');
-            const bootstrapModal = bootstrap.Modal.getInstance(updateModal);
-            bootstrapModal.hide();
-            
-            // IMPORTANT: Refresh the equipment details to show updated state
-            // Wait a brief moment for modal to close completely
-            setTimeout(() => {
-                fetchEquipmentDetails(currentBarcode);
-            }, 300);
-            
-        } else {
-            throw new Error(data.message || 'Unknown error occurred');
-        }
-
-    } catch (error) {
-        console.error('Update item error:', error);
-        showToast('Failed to update item: ' + error.message, 'error');
-    }
-}
 
             // Show confirmation dialog
             function showConfirmationUI(action, timeoutSeconds) {
@@ -817,11 +529,11 @@ async function handleReturn() {
                     confirmationDialog.style.color = '#012952';
 
                     confirmationDialog.innerHTML = `
-                                            <h4>Confirm ${action === 'borrow' ? 'Borrow' : 'Return'}</h4>
-                                            <p>Please confirm this action. Auto-cancelling in <span id="countdown">${timeoutSeconds}</span> seconds.</p>
-                                            <button id="confirm-action">Confirm</button>
-                                            <button id="cancel-action">Cancel</button>
-                                        `;
+                    <h4>Confirm ${action === 'borrow' ? 'Borrow' : 'Return'}</h4>
+                    <p>Please confirm this action. Auto-cancelling in <span id="countdown">${timeoutSeconds}</span> seconds.</p>
+                    <button id="confirm-action">Confirm</button>
+                    <button id="cancel-action">Cancel</button>
+                `;
 
                     document.body.appendChild(confirmationDialog);
 
@@ -876,7 +588,7 @@ async function handleReturn() {
                     const data = await response.json();
 
                     if (data.status === 'success') {
-                        alert(`Item ${action === 'borrow' ? 'borrowed' : 'returned'} successfully.`);
+                        alert(`Item ${action === 'borrow' ? 'borrowed' : 'returned'} successfully!`);
                         fetchEquipmentDetails(currentBarcode); // Refresh data
                     } else {
                         alert('Error: ' + data.message);
@@ -904,6 +616,116 @@ async function handleReturn() {
 
             // Initialize Dynamsoft Barcode Reader
             let scanner = null;
+            async function initDynamsoftScanner() {
+                try {
+                    // Configure Dynamsoft (free tier available)
+                    Dynamsoft.DBR.BarcodeReader.license = 'DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9';
+                    Dynamsoft.DBR.BarcodeReader.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.20/dist/";
+                    scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
+                    console.log('Dynamsoft Barcode Scanner initialized');
+                } catch (ex) {
+                    console.warn('Dynamsoft initialization failed, using Quagga fallback:', ex);
+                }
+            }
+
+            // Initialize on load
+            initDynamsoftScanner();
+
+            // ---------------- File upload / image / PDF scanning ----------------
+            uploadInput.addEventListener("change", async function (e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // If currently scanning via camera, stop to decode file
+                if (scannerRunning) {
+                    try { await html5QrCode.stop(); } catch (e) { }
+                    scannerRunning = false;
+                    stopBtn.style.display = "none";
+                    resumeBtn.style.display = "inline-block";
+                }
+
+                showToast('Processing uploaded image...', 'info');
+
+                try {
+                    if (file.type === "application/pdf") {
+                        await scanPDFBarcode(file);
+                    } else {
+                        await scanImageBarcode(file);
+                    }
+                } catch (error) {
+                    console.error('File scanning error:', error);
+                    showToast('Failed to process file: ' + error.message, 'error');
+                }
+            });
+
+            async function scanPDFBarcode(file) {
+                try {
+                    const pdfjsLib = window['pdfjsLib'];
+                    const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
+                    const page = await pdf.getPage(1);
+                    const viewport = page.getViewport({ scale: 3.0 });
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+
+                    await page.render({
+                        canvasContext: ctx,
+                        viewport: viewport
+                    }).promise;
+
+                    const barcodeData = await scanWithQuagga(canvas.toDataURL());
+
+                    if (barcodeData) {
+                        await onScanSuccess(barcodeData);
+                    } else {
+                        showToast("No barcode found in PDF. Try a clearer image.", "error");
+                    }
+                } catch (err) {
+                    console.error("PDF decode error:", err);
+                    showToast("Failed to decode PDF file.", "error");
+                }
+            }
+
+            async function scanImageBarcode(file) {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = async function () {
+                        try {
+                            const img = new Image();
+                            img.onload = async function () {
+                                console.log('Image loaded:', img.width, 'x', img.height);
+
+                                // Try scanning with original image
+                                let barcodeData = await scanWithQuagga(reader.result);
+
+                                if (!barcodeData) {
+                                    // Try with image preprocessing
+                                    barcodeData = await scanWithImagePreprocessing(img);
+                                }
+
+                                if (barcodeData) {
+                                    await onScanSuccess(barcodeData);
+                                    resolve(true);
+                                } else {
+                                    showToast("No barcode detected. Tips:\n• Use high-contrast barcodes\n• Ensure good lighting\n• Crop to just the barcode\n• Save as PNG for best quality", "error");
+                                    resolve(false);
+                                }
+                            };
+                            img.src = reader.result;
+                        } catch (error) {
+                            console.error("Image processing error:", error);
+                            showToast("Error processing image file.", "error");
+                            resolve(false);
+                        }
+                    };
+                    reader.onerror = function () {
+                        showToast("Failed to read image file.", "error");
+                        resolve(false);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
 
             async function scanWithQuagga(imageData) {
                 return new Promise((resolve) => {
@@ -948,8 +770,10 @@ async function handleReturn() {
 
                     Quagga.decodeSingle(config, function (result) {
                         if (result && result.codeResult && result.codeResult.code) {
+                            console.log('Quagga barcode result:', result.codeResult);
                             resolve(result.codeResult.code);
                         } else {
+                            console.log('No barcode found in first attempt');
                             resolve(null);
                         }
                     });
@@ -972,6 +796,7 @@ async function handleReturn() {
                 ];
 
                 for (let technique of processingTechniques) {
+                    console.log('Trying processing technique:', technique.method);
 
                     // Apply filter
                     ctx.filter = technique.filter;
@@ -992,6 +817,7 @@ async function handleReturn() {
                     const result = await scanWithQuagga(processedImageData);
 
                     if (result) {
+                        console.log('Found barcode with technique:', technique.method);
                         return result;
                     }
 
@@ -1003,5 +829,4 @@ async function handleReturn() {
             }
         });
     </script>
-
 @endsection
