@@ -565,7 +565,7 @@
     // Fetch statuses from API
     async function fetchStatuses() {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/form-statuses');
+            const response = await fetch('/api/form-statuses');
             const data = await response.json();
 
             // Filter out unwanted statuses

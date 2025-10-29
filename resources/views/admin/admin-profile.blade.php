@@ -264,7 +264,7 @@
 
             try {
                 const token = localStorage.getItem('adminToken');
-                const response = await fetch('http://127.0.0.1:8000/api/admin/delete-cloudinary-image', {
+                const response = await fetch('/api/admin/delete-cloudinary-image', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -301,7 +301,7 @@
 
             try {
                 // Load roles
-                const rolesResponse = await fetch('http://127.0.0.1:8000/api/admin-role', {
+                const rolesResponse = await fetch('/api/admin-role', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
@@ -321,7 +321,7 @@
                 });
 
                 // Load departments for later use
-                const deptResponse = await fetch('http://127.0.0.1:8000/api/departments', {
+                const deptResponse = await fetch('/api/departments', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
@@ -433,7 +433,7 @@
             }
 
             // Load profile data
-            fetch('http://127.0.0.1:8000/api/admin/profile', {
+            fetch('/api/admin/profile', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
@@ -667,7 +667,7 @@
 
                 try {
                     const response = await fetch(
-                        `http://127.0.0.1:8000/api/admin/update/${currentAdminData.admin_id}`,
+                        `/api/admin/update/${currentAdminData.admin_id}`,
                         {
                             method: 'POST',
                             headers: {
@@ -740,7 +740,7 @@
 
                     // Update database records
                     console.log('Updating database records...');
-                    const updateResponse = await fetch('http://127.0.0.1:8000/api/admin/update-photo-records', {
+                    const updateResponse = await fetch('/api/admin/update-photo-records', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -841,7 +841,7 @@
 
                     // Update database records
                     console.log('Updating database records for wallpaper...');
-                    const updateResponse = await fetch('http://127.0.0.1:8000/api/admin/update-photo-records', {
+                    const updateResponse = await fetch('/api/admin/update-photo-records', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

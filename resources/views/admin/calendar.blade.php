@@ -972,7 +972,7 @@ async function saveEdit(fieldType) {
     }
 
     try {
-        const response = await fetch(`http://127.0.0.1:8000/api/admin/requisition-forms/${currentRequestId}/calendar-info`, {
+        const response = await fetch(`/api/admin/requisition-forms/${currentRequestId}/calendar-info`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${adminToken}`,
@@ -1101,7 +1101,7 @@ async function saveEdit(fieldType) {
           // Generate skeleton days immediately
           generateSkeletonDays();
 
-          const response = await fetch('http://127.0.0.1:8000/api/admin/requisition-forms', {
+          const response = await fetch('/api/admin/requisition-forms', {
             headers: {
               'Authorization': `Bearer ${adminToken}`,
               'Accept': 'application/json'

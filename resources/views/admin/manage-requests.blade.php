@@ -674,7 +674,7 @@ document.querySelectorAll('.manage-btn').forEach(btn => {
           }
 
           // Fetch status options
-          const statusResponse = await fetch('http://127.0.0.1:8000/api/form-statuses', {
+          const statusResponse = await fetch('/api/form-statuses', {
             headers: {
               'Authorization': `Bearer ${adminToken}`,
               'Accept': 'application/json'
@@ -793,7 +793,7 @@ document.querySelectorAll('.manage-btn').forEach(btn => {
             throw new Error('No authentication token found');
           }
 
-          const response = await fetch('http://127.0.0.1:8000/api/admin/simplified-forms', {
+          const response = await fetch('/api/admin/simplified-forms', {
             headers: {
               'Authorization': `Bearer ${adminToken}`,
               'Accept': 'application/json'
