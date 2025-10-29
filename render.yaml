@@ -98,7 +98,7 @@ services:
       - key: MAIL_USERNAME
         value: hannahescosar@gmail.com
       - key: MAIL_PASSWORD
-        value: nxcjngoqwondumal
+        sync: false
       - key: MAIL_ENCRYPTION
         value: tls
       - key: MAIL_FROM_ADDRESS
