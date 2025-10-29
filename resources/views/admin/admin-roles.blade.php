@@ -31,11 +31,11 @@
       overflow-x: auto;
     }
 
-.table-section table {
-  table-layout: auto;
-  min-width: 100%;
-  font-size: 0.875rem;
-}
+    .table-section table {
+      table-layout: auto;
+      min-width: 100%;
+      font-size: 0.875rem;
+    }
 
 
     .table-section table th,
@@ -867,30 +867,30 @@
               if (admin.departments?.length) {
                 departmentsHtml = admin.departments.map(dept => {
                   return `<span class="badge bg-light text-dark me-1 mb-1" title="${dept.department_name}">
-                            ${dept.department_code}
-                          </span>`;
+                              ${dept.department_code}
+                            </span>`;
                 }).join('');
               }
 
               const row = document.createElement('tr');
               row.innerHTML = `
-                <td>${admin.admin_id}</td>
-                <td>${admin.school_id || 'N/A'}</td>
-                <td>${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</td>
-                <td>${admin.title || 'N/A'}</td>
-                <td title="${admin.email}">${admin.email}</td>
-                <td>${admin.contact_number || 'N/A'}</td>
-                <td>${admin.role ? admin.role.role_title : 'N/A'}</td>
-                <td>${departmentsHtml}</td>
-                <td>
-                  <button class="btn btn-sm btn-info me-1" onclick="openEditModal(${admin.admin_id})" title="Edit">
-                    <i class="bi bi-pencil"></i>
-                  </button>
-                  <button class="btn btn-sm btn-danger" onclick="deleteAdmin(${admin.admin_id})" title="Delete">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </td>
-              `;
+                  <td>${admin.admin_id}</td>
+                  <td>${admin.school_id || 'N/A'}</td>
+                  <td>${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</td>
+                  <td>${admin.title || 'N/A'}</td>
+                  <td title="${admin.email}">${admin.email}</td>
+                  <td>${admin.contact_number || 'N/A'}</td>
+                  <td>${admin.role ? admin.role.role_title : 'N/A'}</td>
+                  <td>${departmentsHtml}</td>
+                  <td>
+                    <button class="btn btn-sm btn-info me-1" onclick="openEditModal(${admin.admin_id})" title="Edit">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteAdmin(${admin.admin_id})" title="Delete">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                `;
               adminListBody.appendChild(row);
             });
           }
@@ -931,19 +931,19 @@
           .then(admin => {
             // Populate admin details in modal
             document.getElementById('deleteAdminDetails').innerHTML = `
-                  <div class="row">
-                      <div class="col-4 fw-bold">School ID:</div>
-                      <div class="col-8">${admin.school_id}</div>
-                      <div class="col-4 fw-bold">Name:</div>
-                      <div class="col-8">${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</div>
-                      <div class="col-4 fw-bold">Title:</div>
-                      <div class="col-8">${admin.title || 'N/A'}</div>
-                      <div class="col-4 fw-bold">Email:</div>
-                      <div class="col-8">${admin.email}</div>
-                      <div class="col-4 fw-bold">Role:</div>
-                      <div class="col-8">${admin.role ? admin.role.role_title : 'N/A'}</div>
-                  </div>
-              `;
+                    <div class="row">
+                        <div class="col-4 fw-bold">School ID:</div>
+                        <div class="col-8">${admin.school_id}</div>
+                        <div class="col-4 fw-bold">Name:</div>
+                        <div class="col-8">${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</div>
+                        <div class="col-4 fw-bold">Title:</div>
+                        <div class="col-8">${admin.title || 'N/A'}</div>
+                        <div class="col-4 fw-bold">Email:</div>
+                        <div class="col-8">${admin.email}</div>
+                        <div class="col-4 fw-bold">Role:</div>
+                        <div class="col-8">${admin.role ? admin.role.role_title : 'N/A'}</div>
+                    </div>
+                `;
 
             // Show the modal
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
@@ -953,11 +953,11 @@
             console.error('Error fetching admin details:', error);
             // Fallback: show modal with basic info if details fetch fails
             document.getElementById('deleteAdminDetails').innerHTML = `
-                  <div class="text-center">
-                      <p class="mb-0">Admin ID: ${adminId}</p>
-                      <p class="text-muted">Unable to load full details</p>
-                  </div>
-              `;
+                    <div class="text-center">
+                        <p class="mb-0">Admin ID: ${adminId}</p>
+                        <p class="text-muted">Unable to load full details</p>
+                    </div>
+                `;
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
             deleteModal.show();
           });
@@ -1185,14 +1185,14 @@
           const editSignaturePreview = document.getElementById('editSignaturePreview');
           if (admin.signature_url) {
             editSignaturePreview.innerHTML = `
-                  <p class="mb-2">Current Signature:</p>
-                  <img src="${admin.signature_url}" class="signature-preview" alt="Current Signature">
-                  <div class="mt-2">
-                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteAdminSignature(${admin.admin_id})">
-                      <i class="bi bi-trash"></i> Delete Signature
-                    </button>
-                  </div>
-                `;
+                    <p class="mb-2">Current Signature:</p>
+                    <img src="${admin.signature_url}" class="signature-preview" alt="Current Signature">
+                    <div class="mt-2">
+                      <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteAdminSignature(${admin.admin_id})">
+                        <i class="bi bi-trash"></i> Delete Signature
+                      </button>
+                    </div>
+                  `;
           } else {
             editSignaturePreview.innerHTML = '<p class="text-muted">No signature uploaded</p>';
           }
@@ -1220,101 +1220,101 @@
       };
 
       // Function to delete admin signature
-// Function to delete admin signature
-window.deleteAdminSignature = async function(adminId) {
-  if (!confirm('Are you sure you want to delete this signature?')) {
-    return;
-  }
+      // Function to delete admin signature
+      window.deleteAdminSignature = async function (adminId) {
+        if (!confirm('Are you sure you want to delete this signature?')) {
+          return;
+        }
 
-  try {
-    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-    
-    // Get the current form values
-    const currentFormData = {
-      first_name: document.getElementById('edit_first_name').value,
-      middle_name: document.getElementById('edit_middle_name').value,
-      last_name: document.getElementById('edit_last_name').value,
-      title: document.getElementById('edit_title').value,
-      email: document.getElementById('edit_email').value,
-      contact_number: document.getElementById('edit_contact_number').value,
-      role_id: document.getElementById('edit_role_id').value,
-      school_id: document.getElementById('edit_school_id').value,
-      department_ids: JSON.parse(document.getElementById('edit-selected-departments').value || '[]')
-    };
+        try {
+          const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
 
-    // Validate that all required fields are present
-    if (!currentFormData.first_name || !currentFormData.last_name || !currentFormData.email || !currentFormData.role_id) {
-      throw new Error('Please fill all required fields in the form before deleting signature');
-    }
+          // Get the current form values
+          const currentFormData = {
+            first_name: document.getElementById('edit_first_name').value,
+            middle_name: document.getElementById('edit_middle_name').value,
+            last_name: document.getElementById('edit_last_name').value,
+            title: document.getElementById('edit_title').value,
+            email: document.getElementById('edit_email').value,
+            contact_number: document.getElementById('edit_contact_number').value,
+            role_id: document.getElementById('edit_role_id').value,
+            school_id: document.getElementById('edit_school_id').value,
+            department_ids: JSON.parse(document.getElementById('edit-selected-departments').value || '[]')
+          };
 
-    // Prepare update data with current form values and null signature
-    const updateData = {
-      first_name: currentFormData.first_name,
-      middle_name: currentFormData.middle_name || '',
-      last_name: currentFormData.last_name,
-      title: currentFormData.title || '',
-      email: currentFormData.email,
-      contact_number: currentFormData.contact_number || '',
-      role_id: parseInt(currentFormData.role_id),
-      school_id: currentFormData.school_id || '',
-      department_ids: currentFormData.department_ids,
-      signature_url: null,
-      signature_public_id: null
-    };
+          // Validate that all required fields are present
+          if (!currentFormData.first_name || !currentFormData.last_name || !currentFormData.email || !currentFormData.role_id) {
+            throw new Error('Please fill all required fields in the form before deleting signature');
+          }
 
-    console.log('Update data for signature deletion:', updateData);
+          // Prepare update data with current form values and null signature
+          const updateData = {
+            first_name: currentFormData.first_name,
+            middle_name: currentFormData.middle_name || '',
+            last_name: currentFormData.last_name,
+            title: currentFormData.title || '',
+            email: currentFormData.email,
+            contact_number: currentFormData.contact_number || '',
+            role_id: parseInt(currentFormData.role_id),
+            school_id: currentFormData.school_id || '',
+            department_ids: currentFormData.department_ids,
+            signature_url: null,
+            signature_public_id: null
+          };
 
-    // Update the admin record to remove signature
-    const updateResponse = await fetch(`/api/admins/${adminId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(updateData)
-    });
+          console.log('Update data for signature deletion:', updateData);
 
-    if (!updateResponse.ok) {
-      const errorData = await updateResponse.json();
-      console.error('Backend error:', errorData);
-      throw new Error(errorData.message || 'Failed to remove signature from admin record');
-    }
+          // Update the admin record to remove signature
+          const updateResponse = await fetch(`/api/admins/${adminId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(updateData)
+          });
 
-    // Update the UI
-    document.getElementById('editSignaturePreview').innerHTML = '<p class="text-muted">No signature uploaded</p>';
-    document.getElementById('edit_signature_url').value = '';
-    document.getElementById('edit_signature_public_id').value = '';
+          if (!updateResponse.ok) {
+            const errorData = await updateResponse.json();
+            console.error('Backend error:', errorData);
+            throw new Error(errorData.message || 'Failed to remove signature from admin record');
+          }
 
-    showToast('Signature removed successfully!', 'success');
-  } catch (error) {
-    console.error('Error removing signature:', error);
-    showToast('Failed to remove signature: ' + error.message, 'error');
-  }
-};
+          // Update the UI
+          document.getElementById('editSignaturePreview').innerHTML = '<p class="text-muted">No signature uploaded</p>';
+          document.getElementById('edit_signature_url').value = '';
+          document.getElementById('edit_signature_public_id').value = '';
 
-// Function to delete signature from Cloudinary
-async function deleteSignatureFromCloudinary(publicId) {
-  const cloudName = 'dn98ntlkd';
-  const apiKey = '545682193957699';
-  const timestamp = Math.floor(Date.now() / 1000);
-  
-  // Generate signature (you'll need to do this server-side for security)
-  // For now, we'll use a simpler approach or you can create a backend endpoint
-  
-  // Since we can't securely generate the signature client-side, 
-  // you have two options:
-  
-  // Option 1: Create a backend endpoint for Cloudinary deletion
-  // Option 2: Use your existing upload preset (but deletion requires signature)
-  
-  // For now, let's use a simple fetch to your backend if you create the route
-  // or we can just update the admin record and leave the image in Cloudinary
-  
-  console.log('Would delete from Cloudinary:', publicId);
-  // Implementation depends on your backend setup
-}
+          showToast('Signature removed successfully!', 'success');
+        } catch (error) {
+          console.error('Error removing signature:', error);
+          showToast('Failed to remove signature: ' + error.message, 'error');
+        }
+      };
+
+      // Function to delete signature from Cloudinary
+      async function deleteSignatureFromCloudinary(publicId) {
+        const cloudName = 'dn98ntlkd';
+        const apiKey = '545682193957699';
+        const timestamp = Math.floor(Date.now() / 1000);
+
+        // Generate signature (you'll need to do this server-side for security)
+        // For now, we'll use a simpler approach or you can create a backend endpoint
+
+        // Since we can't securely generate the signature client-side, 
+        // you have two options:
+
+        // Option 1: Create a backend endpoint for Cloudinary deletion
+        // Option 2: Use your existing upload preset (but deletion requires signature)
+
+        // For now, let's use a simple fetch to your backend if you create the route
+        // or we can just update the admin record and leave the image in Cloudinary
+
+        console.log('Would delete from Cloudinary:', publicId);
+        // Implementation depends on your backend setup
+      }
 
       // Save edited admin - FIXED validation
       document.getElementById('saveAdminChanges').addEventListener('click', async function () {
