@@ -5,16 +5,19 @@ services:
     docker:
       dockerfile: Dockerfile
     envVars:
+      # App Configuration
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
       - key: APP_KEY
         value: base64:wVK+5eQXT7diiqrOeilrWT9nwcsZb4VgI8dOYoEbfWA=
+      - key: APP_NAME
+        value: "VPA Booking System"
       - key: APP_URL
         value: https://vpa-booking-system-r0df.onrender.com
-      - key: FRONTEND_URL
-        value: https://vpa-booking-system-r0df.onrender.com
+      
+      # Database Configuration
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST
@@ -31,7 +34,101 @@ services:
         value: /etc/ssl/certs/aiven/aiven-ca.pem
       - key: MYSQL_ATTR_SSL_VERIFY_SERVER_CERT
         value: true
-      # Add other necessary environment variables...
+      
+      # Session & CORS Configuration
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: true
+      - key: SESSION_ENCRYPT
+        value: true
+      - key: SESSION_DOMAIN
+        value: .onrender.com
+      - key: SESSION_HTTP_ONLY
+        value: true
+      - key: SESSION_SAME_SITE
+        value: lax
+      
+      # CORS Configuration
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://vpa-booking-system-r0df.onrender.com
+      - key: CORS_ALLOWED_METHODS
+        value: POST,GET,OPTIONS,PUT,DELETE
+      - key: CORS_ALLOWED_HEADERS
+        value: Content-Type,Accept,Authorization,X-Requested-With,Application
+      - key: CORS_PATHS
+        value: api/*
+      - key: CORS_SUPPORTS_CREDENTIALS
+        value: true
+      
+      # Sanctum Configuration
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: vpa-booking-system-r0df.onrender.com
+      
+      # Render-specific configurations
+      - key: APP_TRUSTED_PROXIES
+        value: "*"
+      - key: TRUSTED_PROXIES
+        value: "*"
+      
+      # Cloudinary Configuration
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dn98ntlkd
+      - key: CLOUDINARY_API_KEY
+        value: 545682193957699
+      - key: CLOUDINARY_API_SECRET
+        value: I4VIMab4XK-BggScAp5ZjcWVKaE
+      - key: CLOUDINARY_URL
+        value: cloudinary://545682193957699:I4VIMab4XK-BggScAp5ZjcWVKaE@dn98ntlkd
+      
+      # Queue & Cache
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: FILESYSTEM_DISK
+        value: local
+      
+      # Mail Configuration
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USERNAME
+        value: hannahescosar@gmail.com
+      - key: MAIL_PASSWORD
+        value: nxcjngoqwondumal
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        value: hannahescosar@gmail.com
+      - key: MAIL_FROM_NAME
+        value: "CPU Booking Services"
+      
+      # Locale Settings
+      - key: APP_LOCALE
+        value: en
+      - key: APP_FALLBACK_LOCALE
+        value: en
+      - key: APP_FAKER_LOCALE
+        value: en_US
+      
+      # Logging
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_STACK
+        value: single
+      - key: LOG_LEVEL
+        value: error
+      
+      # PHP Settings
+      - key: PHP_CLI_SERVER_WORKERS
+        value: 4
+      - key: BCRYPT_ROUNDS
+        value: 12
+    
     buildCommand: |
       composer install --no-dev --optimize-autoloader
       php artisan config:cache

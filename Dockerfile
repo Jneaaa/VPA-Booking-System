@@ -44,5 +44,9 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage \
     && chmod -R 775 bootstrap/cache
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
+
 EXPOSE 80
 CMD ["apache2-foreground"]
