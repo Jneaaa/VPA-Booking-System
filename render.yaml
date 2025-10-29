@@ -1,13 +1,19 @@
-services: 
-  - type: web 
-    name: laravel-app 
-    env: docker 
-    docker: 
-      dockerfile: Dockerfile 
-    envVars: 
-      - key: APP_ENV 
-        value: production 
-      - key: APP_DEBUG 
-        value: false 
-      - key: APP_KEY 
-        fromSecret: app_key 
+services:
+  - type: web
+    name: laravel-app
+    env: docker
+    docker:
+      dockerfile: Dockerfile
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: true  # ← Changed to true temporarily
+      - key: APP_KEY
+        fromSecret: app_key
+    buildCommand: |
+      php artisan config:clear
+      php artisan route:clear
+      php artisan view:clear
+      php artisan migrate --force
+    startCommand: php artisan serve --host=0.0.0.0 --port=8000

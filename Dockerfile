@@ -1,5 +1,10 @@
 FROM php:8.2-apache
 
+# Install SSL certificates (important for Aiven)
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && update-ca-certificates
+
 WORKDIR /var/www/html
 
 # Install system dependencies including ALL required libraries
