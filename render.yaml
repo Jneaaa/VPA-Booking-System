@@ -10,7 +10,28 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_KEY
-        fromSecret: app_key
+        value: base64:wVK+5eQXT7diiqrOeilrWT9nwcsZb4VgI8dOYoEbfWA=
+      - key: APP_URL
+        value: https://vpa-booking-system-r0df.onrender.com
+      - key: FRONTEND_URL
+        value: https://vpa-booking-system-r0df.onrender.com
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        value: thesis-booking-system-thesis-booking-system.c.aivencloud.com
+      - key: DB_PORT
+        value: 10894
+      - key: DB_DATABASE
+        value: defaultdb
+      - key: DB_USERNAME
+        value: avnadmin
+      - key: DB_PASSWORD
+        value: AVNS_XsNBP1zeG9rheiQ9DvA
+      - key: MYSQL_ATTR_SSL_CA
+        value: /etc/ssl/certs/aiven/aiven-ca.pem
+      - key: MYSQL_ATTR_SSL_VERIFY_SERVER_CERT
+        value: true
+      # Add other necessary environment variables...
     buildCommand: |
       composer install --no-dev --optimize-autoloader
       php artisan config:cache

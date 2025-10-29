@@ -36,9 +36,6 @@ COPY .docker/apache.conf /etc/apache2/sites-available/000-default.conf
 # Copy application files
 COPY . .
 
-# Copy production environment file
-COPY .env.production .env
-
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
@@ -46,9 +43,6 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage \
     && chmod -R 775 bootstrap/cache
-
-# Generate key and cache config
-RUN php artisan config:cache && php artisan route:cache
 
 EXPOSE 80
 CMD ["apache2-foreground"]
