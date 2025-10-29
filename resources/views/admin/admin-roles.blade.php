@@ -4,15 +4,16 @@
 
 @section('content')
   <style>
-            .card {
-  border: 0 !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  border-radius: 0.75rem; /* optional, for smoother corners */
-}
+    .card {
+      border: 0 !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      border-radius: 0.75rem;
+      /* optional, for smoother corners */
+    }
+
     #confirmDeleteBtn {
       min-width: 120px;
     }
-
 
     /* Spinner for delete button */
     .spinner-border-sm {
@@ -30,12 +31,12 @@
       overflow-x: auto;
     }
 
-    .table-section table {
-      table-layout: fixed;
-      width: 100%;
-      font-size: 0.875rem;
-      /* Slightly smaller text for better fit */
-    }
+.table-section table {
+  table-layout: auto;
+  min-width: 100%;
+  font-size: 0.875rem;
+}
+
 
     .table-section table th,
     .table-section table td {
@@ -186,127 +187,190 @@
       margin-bottom: 2px;
       display: inline-block;
     }
+
+    /* Signature upload styles */
+    .signature-preview {
+      max-width: 300px;
+      max-height: 100px;
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 5px;
+      background-color: #f8f9fa;
+    }
+
+    .signature-upload-container {
+      border: 2px dashed #dee2e6;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      text-align: center;
+      transition: border-color 0.3s ease;
+    }
+
+    .signature-upload-container:hover {
+      border-color: #007bff;
+    }
+
+    .signature-upload-container.dragover {
+      border-color: #007bff;
+      background-color: #f8f9fa;
+    }
   </style>
 
-    <main id="main">
+  <main id="main">
 
-        <!-- Add New Admin card -->
-        <section class="form-section card border-0 p-4 mb-4">
-          <h3 class="mb-4 fw-bold">Add New Admin</h3>
-          <form id="addAdminForm" novalidate>
-            @csrf
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label for="first_name" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name"
-                  required>
-              </div>
-              <div class="col-md-4">
-                <label for="middle_name" class="form-label">Middle Name</label>
-                <input type="text" class="form-control" id="middle_name" name="middle_name" placeholder="Middle Name">
-              </div>
-              <div class="col-md-4">
-                <label for="last_name" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
-              </div>
-              <div class="col-md-6">
-                <label for="school_id" class="form-label d-flex align-items-center">
-                  School ID
-                  <small class="text-muted ms-2">(Format: 00-0000-00)</small>
-                </label>
-                <input type="text" class="form-control" id="school_id" name="school_id" placeholder="00-0000-00"
-                  pattern="\d{2}-\d{4}-\d{2}" maxlength="10" minlength="10">
-              </div>
-              <div class="col-md-6">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" placeholder="samplemail@gmail.com"
-                  required minlength="6" maxlength="150" autocomplete="off">
-              </div>
-
-              <div class="col-md-6">
-                <label for="contact_number" class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" id="contact_number" name="contact_number"
-                  placeholder="e.g. 09123456789" pattern="\d{11,20}" minlength="11" maxlength="20">
-              </div>
-
-              <div class="col-md-6">
-                <label for="role_id" class="form-label">Role</label>
-                <select class="form-select" id="role_id" name="role_id" required>
-                  <option value="">Select a role</option>
-                </select>
-              </div>
-
-              <div class="col-12">
-                <label for="password" class="form-label d-flex align-items-center">
-                  Temporary Password
-                  <small class="text-muted ms-2">(Admin will be prompted to change this upon first login.)</small>
-                </label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Temporary Password"
-                  required minlength="8" maxlength="12">
-              </div>
-
-
-
-              <!-- Departments Section for Add Form -->
-              <div class="col-12" id="add-departments-section-container">
-                <label class="form-label d-flex align-items-center">
-                  Departments
-                  <small class="text-muted ms-2">(Click to select/deselect departments.)</small>
-                </label>
-
-                <div id="add-department-buttons-container" class="d-flex flex-wrap gap-2"
-                  style="flex-direction: row !important; align-items: flex-start;">
-                  <!-- Bootstrap loading spinner -->
-                  <div class="d-flex align-items-center text-muted">
-                    <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
-                    Loading departments...
-                  </div>
-                </div>
-
-                <input type="hidden" id="add-selected-departments" name="department_ids">
-              </div>
-
-
-              <div class="col-12 mt-4">
-                <button type="submit" class="btn btn-primary">Add Admin</button>
-              </div>
-            </div>
-          </form>
-        </section>
-
-        <!-- Existing Admins card -->
-        <section class="table-section border-0 card p-4">
-          <h3 class="mb-4 fw-bold">Existing Admins</h3>
-
-          <!-- Loading indicator -->
-          <div id="adminLoading" class="text-center my-4">
-            <p class="mb-2">Loading admins...</p>
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
+    <!-- Add New Admin card -->
+    <section class="form-section card border-0 p-4 mb-4">
+      <h3 class="mb-4 fw-bold">Add New Admin</h3>
+      <form id="addAdminForm" novalidate>
+        @csrf
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="first_name" class="form-label">First Name</label>
+            <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+          </div>
+          <div class="col-md-4">
+            <label for="middle_name" class="form-label">Middle Name</label>
+            <input type="text" class="form-control" id="middle_name" name="middle_name" placeholder="Middle Name">
+          </div>
+          <div class="col-md-4">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
           </div>
 
-          <div class="table-responsive" id="adminTableWrapper" style="display: none;">
-            <table class="table table-hover align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Admin ID</th>
-                  <th>School ID</th>
-                  <th>Full Name</th>
-                  <th>Email</th>
-                  <th>Phone Number</th>
-                  <th>Role</th>
-                  <th class="allow-wrap">Departments</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="adminListBody">
-                <!-- Dynamic content will be loaded here -->
-              </tbody>
-            </table>
+          <!-- NEW: Title Field -->
+          <div class="col-md-6">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="e.g., Dr., Prof., Mr., Ms."
+              maxlength="100">
           </div>
-        </section>
-    </main>
+
+          <div class="col-md-6">
+            <label for="school_id" class="form-label d-flex align-items-center">
+              School ID
+              <small class="text-muted ms-2">(Format: 00-0000-00)</small>
+            </label>
+            <input type="text" class="form-control" id="school_id" name="school_id" placeholder="00-0000-00"
+              pattern="\d{2}-\d{4}-\d{2}" maxlength="10" minlength="10">
+          </div>
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="samplemail@gmail.com" required
+              minlength="6" maxlength="150" autocomplete="off">
+          </div>
+
+          <div class="col-md-6">
+            <label for="contact_number" class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" id="contact_number" name="contact_number"
+              placeholder="e.g. 09123456789" pattern="\d{11,20}" minlength="11" maxlength="20">
+          </div>
+
+          <div class="col-md-6">
+            <label for="role_id" class="form-label">Role</label>
+            <select class="form-select" id="role_id" name="role_id" required>
+              <option value="">Select a role</option>
+            </select>
+          </div>
+
+          <!-- NEW: Signature Upload Section -->
+          <div class="col-12">
+            <label class="form-label">Signature Upload</label>
+            <div class="signature-upload-container" id="signatureUploadArea">
+              <div class="mb-3">
+                <i class="bi bi-cloud-upload fs-1 text-muted"></i>
+                <p class="mb-1">Drag & drop your signature here or click to browse</p>
+                <small class="text-muted">Supported formats: JPG, PNG, GIF (Max: 2MB)</small>
+              </div>
+              <input type="file" id="signature" name="signature" accept="image/*" class="d-none">
+              <button type="button" class="btn btn-outline-primary btn-sm"
+                onclick="document.getElementById('signature').click()">
+                Choose File
+              </button>
+            </div>
+            <div id="signaturePreview" class="mt-3 text-center" style="display: none;">
+              <p class="mb-2">Signature Preview:</p>
+              <img id="signaturePreviewImg" class="signature-preview" src="" alt="Signature Preview">
+              <div class="mt-2">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeSignature()">
+                  <i class="bi bi-trash"></i> Remove Signature
+                </button>
+              </div>
+            </div>
+            <input type="hidden" id="signature_url" name="signature_url">
+            <input type="hidden" id="signature_public_id" name="signature_public_id">
+          </div>
+
+          <div class="col-12">
+            <label for="password" class="form-label d-flex align-items-center">
+              Temporary Password
+              <small class="text-muted ms-2">(Admin will be prompted to change this upon first login.)</small>
+            </label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Temporary Password"
+              required minlength="8" maxlength="12">
+          </div>
+
+
+
+          <!-- Departments Section for Add Form -->
+          <div class="col-12" id="add-departments-section-container">
+            <label class="form-label d-flex align-items-center">
+              Departments
+              <small class="text-muted ms-2">(Click to select/deselect departments.)</small>
+            </label>
+
+            <div id="add-department-buttons-container" class="d-flex flex-wrap gap-2"
+              style="flex-direction: row !important; align-items: flex-start;">
+              <!-- Bootstrap loading spinner -->
+              <div class="d-flex align-items-center text-muted">
+                <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+                Loading departments...
+              </div>
+            </div>
+
+            <input type="hidden" id="add-selected-departments" name="department_ids">
+          </div>
+
+
+          <div class="col-12 mt-4">
+            <button type="submit" class="btn btn-primary">Add Admin</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Existing Admins card -->
+    <section class="table-section border-0 card p-4">
+      <h3 class="mb-4 fw-bold">Existing Admins</h3>
+
+      <!-- Loading indicator -->
+      <div id="adminLoading" class="text-center my-4">
+        <p class="mb-2">Loading admins...</p>
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div class="table-responsive" id="adminTableWrapper" style="display: none;">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Admin ID</th>
+              <th>School ID</th>
+              <th>Full Name</th>
+              <th>Title</th> <!-- NEW: Title Column -->
+              <th>Email</th>
+              <th>Phone Number</th>
+              <th>Role</th>
+              <th class="allow-wrap">Departments</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminListBody">
+            <!-- Dynamic content will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
 
 
@@ -335,6 +399,14 @@
                 <label for="edit_last_name" class="form-label">Last Name</label>
                 <input type="text" class="form-control" id="edit_last_name" name="last_name" required>
               </div>
+
+              <!-- NEW: Title Field in Edit Modal -->
+              <div class="col-md-6">
+                <label for="edit_title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="edit_title" name="title"
+                  placeholder="e.g., Dr., Prof., Mr., Ms." maxlength="100">
+              </div>
+
               <div class="col-md-6">
                 <label for="edit_school_id" class="form-label d-flex align-items-center">
                   School ID
@@ -358,6 +430,38 @@
                   <option value="">Loading roles...</option>
                 </select>
               </div>
+
+              <!-- NEW: Signature Upload Section in Edit Modal -->
+              <div class="col-12">
+                <label class="form-label">Signature</label>
+                <div id="editSignaturePreview" class="text-center mb-3">
+                  <p class="text-muted">No signature uploaded</p>
+                </div>
+                <div class="signature-upload-container" id="editSignatureUploadArea">
+                  <div class="mb-3">
+                    <i class="bi bi-cloud-upload fs-1 text-muted"></i>
+                    <p class="mb-1">Drag & drop new signature here or click to browse</p>
+                    <small class="text-muted">Supported formats: JPG, PNG, GIF (Max: 2MB)</small>
+                  </div>
+                  <input type="file" id="edit_signature" name="signature" accept="image/*" class="d-none">
+                  <button type="button" class="btn btn-outline-primary btn-sm"
+                    onclick="document.getElementById('edit_signature').click()">
+                    Choose File
+                  </button>
+                </div>
+                <div id="editNewSignaturePreview" class="mt-3 text-center" style="display: none;">
+                  <p class="mb-2">New Signature Preview:</p>
+                  <img id="editNewSignaturePreviewImg" class="signature-preview" src="" alt="New Signature Preview">
+                  <div class="mt-2">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeEditSignature()">
+                      <i class="bi bi-trash"></i> Remove New Signature
+                    </button>
+                  </div>
+                </div>
+                <input type="hidden" id="edit_signature_url" name="signature_url">
+                <input type="hidden" id="edit_signature_public_id" name="signature_public_id">
+              </div>
+
               <div class="col-12">
                 <label for="edit_password" class="form-label d-flex align-items-center">
                   New Password
@@ -418,6 +522,166 @@
 @section('scripts')
   <script src="{{ asset('js/admin/toast.js') }}"></script>
   <script>
+    // Signature upload functionality
+    function initializeSignatureUpload() {
+      // Add form signature upload
+      const signatureUploadArea = document.getElementById('signatureUploadArea');
+      const signatureInput = document.getElementById('signature');
+      const signaturePreview = document.getElementById('signaturePreview');
+      const signaturePreviewImg = document.getElementById('signaturePreviewImg');
+
+      // Edit form signature upload
+      const editSignatureUploadArea = document.getElementById('editSignatureUploadArea');
+      const editSignatureInput = document.getElementById('edit_signature');
+      const editNewSignaturePreview = document.getElementById('editNewSignaturePreview');
+      const editNewSignaturePreviewImg = document.getElementById('editNewSignaturePreviewImg');
+
+      // Drag and drop functionality for add form
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        signatureUploadArea.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        signatureUploadArea.addEventListener(eventName, highlight, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        signatureUploadArea.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight() {
+        signatureUploadArea.classList.add('dragover');
+      }
+
+      function unhighlight() {
+        signatureUploadArea.classList.remove('dragover');
+      }
+
+      signatureUploadArea.addEventListener('drop', handleDrop, false);
+
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        signatureInput.files = files;
+        handleSignatureFile(files[0], signaturePreview, signaturePreviewImg, 'signature_url', 'signature_public_id');
+      }
+
+      signatureInput.addEventListener('change', function (e) {
+        handleSignatureFile(e.target.files[0], signaturePreview, signaturePreviewImg, 'signature_url', 'signature_public_id');
+      });
+
+      // Drag and drop functionality for edit form
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        editSignatureUploadArea.addEventListener(eventName, preventDefaults, false);
+      });
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        editSignatureUploadArea.addEventListener(eventName, highlightEdit, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        editSignatureUploadArea.addEventListener(eventName, unhighlightEdit, false);
+      });
+
+      function highlightEdit() {
+        editSignatureUploadArea.classList.add('dragover');
+      }
+
+      function unhighlightEdit() {
+        editSignatureUploadArea.classList.remove('dragover');
+      }
+
+      editSignatureUploadArea.addEventListener('drop', handleEditDrop, false);
+
+      function handleEditDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        editSignatureInput.files = files;
+        handleSignatureFile(files[0], editNewSignaturePreview, editNewSignaturePreviewImg, 'edit_signature_url', 'edit_signature_public_id');
+      }
+
+      editSignatureInput.addEventListener('change', function (e) {
+        handleSignatureFile(e.target.files[0], editNewSignaturePreview, editNewSignaturePreviewImg, 'edit_signature_url', 'edit_signature_public_id');
+      });
+    }
+
+    function handleSignatureFile(file, previewContainer, previewImg, urlFieldId, publicIdFieldId) {
+      if (file) {
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+          showToast('Please select a valid image file (JPG, PNG, GIF)');
+          return;
+        }
+
+        // Validate file size (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+          showToast('File size must be less than 2MB');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewImg.src = e.target.result;
+          previewContainer.style.display = 'block';
+
+          // Upload to Cloudinary
+          uploadSignatureToCloudinary(file, urlFieldId, publicIdFieldId);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function uploadSignatureToCloudinary(file, urlFieldId, publicIdFieldId) {
+      const cloudName = 'dn98ntlkd';
+      const uploadPreset = 'admin-photos';
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
+      formData.append('folder', 'admin-signatures'); // Optional: organize signatures in separate folder
+
+      try {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to upload signature to Cloudinary');
+        }
+
+        const data = await response.json();
+
+        // Set the hidden fields with Cloudinary response data
+        document.getElementById(urlFieldId).value = data.secure_url;
+        document.getElementById(publicIdFieldId).value = data.public_id;
+
+        showToast('Signature uploaded successfully!', 'success');
+      } catch (error) {
+        console.error('Error uploading signature:', error);
+        showToast('Failed to upload signature: ' + error.message, 'error');
+      }
+    }
+
+    function removeSignature() {
+      document.getElementById('signaturePreview').style.display = 'none';
+      document.getElementById('signature').value = '';
+      document.getElementById('signature_url').value = '';
+      document.getElementById('signature_public_id').value = '';
+    }
+
+    function removeEditSignature() {
+      document.getElementById('editNewSignaturePreview').style.display = 'none';
+      document.getElementById('edit_signature').value = '';
+      document.getElementById('edit_signature_url').value = '';
+      document.getElementById('edit_signature_public_id').value = '';
+    }
 
     // School ID formatting function
     function formatSchoolId(input) {
@@ -541,6 +805,9 @@
       const adminListBody = document.getElementById('adminListBody');
       const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
 
+      // Initialize signature upload functionality
+      initializeSignatureUpload();
+
       // Apply School ID formatting
       formatSchoolId(document.getElementById('school_id'));
       formatSchoolId(document.getElementById('edit_school_id'));
@@ -590,7 +857,7 @@
 
           if (admins.length === 0) {
             adminListBody.innerHTML =
-              '<tr><td colspan="8" class="text-center">No other admins found</td></tr>';
+              '<tr><td colspan="9" class="text-center">No other admins found</td></tr>';
           } else {
             admins.forEach(admin => {
               const currentAdminId = localStorage.getItem('adminId');
@@ -600,29 +867,30 @@
               if (admin.departments?.length) {
                 departmentsHtml = admin.departments.map(dept => {
                   return `<span class="badge bg-light text-dark me-1 mb-1" title="${dept.department_name}">
-                        ${dept.department_code}
-                      </span>`;
+                            ${dept.department_code}
+                          </span>`;
                 }).join('');
               }
 
               const row = document.createElement('tr');
               row.innerHTML = `
-            <td>${admin.admin_id}</td>
-            <td>${admin.school_id || 'N/A'}</td>
-            <td>${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</td>
-            <td title="${admin.email}">${admin.email}</td>
-            <td>${admin.contact_number || 'N/A'}</td>
-            <td>${admin.role ? admin.role.role_title : 'N/A'}</td>
-            <td>${departmentsHtml}</td>
-            <td>
-              <button class="btn btn-sm btn-info me-1" onclick="openEditModal(${admin.admin_id})" title="Edit">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button class="btn btn-sm btn-danger" onclick="deleteAdmin(${admin.admin_id})" title="Delete">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          `;
+                <td>${admin.admin_id}</td>
+                <td>${admin.school_id || 'N/A'}</td>
+                <td>${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</td>
+                <td>${admin.title || 'N/A'}</td>
+                <td title="${admin.email}">${admin.email}</td>
+                <td>${admin.contact_number || 'N/A'}</td>
+                <td>${admin.role ? admin.role.role_title : 'N/A'}</td>
+                <td>${departmentsHtml}</td>
+                <td>
+                  <button class="btn btn-sm btn-info me-1" onclick="openEditModal(${admin.admin_id})" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteAdmin(${admin.admin_id})" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              `;
               adminListBody.appendChild(row);
             });
           }
@@ -634,7 +902,7 @@
         } catch (error) {
           console.error('Error loading admin list:', error);
           adminListBody.innerHTML =
-            '<tr><td colspan="8" class="text-center">Error loading admin list</td></tr>';
+            '<tr><td colspan="9" class="text-center">Error loading admin list</td></tr>';
 
           // Hide spinner even on error
           loadingEl.style.display = 'none';
@@ -663,17 +931,19 @@
           .then(admin => {
             // Populate admin details in modal
             document.getElementById('deleteAdminDetails').innerHTML = `
-              <div class="row">
-                  <div class="col-4 fw-bold">School ID:</div>
-                  <div class="col-8">${admin.school_id}</div>
-                  <div class="col-4 fw-bold">Name:</div>
-                  <div class="col-8">${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</div>
-                  <div class="col-4 fw-bold">Email:</div>
-                  <div class="col-8">${admin.email}</div>
-                  <div class="col-4 fw-bold">Role:</div>
-                  <div class="col-8">${admin.role ? admin.role.role_title : 'N/A'}</div>
-              </div>
-          `;
+                  <div class="row">
+                      <div class="col-4 fw-bold">School ID:</div>
+                      <div class="col-8">${admin.school_id}</div>
+                      <div class="col-4 fw-bold">Name:</div>
+                      <div class="col-8">${admin.first_name} ${admin.middle_name ? admin.middle_name + ' ' : ''}${admin.last_name}</div>
+                      <div class="col-4 fw-bold">Title:</div>
+                      <div class="col-8">${admin.title || 'N/A'}</div>
+                      <div class="col-4 fw-bold">Email:</div>
+                      <div class="col-8">${admin.email}</div>
+                      <div class="col-4 fw-bold">Role:</div>
+                      <div class="col-8">${admin.role ? admin.role.role_title : 'N/A'}</div>
+                  </div>
+              `;
 
             // Show the modal
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
@@ -683,11 +953,11 @@
             console.error('Error fetching admin details:', error);
             // Fallback: show modal with basic info if details fetch fails
             document.getElementById('deleteAdminDetails').innerHTML = `
-              <div class="text-center">
-                  <p class="mb-0">Admin ID: ${adminId}</p>
-                  <p class="text-muted">Unable to load full details</p>
-              </div>
-          `;
+                  <div class="text-center">
+                      <p class="mb-0">Admin ID: ${adminId}</p>
+                      <p class="text-muted">Unable to load full details</p>
+                  </div>
+              `;
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
             deleteModal.show();
           });
@@ -710,8 +980,6 @@
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-              'Authorization': `Bearer ${token}`
             }
           });
 
@@ -833,6 +1101,7 @@
           first_name: document.getElementById('first_name').value,
           middle_name: document.getElementById('middle_name').value,
           last_name: document.getElementById('last_name').value,
+          title: document.getElementById('title').value, // NEW: Title field
           email: document.getElementById('email').value,
           contact_number: document.getElementById('contact_number').value,
           role_id: roleId,
@@ -842,7 +1111,9 @@
           photo_url: 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1751033911/ksdmh4mmpxdtjogdgjmm.png',
           photo_public_id: 'ksdmh4mmpxdtjogdgjmm',
           wallpaper_url: null,
-          wallpaper_public_id: null
+          wallpaper_public_id: null,
+          signature_url: document.getElementById('signature_url').value, // NEW: Signature URL
+          signature_public_id: document.getElementById('signature_public_id').value // NEW: Signature Public ID
         };
 
         try {
@@ -867,6 +1138,9 @@
           showToast('Admin added successfully!');
           addAdminForm.reset();
           document.getElementById('add-selected-departments').value = '[]';
+          document.getElementById('signature_url').value = '';
+          document.getElementById('signature_public_id').value = '';
+          document.getElementById('signaturePreview').style.display = 'none';
           createDepartmentButtons('add-department-buttons-container', []);
           await loadAdminList();
         } catch (error) {
@@ -896,6 +1170,7 @@
           document.getElementById('edit_first_name').value = admin.first_name;
           document.getElementById('edit_middle_name').value = admin.middle_name || '';
           document.getElementById('edit_last_name').value = admin.last_name;
+          document.getElementById('edit_title').value = admin.title || ''; // NEW: Title field
           document.getElementById('edit_email').value = admin.email;
           document.getElementById('edit_contact_number').value = admin.contact_number || '';
           document.getElementById('edit_school_id').value = admin.school_id || '';
@@ -905,6 +1180,26 @@
           if (editRoleSelect && admin.role_id) {
             editRoleSelect.value = admin.role_id;
           }
+
+          // Handle signature preview in edit modal
+          const editSignaturePreview = document.getElementById('editSignaturePreview');
+          if (admin.signature_url) {
+            editSignaturePreview.innerHTML = `
+                  <p class="mb-2">Current Signature:</p>
+                  <img src="${admin.signature_url}" class="signature-preview" alt="Current Signature">
+                  <div class="mt-2">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteAdminSignature(${admin.admin_id})">
+                      <i class="bi bi-trash"></i> Delete Signature
+                    </button>
+                  </div>
+                `;
+          } else {
+            editSignaturePreview.innerHTML = '<p class="text-muted">No signature uploaded</p>';
+          }
+
+          // Set current signature values
+          document.getElementById('edit_signature_url').value = admin.signature_url || '';
+          document.getElementById('edit_signature_public_id').value = admin.signature_public_id || '';
 
           // Create department buttons and pre-select current departments
           const selectedDeptIds = admin.departments ? admin.departments.map(dept => dept.department_id.toString()) : [];
@@ -923,6 +1218,103 @@
           showToast('Failed to load admin details: ' + error.message);
         }
       };
+
+      // Function to delete admin signature
+// Function to delete admin signature
+window.deleteAdminSignature = async function(adminId) {
+  if (!confirm('Are you sure you want to delete this signature?')) {
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+    
+    // Get the current form values
+    const currentFormData = {
+      first_name: document.getElementById('edit_first_name').value,
+      middle_name: document.getElementById('edit_middle_name').value,
+      last_name: document.getElementById('edit_last_name').value,
+      title: document.getElementById('edit_title').value,
+      email: document.getElementById('edit_email').value,
+      contact_number: document.getElementById('edit_contact_number').value,
+      role_id: document.getElementById('edit_role_id').value,
+      school_id: document.getElementById('edit_school_id').value,
+      department_ids: JSON.parse(document.getElementById('edit-selected-departments').value || '[]')
+    };
+
+    // Validate that all required fields are present
+    if (!currentFormData.first_name || !currentFormData.last_name || !currentFormData.email || !currentFormData.role_id) {
+      throw new Error('Please fill all required fields in the form before deleting signature');
+    }
+
+    // Prepare update data with current form values and null signature
+    const updateData = {
+      first_name: currentFormData.first_name,
+      middle_name: currentFormData.middle_name || '',
+      last_name: currentFormData.last_name,
+      title: currentFormData.title || '',
+      email: currentFormData.email,
+      contact_number: currentFormData.contact_number || '',
+      role_id: parseInt(currentFormData.role_id),
+      school_id: currentFormData.school_id || '',
+      department_ids: currentFormData.department_ids,
+      signature_url: null,
+      signature_public_id: null
+    };
+
+    console.log('Update data for signature deletion:', updateData);
+
+    // Update the admin record to remove signature
+    const updateResponse = await fetch(`/api/admins/${adminId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(updateData)
+    });
+
+    if (!updateResponse.ok) {
+      const errorData = await updateResponse.json();
+      console.error('Backend error:', errorData);
+      throw new Error(errorData.message || 'Failed to remove signature from admin record');
+    }
+
+    // Update the UI
+    document.getElementById('editSignaturePreview').innerHTML = '<p class="text-muted">No signature uploaded</p>';
+    document.getElementById('edit_signature_url').value = '';
+    document.getElementById('edit_signature_public_id').value = '';
+
+    showToast('Signature removed successfully!', 'success');
+  } catch (error) {
+    console.error('Error removing signature:', error);
+    showToast('Failed to remove signature: ' + error.message, 'error');
+  }
+};
+
+// Function to delete signature from Cloudinary
+async function deleteSignatureFromCloudinary(publicId) {
+  const cloudName = 'dn98ntlkd';
+  const apiKey = '545682193957699';
+  const timestamp = Math.floor(Date.now() / 1000);
+  
+  // Generate signature (you'll need to do this server-side for security)
+  // For now, we'll use a simpler approach or you can create a backend endpoint
+  
+  // Since we can't securely generate the signature client-side, 
+  // you have two options:
+  
+  // Option 1: Create a backend endpoint for Cloudinary deletion
+  // Option 2: Use your existing upload preset (but deletion requires signature)
+  
+  // For now, let's use a simple fetch to your backend if you create the route
+  // or we can just update the admin record and leave the image in Cloudinary
+  
+  console.log('Would delete from Cloudinary:', publicId);
+  // Implementation depends on your backend setup
+}
 
       // Save edited admin - FIXED validation
       document.getElementById('saveAdminChanges').addEventListener('click', async function () {
@@ -962,12 +1354,15 @@
           first_name: document.getElementById('edit_first_name').value,
           middle_name: document.getElementById('edit_middle_name').value,
           last_name: document.getElementById('edit_last_name').value,
+          title: document.getElementById('edit_title').value, // NEW: Title field
           email: document.getElementById('edit_email').value,
           contact_number: document.getElementById('edit_contact_number').value,
           role_id: roleId,
           school_id: schoolId,
           password: document.getElementById('edit_password').value || undefined,
-          department_ids: finalSelectedDeptIds // Use the final selected departments
+          department_ids: finalSelectedDeptIds, // Use the final selected departments
+          signature_url: document.getElementById('edit_signature_url').value || null,
+          signature_public_id: document.getElementById('edit_signature_public_id').value || null
         };
 
         try {

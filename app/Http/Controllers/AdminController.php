@@ -90,22 +90,29 @@ class AdminController extends Controller
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
             'middle_name' => 'nullable|string|max:50',
+            'title' => 'nullable|string|max:100', // NEW
             'email' => 'required|email|unique:admins,email|max:150',
             'contact_number' => 'nullable|string|max:20',
             'role_id' => 'required|exists:admin_roles,role_id',
             'school_id' => 'nullable|string|max:20',
             'password' => 'required|string|min:8|max:50',
-            'department_ids' => 'nullable|array', // Add this line
-            'department_ids.*' => 'exists:departments,department_id', // Add this line
+            'department_ids' => 'nullable|array',
+            'department_ids.*' => 'exists:departments,department_id',
             'photo_url' => 'nullable|string',
             'photo_public_id' => 'nullable|string',
             'wallpaper_url' => 'nullable|string',
             'wallpaper_public_id' => 'nullable|string',
+            'signature_url' => 'nullable|string', // NEW
+            'signature_public_id' => 'nullable|string', // NEW
         ]);
 
         // Set default photo if not provided
         $validated['photo_url'] = $validated['photo_url'] ?? 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1751033911/ksdmh4mmpxdtjogdgjmm.png';
         $validated['photo_public_id'] = $validated['photo_public_id'] ?? 'ksdmh4mmpxdtjogdgjmm';
+
+        // Set default signature if not provided
+        $validated['signature_url'] = $validated['signature_url'] ?? null;
+        $validated['signature_public_id'] = $validated['signature_public_id'] ?? null;
 
         // Hash the password
         $validated['hashed_password'] = bcrypt($validated['password']);
@@ -206,13 +213,16 @@ class AdminController extends Controller
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
             'middle_name' => 'nullable|string|max:50',
+            'title' => 'nullable|string|max:100', // NEW
             'email' => 'required|email|max:150|unique:admins,email,' . $admin->admin_id . ',admin_id',
             'contact_number' => 'nullable|string|max:20',
             'role_id' => 'required|exists:admin_roles,role_id',
             'school_id' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:8|max:50',
             'department_ids' => 'nullable|array',
-            'department_ids.*' => 'exists:departments,department_id'
+            'department_ids.*' => 'exists:departments,department_id',
+            'signature_url' => 'nullable|string', // NEW
+            'signature_public_id' => 'nullable|string', // NEW
         ]);
 
         // Store old role for comparison
@@ -278,7 +288,7 @@ class AdminController extends Controller
             \Log::error('Error updating admin profile: ' . $e->getMessage(), [
                 'admin_id' => $admin->admin_id,
                 'request_data' => $request->except('password'),
-                'trace' => $e->getTraceAsString() // Added for better debugging
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
@@ -325,14 +335,15 @@ class AdminController extends Controller
     {
         try {
             $request->validate([
-                'photo' => 'required_without:wallpaper|image|max:2048',
-                'wallpaper' => 'required_without:photo|image|max:5120',
-                'type' => 'required|in:photo,wallpaper'
+                'photo' => 'required_without_all:wallpaper,signature|image|max:2048',
+                'wallpaper' => 'required_without_all:photo,signature|image|max:5120',
+                'signature' => 'required_without_all:photo,wallpaper|image|max:2048', // NEW
+                'type' => 'required|in:photo,wallpaper,signature' // UPDATED
             ]);
 
             $admin = $request->user();
             $type = $request->type;
-            $file = $request->file($type); // Either 'photo' or 'wallpaper' file
+            $file = $request->file($type); // Either 'photo', 'wallpaper', or 'signature' file
 
             if (!$file) {
                 throw new \Exception('No file provided');
@@ -351,6 +362,12 @@ class AdminController extends Controller
                     'transformation' => ['width' => 1920, 'height' => 400, 'crop' => 'fill'],
                     'url_field' => 'wallpaper_url',
                     'public_id_field' => 'wallpaper_public_id'
+                ],
+                'signature' => [ // NEW
+                    'folder' => 'admin-signatures',
+                    'transformation' => ['width' => 300, 'height' => 100, 'crop' => 'fit'],
+                    'url_field' => 'signature_url',
+                    'public_id_field' => 'signature_public_id'
                 ]
             ][$type];
 
@@ -394,6 +411,7 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
     public function updatePhotoRecords(Request $request)
     {
         try {
@@ -402,7 +420,9 @@ class AdminController extends Controller
                 'photo_public_id' => 'nullable|string',
                 'wallpaper_url' => 'nullable|string',
                 'wallpaper_public_id' => 'nullable|string',
-                'type' => 'required|in:photo,wallpaper'
+                'signature_url' => 'nullable|string', // NEW
+                'signature_public_id' => 'nullable|string', // NEW
+                'type' => 'required|in:photo,wallpaper,signature' // UPDATED
             ]);
 
             $admin = $request->user();
@@ -412,9 +432,12 @@ class AdminController extends Controller
             if ($type === 'photo') {
                 $updateData['photo_url'] = $validated['photo_url'];
                 $updateData['photo_public_id'] = $validated['photo_public_id'];
-            } else {
+            } else if ($type === 'wallpaper') {
                 $updateData['wallpaper_url'] = $validated['wallpaper_url'];
                 $updateData['wallpaper_public_id'] = $validated['wallpaper_public_id'];
+            } else { // signature
+                $updateData['signature_url'] = $validated['signature_url'];
+                $updateData['signature_public_id'] = $validated['signature_public_id'];
             }
 
             $admin->update($updateData);
@@ -434,12 +457,13 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
     public function deleteCloudinaryImage(Request $request)
     {
         try {
             $validated = $request->validate([
                 'public_id' => 'required|string',
-                'type' => 'required|in:photo,wallpaper'
+                'type' => 'required|in:photo,wallpaper,signature' // UPDATED
             ]);
 
             $publicId = $validated['public_id'];

@@ -239,6 +239,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // ---------------- Cloudinary Management ---------------- //
+    
     Route::post('/admin/cloudinary/delete', function (Request $request) {
         try {
             $request->validate([

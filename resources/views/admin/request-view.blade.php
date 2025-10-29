@@ -3529,49 +3529,59 @@ document.getElementById('confirmCloseForm').addEventListener('click', async func
                                             </table>
                                         `;
 
-                // Event details
-                document.getElementById('eventDetails').innerHTML = `
-                <table class="table table-borderless mb-0 small text-start align-top">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div><strong>Endorser</strong></div>
-                                <div>${request.documents.endorser || 'N/A'}</div>
-                            </td>
-                            <td>
-                                <div><strong>Date Endorsed</strong></div>
-                                <div>${formatDateEndorsed(request.documents.date_endorsed) || 'N/A'}</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div><strong>Rental Purpose</strong></div>
-                                <div>${request.form_details.purpose}</div>
-                            </td>
-                            <td>
-                                <div><strong>Participants</strong></div>
-                                <div>${request.form_details.num_participants}</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <div><strong>Additional Requests</strong></div>
-                                <div>${request.form_details.additional_requests || 'No additional requests.'}</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div><strong>Start Schedule</strong></div>
-                                <div>${formatStartDateTime(request.schedule)}</div>
-                            </td>
-                            <td>
-                                <div><strong>End Schedule</strong></div>
-                                <div>${formatEndDateTime(request.schedule)}</div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            `;
+          // Event details
+document.getElementById('eventDetails').innerHTML = `
+<table class="table table-borderless mb-0 small text-start align-top">
+    <tbody>
+        <tr>
+            <td>
+                <div><strong>Endorser</strong></div>
+                <div>${request.documents.endorser || 'N/A'}</div>
+            </td>
+            <td>
+                <div><strong>Date Endorsed</strong></div>
+                <div>${formatDateEndorsed(request.documents.date_endorsed) || 'N/A'}</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div><strong>Rental Purpose</strong></div>
+                <div>${request.form_details.purpose}</div>
+            </td>
+            <td>
+                <div><strong>Participants</strong></div>
+                <div>${request.form_details.num_participants}</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div><strong>Number of Tables</strong></div>
+                <div>${request.form_details.num_tables || 0}</div>
+            </td>
+            <td>
+                <div><strong>Number of Chairs</strong></div>
+                <div>${request.form_details.num_chairs || 0}</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div><strong>Additional Requests</strong></div>
+                <div>${request.form_details.additional_requests || 'No additional requests.'}</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div><strong>Start Schedule</strong></div>
+                <div>${formatStartDateTime(request.schedule)}</div>
+            </td>
+            <td>
+                <div><strong>End Schedule</strong></div>
+                <div>${formatEndDateTime(request.schedule)}</div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+`;
                 // Update requested items with fee breakdown
                 document.getElementById('requestedItems').innerHTML = `
                                             <div class="mb-3">
