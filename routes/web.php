@@ -8,7 +8,17 @@ use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\FeedbackController;
 
 
-
+Route::get('/test-email', function () {
+    try {
+        \Mail::raw('Test email from Render', function ($message) {
+            $message->to('hannahescosar@gmail.com')
+                    ->subject('Test from Render');
+        });
+        return 'Email sent successfully!';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
 
 Route::middleware('web')->group(function () {
 Route::get('/', function () {
