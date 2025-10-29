@@ -603,7 +603,7 @@ async function fetchRequisitionFormsForCalendar() {
     try {
         const token = localStorage.getItem('adminToken');
 
-        const response = await fetch('http://127.0.0.1:8000/api/admin/requisition-forms', {
+        const response = await fetch('/api/admin/requisition-forms', {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json'
@@ -651,7 +651,7 @@ fetchRequisitionFormsForCalendar();
       }
 
       // Fetch requisition data from API with authentication
-      fetch('http://127.0.0.1:8000/api/admin/requisition-forms', {
+      fetch('/api/admin/requisition-forms', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -732,7 +732,7 @@ async function fetchUserFeedback() {
         const token = localStorage.getItem('adminToken');
         console.log('Fetching user feedback...');
 
-        const response = await fetch('http://127.0.0.1:8000/api/feedback', {
+        const response = await fetch('/api/feedback', {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json'
@@ -902,7 +902,7 @@ fetchUserFeedback();
         if (requisitionsData) {
           systemLogData = await processSystemLogData(requisitionsData);
         } else {
-          const response = await fetch('http://127.0.0.1:8000/api/admin/requisition-forms', {
+          const response = await fetch('/api/admin/requisition-forms', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Accept': 'application/json'
@@ -1140,7 +1140,7 @@ fetchUserFeedback();
     }
 
     function fetchEquipmentData() {
-      fetch('http://127.0.0.1:8000/api/equipment', {
+      fetch('/api/equipment', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',

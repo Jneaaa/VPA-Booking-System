@@ -16,7 +16,7 @@ async function checkIfHeadAdmin() {
             return false;
         }
 
-        const response = await fetch('http://127.0.0.1:8000/api/admin/profile', {
+        const response = await fetch('/api/admin/profile', {
             headers: {
                 'Authorization': `Bearer ${adminToken}`,
                 'Accept': 'application/json'
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         // Check authentication and role in parallel
         const [authResponse, roleCheck] = await Promise.all([
-            fetch("http://127.0.0.1:8000/api/admin/profile", {
+            fetch("/api/admin/profile", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     Accept: "application/json",
@@ -118,7 +118,7 @@ document.getElementById("logoutLink")?.addEventListener("click", async (e) => {
     }
 
     try {
-        await fetch("http://127.0.0.1:8000/api/admin/logout", {
+        await fetch("/api/admin/logout", {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${token}`,

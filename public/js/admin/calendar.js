@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Fetch requisition forms from API
-            fetch('http://127.0.0.1:8000/api/admin/requisition-forms', {
+            fetch('/api/admin/requisition-forms', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json',

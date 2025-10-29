@@ -833,7 +833,7 @@ handleNotificationClick(notificationId, requestId) {
             const token = localStorage.getItem('adminToken');
             if (!token) return;
 
-            fetch('http://127.0.0.1:8000/api/admin/profile', {
+            fetch('/api/admin/profile', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
