@@ -24,11 +24,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Create ssl directory and copy Aiven certificate
-RUN mkdir -p /etc/ssl/certs/aiven
-COPY ssl/ca.pem /etc/ssl/certs/aiven/aiven-ca.pem
-RUN chmod 644 /etc/ssl/certs/aiven/aiven-ca.pem
-
 # Create .docker directory and Apache config
 RUN mkdir -p .docker
 COPY .docker/apache.conf /etc/apache2/sites-available/000-default.conf
@@ -36,17 +31,18 @@ COPY .docker/apache.conf /etc/apache2/sites-available/000-default.conf
 # Copy application files
 COPY . .
 
+# Create ssl directory and copy Aiven certificate (do this AFTER copying files)
+RUN mkdir -p /etc/ssl/certs/aiven
+COPY ssl/ca.pem /etc/ssl/certs/aiven/aiven-ca.pem
+RUN chmod 644 /etc/ssl/certs/aiven/aiven-ca.pem
+
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set proper permissions for Laravel
+# Set proper permissions for Laravel (ONLY for Laravel directories)
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage \
-    && chmod -R 775 bootstrap/cache \
-    && chmod -R 775 /etc/ssl/certs/aiven
-
-# Ensure storage is writable
-RUN chmod -R 777 storage
+    && chmod -R 775 bootstrap/cache
 
 # Remove local .env to prevent conflicts
 RUN rm -f .env
