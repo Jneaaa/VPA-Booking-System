@@ -180,6 +180,8 @@ class AdminApprovalController extends Controller
                     ],
                     'form_details' => [
                         'num_participants' => $form->num_participants,
+                         'num_tables' => $form->num_tables, 
+                         'num_chairs' => $form->num_chairs,
                         'purpose' => $form->purpose->purpose_name,
                         'additional_requests' => $form->additional_requests,
                         'status' => [

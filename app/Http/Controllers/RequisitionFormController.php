@@ -12,6 +12,7 @@ use App\Models\RequestedEquipment;
 use App\Models\RequestedFacility;
 use App\Models\Facility;
 use App\Models\Equipment;
+use App\Models\EquipmentItem;
 use App\Models\FormStatus;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
