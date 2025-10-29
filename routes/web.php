@@ -11,9 +11,9 @@ use App\Http\Controllers\FeedbackController;
 
 
 Route::middleware('web')->group(function () {
-    Route::get('/', function () {
-        return view('welcome');
-    });
+Route::get('/', function () {
+    return view('public.index'); // Redirect to your main frontend
+});
 
     Route::get('/admin/feedback-data', [FeedbackController::class, 'getFeedbackData'])->name('admin.feedback.data');
     Route::get('/admin/feedback-stats', [FeedbackController::class, 'getFeedbackStats'])->name('admin.feedback.stats');
