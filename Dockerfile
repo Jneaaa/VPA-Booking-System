@@ -1,13 +1,8 @@
 FROM php:8.2-apache
 
-# Install SSL certificates (important for Aiven)
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    && update-ca-certificates
-
 WORKDIR /var/www/html
 
-# Install system dependencies including ALL required libraries
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -15,33 +10,37 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libonig-dev \
     libxml2-dev \
+    libpq-dev \
     zip \
     unzip \
     git \
     curl
 
-# Install GD extension properly
+# Install PHP extensions (including PostgreSQL)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install gd
-
-# Install other essential PHP extensions
-RUN docker-php-ext-install pdo_mysql
-RUN docker-php-ext-install mbstring
-RUN docker-php-ext-install zip
-RUN docker-php-ext-install xml
-RUN docker-php-ext-install exif
+RUN docker-php-ext-install gd pdo_mysql pdo_pgsql mbstring zip xml exif
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Copy application files
 COPY . .
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
+
+# Generate key and setup Laravel for production
+RUN php artisan key:generate
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
+
+# ✅ ADD THIS LINE - Create database tables
+RUN php artisan migrate --force
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
