@@ -219,7 +219,7 @@ window.EquipmentManagement = {
     // Save image to database
     saveImageToDatabase: async function(equipmentId, imageUrl, publicId) {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/save`, {
+            const response = await fetch(`/api/admin/equipment/${equipmentId}/images/save`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
@@ -258,7 +258,7 @@ window.EquipmentManagement = {
             const formData = new FormData();
             formData.append('public_id', publicId);
 
-            const response = await fetch(`http://127.0.0.1:8000/api/admin/cloudinary/delete`, {
+            const response = await fetch(`/api/admin/cloudinary/delete`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
