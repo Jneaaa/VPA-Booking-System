@@ -8,12 +8,12 @@ services:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
-        value: true  # ← Changed to true temporarily
+        value: false
       - key: APP_KEY
         fromSecret: app_key
     buildCommand: |
-      php artisan config:clear
-      php artisan route:clear
-      php artisan view:clear
+      composer install --no-dev --optimize-autoloader
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
       php artisan migrate --force
-    startCommand: php artisan serve --host=0.0.0.0 --port=8000
