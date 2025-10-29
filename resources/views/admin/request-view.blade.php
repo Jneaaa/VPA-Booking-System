@@ -1111,7 +1111,7 @@
 async function checkAdminRoleAndUpdateUI() {
     try {
         const adminToken = localStorage.getItem('adminToken');
-        const response = await fetch('http://127.0.0.1:8000/api/admin/profile', {
+        const response = await fetch('/api/admin/profile', {
             headers: {
                 'Authorization': `Bearer ${adminToken}`,
                 'Accept': 'application/json'
@@ -3457,7 +3457,7 @@ document.getElementById('confirmCloseForm').addEventListener('click', async func
                 document.getElementById('loadingState').style.display = 'block';
                 document.getElementById('contentState').style.display = 'none';
 
-                const response = await fetch(`http://127.0.0.1:8000/api/admin/requisition-forms`, {
+                const response = await fetch(`/api/admin/requisition-forms`, {
                     headers: {
                         'Authorization': `Bearer ${adminToken}`,
                         'Accept': 'application/json'
@@ -3969,7 +3969,7 @@ document.getElementById('eventDetails').innerHTML = `
             // If we don't have admin info from the fee response, try to get it
             if (!fee.added_by) {
                 try {
-                    const adminResponse = await fetch('http://127.0.0.1:8000/api/admin/profile', {
+                    const adminResponse = await fetch('/api/admin/profile', {
                         headers: {
                             'Authorization': `Bearer ${adminToken}`,
                             'Accept': 'application/json'
@@ -4015,7 +4015,7 @@ document.getElementById('eventDetails').innerHTML = `
             // Add remove functionality for regular fees
             feeItem.querySelector(".remove-btn").addEventListener("click", async function () {
                 try {
-                    const deleteResponse = await fetch(`http://127.0.0.1:8000/api/admin/requisition/${requestId}/fee/${fee.fee_id}`, {
+                    const deleteResponse = await fetch(`/api/admin/requisition/${requestId}/fee/${fee.fee_id}`, {
                         method: 'DELETE',
                         headers: {
                             'Authorization': `Bearer ${adminToken}`,

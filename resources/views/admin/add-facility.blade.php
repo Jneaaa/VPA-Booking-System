@@ -564,7 +564,7 @@ label.required::after {
             // 3. Fetch categories with subcategories
             async function fetchCategoriesWithSubcategories() {
                 try {
-                    const response = await fetch('http://127.0.0.1:8000/api/facility-categories/index', {
+                    const response = await fetch('/api/facility-categories/index', {
                         headers: {
                             'Accept': 'application/json'
                         }
@@ -780,7 +780,7 @@ label.required::after {
             // 12. Function to save image reference to your database (now only called during form submission)
             async function saveImageToDatabase(facilityId, imageUrl, publicId) {
                 try {
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}/images/save`, {
+                    const response = await fetch(`/api/admin/facilities/${facilityId}/images/save`, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
@@ -908,7 +908,7 @@ label.required::after {
                     const token = localStorage.getItem('adminToken');
 
                     // Fetch statuses
-                    const statusesResponse = await fetch('http://127.0.0.1:8000/api/availability-statuses', {
+                    const statusesResponse = await fetch('/api/availability-statuses', {
                         headers: {
                             'Accept': 'application/json'
                         }
@@ -924,7 +924,7 @@ label.required::after {
                     }
 
                     // Fetch departments
-                    const departmentsResponse = await fetch('http://127.0.0.1:8000/api/departments', {
+                    const departmentsResponse = await fetch('/api/departments', {
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'Accept': 'application/json'
@@ -1033,7 +1033,7 @@ document.getElementById('addFacilityForm').addEventListener('submit', async func
             location_note: document.getElementById('locationNote').value.trim() || 'No location details provided'
         };
 
-        const facilityResponse = await fetch(`http://127.0.0.1:8000/api/admin/add-facility`, {
+        const facilityResponse = await fetch(`/api/admin/add-facility`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

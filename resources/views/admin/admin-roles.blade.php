@@ -815,7 +815,7 @@
       // Function to load departments
       async function loadDepartments() {
         try {
-          const response = await fetch('http://127.0.0.1:8000/api/departments', {
+          const response = await fetch('/api/departments', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Accept': 'application/json'
@@ -1019,7 +1019,7 @@
       // Fetch roles and populate dropdown
       async function loadRoles() {
         try {
-          const response = await fetch('http://127.0.0.1:8000/api/admin-role', {
+          const response = await fetch('/api/admin-role', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Accept': 'application/json'

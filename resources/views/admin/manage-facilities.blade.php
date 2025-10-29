@@ -242,7 +242,7 @@
       // Fetch and populate availability statuses
       async function fetchStatuses() {
         try {
-          const response = await fetch("http://127.0.0.1:8000/api/availability-statuses", {
+          const response = await fetch("/api/availability-statuses", {
             headers: {
               Authorization: `Bearer ${token}`,
               Accept: "application/json",
@@ -292,7 +292,7 @@
           noResultsMessage.classList.add("d-none");
 
           const response = await fetch(
-            "http://127.0.0.1:8000/api/facilities",
+            "/api/facilities",
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -324,7 +324,7 @@
       // Fetch and populate facilities categories
       async function fetchCategories() {
         try {
-          const response = await fetch("http://127.0.0.1:8000/api/facility-categories", {
+          const response = await fetch("/api/facility-categories", {
             headers: {
               Authorization: `Bearer ${token}`,
               Accept: "application/json",
@@ -588,7 +588,7 @@
       async function handleDeleteFacility(id) {
         try {
           const response = await fetch(
-            `http://127.0.0.1:8000/api/admin/facilities/${id}`,
+            `/api/admin/facilities/${id}`,
             {
               method: "DELETE",
               headers: {

@@ -744,7 +744,7 @@
             // Function to save image reference to your database (now only called during form submission)
             async function saveImageToDatabase(facilityId, imageUrl, publicId) {
                 try {
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}/images/save`, {
+                    const response = await fetch(`/api/admin/facilities/${facilityId}/images/save`, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
@@ -781,7 +781,7 @@
 
                     // 1. Delete from Cloudinary via your simple backend endpoint
                     if (cloudinaryPublicId) {
-                        await fetch(`http://127.0.0.1:8000/api/admin/cloudinary/delete`, {
+                        await fetch(`/api/admin/cloudinary/delete`, {
                             method: 'POST',
                             headers: {
                                 'Authorization': `Bearer ${token}`,
@@ -794,7 +794,7 @@
                     }
 
                     // 2. Delete from your database
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}/images/${imageId}`, {
+                    const response = await fetch(`/api/admin/facilities/${facilityId}/images/${imageId}`, {
                         method: 'DELETE',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -956,7 +956,7 @@
            // Fetch facility data
 async function fetchFacilityData() {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}`, {
+        const response = await fetch(`/api/admin/facilities/${facilityId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
@@ -1070,7 +1070,7 @@ async function fetchFacilityData() {
 
             async function fetchCategoriesWithSubcategories() {
                 try {
-                    const response = await fetch('http://127.0.0.1:8000/api/facility-categories/index', {
+                    const response = await fetch('/api/facility-categories/index', {
                         headers: {
                             'Accept': 'application/json'
                         }
@@ -1110,7 +1110,7 @@ async function fetchFacilityData() {
 
             async function fetchDepartments() {
                 try {
-                    const response = await fetch('http://127.0.0.1:8000/api/departments', {
+                    const response = await fetch('/api/departments', {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
                             'Accept': 'application/json'
@@ -1132,7 +1132,7 @@ async function fetchFacilityData() {
 
             async function fetchStatuses() {
                 try {
-                    const response = await fetch('http://127.0.0.1:8000/api/availability-statuses', {
+                    const response = await fetch('/api/availability-statuses', {
                         headers: {
                             'Accept': 'application/json'
                         }
@@ -1247,7 +1247,7 @@ async function fetchFacilityData() {
                     }
 
                     // Step 1: Update facility data
-                    const response = await fetch(`http://127.0.0.1:8000/api/admin/facilities/${facilityId}`, {
+                    const response = await fetch(`/api/admin/facilities/${facilityId}`, {
                         method: 'PUT',
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,

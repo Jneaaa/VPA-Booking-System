@@ -748,7 +748,7 @@
                 // 10. Function to save image reference to your database
                 async function saveImageToDatabase(equipmentId, imageUrl, publicId) {
                     try {
-                        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/save`, {
+                        const response = await fetch(`/api/admin/equipment/${equipmentId}/images/save`, {
                             method: 'POST',
                             headers: {
                                 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
@@ -788,7 +788,7 @@
                         const formData = new FormData();
                         formData.append('public_id', publicId);
 
-                        const response = await fetch(`http://127.0.0.1:8000/api/admin/cloudinary/delete`, {
+                        const response = await fetch(`/api/admin/cloudinary/delete`, {
                             method: 'POST',
                             headers: {
                                 'Authorization': `Bearer ${token}`,
@@ -829,7 +829,7 @@
 
                         // 1. Delete from Cloudinary via your simple backend endpoint
                         if (cloudinaryPublicId) {
-                            await fetch(`http://127.0.0.1:8000/api/admin/cloudinary/delete`, {
+                            await fetch(`/api/admin/cloudinary/delete`, {
                                 method: 'POST',
                                 headers: {
                                     'Authorization': `Bearer ${token}`,
@@ -841,7 +841,7 @@
                         }
 
                         // 2. Delete from your database
-                        const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${equipmentId}/images/${imageId}`, {
+                        const response = await fetch(`/api/admin/equipment/${equipmentId}/images/${imageId}`, {
                             method: 'DELETE',
                             headers: {
                                 'Authorization': `Bearer ${token}`,
@@ -1605,7 +1605,7 @@
                         const token = localStorage.getItem('adminToken');
 
                         // Fetch categories
-                        const categoriesResponse = await fetch('http://127.0.0.1:8000/api/equipment-categories', {
+                        const categoriesResponse = await fetch('/api/equipment-categories', {
                             headers: {
                                 'Accept': 'application/json'
                             }
@@ -1621,7 +1621,7 @@
                         }
 
                         // Fetch statuses
-                        const statusesResponse = await fetch('http://127.0.0.1:8000/api/availability-statuses', {
+                        const statusesResponse = await fetch('/api/availability-statuses', {
                             headers: {
                                 'Accept': 'application/json'
                             }
@@ -1637,7 +1637,7 @@
                         }
 
                         // Fetch departments
-                        const departmentsResponse = await fetch('http://127.0.0.1:8000/api/departments', {
+                        const departmentsResponse = await fetch('/api/departments', {
                             headers: {
                                 'Authorization': `Bearer ${token}`,
                                 'Accept': 'application/json'
@@ -1654,7 +1654,7 @@
                         }
 
                         // Fetch conditions for inventory items
-                        const conditionsResponse = await fetch('http://127.0.0.1:8000/api/conditions', {
+                        const conditionsResponse = await fetch('/api/conditions', {
                             headers: {
                                 'Authorization': `Bearer ${token}`,
                                 'Accept': 'application/json'
@@ -1731,7 +1731,7 @@
                             maximum_rental_hour: document.getElementById('minRentalHours').value,
                         };
 
-                        const equipmentResponse = await fetch(`http://127.0.0.1:8000/api/admin/equipment`, {
+                        const equipmentResponse = await fetch(`/api/admin/equipment`, {
                             method: 'POST',
                             headers: {
                                 'Authorization': `Bearer ${token}`,
@@ -1795,7 +1795,7 @@
                                         publicId = cloudinaryData.public_id;
                                     }
 
-                                    const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${window.newEquipmentId}/items`, {
+                                    const response = await fetch(`/api/admin/equipment/${window.newEquipmentId}/items`, {
                                         method: 'POST',
                                         headers: {
                                             'Authorization': `Bearer ${token}`,
