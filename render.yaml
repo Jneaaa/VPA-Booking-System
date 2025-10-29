@@ -129,9 +129,20 @@ services:
       - key: BCRYPT_ROUNDS
         value: 12
     
-    buildCommand: |
-      composer install --no-dev --optimize-autoloader
-      php artisan config:cache
-      php artisan route:cache
-      php artisan view:cache
-      php artisan migrate --force
+buildCommand: |
+  composer install --no-dev --optimize-autoloader
+  # Test database connection
+  php -r "try {
+      new PDO('mysql:host=thesis-booking-system-thesis-booking-system.c.aivencloud.com;port=10894;dbname=defaultdb', 'avnadmin', 'AVNS_XsNBP1zeG9rheiQ9DvA', [
+          PDO::MYSQL_ATTR_SSL_CA => '/etc/ssl/certs/aiven/aiven-ca.pem',
+          PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => true
+      ]);
+      echo '✅ Database connection successful!';
+  } catch (Exception \$e) {
+      echo '❌ Database connection failed: ' . \$e->getMessage();
+      exit(1);
+  }"
+  php artisan config:cache
+  php artisan route:cache
+  php artisan view:cache
+  php artisan migrate --force

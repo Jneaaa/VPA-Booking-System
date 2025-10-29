@@ -39,14 +39,17 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions
+# Set proper permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage \
-    && chmod -R 775 bootstrap/cache
+    && chmod -R 775 bootstrap/cache \
+    && chmod -R 775 /etc/ssl/certs/aiven
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
+# Ensure storage is writable
+RUN chmod -R 777 storage
+
+# Remove local .env to prevent conflicts
+RUN rm -f .env
 
 EXPOSE 80
 CMD ["apache2-foreground"]
