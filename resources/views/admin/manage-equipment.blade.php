@@ -248,7 +248,7 @@ async function init() {
       // Fetch and populate availability statuses
       async function fetchStatuses() {
         try {
-          const response = await fetch("http://127.0.0.1:8000/api/availability-statuses", {
+          const response = await fetch("/api/availability-statuses", {
             headers: {
               Authorization: `Bearer ${token}`,
               Accept: "application/json",
@@ -298,7 +298,7 @@ async function init() {
           noResultsMessage.classList.add("d-none");
 
           const response = await fetch(
-            "http://127.0.0.1:8000/api/equipment",
+            "/api/equipment",
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -330,7 +330,7 @@ async function init() {
       // Fetch and populate equipment categories
       async function fetchCategories() {
         try {
-          const response = await fetch("http://127.0.0.1:8000/api/equipment-categories", {
+          const response = await fetch("/api/equipment-categories", {
             headers: {
               Authorization: `Bearer ${token}`,
               Accept: "application/json",
@@ -694,7 +694,7 @@ window.showToast = function (message, type = 'success', duration = 3000) {
         });
 
         const response = await fetch(
-            `http://127.0.0.1:8000/api/admin/equipment/${id}`,
+            `/api/admin/equipment/${id}`,
             {
                 method: "DELETE",
                 headers: {

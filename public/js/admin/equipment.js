@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function fetchUserData() {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/admin/user', {
+            const response = await fetch('/api/admin/user', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function fetchEquipment() {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/admin/equipment', {
+            const response = await fetch('/api/admin/equipment', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function deleteEquipment(id) {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/admin/equipment/${id}`, {
+            const response = await fetch(`/api/admin/equipment/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
