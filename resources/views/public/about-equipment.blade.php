@@ -77,6 +77,15 @@
             flex-direction: column;
             justify-content: space-between;
         }
+
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
     </style>
     <section class="hero-section">
         <h1>Equipment</h1>

@@ -19,6 +19,82 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
     rel="stylesheet" />
   <style>
+.btn-outline-primary {
+    border: none !important;
+    background: transparent !important;
+    color: #003366 !important;
+}
+
+.btn-outline-primary:hover {
+    background: #e6e6e6 !important;
+    color: #003366 !important;
+}
+
+
+    /* Loading Spinner Styles */
+    .loading-spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: #0d4581ff;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-overlay {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: #6c757d;
+    }
+
+    .loading-overlay .loading-spinner {
+      width: 2rem;
+      height: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .fee-loading {
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .selected-items-loading {
+      min-height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Conflict Modal Styles */
+    #conflictModal .modal-header {
+      background-color: var(--cpu-primary) !important;
+    }
+
+    #conflictModal .modal-title {
+      color: white !important;
+      font-weight: 600;
+    }
+
+    #conflictModal .modal-body {
+      max-height: 60vh;
+      /* controls modal size */
+      overflow-y: auto;
+      /* scroll inside */
+      overflow-x: hidden;
+    }
+
     .summary-item {
       display: flex;
       justify-content: space-between;
@@ -714,11 +790,13 @@
             <div class="form-section-card" style="height: 400px; overflow-y: auto;">
 
               <!-- Requested Facilities -->
+              <!-- Requested Facilities -->
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="mb-0">Requested Facilities</h5>
-                <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
-                  style="width: 26px; height: 26px;" type="button" onclick="navigateToCatalog('facility')">
-                  <i class="bi bi-plus fs-4"></i>
+                <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" type="button"
+                  onclick="navigateToCatalog('facility')">
+                  <i class="bi bi-plus"></i>
+                  <span>Add item</span>
                 </button>
               </div>
               <div id="facilityList" class="selected-items-container mb-3">
@@ -729,9 +807,10 @@
               <!-- Requested Equipment -->
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="mb-0">Requested Equipment</h5>
-                <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
-                  style="width: 26px; height: 26px;" type="button" onclick="navigateToCatalog('equipment')">
-                  <i class="bi bi-plus fs-4"></i>
+                <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" type="button"
+                  onclick="navigateToCatalog('equipment')">
+                  <i class="bi bi-plus"></i>
+                  <span>Add item</span>
                 </button>
               </div>
               <div id="equipmentList" class="selected-items-container">
@@ -1031,99 +1110,99 @@
         </div>
       </div>
 
-<!-- Step 3: Form Summary -->
-<div class="step-section" id="step3">
-  <div class="row">
-    <div class="col-12">
-      <div class="form-section-card">
-        <h5 class="fw-bold text-center">Requisition Summary</h5>
-        <small class="d-block text-center text-muted" style="margin-bottom: 2rem;">
-          Please review all information carefully. Submitted requests cannot be edited.
-        </small>
+      <!-- Step 3: Form Summary -->
+      <div class="step-section" id="step3">
         <div class="row">
-          <!-- Contact Information Summary -->
-          <div class="col-md-6">
-            <h6 class="border-bottom pb-2">Contact Information</h6>
-            <div class="summary-item">
-              <strong>Applicant Type:</strong>
-              <span id="summary-applicant-type"></span>
-            </div>
-            <div class="summary-item">
-              <strong>Name:</strong>
-              <span id="summary-name"></span>
-            </div>
-            <div class="summary-item">
-              <strong>Email:</strong>
-              <span id="summary-email"></span>
-            </div>
-            <div class="summary-item">
-              <strong>Contact Number:</strong>
-              <span id="summary-contact"></span>
-            </div>
-            <div class="summary-item">
-              <strong>Organization:</strong>
-              <span id="summary-organization"></span>
-            </div>
-            <div class="summary-item" id="summary-school-id-container">
-              <strong>School ID:</strong>
-              <span id="summary-school-id"></span>
-            </div>
-          </div>
+          <div class="col-12">
+            <div class="form-section-card">
+              <h5 class="fw-bold text-center">Requisition Summary</h5>
+              <small class="d-block text-center text-muted" style="margin-bottom: 2rem;">
+                Please review all information carefully. Submitted requests cannot be edited.
+              </small>
+              <div class="row">
+                <!-- Contact Information Summary -->
+                <div class="col-md-6">
+                  <h6 class="border-bottom pb-2">Contact Information</h6>
+                  <div class="summary-item">
+                    <strong>Applicant Type:</strong>
+                    <span id="summary-applicant-type"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Name:</strong>
+                    <span id="summary-name"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Email:</strong>
+                    <span id="summary-email"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Contact Number:</strong>
+                    <span id="summary-contact"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Organization:</strong>
+                    <span id="summary-organization"></span>
+                  </div>
+                  <div class="summary-item" id="summary-school-id-container">
+                    <strong>School ID:</strong>
+                    <span id="summary-school-id"></span>
+                  </div>
+                </div>
 
-          <!-- Reservation Details Summary -->
-          <div class="col-md-6">
-            <h6 class="border-bottom pb-2">Reservation Details</h6>
-            <div class="summary-item">
-              <strong>Activity/Purpose:</strong>
-              <span id="summary-purpose"></span>
-            </div>
-            <div class="summary-item">
-              <strong>Start Date & Time:</strong>
-              <span id="summary-start"></span>
-            </div>
-            <div class="summary-item">
-              <strong>End Date & Time:</strong>
-              <span id="summary-end"></span>
-            </div>
-            <div class="summary-item">
-              <strong>Participants:</strong>
-              <span id="summary-participants"></span>
-            </div>
-            <div class="summary-item">
-              <strong>Chairs/Tables:</strong>
-              <span id="summary-furniture"></span>
-            </div>
-            <div class="summary-item">
-              <strong>Endorser:</strong>
-              <span id="summary-endorser"></span>
-            </div>
-            <div class="summary-item">
-              <strong>Additional Requests:</strong>
-              <span id="summary-requests"></span>
+                <!-- Reservation Details Summary -->
+                <div class="col-md-6">
+                  <h6 class="border-bottom pb-2">Reservation Details</h6>
+                  <div class="summary-item">
+                    <strong>Activity/Purpose:</strong>
+                    <span id="summary-purpose"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Start Date & Time:</strong>
+                    <span id="summary-start"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>End Date & Time:</strong>
+                    <span id="summary-end"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Participants:</strong>
+                    <span id="summary-participants"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Chairs/Tables:</strong>
+                    <span id="summary-furniture"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Endorser:</strong>
+                    <span id="summary-endorser"></span>
+                  </div>
+                  <div class="summary-item">
+                    <strong>Additional Requests:</strong>
+                    <span id="summary-requests"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selected Items and Fee Breakdown in the same row -->
+              <div class="row">
+                <!-- Fee Breakdown Summary (Right Column) -->
+                <div class="col-12">
+                  <h6 class="border-bottom pb-2">Fee Breakdown</h6>
+                  <div id="summary-fees">
+                    <!-- Fees will be dynamically populated -->
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Selected Items and Fee Breakdown in the same row -->
-        <div class="row">
-          <!-- Fee Breakdown Summary (Right Column) -->
-          <div class="col-12">
-            <h6 class="border-bottom pb-2">Fee Breakdown</h6>
-            <div id="summary-fees">
-              <!-- Fees will be dynamically populated -->
-            </div>
-          </div>
+        <!-- Navigation Buttons for Step 3 -->
+        <div class="navigation-buttons">
+          <button type="button" class="btn btn-secondary" onclick="previousStep(2)">Previous</button>
+          <button type="button" class="btn btn-primary" onclick="openTermsModal(event)">Submit Form</button>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Navigation Buttons for Step 3 -->
-  <div class="navigation-buttons">
-    <button type="button" class="btn btn-secondary" onclick="previousStep(2)">Previous</button>
-    <button type="button" class="btn btn-primary" onclick="openTermsModal(event)">Submit Form</button>
-  </div>
-</div>
     </form>
   </div>
 
@@ -1149,6 +1228,39 @@
         <div class="modal-footer justify-content-center">
           <button type="button" class="btn btn-primary" onclick="window.location.href='{{ asset('index') }}'">
             Back to Home
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conflict Items Modal -->
+  <div class="modal fade" id="conflictModal" tabindex="-1" aria-labelledby="conflictModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title" id="conflictModalLabel">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Scheduling Conflict Detected
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-3">
+            The selected time slot conflicts with the following items that are already booked:
+          </p>
+
+          <div id="conflictItemsList" class="mb-3">
+            <!-- Conflict items will be dynamically inserted here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Close
+          </button>
+          <button type="button" class="btn btn-primary"
+            onclick="window.location.href='{{ asset("facility-catalog") }}'">
+            View Catalog
           </button>
         </div>
       </div>
@@ -1276,6 +1388,281 @@
     const equipmentList = document.getElementById('equipmentList');
     const feeDisplay = document.getElementById('feeDisplay');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    // Ensure the form always starts at Step 1 when page loads
+    window.addEventListener('load', function () {
+      showStep(1);
+    });
+
+    // ========== LOCAL STORAGE AUTO-SAVE ==========
+    class LocalStorageAutoSave {
+      constructor(options = {}) {
+        // Configuration
+        this.formSelector = options.formSelector || '#reservationForm';
+        this.formId = options.formId || 'reservation_form_' + window.location.pathname.replace(/\//g, '_');
+        this.saveInterval = options.saveInterval || 2000; // 2 seconds
+        this.excludedFields = options.excludedFields || ['password', 'confirm_password', 'token', '_token', 'csrf_token'];
+
+        // State
+        this.debounceTimer = null;
+        this.isSaving = false;
+        this.storageKey = `reservation_form_data_${this.formId}`;
+
+        this.init();
+      }
+
+      init() {
+        // Get form element
+        this.form = document.querySelector(this.formSelector);
+        if (!this.form) {
+          console.warn('Form not found with selector:', this.formSelector);
+          return;
+        }
+
+        // Check if form was recently submitted (using sessionStorage)
+        const recentlySubmitted = sessionStorage.getItem('form_recently_submitted');
+
+        if (recentlySubmitted === 'true') {
+          // Form was recently submitted, clear everything and start fresh
+          sessionStorage.removeItem('form_recently_submitted');
+          localStorage.removeItem(this.storageKey);
+          showStep(1);
+          console.log('Starting fresh (recent submission detected)');
+        } else {
+          // Normal behavior: restore saved data
+          setTimeout(() => this.restoreProgress(), 100);
+        }
+
+        // Set up event listeners
+        this.setupEventListeners();
+
+        // Auto-save on page unload
+        window.addEventListener('beforeunload', () => {
+          this.saveProgress(true);
+        });
+
+        // Periodically save (as backup)
+        setInterval(() => {
+          this.saveProgress();
+        }, this.saveInterval * 2);
+      }
+
+      setupEventListeners() {
+        // Listen to all form inputs
+        const saveHandler = (e) => {
+          if (this.shouldExcludeField(e.target)) return;
+          this.debouncedSave();
+        };
+
+        this.form.addEventListener('input', saveHandler);
+        this.form.addEventListener('change', saveHandler);
+
+        // Handle special cases
+        this.form.addEventListener('blur', saveHandler, true);
+      }
+
+      shouldExcludeField(field) {
+        if (!field) return false;
+
+        const fieldName = (field.name || '').toLowerCase();
+        const fieldType = (field.type || '').toLowerCase();
+
+        return this.excludedFields.some(excluded =>
+          fieldName.includes(excluded) ||
+          fieldType.includes('password') ||
+          fieldType.includes('file')
+        );
+      }
+
+      debouncedSave() {
+        if (this.debounceTimer) {
+          clearTimeout(this.debounceTimer);
+        }
+
+        this.debounceTimer = setTimeout(() => {
+          this.saveProgress();
+        }, 500); // 500ms debounce
+      }
+
+      getFormData() {
+        const data = {};
+
+        // Get all form elements
+        const elements = this.form.querySelectorAll('input, select, textarea, .selected-items-container');
+
+        elements.forEach(element => {
+          if (this.shouldExcludeField(element)) return;
+
+          const name = element.name;
+          if (!name) return;
+
+          const type = element.type || 'text';
+          const tagName = element.tagName.toLowerCase();
+
+          if (tagName === 'input') {
+            if (type === 'checkbox' || type === 'radio') {
+              // Handle checkboxes and radios
+              const checkboxes = this.form.querySelectorAll(`[name="${name}"]`);
+              if (checkboxes.length > 1) {
+                data[name] = [];
+                checkboxes.forEach(cb => {
+                  if (cb.checked) {
+                    data[name].push(cb.value);
+                  }
+                });
+              } else {
+                data[name] = element.checked ? element.value : '';
+              }
+            } else {
+              data[name] = element.value;
+            }
+          } else if (tagName === 'select') {
+            if (element.multiple) {
+              data[name] = Array.from(element.selectedOptions).map(option => option.value);
+            } else {
+              data[name] = element.value;
+            }
+          } else if (tagName === 'textarea') {
+            data[name] = element.value;
+          }
+        });
+
+        // Save current step
+        data._currentStep = currentStep;
+        data._timestamp = new Date().toISOString();
+
+        return data;
+      }
+
+      saveProgress(immediate = false) {
+        if (this.isSaving) return;
+
+        this.isSaving = true;
+        const formData = this.getFormData();
+
+        try {
+          // Save to localStorage
+          localStorage.setItem(this.storageKey, JSON.stringify(formData));
+
+          return true;
+        } catch (error) {
+          console.error('Error saving to localStorage:', error);
+          return false;
+        } finally {
+          this.isSaving = false;
+        }
+      }
+
+      restoreProgress() {
+        try {
+          const savedData = localStorage.getItem(this.storageKey);
+          if (!savedData) return false;
+
+          const data = JSON.parse(savedData);
+
+          if (!data || Object.keys(data).length === 0) {
+            return false;
+          }
+
+          // Restore form data (excluding metadata)
+          Object.entries(data).forEach(([fieldName, value]) => {
+            if (fieldName.startsWith('_')) return;
+
+            const elements = this.form.querySelectorAll(`[name="${fieldName}"]`);
+
+            if (elements.length === 0) return;
+
+            elements.forEach(element => {
+              const type = element.type || 'text';
+              const tagName = element.tagName.toLowerCase();
+
+              if (tagName === 'input') {
+                if (type === 'checkbox' || type === 'radio') {
+                  if (Array.isArray(value)) {
+                    element.checked = value.includes(element.value);
+                  } else {
+                    element.checked = element.value == value;
+                  }
+                } else {
+                  element.value = value || '';
+                }
+              } else if (tagName === 'select') {
+                if (element.multiple && Array.isArray(value)) {
+                  Array.from(element.options).forEach(option => {
+                    option.selected = value.includes(option.value);
+                  });
+                } else {
+                  element.value = value || '';
+                }
+              } else if (tagName === 'textarea') {
+                element.value = value || '';
+              }
+            });
+          });
+
+          // Show restore notification
+          this.showRestoreNotification();
+
+          return true;
+        } catch (error) {
+          console.error('Error restoring from localStorage:', error);
+          return false;
+        }
+      }
+
+      clearProgress() {
+        try {
+          localStorage.removeItem(this.storageKey);
+          this.form.reset();
+
+          // Reset to step 1
+          currentStep = 1;
+          showStep(1);
+
+          return true;
+        } catch (error) {
+          console.error('Error clearing localStorage:', error);
+          return false;
+        }
+      }
+
+      showRestoreNotification() {
+        const notification = document.createElement('div');
+        notification.id = 'restore-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #2196F3;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 9999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        `;
+
+        const savedData = localStorage.getItem(this.storageKey);
+        const data = savedData ? JSON.parse(savedData) : null;
+        const timeText = data && data._timestamp ?
+          `Last saved: ${new Date(data._timestamp).toLocaleString()}` : '';
+
+        showToast(`Draft restored<br><small>${timeText}</small>`, 'success', 5000);
+
+
+        notification.querySelector('button').addEventListener('click', () => {
+          notification.remove();
+        });
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          if (notification.parentElement) {
+            notification.remove();
+          }
+        }, 5000);
+      }
+    }
 
     // ========== STEP NAVIGATION FUNCTIONS ==========
     function showStep(stepNumber) {
@@ -1498,76 +1885,76 @@
     };
 
     // ========== FORM SUMMARY FUNCTIONS ==========
-function populateFormSummary() {
-    // Contact Information
-    const applicantType = document.getElementById('applicantType');
-    const firstName = document.querySelector('input[name="first_name"]');
-    const lastName = document.querySelector('input[name="last_name"]');
-    const email = document.querySelector('input[name="email"]');
-    const contactNumber = document.querySelector('input[name="contact_number"]');
-    const organizationName = document.querySelector('input[name="organization_name"]');
-    const schoolId = document.getElementById('school_id');
+    function populateFormSummary() {
+      // Contact Information
+      const applicantType = document.getElementById('applicantType');
+      const firstName = document.querySelector('input[name="first_name"]');
+      const lastName = document.querySelector('input[name="last_name"]');
+      const email = document.querySelector('input[name="email"]');
+      const contactNumber = document.querySelector('input[name="contact_number"]');
+      const organizationName = document.querySelector('input[name="organization_name"]');
+      const schoolId = document.getElementById('school_id');
 
-    document.getElementById('summary-applicant-type').textContent = applicantType.value || 'Not specified';
-    document.getElementById('summary-name').textContent = `${firstName.value || ''} ${lastName.value || ''}`.trim() || 'Not specified';
-    document.getElementById('summary-email').textContent = email.value || 'Not specified';
-    document.getElementById('summary-contact').textContent = contactNumber.value || 'Not specified';
-    document.getElementById('summary-organization').textContent = organizationName.value || 'Not specified';
+      document.getElementById('summary-applicant-type').textContent = applicantType.value || 'Not specified';
+      document.getElementById('summary-name').textContent = `${firstName.value || ''} ${lastName.value || ''}`.trim() || 'Not specified';
+      document.getElementById('summary-email').textContent = email.value || 'Not specified';
+      document.getElementById('summary-contact').textContent = contactNumber.value || 'Not specified';
+      document.getElementById('summary-organization').textContent = organizationName.value || 'Not specified';
 
-    const schoolIdContainer = document.getElementById('summary-school-id-container');
-    if (applicantType.value === 'Internal' && schoolId.value) {
+      const schoolIdContainer = document.getElementById('summary-school-id-container');
+      if (applicantType.value === 'Internal' && schoolId.value) {
         document.getElementById('summary-school-id').textContent = schoolId.value;
         schoolIdContainer.style.display = 'flex';
-    } else {
+      } else {
         schoolIdContainer.style.display = 'none';
-    }
+      }
 
-    // Reservation Details
-    const purposeSelect = document.getElementById('activityPurposeField');
-    const purposeText = purposeSelect.options[purposeSelect.selectedIndex]?.text || 'Not specified';
-    const startDate = document.getElementById('startDateField').value;
-    const endDate = document.getElementById('endDateField').value;
-    const startTime = document.getElementById('startTimeField').value;
-    const endTime = document.getElementById('endTimeField').value;
-    const numParticipants = document.querySelector('input[name="num_participants"]');
-    const numChairs = document.querySelector('input[name="num_chairs"]');
-    const numTables = document.querySelector('input[name="num_tables"]');
-    const endorser = document.querySelector('input[name="endorser"]');
-    const additionalRequests = document.querySelector('textarea[name="additional_requests"]');
+      // Reservation Details
+      const purposeSelect = document.getElementById('activityPurposeField');
+      const purposeText = purposeSelect.options[purposeSelect.selectedIndex]?.text || 'Not specified';
+      const startDate = document.getElementById('startDateField').value;
+      const endDate = document.getElementById('endDateField').value;
+      const startTime = document.getElementById('startTimeField').value;
+      const endTime = document.getElementById('endTimeField').value;
+      const numParticipants = document.querySelector('input[name="num_participants"]');
+      const numChairs = document.querySelector('input[name="num_chairs"]');
+      const numTables = document.querySelector('input[name="num_tables"]');
+      const endorser = document.querySelector('input[name="endorser"]');
+      const additionalRequests = document.querySelector('textarea[name="additional_requests"]');
 
-    document.getElementById('summary-purpose').textContent = purposeText;
+      document.getElementById('summary-purpose').textContent = purposeText;
 
-    // Format dates to "January 1, 2025" format and split into start/end
-    const formatDate = (dateString) => {
+      // Format dates to "January 1, 2025" format and split into start/end
+      const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
         });
-    };
+      };
 
-    if (startDate && startTime) {
+      if (startDate && startTime) {
         const formattedStartDate = formatDate(startDate);
         document.getElementById('summary-start').textContent = `${formattedStartDate} ${startTime}`;
-    } else {
+      } else {
         document.getElementById('summary-start').textContent = 'Not specified';
-    }
+      }
 
-    if (endDate && endTime) {
+      if (endDate && endTime) {
         const formattedEndDate = formatDate(endDate);
         document.getElementById('summary-end').textContent = `${formattedEndDate} ${endTime}`;
-    } else {
+      } else {
         document.getElementById('summary-end').textContent = 'Not specified';
+      }
+
+      document.getElementById('summary-participants').textContent = numParticipants.value || '0';
+      document.getElementById('summary-furniture').textContent = `${numChairs.value || '0'} chairs, ${numTables.value || '0'} tables`;
+      document.getElementById('summary-endorser').textContent = endorser.value || 'Not specified';
+      document.getElementById('summary-requests').textContent = additionalRequests.value || 'None';
+
+      // Generate fee breakdown
+      generateFeeBreakdownForSummary();
     }
-
-    document.getElementById('summary-participants').textContent = numParticipants.value || '0';
-    document.getElementById('summary-furniture').textContent = `${numChairs.value || '0'} chairs, ${numTables.value || '0'} tables`;
-    document.getElementById('summary-endorser').textContent = endorser.value || 'Not specified';
-    document.getElementById('summary-requests').textContent = additionalRequests.value || 'None';
-
-    // Generate fee breakdown
-    generateFeeBreakdownForSummary();
-}
 
     // ========== TOAST FUNCTION ==========
     window.showToast = function (message, type = 'success', duration = 3000) {
@@ -1630,6 +2017,21 @@ function populateFormSummary() {
     document.addEventListener('DOMContentLoaded', function () {
       // Initialize step system
       showStep(1);
+
+      // ========== INITIALIZE LOCAL STORAGE AUTO-SAVE ==========
+      window.autoSave = new LocalStorageAutoSave({
+        formSelector: '#reservationForm',
+        formId: 'reservation_form',
+        saveInterval: 2000,
+        excludedFields: ['password', '_token', 'csrf_token']
+      });
+
+      // Clear localStorage on successful form submission
+      window.addEventListener('formSubmitted', () => {
+        if (window.autoSave) {
+          window.autoSave.clearProgress();
+        }
+      });
 
       // Set up applicant type change handler
       const applicantType = document.getElementById('applicantType');
@@ -1809,25 +2211,22 @@ function populateFormSummary() {
         const availabilityResult = document.getElementById('availabilityResult');
         if (result.data.available) {
           availabilityResult.innerHTML = `
-                    <span class="text-success">
-                        <i class="bi bi-check-circle-fill" style="margin-right:5px;"></i>
-                        Available
-                    </span>
-                `;
+        <span class="text-success">
+          <i class="bi bi-check-circle-fill" style="margin-right:5px;"></i>
+          Available
+        </span>
+      `;
           showToast('Time slot is available!', 'success');
         } else {
           availabilityResult.innerHTML = `
-                    <span class="text-danger">
-                        <i class="bi bi-x-circle-fill" style="margin-right:5px;"></i>
-                        Conflict found!
-                    </span>
-                `;
+        <span class="text-danger">
+          <i class="bi bi-x-circle-fill" style="margin-right:5px;"></i>
+          Conflict found!
+        </span>
+      `;
 
-          const conflictItems = result.data.conflict_items.map(item =>
-            `${item.type}: ${item.name}`
-          ).join(', ');
-
-          showToast(`Conflict with: ${conflictItems}`, 'error');
+          // Instead of toast, show modal with conflict details
+          showConflictModal(result.data.conflict_items);
         }
 
       } catch (error) {
@@ -1839,8 +2238,128 @@ function populateFormSummary() {
       }
     };
 
+    // ========== CONFLICT MODAL FUNCTION ==========
+    function showConflictModal(conflictItems) {
+      // Get modal elements
+      const modalElement = document.getElementById('conflictModal');
+      const conflictItemsList = document.getElementById('conflictItemsList');
+
+      if (!conflictItemsList) {
+        console.error('Conflict items list element not found');
+        showToast(`Conflict with: ${conflictItems.map(item => item.name).join(', ')}`, 'error');
+        return;
+      }
+
+      // Clear previous content
+      conflictItemsList.innerHTML = '';
+
+      // Group conflicts by type
+      const facilities = conflictItems.filter(item => item.type === 'facility');
+      const equipment = conflictItems.filter(item => item.type === 'equipment');
+
+      // Create conflict list HTML
+      let htmlContent = '';
+
+      if (facilities.length > 0) {
+        htmlContent += `
+      <div class="mb-3">
+        <ul class="list-group">
+        `;
+
+        facilities.forEach(item => {
+          htmlContent += `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>${item.name}</strong>
+            <div class="text-muted small">
+              <i class="bi bi-calendar-event me-1"></i>
+              ${item.conflicting_booking_date || 'Booked'}
+            </div>
+          </div>
+          <span class="badge bg-danger rounded-pill">Facility</span>
+        </li>
+      `;
+        });
+
+        htmlContent += '</ul></div>';
+      }
+
+      if (equipment.length > 0) {
+        htmlContent += `
+      <div class="mb-3">
+        <ul class="list-group">
+    `;
+
+        equipment.forEach(item => {
+          htmlContent += `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>${item.name}</strong>
+            <div class="text-muted small">
+              <i class="bi bi-calendar-event me-1"></i>
+              ${item.conflicting_booking_date || 'Booked'}
+            </div>
+          </div>
+          <span class="badge bg-danger text-white rounded-pill">Equipment</span>
+        </li>
+      `;
+        });
+
+        htmlContent += '</ul></div>';
+      }
+
+      // Add summary
+      htmlContent += `
+    <div class="alert alert-danger">
+      <div class="d-flex">
+        <div class="flex-shrink-0">
+          <i class="bi bi-exclamation-circle fs-4"></i>
+        </div>
+        <div class="flex-grow-1 ms-3">
+          <h6 class="alert-warning">Total Conflicts: ${conflictItems.length}</h6>
+          <p class="mb-0 small">
+            <strong>What to do:</strong><br>
+            1. Select a different date/time<br>
+            2. Remove conflicting items from your selection<br>
+            3. Check with facility/equipment administrators
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+
+      // Insert into modal
+      conflictItemsList.innerHTML = htmlContent;
+
+      // Show the modal
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+
+      // Add event listener to close button
+      const closeBtn = modalElement.querySelector('.btn-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          modal.hide();
+        });
+      }
+    }
+
     // ========== FEE BREAKDOWN FOR SUMMARY ==========
     async function generateFeeBreakdownForSummary() {
+      const summaryFees = document.getElementById('summary-fees');
+
+      if (!summaryFees) return;
+
+      // Show loading state
+      summaryFees.innerHTML = `
+    <div class="fee-loading">
+      <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <small>Calculating fees...</small>
+      </div>
+    </div>
+  `;
+
       try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         const response = await fetch('/requisition/get-items', {
@@ -1854,16 +2373,13 @@ function populateFormSummary() {
         if (!response.ok) throw new Error('Failed to fetch items');
         const data = await response.json();
         const items = data.data?.selected_items || [];
-        const summaryFees = document.getElementById('summary-fees');
-
-        if (!summaryFees) return;
 
         if (items.length === 0) {
           summaryFees.innerHTML = '<div class="text-muted">No items added yet.</div>';
           return;
         }
 
-        // Get schedule informations
+        // Get schedule information
         const startDate = document.getElementById('startDateField').value;
         const endDate = document.getElementById('endDateField').value;
         const startTime = document.getElementById('startTimeField').value;
@@ -1911,30 +2427,30 @@ function populateFormSummary() {
             if (item.rate_type === 'Per Hour' && durationHours > 0) {
               fee = fee * durationHours;
               htmlContent += `
-                        <div class="fee-item d-flex justify-content-between mb-2">
-                            <span>${item.name} (${durationHours.toFixed(1)} hrs)</span>
-                            <div class="text-end">
-                                <small>₱${parseFloat(item.external_fee).toLocaleString()}/hr</small>
-                                <div><strong>₱${fee.toLocaleString()}</strong></div>
-                            </div>
-                        </div>
-                    `;
+                <div class="fee-item d-flex justify-content-between mb-2">
+                    <span>${item.name} (${durationHours.toFixed(1)} hrs)</span>
+                    <div class="text-end">
+                        <small>₱${parseFloat(item.external_fee).toLocaleString()}/hr</small>
+                        <div><strong>₱${fee.toLocaleString()}</strong></div>
+                    </div>
+                </div>
+            `;
             } else {
               htmlContent += `
-                        <div class="fee-item d-flex justify-content-between mb-2">
-                            <span>${item.name}</span>
-                            <span>₱${fee.toLocaleString()}</span>
-                        </div>
-                    `;
+                <div class="fee-item d-flex justify-content-between mb-2">
+                    <span>${item.name}</span>
+                    <span>₱${fee.toLocaleString()}</span>
+                </div>
+            `;
             }
             facilityTotal += fee;
           });
           htmlContent += `
-                <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                    <strong>Subtotal</strong>
-                    <strong>₱${facilityTotal.toLocaleString()}</strong>
-                </div>
-            </div>`;
+            <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                <strong>Subtotal</strong>
+                <strong>₱${facilityTotal.toLocaleString()}</strong>
+            </div>
+        </div>`;
         }
 
         // Equipment breakdown
@@ -1948,44 +2464,44 @@ function populateFormSummary() {
             if (item.rate_type === 'Per Hour' && durationHours > 0) {
               itemTotal = itemTotal * durationHours;
               htmlContent += `
-                        <div class="fee-item d-flex justify-content-between mb-2">
-                            <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''} (${durationHours.toFixed(1)} hrs)</span>
-                            <div class="text-end">
-                                <small>₱${unitFee.toLocaleString()}/hr × ${quantity}</small>
-                                <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
-                            </div>
-                        </div>
-                    `;
+                <div class="fee-item d-flex justify-content-between mb-2">
+                    <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''} (${durationHours.toFixed(1)} hrs)</span>
+                    <div class="text-end">
+                        <small>₱${unitFee.toLocaleString()}/hr × ${quantity}</small>
+                        <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                    </div>
+                </div>
+            `;
             } else {
               htmlContent += `
-                        <div class="fee-item d-flex justify-content-between mb-2">
-                            <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
-                            <div class="text-end">
-                                <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
-                                <strong>₱${itemTotal.toLocaleString()}</strong>
-                            </div>
-                        </div>
-                    `;
+                <div class="fee-item d-flex justify-content-between mb-2">
+                    <span>${item.name} ${quantity > 1 ? `(x${quantity})` : ''}</span>
+                    <div class="text-end">
+                        <div>₱${unitFee.toLocaleString()} × ${quantity}</div>
+                        <strong>₱${itemTotal.toLocaleString()}</strong>
+                    </div>
+                </div>
+            `;
             }
             equipmentTotal += itemTotal;
           });
           htmlContent += `
-                <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
-                    <strong>Subtotal</strong>
-                    <strong>₱${equipmentTotal.toLocaleString()}</strong>
-                </div>
-            </div>`;
+            <div class="subtotal d-flex justify-content-between mt-2 pt-2 border-top">
+                <strong>Subtotal</strong>
+                <strong>₱${equipmentTotal.toLocaleString()}</strong>
+            </div>
+        </div>`;
         }
 
         // Total
         const total = facilityTotal + equipmentTotal;
         if (total > 0) {
           htmlContent += `
-                <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
-                    <h6 class="mb-0">Total Amount</h6>
-                    <h6 class="mb-0">₱${total.toLocaleString()}</h6>
-                </div>
-            `;
+            <div class="total-fee d-flex justify-content-between mt-4 pt-3 border-top">
+                <h6 class="mb-0">Total Amount</h6>
+                <h6 class="mb-0">₱${total.toLocaleString()}</h6>
+            </div>
+        `;
         } else {
           htmlContent += '<div class="text-muted text-center">No items added yet.</div>';
         }
@@ -1995,10 +2511,12 @@ function populateFormSummary() {
 
       } catch (error) {
         console.error('Error generating fee breakdown for summary:', error);
-        const summaryFees = document.getElementById('summary-fees');
-        if (summaryFees) {
-          summaryFees.innerHTML = '<div class="alert alert-danger">Error loading fee breakdown</div>';
-        }
+        summaryFees.innerHTML = `
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Error loading fee breakdown. Please try again.
+      </div>
+    `;
       }
     }
 
@@ -2011,14 +2529,16 @@ function populateFormSummary() {
 
     function renderItemsList(container, items, type) {
       if (!container) return;
+
+      // If container is showing loading state, clear it first
       container.innerHTML = '';
 
       if (items.length === 0) {
         container.innerHTML = `
-                <div class="empty-message text-center py-4">
-                    <p class="text-muted mb-0">No ${pluralizeType(type)} added yet.</p>
-                </div>
-            `;
+      <div class="empty-message text-center py-4">
+        <p class="text-muted mb-0">No ${pluralizeType(type)} added yet.</p>
+      </div>
+    `;
         return;
       }
 
@@ -2031,38 +2551,38 @@ function populateFormSummary() {
         const displayImage = item.images?.find(img => img.image_type === "Primary") || item.images?.[0];
 
         card.innerHTML = `
-                <div class="card h-100 border-0 shadow-sm mb-2">
-                    <div class="card-body p-2 d-flex align-items-center">
-                        ${displayImage ? `
-                            <img src="${displayImage.image_url}" 
-                                alt="${item.name}" 
-                                style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 12px;">
-                        ` : `
-                            <div style="width: 80px; height: 80px; background: #e9ecef; border-radius: 8px; margin-right: 12px;"></div>
-                        `}
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h6 class="mb-1 fw-semibold">${item.name}</h6>
-                                <button type="button" class="btn btn-sm btn-danger ms-2" 
-                                    onclick="removeSelectedItem(${type === 'facility' ? item.facility_id : item.equipment_id}, '${type}')">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mt-1">
-                                <div>
-                                    <span class="badge bg-primary me-2">${item.rate_type || 'booking'}</span>
-                                    ${type === 'equipment' ? `<span class="badge bg-secondary">Qty: ${item.quantity || 1}</span>` : ''}
-                                </div>
-                                <div class="text-end">
-                                    <div class="fw-bold text-success">
-                                        ₱${parseFloat(item.external_fee * (type === 'equipment' ? (item.quantity || 1) : 1)).toLocaleString()}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+      <div class="card h-100 border-0 shadow-sm mb-2">
+        <div class="card-body p-2 d-flex align-items-center">
+          ${displayImage ? `
+            <img src="${displayImage.image_url}" 
+              alt="${item.name}" 
+              style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 12px;">
+          ` : `
+            <div style="width: 80px; height: 80px; background: #e9ecef; border-radius: 8px; margin-right: 12px;"></div>
+          `}
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-start">
+              <h6 class="mb-1 fw-semibold">${item.name}</h6>
+              <button type="button" class="btn btn-sm btn-danger ms-2" 
+                onclick="removeSelectedItem(${type === 'facility' ? item.facility_id : item.equipment_id}, '${type}')">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <div>
+                <span class="badge bg-primary me-2">${item.rate_type || 'booking'}</span>
+                ${type === 'equipment' ? `<span class="badge bg-secondary">Qty: ${item.quantity || 1}</span>` : ''}
+              </div>
+              <div class="text-end">
+                <div class="fw-bold text-success">
+                  ₱${parseFloat(item.external_fee * (type === 'equipment' ? (item.quantity || 1) : 1)).toLocaleString()}
                 </div>
-            `;
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
         cardContainer.appendChild(card);
       });
 
@@ -2072,6 +2592,31 @@ function populateFormSummary() {
     window.renderSelectedItems = async function () {
       try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        // Show loading state for facilities
+        if (facilityList) {
+          facilityList.innerHTML = `
+        <div class="selected-items-loading">
+          <div class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <small>Loading facilities...</small>
+          </div>
+        </div>
+      `;
+        }
+
+        // Show loading state for equipment
+        if (equipmentList) {
+          equipmentList.innerHTML = `
+        <div class="selected-items-loading">
+          <div class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <small>Loading equipment...</small>
+          </div>
+        </div>
+      `;
+        }
+
         const response = await fetch('/requisition/get-items', {
           headers: {
             'X-CSRF-TOKEN': csrfToken,
@@ -2084,12 +2629,32 @@ function populateFormSummary() {
         const data = await response.json();
         const items = data.data?.selected_items || [];
 
+        // Render facilities and equipment with actual data
         renderItemsList(facilityList, items.filter(i => i.type === 'facility'), 'facility');
         renderItemsList(equipmentList, items.filter(i => i.type === 'equipment'), 'equipment');
 
       } catch (error) {
         console.error('Error rendering selected items:', error);
         showToast('Failed to load selected items', 'error');
+
+        // Show error state in both containers
+        if (facilityList) {
+          facilityList.innerHTML = `
+        <div class="alert alert-danger mt-3">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Failed to load facilities
+        </div>
+      `;
+        }
+
+        if (equipmentList) {
+          equipmentList.innerHTML = `
+        <div class="alert alert-danger mt-3">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Failed to load equipment
+        </div>
+      `;
+        }
       }
     };
 
@@ -2514,7 +3079,8 @@ function populateFormSummary() {
         const successModal = new bootstrap.Modal(document.getElementById('successModal'));
         successModal.show();
 
-        // Clear session data
+        // ========== CLEAR ALL STORAGE DATA ==========
+        // Clear session storage
         await fetch('/requisition/clear-session', {
           method: 'POST',
           headers: {
@@ -2522,12 +3088,91 @@ function populateFormSummary() {
           }
         });
 
-        // Reset form
+        // Clear local storage (form progress data)
+        if (typeof localStorage !== 'undefined') {
+          // Clear all reservation-related local storage keys
+          const keysToRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (
+              key.includes('reservation') ||
+              key.includes('booking') ||
+              key.includes('form') ||
+              key.includes('requisition')
+            )) {
+              keysToRemove.push(key);
+            }
+          }
+
+          keysToRemove.forEach(key => localStorage.removeItem(key));
+          console.log('Cleared local storage keys:', keysToRemove);
+        }
+
+        // Clear session storage (client-side)
+        if (typeof sessionStorage !== 'undefined') {
+          // Clear all reservation-related session storage keys
+          const sessionKeysToRemove = [];
+          for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key && (
+              key.includes('reservation') ||
+              key.includes('booking') ||
+              key.includes('form') ||
+              key.includes('requisition') ||
+              key.includes('selected_items')
+            )) {
+              sessionKeysToRemove.push(key);
+            }
+          }
+
+          sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
+          console.log('Cleared session storage keys:', sessionKeysToRemove);
+        }
+
+        // Reset form to clean state
         document.getElementById('reservationForm').reset();
 
-        // Clear selected items
+        // Reset step navigation to step 1
+        showStep(1);
+
+        // Clear selected items display
         await renderSelectedItems();
         await calculateAndDisplayFees();
+
+        // Clear any form validation states
+        const form = document.getElementById('reservationForm');
+        form.querySelectorAll('.is-invalid').forEach(input => {
+          input.classList.remove('is-invalid');
+          input.removeAttribute('title');
+          input.removeAttribute('data-bs-toggle');
+          input.removeAttribute('data-bs-placement');
+        });
+
+        // Clear any displayed fees or availability results
+        const availabilityResult = document.getElementById('availabilityResult');
+        if (availabilityResult) {
+          availabilityResult.textContent = '';
+          availabilityResult.style.color = '';
+        }
+
+        // Clear summary fields
+        const summaryFields = [
+          'summary-applicant-type', 'summary-name', 'summary-email',
+          'summary-contact', 'summary-organization', 'summary-school-id',
+          'summary-purpose', 'summary-start', 'summary-end',
+          'summary-participants', 'summary-furniture', 'summary-endorser',
+          'summary-requests'
+        ];
+
+        summaryFields.forEach(id => {
+          const element = document.getElementById(id);
+          if (element) element.textContent = '';
+        });
+
+        const summaryFees = document.getElementById('summary-fees');
+        if (summaryFees) summaryFees.innerHTML = '';
+
+        console.log('Form completely reset and storage cleared');
 
       } catch (error) {
         console.error('Error submitting form:', error);

@@ -73,14 +73,24 @@
             display: flex;
             flex-direction: column;
         }
+
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
     </style>
 
 
     <section class="hero-section text-center">
         <h1>Extra Services</h1>
-<p class="mb-4 mx-auto text-center" style="max-width: 700px;">
-    Access a range of support services designed to enhance event coordination, technical setup, and on-site management.
-</p>
+        <p class="mb-4 mx-auto text-center" style="max-width: 700px;">
+            Access a range of support services designed to enhance event coordination, technical setup, and on-site
+            management.
+        </p>
 
     </section>
 

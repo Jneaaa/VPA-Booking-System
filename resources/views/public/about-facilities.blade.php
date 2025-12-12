@@ -72,11 +72,21 @@
             display: flex;
             flex-direction: column;
         }
+
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
     </style>
 
     <section class="hero-section">
         <h1>Facilities</h1>
-        <p class="mb-4">Explore a range of facilities designed to host events, meetings, trainings, and recreational activities with ease.</p>
+        <p class="mb-4">Explore a range of facilities designed to host events, meetings, trainings, and recreational
+            activities with ease.</p>
     </section>
 
     <section class="section-content container">
@@ -86,7 +96,11 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/conference-room.jpeg') }}"
                         class="card-img-top card-img" alt="Conference Room">
                     <div class="card-body">
-                        <h5 class="card-title fw-bold">Conference & Meeting Rooms</h5>
+                        <h5 class="card-title fw-bold">
+                            <a href="{{ url('/facility-catalog') }}" class="text-decoration-none stext-dark">
+                                Conference & Meeting Rooms
+                            </a>
+                        </h5>
                         <p class="card-text">Well-equipped spaces for group discussions, seminars, and formal meetings.</p>
                     </div>
                 </div>
@@ -97,7 +111,10 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/lecture-hall.jpg') }}" class="card-img-top card-img"
                         alt="Lecture Hall">
                     <div class="card-body">
-                        <h5 class="card-title fw-bold">Lecture & Training Halls</h5>
+                        <a href="{{ url('/facility-catalog') }}" class="text-decoration-none text-dark">
+                            <h5 class="card-title fw-bold">Lecture & Training Halls
+                        </a>
+                        </h5>
                         <p class="card-text">Spacious venues ideal for lectures, presentations, and workshops.</p>
                     </div>
                 </div>
@@ -108,7 +125,11 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/auditorium.jpg') }}" class="card-img-top card-img"
                         alt="Auditorium">
                     <div class="card-body">
-                        <h5 class="card-title fw-bold">Auditoriums</h5>
+                        <h5 class="card-title fw-bold">
+                            <a href="{{ url('/facility-catalog') }}" class="text-decoration-none text-dark">
+                                Auditoriums
+                            </a>
+                        </h5>
                         <p class="card-text">Large venues designed for conferences, ceremonies, and cultural events.</p>
                     </div>
                 </div>
@@ -119,7 +140,11 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/court.jpg') }}" class="card-img-top card-img"
                         alt="Gym Court">
                     <div class="card-body">
-                        <h5 class="card-title fw-bold">Sports & Gym Facilities</h5>
+                        <h5 class="card-title fw-bold">
+                            <a href="{{ url('/facility-catalog') }}" class="text-decoration-none text-dark">
+                                Sports & Gym Facilities
+                            </a>
+                        </h5>
                         <p class="card-text">Multipurpose gyms and courts for athletic events, exhibitions, and student
                             activities.</p>
                     </div>
@@ -131,7 +156,11 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/study-area.jpg') }}" class="card-img-top card-img"
                         alt="Libraries">
                     <div class="card-body">
-                        <h5 class="card-title fw-bold">Libraries & Study Areas</h5>
+                        <h5 class="card-title fw-bold">
+                            <a href="{{ url('/facility-catalog') }}" class="text-decoration-none text-dark">
+                                Libraries & Study Areas
+                            </a>
+                        </h5>
                         <p class="card-text">Quiet spaces designed for research, study sessions, and academic gatherings.
                         </p>
                     </div>
@@ -143,7 +172,11 @@
                     <img src="{{ asset('assets/frontend-pics/facilities/comp-lab.jpg') }}" class="card-img-top card-img"
                         alt="Computer Laboratories">
                     <div class="card-body">
-                        <h5 class="card-title fw-bold">Computer Laboratories</h5>
+                        <h5 class="card-title fw-bold">
+                            <a href="{{ url('/facility-catalog') }}" class="text-decoration-none text-dark">
+                                Computer Laboratories
+                            </a>
+                        </h5>
                         <p class="card-text">Fully equipped labs for IT classes, training sessions, and technical workshops.
                         </p>
                     </div>
