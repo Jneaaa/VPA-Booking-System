@@ -7,50 +7,65 @@
     <link rel="stylesheet" href="{{ asset('css/admin/request-view.css') }}">
 
     <style>
+        .btn-outline-secondary {
+            background: none !important;
+            color: #003366 !important;
+            border: none !important;
+        }
 
-    .hover-pointer:hover {
-        cursor: pointer;
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-    
-    /* Set fixed height for both cards */
-    .status-action-row .card {
-        height: 140px; /* Adjust this value as needed */
-    }
-    
-    /* Status summary card specific styling */
-    .status-summary-card .card-body {
-        height: calc(100% - 60px); /* Subtract card header height */
-        display: flex;
-        align-items: center; /* Vertically center the pills */
-        padding: 10px 16px;
-    }
-    
-    /* Action panel specific styling */
-    .action-panel-card {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    
-    /* Status pills container */
-    .status-pills-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
-        width: 100%;
-    }
-    
-    /* Individual pills - fixed height, no stretching */
-    .status-pill {
-        height: 32px;
-        display: inline-flex;
-        align-items: center;
-        white-space: nowrap;
-        flex-shrink: 0;
-        margin: 0;
-    }
+        .btn-outline-secondary:hover,
+        .btn-outline-secondary:focus {
+            background: #e6e6e6 !important;
+            /* light gray */
+            color: #003366 !important;
+        }
+
+        .hover-pointer:hover {
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Set fixed height for both cards */
+        .status-action-row .card {
+            height: 140px;
+            /* Adjust this value as needed */
+        }
+
+        /* Status summary card specific styling */
+        .status-summary-card .card-body {
+            height: calc(100% - 60px);
+            /* Subtract card header height */
+            display: flex;
+            align-items: center;
+            /* Vertically center the pills */
+            padding: 10px 16px;
+        }
+
+        /* Action panel specific styling */
+        .action-panel-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Status pills container */
+        .status-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Individual pills - fixed height, no stretching */
+        .status-pill {
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin: 0;
+        }
 
         .request-code {
             background-color: #f4f4f4;
@@ -179,136 +194,141 @@
                 <div id="contentState" style="display: none;">
 
                     <!-- Request Status + Action Panel -->
-                   <!-- Request Status + Action Panel -->
-<div class="row g-2 mb-2">
-    <!-- Status Summary -->
-    <div class="col-md-9">
-        <div class="card">
-            <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center text-primary fw-bold">
-                    Currently Reviewing:
-                    <code id="requestIdTitle" class="request-code ms-1"></code>
-                </div>
-                <span id="statusBadge" class="badge ms-1"></span>
-            </div>
+                    <!-- Request Status + Action Panel -->
+                    <div class="row g-2 mb-2">
+                        <!-- Status Summary -->
+                        <div class="col-md-9">
+                            <div class="card">
+                                <div
+                                    class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center text-primary fw-bold">
+                                        Currently Reviewing:
+                                        <code id="requestIdTitle" class="request-code ms-1"></code>
+                                    </div>
+                                    <span id="statusBadge" class="badge ms-1"></span>
+                                </div>
 
-            <!-- Add the status-pills-container class here -->
-            <div class="card-body status-pills-container d-flex flex-wrap gap-2 justify-content-start align-items-center">
-                
-                <!-- Add status-pill class to each pill -->
-                <div class="status-pill px-3 py-1 bg-success-subtle text-success rounded-pill d-inline-flex align-items-center hover-pointer"
-                    role="button" data-bs-toggle="modal" data-bs-target="#approvalsModal">
-                    <i class="fa fa-thumbs-up me-1"></i>
-                    <span class="fw-bold me-2" id="approvalsCount">0</span>
-                </div>
+                                <!-- Add the status-pills-container class here -->
+                                <div
+                                    class="card-body status-pills-container d-flex flex-wrap gap-2 justify-content-start align-items-center">
 
-                <div class="status-pill px-3 py-1 bg-danger-subtle text-danger rounded-pill d-inline-flex align-items-center hover-pointer"
-                    role="button" data-bs-toggle="modal" data-bs-target="#rejectionsModal">
-                    <i class="fa fa-thumbs-down me-1"></i>
-                    <span class="fw-bold me-1" id="rejectionsCount">0</span>
-                </div>
+                                    <!-- Add status-pill class to each pill -->
+                                    <div class="status-pill px-3 py-1 bg-success-subtle text-success rounded-pill d-inline-flex align-items-center hover-pointer"
+                                        role="button" data-bs-toggle="modal" data-bs-target="#approvalsModal">
+                                        <i class="fa fa-thumbs-up me-1"></i>
+                                        <span class="fw-bold me-2" id="approvalsCount">0</span>
+                                    </div>
 
-                <!-- Bootstrap Modals -->
-                <div class="modal fade" id="approvalsModal" tabindex="-1"
-                    aria-labelledby="approvalsModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="approvalsModalLabel">Approvals</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
+                                    <div class="status-pill px-3 py-1 bg-danger-subtle text-danger rounded-pill d-inline-flex align-items-center hover-pointer"
+                                        role="button" data-bs-toggle="modal" data-bs-target="#rejectionsModal">
+                                        <i class="fa fa-thumbs-down me-1"></i>
+                                        <span class="fw-bold me-1" id="rejectionsCount">0</span>
+                                    </div>
+
+                                    <!-- Bootstrap Modals -->
+                                    <div class="modal fade" id="approvalsModal" tabindex="-1"
+                                        aria-labelledby="approvalsModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="approvalsModalLabel">Approvals</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <!-- Empty content for now -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal fade" id="rejectionsModal" tabindex="-1"
+                                        aria-labelledby="rejectionsModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="rejectionsModalLabel">Rejections</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <!-- Empty content for now -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="status-pill px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
+                                        <i class="fa fa-hourglass-end me-1"></i>
+                                        <span class="me-2" id="isLateStatus">Not Late</span>
+                                    </div>
+
+                                    <!-- Total Fee Pill -->
+                                    <div
+                                        class="status-pill px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
+                                        <i class="fa fa-money-bill me-2"></i>
+                                        <span class="me-1" id="totalApprovedFee">0</span>
+                                    </div>
+
+                                    <!-- Comments Pill -->
+                                    <div
+                                        class="status-pill px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
+                                        <i class="fa fa-commenting me-2"></i>
+                                        <span class="me-1" id="commentCount">0</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="modal-body">
-                                <!-- Empty content for now -->
+                        </div>
+
+                        <!-- Action Panel (unchanged) -->
+                        <div class="col-md-3">
+                            <div class="card h-100 d-flex flex-column justify-content-center align-items-center p-3">
+                                <button class="btn btn-success w-100 mb-2" id="approveBtn">
+                                    <i class="bi bi-hand-thumbs-up me-1"></i> Approve
+                                </button>
+                                <button class="btn btn-danger w-100 mb-2" id="rejectBtn">
+                                    <i class="bi bi-hand-thumbs-down me-1"></i> Reject
+                                </button>
+                                <!-- Finalize Button (Hidden by default, shown for Head Admin) -->
+                                <button class="btn btn-primary w-100 mb-2" id="finalizeBtn" style="display: none;">
+                                    <i class="bi bi-check-circle me-1"></i> Finalize
+                                </button>
+                                <!-- More Actions Dropdown -->
+                                <div class="dropdown w-100" id="moreActionsDropdown">
+                                    <button class="btn btn-secondary bg-secondary-subtle text-dark w-100 dropdown-toggle"
+                                        type="button" id="moreActionsBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots me-1"></i> More
+                                    </button>
+                                    <ul class="dropdown-menu" style="min-width: 100px;" aria-labelledby="moreActionsBtn">
+                                        <li>
+                                            <a class="dropdown-item text-start w-100 status-option" id="statusScheduled"
+                                                data-value="Scheduled" href="#">
+                                                <i class="bi bi-calendar-event me-2"></i> Mark Scheduled
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-start w-100 status-option" id="statusOngoing"
+                                                data-value="Ongoing" href="#">
+                                                <i class="bi bi-play-circle me-2"></i> Mark Ongoing
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-start w-100 status-option" id="statusLate"
+                                                data-value="Late" href="#">
+                                                <i class="bi bi-exclamation-circle me-2"></i> Mark Late
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-start w-100" id="closeForm" href="#">
+                                                <i class="bi bi-x-circle me-2"></i> Close Form
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="modal fade" id="rejectionsModal" tabindex="-1"
-                    aria-labelledby="rejectionsModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="rejectionsModalLabel">Rejections</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <!-- Empty content for now -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="status-pill px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
-                    <i class="fa fa-hourglass-end me-1"></i>
-                    <span class="me-2" id="isLateStatus">Not Late</span>
-                </div>
-
-                <!-- Total Fee Pill -->
-                <div class="status-pill px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
-                    <i class="fa fa-money-bill me-2"></i>
-                    <span class="me-1" id="totalApprovedFee">0</span>
-                </div>
-
-                <!-- Comments Pill -->
-                <div class="status-pill px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center">
-                    <i class="fa fa-commenting me-2"></i>
-                    <span class="me-1" id="commentCount">0</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Action Panel (unchanged) -->
-    <div class="col-md-3">
-        <div class="card h-100 d-flex flex-column justify-content-center align-items-center p-3">
-            <button class="btn btn-success w-100 mb-2" id="approveBtn">
-                <i class="bi bi-hand-thumbs-up me-1"></i> Approve
-            </button>
-            <button class="btn btn-danger w-100 mb-2" id="rejectBtn">
-                <i class="bi bi-hand-thumbs-down me-1"></i> Reject
-            </button>
-            <!-- Finalize Button (Hidden by default, shown for Head Admin) -->
-            <button class="btn btn-primary w-100 mb-2" id="finalizeBtn" style="display: none;">
-                <i class="bi bi-check-circle me-1"></i> Finalize
-            </button>
-            <!-- More Actions Dropdown -->
-            <div class="dropdown w-100" id="moreActionsDropdown">
-                <button class="btn btn-secondary bg-secondary-subtle text-dark w-100 dropdown-toggle"
-                    type="button" id="moreActionsBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-three-dots me-1"></i> More
-                </button>
-                <ul class="dropdown-menu" style="min-width: 100px;" aria-labelledby="moreActionsBtn">
-                    <li>
-                        <a class="dropdown-item text-start w-100 status-option" id="statusScheduled"
-                            data-value="Scheduled" href="#">
-                            <i class="bi bi-calendar-event me-2"></i> Mark Scheduled
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item text-start w-100 status-option" id="statusOngoing"
-                            data-value="Ongoing" href="#">
-                            <i class="bi bi-play-circle me-2"></i> Mark Ongoing
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item text-start w-100 status-option" id="statusLate"
-                            data-value="Late" href="#">
-                            <i class="bi bi-exclamation-circle me-2"></i> Mark Late
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item text-start w-100" id="closeForm" href="#">
-                            <i class="bi bi-x-circle me-2"></i> Close Form
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 
                     <div class="row g-2">
                         <!-- Left column: Contact Information -->
@@ -339,7 +359,7 @@
                                                 <div class="card-body p-2 d-flex flex-column justify-content-center">
                                                     <i id="formalLetterIcon"
                                                         class="fas fa-file-alt fa-2x text-muted mb-1"></i>
-                                                    <small class="text-muted mb-1">Formal Letter <br>(Required)</small>
+                                                    <small class="text-muted mb-1">Formal<br>Letter</small>
                                                     <div id="formalLetterDocument"></div>
                                                 </div>
                                             </div>
@@ -577,8 +597,8 @@
                                         <div class="mb-3">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <h6 class="fw-bold mb-0">Miscellaneous Fees</h6>
-                                                <button id="addFeeBtn" class="btn btn-sm btn-primary">
-                                                    <i class="bi bi-plus-circle"></i> Add Fee
+                                                <button id="addFeeBtn" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-plus"></i> Add Fee/Discount
                                                 </button>
                                             </div>
                                             <div id="additionalFeesContainer"></div>
@@ -989,6 +1009,18 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script>
 
+        function formatMoney(amount) {
+            // Handle different input types
+            let num = parseFloat(amount);
+            if (isNaN(num)) return '₱0.00';
+
+            // Format with commas and 2 decimal places
+            return '₱' + num.toLocaleString('en-PH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
 
             // Back to Top Button
@@ -1022,3158 +1054,3159 @@
 
             // Mark notification as read when viewing the request
             markNotificationAsRead(requestId);
-        
+
 
             async function markNotificationAsRead(requestId) {
-            try {
-                const adminToken = localStorage.getItem('adminToken');
-                if (!adminToken) {
-                    console.error('No authentication token found');
-                    return;
-                }
-
-                const response = await fetch(`/api/admin/notifications/requisition/${requestId}/mark-as-read`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                try {
+                    const adminToken = localStorage.getItem('adminToken');
+                    if (!adminToken) {
+                        console.error('No authentication token found');
+                        return;
                     }
-                });
 
-                if (response.ok) {
-                    console.log(`Notification for request ${requestId} marked as read`);
-                    // Update the global unread count
-                    updateGlobalUnreadCount();
-                } else {
-                    console.error('Failed to mark notification as read');
-                }
-            } catch (error) {
-                console.error('Error marking notification as read:', error);
-            }
-        }
+                    const response = await fetch(`/api/admin/notifications/requisition/${requestId}/mark-as-read`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
 
-        function updateGlobalUnreadCount() {
-            // This would update any global notification badge in the layout
-            const navBadge = document.getElementById('requisitionNotificationBadge');
-            if (navBadge) {
-                // You might want to fetch the updated count from the server
-                // or decrement the current count
-                const currentCount = parseInt(navBadge.textContent) || 0;
-                if (currentCount > 0) {
-                    navBadge.textContent = currentCount - 1;
-                    if (currentCount - 1 === 0) {
-                        navBadge.style.display = 'none';
+                    if (response.ok) {
+                        console.log(`Notification for request ${requestId} marked as read`);
+                        // Update the global unread count
+                        updateGlobalUnreadCount();
+                    } else {
+                        console.error('Failed to mark notification as read');
                     }
+                } catch (error) {
+                    console.error('Error marking notification as read:', error);
                 }
             }
-        }
 
-
-        // Initialize Bootstrap modal
-        const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
-        const feeModal = new bootstrap.Modal(document.getElementById('feeModal'));
-
-        // Form Action Modals
-        const approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
-        const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
-        const finalizeModal = new bootstrap.Modal(document.getElementById('finalizeModal'));
-
-        // Function to handle mark scheduled action
-        function handleMarkScheduled() {
-            markScheduledModal.show();
-        }
-
-
-        // Fee management elements
-        const feesContainer = document.getElementById("additionalFees");
-        const placeholder = document.getElementById("feesPlaceholder");
-        const addFeeBtn = document.getElementById("addFeeBtn");
-        const saveFeeBtn = document.getElementById("saveFeeBtn");
-        const feeTypeSelect = document.getElementById("feeType");
-        const feeValueInput = document.getElementById("feeValue");
-        const discountTypeSection = document.getElementById("discountTypeSection");
-
-        // Status update functionality
-        const statusDropdown = document.getElementById('statusDropdown');
-        const moreDropdown = document.getElementById('moreDropdown');
-        const statusOptions = document.querySelectorAll('.status-option');
-        const updateStatusBtn = document.getElementById('updateStatusBtn');
-        const statusUpdateModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
-        let selectedStatus = '';
-
-
-
-
-
-
-      // Function to check admin role and update UI accordingly
-async function checkAdminRoleAndUpdateUI() {
-    try {
-        const adminToken = localStorage.getItem('adminToken');
-        const response = await fetch('/api/admin/profile', {
-            headers: {
-                'Authorization': `Bearer ${adminToken}`,
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            console.error('Failed to fetch admin profile. Status:', response.status);
-            return;
-        }
-
-        const adminData = await response.json();
-        console.log('Admin role data:', {
-            adminId: adminData.admin_id,
-            roleTitle: adminData.role?.role_title,
-            departments: adminData.departments?.map(d => d.department_name)
-        });
-
-        // Define role checks based on admin data
-        const isHeadAdmin = adminData.role?.role_title === 'Head Admin';
-        const isApprovingOfficer = adminData.role?.role_title === 'Approving Officer';
-        const isVPA = adminData.role?.role_title === 'Vice President of Administration';
-
-        const approveBtn = document.getElementById('approveBtn');
-        const rejectBtn = document.getElementById('rejectBtn');
-        const finalizeBtn = document.getElementById('finalizeBtn');
-        const moreActionsDropdown = document.getElementById('moreActionsDropdown');
-        const moreActionsBtn = document.getElementById('moreActionsBtn');
-        const actionPanel = document.querySelector('.col-md-3 .card');
-
-        // First, check if this admin has already taken action on this request
-        const hasTakenAction = await checkIfAdminHasTakenAction(adminData.admin_id);
-
-        console.log('UI Update Decision:', {
-            adminId: adminData.admin_id,
-            hasTakenAction: hasTakenAction,
-            isHeadAdmin: isHeadAdmin,
-            isApprovingOfficer: isApprovingOfficer,
-            isVPA: isVPA
-        });
-
-        // Remove any existing action taken message or dynamic buttons
-        const existingMessage = actionPanel?.querySelector('.action-taken-message');
-        if (existingMessage) {
-            existingMessage.remove();
-        }
-
-        // Get current request status for Head Admin logic
-        const currentRequest = allRequests.find(req => req.request_id == requestId);
-        const currentStatusId = currentRequest ? currentRequest.form_details.status.id : null;
-        const currentStatusName = currentRequest ? currentRequest.form_details.status.name : 'Unknown';
-
-        // Reset all elements to default state first
-        if (moreActionsDropdown) moreActionsDropdown.style.display = 'block';
-        if (moreActionsBtn) moreActionsBtn.style.display = 'block';
-        if (approveBtn) {
-            approveBtn.style.display = 'block';
-            approveBtn.disabled = false;
-            approveBtn.classList.remove('disabled');
-        }
-        if (rejectBtn) {
-            rejectBtn.style.display = 'block';
-            rejectBtn.disabled = false;
-            rejectBtn.classList.remove('disabled');
-        }
-        if (finalizeBtn) {
-            finalizeBtn.style.display = 'none';
-            finalizeBtn.disabled = false;
-            finalizeBtn.classList.remove('disabled');
-        }
-
-        // Reset dropdown items visibility
-        const markScheduledOption = document.getElementById('statusScheduled');
-        const markOngoingOption = document.getElementById('statusOngoing');
-        const markLateOption = document.getElementById('statusLate');
-        if (markScheduledOption) markScheduledOption.style.display = 'block';
-        if (markOngoingOption) markOngoingOption.style.display = 'block';
-        if (markLateOption) markLateOption.style.display = 'block';
-
-        // Remove any dynamically created buttons
-        const dynamicMarkScheduledBtn = document.getElementById('markScheduledBtn');
-        const dynamicMarkOngoingBtn = document.getElementById('markOngoingBtn');
-        const dynamicUnmarkLateBtn = document.getElementById('unmarkLateBtn');
-        const dynamicCloseFormBtn = document.getElementById('closeFormBtn');
-        if (dynamicMarkScheduledBtn) dynamicMarkScheduledBtn.remove();
-        if (dynamicMarkOngoingBtn) dynamicMarkOngoingBtn.remove();
-        if (dynamicUnmarkLateBtn) dynamicUnmarkLateBtn.remove();
-        if (dynamicCloseFormBtn) dynamicCloseFormBtn.remove();
-
-        // If admin has already taken action, show message and hide appropriate buttons
-        if (hasTakenAction) {
-            console.log('Hiding buttons - admin has already taken action');
-
-            // For Approving Officers and VPA, hide approve/reject buttons and show message
-            if (isApprovingOfficer || isVPA) {
-                if (approveBtn) approveBtn.style.display = 'none';
-                if (rejectBtn) rejectBtn.style.display = 'none';
-                if (moreActionsDropdown) moreActionsDropdown.style.display = 'none';
-                if (moreActionsBtn) moreActionsBtn.style.display = 'none';
-
-                // Show action taken message
-                if (actionPanel) {
-                    const actionMessage = document.createElement('div');
-                    actionMessage.className = 'action-taken-message text-center p-3';
-                    actionMessage.innerHTML = `
-                        <i class="bi bi-check-circle-fill text-success fs-4 d-block mb-2"></i>
-                        <p class="mb-0 small text-muted">You have already taken action for this request.</p>
-                    `;
-                    actionPanel.appendChild(actionMessage);
+            function updateGlobalUnreadCount() {
+                // This would update any global notification badge in the layout
+                const navBadge = document.getElementById('requisitionNotificationBadge');
+                if (navBadge) {
+                    // You might want to fetch the updated count from the server
+                    // or decrement the current count
+                    const currentCount = parseInt(navBadge.textContent) || 0;
+                    if (currentCount > 0) {
+                        navBadge.textContent = currentCount - 1;
+                        if (currentCount - 1 === 0) {
+                            navBadge.style.display = 'none';
+                        }
+                    }
                 }
             }
-            // For Head Admin who has taken action, still allow status management but not approve/reject
-            else if (isHeadAdmin) {
-                if (approveBtn) approveBtn.style.display = 'none';
-                if (rejectBtn) rejectBtn.style.display = 'none';
-                // Head Admin can still use finalize and more actions even if they've taken action
+
+
+            // Initialize Bootstrap modal
+            const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+            const feeModal = new bootstrap.Modal(document.getElementById('feeModal'));
+
+            // Form Action Modals
+            const approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
+            const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
+            const finalizeModal = new bootstrap.Modal(document.getElementById('finalizeModal'));
+
+            // Function to handle mark scheduled action
+            function handleMarkScheduled() {
+                markScheduledModal.show();
             }
 
-            return; // Exit early since admin has taken action
-        }
 
-        // Apply role-based rules if admin hasn't taken action yet
-        
-        // For Approving Officer and VPA - SAME LOGIC FOR BOTH ROLES
-        if (isApprovingOfficer || isVPA) {
-            // Hide More dropdown for both Approving Officer and VPA
-            if (moreActionsDropdown) moreActionsDropdown.style.display = 'none';
-            if (moreActionsBtn) moreActionsBtn.style.display = 'none';
-            
-            // Show Approve/Reject buttons for both roles
-            if (approveBtn) approveBtn.style.display = 'block';
-            if (rejectBtn) rejectBtn.style.display = 'block';
-            
-            // Hide Finalize button for both roles
-            if (finalizeBtn) finalizeBtn.style.display = 'none';
-            
-            console.log('Applied Approving Officer/VPA UI: Show Approve/Reject, Hide More dropdown and Finalize');
-        }
+            // Fee management elements
+            const feesContainer = document.getElementById("additionalFees");
+            const placeholder = document.getElementById("feesPlaceholder");
+            const addFeeBtn = document.getElementById("addFeeBtn");
+            const saveFeeBtn = document.getElementById("saveFeeBtn");
+            const feeTypeSelect = document.getElementById("feeType");
+            const feeValueInput = document.getElementById("feeValue");
+            const discountTypeSection = document.getElementById("discountTypeSection");
 
-        if (isHeadAdmin) {
-            // Hide Approve/Reject buttons for Head Admin
-            if (approveBtn) approveBtn.style.display = 'none';
-            if (rejectBtn) rejectBtn.style.display = 'none';
+            // Status update functionality
+            const statusDropdown = document.getElementById('statusDropdown');
+            const moreDropdown = document.getElementById('moreDropdown');
+            const statusOptions = document.querySelectorAll('.status-option');
+            const updateStatusBtn = document.getElementById('updateStatusBtn');
+            const statusUpdateModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+            let selectedStatus = '';
 
-            // Show Finalize button for Head Admin (unless status requires changes)
-            if (finalizeBtn) finalizeBtn.style.display = 'block';
 
-            // Ensure More dropdown is visible for Head Admin (unless status requires changes)
-            if (moreActionsDropdown) moreActionsDropdown.style.display = 'block';
-            if (moreActionsBtn) moreActionsBtn.style.display = 'block';
-            console.log('Showing Finalize button and More dropdown for Head Admin');
 
-            // Apply Head Admin status-based UI updates
-            console.log('Applying Head Admin status-based UI for status:', {
-                statusId: currentStatusId,
-                statusName: currentStatusName
-            });
 
-            // Use the actual status IDs from your system
-            switch (currentStatusId) {
-                case 1: // Pending Approval (status ID 1)
-                    console.log('Status: Pending Approval - Replacing More dropdown with Close Form button');
 
-                    // Hide More dropdown
-                    if (moreActionsDropdown) {
-                        moreActionsDropdown.style.display = 'none';
-                    }
 
-                    // Create Close Form button
-                    const closeFormBtnPending = document.createElement('button');
-                    closeFormBtnPending.id = 'closeFormBtn';
-                    closeFormBtnPending.className = 'btn btn-light-danger w-100 mb-2';
-                    closeFormBtnPending.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
-                    closeFormBtnPending.addEventListener('click', function () {
-                        closeForm();
+            // Function to check admin role and update UI accordingly
+            async function checkAdminRoleAndUpdateUI() {
+                try {
+                    const adminToken = localStorage.getItem('adminToken');
+                    const response = await fetch('/api/admin/profile', {
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
                     });
 
-                    // Add button to action panel
-                    if (actionPanel) {
-                        actionPanel.appendChild(closeFormBtnPending);
+                    if (!response.ok) {
+                        console.error('Failed to fetch admin profile. Status:', response.status);
+                        return;
                     }
-                    break;
 
-                case 2: // Awaiting Payment (status ID 2)
-                    console.log('Status: Awaiting Payment - Replacing Finalize with Mark Scheduled, replacing More with Close Form');
+                    const adminData = await response.json();
+                    console.log('Admin role data:', {
+                        adminId: adminData.admin_id,
+                        roleTitle: adminData.role?.role_title,
+                        departments: adminData.departments?.map(d => d.department_name)
+                    });
 
-                    // Replace Finalize button with Mark Scheduled
+                    // Define role checks based on admin data
+                    const isHeadAdmin = adminData.role?.role_title === 'Head Admin';
+                    const isApprovingOfficer = adminData.role?.role_title === 'Approving Officer';
+                    const isVPA = adminData.role?.role_title === 'Vice President of Administration';
+
+                    const approveBtn = document.getElementById('approveBtn');
+                    const rejectBtn = document.getElementById('rejectBtn');
+                    const finalizeBtn = document.getElementById('finalizeBtn');
+                    const moreActionsDropdown = document.getElementById('moreActionsDropdown');
+                    const moreActionsBtn = document.getElementById('moreActionsBtn');
+                    const actionPanel = document.querySelector('.col-md-3 .card');
+
+                    // First, check if this admin has already taken action on this request
+                    const hasTakenAction = await checkIfAdminHasTakenAction(adminData.admin_id);
+
+                    console.log('UI Update Decision:', {
+                        adminId: adminData.admin_id,
+                        hasTakenAction: hasTakenAction,
+                        isHeadAdmin: isHeadAdmin,
+                        isApprovingOfficer: isApprovingOfficer,
+                        isVPA: isVPA
+                    });
+
+                    // Remove any existing action taken message or dynamic buttons
+                    const existingMessage = actionPanel?.querySelector('.action-taken-message');
+                    if (existingMessage) {
+                        existingMessage.remove();
+                    }
+
+                    // Get current request status for Head Admin logic
+                    const currentRequest = allRequests.find(req => req.request_id == requestId);
+                    const currentStatusId = currentRequest ? currentRequest.form_details.status.id : null;
+                    const currentStatusName = currentRequest ? currentRequest.form_details.status.name : 'Unknown';
+
+                    // Reset all elements to default state first
+                    if (moreActionsDropdown) moreActionsDropdown.style.display = 'block';
+                    if (moreActionsBtn) moreActionsBtn.style.display = 'block';
+                    if (approveBtn) {
+                        approveBtn.style.display = 'block';
+                        approveBtn.disabled = false;
+                        approveBtn.classList.remove('disabled');
+                    }
+                    if (rejectBtn) {
+                        rejectBtn.style.display = 'block';
+                        rejectBtn.disabled = false;
+                        rejectBtn.classList.remove('disabled');
+                    }
                     if (finalizeBtn) {
                         finalizeBtn.style.display = 'none';
-                    }
-
-                    // Replace More dropdown with Close Form button
-                    if (moreActionsDropdown) {
-                        moreActionsDropdown.style.display = 'none';
-                    }
-
-                    // Create Mark Scheduled button
-                    const markScheduledBtn = document.createElement('button');
-                    markScheduledBtn.id = 'markScheduledBtn';
-                    markScheduledBtn.className = 'btn btn-primary w-100 mb-2';
-                    markScheduledBtn.innerHTML = '<i class="bi bi-calendar-event me-1"></i> Mark Scheduled';
-                    markScheduledBtn.addEventListener('click', function () {
-                        handleMarkScheduled(); // Use the custom handler instead of handleStatusAction
-                    });
-
-                    // Create Close Form button
-                    const closeFormBtnAwaiting = document.createElement('button');
-                    closeFormBtnAwaiting.id = 'closeFormBtn';
-                    closeFormBtnAwaiting.className = 'btn btn-light-danger w-100 mb-2';
-                    closeFormBtnAwaiting.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
-                    closeFormBtnAwaiting.addEventListener('click', function () {
-                        closeForm();
-                    });
-
-                    // Add buttons to action panel
-                    if (actionPanel) {
-                        actionPanel.appendChild(markScheduledBtn);
-                        actionPanel.appendChild(closeFormBtnAwaiting);
-                    }
-                    break;
-
-                case 3: // Scheduled (status ID 3)
-                    console.log('Status: Scheduled - Replacing Finalize with Mark Ongoing, replacing More with Close Form');
-
-                    // Replace Finalize button with Mark Ongoing
-                    if (finalizeBtn) {
-                        finalizeBtn.style.display = 'none';
-                    }
-
-                    // Replace More dropdown with Close Form button
-                    if (moreActionsDropdown) {
-                        moreActionsDropdown.style.display = 'none';
-                    }
-
-                    // Create Mark Ongoing button
-                    const markOngoingBtn = document.createElement('button');
-                    markOngoingBtn.id = 'markOngoingBtn';
-                    markOngoingBtn.className = 'btn btn-primary w-100 mb-2';
-                    markOngoingBtn.innerHTML = '<i class="bi bi-play-circle me-1"></i> Mark Ongoing';
-                    markOngoingBtn.addEventListener('click', function () {
-                        handleStatusAction('Ongoing');
-                    });
-
-                    // Create Close Form button
-                    const closeFormBtnScheduled = document.createElement('button');
-                    closeFormBtnScheduled.id = 'closeFormBtn';
-                    closeFormBtnScheduled.className = 'btn btn-light-danger w-100 mb-2';
-                    closeFormBtnScheduled.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
-                    closeFormBtnScheduled.addEventListener('click', function () {
-                        closeForm();
-                    });
-
-                    // Add buttons to action panel
-                    if (actionPanel) {
-                        actionPanel.appendChild(markOngoingBtn);
-                        actionPanel.appendChild(closeFormBtnScheduled);
-                    }
-                    break;
-
-                case 4: // Ongoing (status ID 4)
-                    console.log('Status: Ongoing - Replacing Finalize with Mark Late, replacing More with Close Form');
-
-                    // Hide existing buttons
-                    if (finalizeBtn) {
-                        finalizeBtn.style.display = 'none';
-                    }
-                    if (moreActionsDropdown) {
-                        moreActionsDropdown.style.display = 'none';
-                    }
-
-                    // Only create Mark Late button if it doesn't exist
-                    if (!document.getElementById('markLateBtn')) {
-                        const markLateBtn = document.createElement('button');
-                        markLateBtn.id = 'markLateBtn';
-                        markLateBtn.className = 'btn btn-primary w-100 mb-2';
-                        markLateBtn.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Mark Late/Damaged';
-                        markLateBtn.addEventListener('click', function () {
-                            handleStatusAction('Late');
-                        });
-                        actionPanel.appendChild(markLateBtn);
-                    }
-
-                    // Only create Close Form button if it doesn't exist
-                    if (!document.getElementById('closeFormBtn')) {
-                        const closeFormBtnOngoing = document.createElement('button');
-                        closeFormBtnOngoing.id = 'closeFormBtn';
-                        closeFormBtnOngoing.className = 'btn btn-light-danger w-100 mb-2';
-                        closeFormBtnOngoing.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
-                        closeFormBtnOngoing.addEventListener('click', function () {
-                            closeForm();
-                        });
-                        actionPanel.appendChild(closeFormBtnOngoing);
-                    }
-                    break;
-
-                case 5: // Late (status ID 5)
-                    console.log('Status: Late - Replacing Finalize with Unmark Late, replacing More with Close Form');
-
-                    // Replace Finalize button with Unmark Late
-                    if (finalizeBtn) {
-                        finalizeBtn.style.display = 'none';
-                    }
-
-                    // Replace More dropdown with Close Form button
-                    if (moreActionsDropdown) {
-                        moreActionsDropdown.style.display = 'none';
-                    }
-
-                    // Create Unmark Late button
-                    const unmarkLateBtn = document.createElement('button');
-                    unmarkLateBtn.id = 'unmarkLateBtn';
-                    unmarkLateBtn.className = 'btn btn-primary w-100 mb-2';
-                    unmarkLateBtn.innerHTML = '<i class="bi bi-arrow-counterclockwise me-1"></i> Unmark Late/Damaged';
-                    unmarkLateBtn.addEventListener('click', function () {
-                        handleUnmarkLate();
-                    });
-
-                    // Create Close Form button
-                    const closeFormBtnLate = document.createElement('button');
-                    closeFormBtnLate.id = 'closeFormBtn';
-                    closeFormBtnLate.className = 'btn btn-light-danger w-100 mb-2';
-                    closeFormBtnLate.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
-                    closeFormBtnLate.addEventListener('click', function () {
-                        closeForm();
-                    });
-
-                    // Add buttons to action panel
-                    if (actionPanel) {
-                        actionPanel.appendChild(unmarkLateBtn);
-                        actionPanel.appendChild(closeFormBtnLate);
-                    }
-                    break;
-
-                default:
-                    console.log('Status: Other - Showing all options');
-                    // For other statuses, ensure finalize button is enabled
-                    if (finalizeBtn) {
                         finalizeBtn.disabled = false;
                         finalizeBtn.classList.remove('disabled');
                     }
-                    break;
-            }
-        }
 
-    } catch (error) {
-        console.error('Error checking admin role:', error);
-        // Fallback: show default UI if there's an error fetching role
-        console.log('Using default UI due to error fetching admin role');
-    }
-}
+                    // Reset dropdown items visibility
+                    const markScheduledOption = document.getElementById('statusScheduled');
+                    const markOngoingOption = document.getElementById('statusOngoing');
+                    const markLateOption = document.getElementById('statusLate');
+                    if (markScheduledOption) markScheduledOption.style.display = 'block';
+                    if (markOngoingOption) markOngoingOption.style.display = 'block';
+                    if (markLateOption) markLateOption.style.display = 'block';
 
-        async function loadApprovalHistory() {
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/approval-history`, {
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Accept': 'application/json'
+                    // Remove any dynamically created buttons
+                    const dynamicMarkScheduledBtn = document.getElementById('markScheduledBtn');
+                    const dynamicMarkOngoingBtn = document.getElementById('markOngoingBtn');
+                    const dynamicUnmarkLateBtn = document.getElementById('unmarkLateBtn');
+                    const dynamicCloseFormBtn = document.getElementById('closeFormBtn');
+                    if (dynamicMarkScheduledBtn) dynamicMarkScheduledBtn.remove();
+                    if (dynamicMarkOngoingBtn) dynamicMarkOngoingBtn.remove();
+                    if (dynamicUnmarkLateBtn) dynamicUnmarkLateBtn.remove();
+                    if (dynamicCloseFormBtn) dynamicCloseFormBtn.remove();
+
+                    // If admin has already taken action, show message and hide appropriate buttons
+                    if (hasTakenAction) {
+                        console.log('Hiding buttons - admin has already taken action');
+
+                        // For Approving Officers and VPA, hide approve/reject buttons and show message
+                        if (isApprovingOfficer || isVPA) {
+                            if (approveBtn) approveBtn.style.display = 'none';
+                            if (rejectBtn) rejectBtn.style.display = 'none';
+                            if (moreActionsDropdown) moreActionsDropdown.style.display = 'none';
+                            if (moreActionsBtn) moreActionsBtn.style.display = 'none';
+
+                            // Show action taken message
+                            if (actionPanel) {
+                                const actionMessage = document.createElement('div');
+                                actionMessage.className = 'action-taken-message text-center p-3';
+                                actionMessage.innerHTML = `
+                                <i class="bi bi-check-circle-fill text-success fs-4 d-block mb-2"></i>
+                                <p class="mb-0 small text-muted">You have already taken action for this request.</p>
+                            `;
+                                actionPanel.appendChild(actionMessage);
+                            }
+                        }
+                        // For Head Admin who has taken action, still allow status management but not approve/reject
+                        else if (isHeadAdmin) {
+                            if (approveBtn) approveBtn.style.display = 'none';
+                            if (rejectBtn) rejectBtn.style.display = 'none';
+                            // Head Admin can still use finalize and more actions even if they've taken action
+                        }
+
+                        return; // Exit early since admin has taken action
                     }
-                });
 
-                if (!response.ok) throw new Error('Failed to fetch approval history');
+                    // Apply role-based rules if admin hasn't taken action yet
 
-                const approvalHistory = await response.json();
+                    // For Approving Officer and VPA - SAME LOGIC FOR BOTH ROLES
+                    if (isApprovingOfficer || isVPA) {
+                        // Hide More dropdown for both Approving Officer and VPA
+                        if (moreActionsDropdown) moreActionsDropdown.style.display = 'none';
+                        if (moreActionsBtn) moreActionsBtn.style.display = 'none';
 
-                // Update approvals modal
-                const approvalsModalBody = document.querySelector('#approvalsModal .modal-body');
-                approvalsModalBody.innerHTML = generateApprovalHistoryHTML(approvalHistory.filter(item => item.action === 'approved'));
+                        // Show Approve/Reject buttons for both roles
+                        if (approveBtn) approveBtn.style.display = 'block';
+                        if (rejectBtn) rejectBtn.style.display = 'block';
 
-                // Update rejections modal
-                const rejectionsModalBody = document.querySelector('#rejectionsModal .modal-body');
-                rejectionsModalBody.innerHTML = generateApprovalHistoryHTML(approvalHistory.filter(item => item.action === 'rejected'));
+                        // Hide Finalize button for both roles
+                        if (finalizeBtn) finalizeBtn.style.display = 'none';
 
-            } catch (error) {
-                console.error('Error loading approval history:', error);
-                const modalBodies = document.querySelectorAll('#approvalsModal .modal-body, #rejectionsModal .modal-body');
-                modalBodies.forEach(body => {
-                    body.innerHTML = '<div class="text-center text-muted py-4">Failed to load history</div>';
-                });
-            }
-        }
+                        console.log('Applied Approving Officer/VPA UI: Show Approve/Reject, Hide More dropdown and Finalize');
+                    }
 
+                    if (isHeadAdmin) {
+                        // Hide Approve/Reject buttons for Head Admin
+                        if (approveBtn) approveBtn.style.display = 'none';
+                        if (rejectBtn) rejectBtn.style.display = 'none';
 
-        function generateApprovalHistoryHTML(history) {
-            if (!history || history.length === 0) {
-                return '<div class="text-center text-muted py-4">No records found</div>';
-            }
+                        // Show Finalize button for Head Admin (unless status requires changes)
+                        if (finalizeBtn) finalizeBtn.style.display = 'block';
 
-            return history.map(item => `
-                                            <div class="d-flex align-items-center mb-3 p-2 border rounded">
-                                                <div class="me-3 flex-shrink-0">
-                                                    ${item.admin_photo ?
-                    `<img src="${item.admin_photo}" class="rounded-circle" width="45" height="45" alt="${item.admin_name}" style="object-fit: cover;">` :
-                    `<div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width: 45px; height: 45px;">
-                                                            ${item.admin_name.split(' ').map(n => n.charAt(0)).join('')}
-                                                        </div>`
+                        // Ensure More dropdown is visible for Head Admin (unless status requires changes)
+                        if (moreActionsDropdown) moreActionsDropdown.style.display = 'block';
+                        if (moreActionsBtn) moreActionsBtn.style.display = 'block';
+                        console.log('Showing Finalize button and More dropdown for Head Admin');
+
+                        // Apply Head Admin status-based UI updates
+                        console.log('Applying Head Admin status-based UI for status:', {
+                            statusId: currentStatusId,
+                            statusName: currentStatusName
+                        });
+
+                        // Use the actual status IDs from your system
+                        switch (currentStatusId) {
+                            case 1: // Pending Approval (status ID 1)
+                                console.log('Status: Pending Approval - Replacing More dropdown with Close Form button');
+
+                                // Hide More dropdown
+                                if (moreActionsDropdown) {
+                                    moreActionsDropdown.style.display = 'none';
+                                }
+
+                                // Create Close Form button
+                                const closeFormBtnPending = document.createElement('button');
+                                closeFormBtnPending.id = 'closeFormBtn';
+                                closeFormBtnPending.className = 'btn btn-light-danger w-100 mb-2';
+                                closeFormBtnPending.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
+                                closeFormBtnPending.addEventListener('click', function () {
+                                    closeForm();
+                                });
+
+                                // Add button to action panel
+                                if (actionPanel) {
+                                    actionPanel.appendChild(closeFormBtnPending);
+                                }
+                                break;
+
+                            case 2: // Awaiting Payment (status ID 2)
+                                console.log('Status: Awaiting Payment - Replacing Finalize with Mark Scheduled, replacing More with Close Form');
+
+                                // Replace Finalize button with Mark Scheduled
+                                if (finalizeBtn) {
+                                    finalizeBtn.style.display = 'none';
+                                }
+
+                                // Replace More dropdown with Close Form button
+                                if (moreActionsDropdown) {
+                                    moreActionsDropdown.style.display = 'none';
+                                }
+
+                                // Create Mark Scheduled button
+                                const markScheduledBtn = document.createElement('button');
+                                markScheduledBtn.id = 'markScheduledBtn';
+                                markScheduledBtn.className = 'btn btn-primary w-100 mb-2';
+                                markScheduledBtn.innerHTML = '<i class="bi bi-calendar-event me-1"></i> Mark Scheduled';
+                                markScheduledBtn.addEventListener('click', function () {
+                                    handleMarkScheduled(); // Use the custom handler instead of handleStatusAction
+                                });
+
+                                // Create Close Form button
+                                const closeFormBtnAwaiting = document.createElement('button');
+                                closeFormBtnAwaiting.id = 'closeFormBtn';
+                                closeFormBtnAwaiting.className = 'btn btn-light-danger w-100 mb-2';
+                                closeFormBtnAwaiting.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
+                                closeFormBtnAwaiting.addEventListener('click', function () {
+                                    closeForm();
+                                });
+
+                                // Add buttons to action panel
+                                if (actionPanel) {
+                                    actionPanel.appendChild(markScheduledBtn);
+                                    actionPanel.appendChild(closeFormBtnAwaiting);
+                                }
+                                break;
+
+                            case 3: // Scheduled (status ID 3)
+                                console.log('Status: Scheduled - Replacing Finalize with Mark Ongoing, replacing More with Close Form');
+
+                                // Replace Finalize button with Mark Ongoing
+                                if (finalizeBtn) {
+                                    finalizeBtn.style.display = 'none';
+                                }
+
+                                // Replace More dropdown with Close Form button
+                                if (moreActionsDropdown) {
+                                    moreActionsDropdown.style.display = 'none';
+                                }
+
+                                // Create Mark Ongoing button
+                                const markOngoingBtn = document.createElement('button');
+                                markOngoingBtn.id = 'markOngoingBtn';
+                                markOngoingBtn.className = 'btn btn-primary w-100 mb-2';
+                                markOngoingBtn.innerHTML = '<i class="bi bi-play-circle me-1"></i> Mark Ongoing';
+                                markOngoingBtn.addEventListener('click', function () {
+                                    handleStatusAction('Ongoing');
+                                });
+
+                                // Create Close Form button
+                                const closeFormBtnScheduled = document.createElement('button');
+                                closeFormBtnScheduled.id = 'closeFormBtn';
+                                closeFormBtnScheduled.className = 'btn btn-light-danger w-100 mb-2';
+                                closeFormBtnScheduled.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
+                                closeFormBtnScheduled.addEventListener('click', function () {
+                                    closeForm();
+                                });
+
+                                // Add buttons to action panel
+                                if (actionPanel) {
+                                    actionPanel.appendChild(markOngoingBtn);
+                                    actionPanel.appendChild(closeFormBtnScheduled);
+                                }
+                                break;
+
+                            case 4: // Ongoing (status ID 4)
+                                console.log('Status: Ongoing - Replacing Finalize with Mark Late, replacing More with Close Form');
+
+                                // Hide existing buttons
+                                if (finalizeBtn) {
+                                    finalizeBtn.style.display = 'none';
+                                }
+                                if (moreActionsDropdown) {
+                                    moreActionsDropdown.style.display = 'none';
+                                }
+
+                                // Only create Mark Late button if it doesn't exist
+                                if (!document.getElementById('markLateBtn')) {
+                                    const markLateBtn = document.createElement('button');
+                                    markLateBtn.id = 'markLateBtn';
+                                    markLateBtn.className = 'btn btn-primary w-100 mb-2';
+                                    markLateBtn.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Mark Late/Damaged';
+                                    markLateBtn.addEventListener('click', function () {
+                                        handleStatusAction('Late');
+                                    });
+                                    actionPanel.appendChild(markLateBtn);
+                                }
+
+                                // Only create Close Form button if it doesn't exist
+                                if (!document.getElementById('closeFormBtn')) {
+                                    const closeFormBtnOngoing = document.createElement('button');
+                                    closeFormBtnOngoing.id = 'closeFormBtn';
+                                    closeFormBtnOngoing.className = 'btn btn-light-danger w-100 mb-2';
+                                    closeFormBtnOngoing.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
+                                    closeFormBtnOngoing.addEventListener('click', function () {
+                                        closeForm();
+                                    });
+                                    actionPanel.appendChild(closeFormBtnOngoing);
+                                }
+                                break;
+
+                            case 5: // Late (status ID 5)
+                                console.log('Status: Late - Replacing Finalize with Unmark Late, replacing More with Close Form');
+
+                                // Replace Finalize button with Unmark Late
+                                if (finalizeBtn) {
+                                    finalizeBtn.style.display = 'none';
+                                }
+
+                                // Replace More dropdown with Close Form button
+                                if (moreActionsDropdown) {
+                                    moreActionsDropdown.style.display = 'none';
+                                }
+
+                                // Create Unmark Late button
+                                const unmarkLateBtn = document.createElement('button');
+                                unmarkLateBtn.id = 'unmarkLateBtn';
+                                unmarkLateBtn.className = 'btn btn-primary w-100 mb-2';
+                                unmarkLateBtn.innerHTML = '<i class="bi bi-arrow-counterclockwise me-1"></i> Unmark Late/Damaged';
+                                unmarkLateBtn.addEventListener('click', function () {
+                                    handleUnmarkLate();
+                                });
+
+                                // Create Close Form button
+                                const closeFormBtnLate = document.createElement('button');
+                                closeFormBtnLate.id = 'closeFormBtn';
+                                closeFormBtnLate.className = 'btn btn-light-danger w-100 mb-2';
+                                closeFormBtnLate.innerHTML = '<i class="bi bi-x-circle me-1"></i> Close Form';
+                                closeFormBtnLate.addEventListener('click', function () {
+                                    closeForm();
+                                });
+
+                                // Add buttons to action panel
+                                if (actionPanel) {
+                                    actionPanel.appendChild(unmarkLateBtn);
+                                    actionPanel.appendChild(closeFormBtnLate);
+                                }
+                                break;
+
+                            default:
+                                console.log('Status: Other - Showing all options');
+                                // For other statuses, ensure finalize button is enabled
+                                if (finalizeBtn) {
+                                    finalizeBtn.disabled = false;
+                                    finalizeBtn.classList.remove('disabled');
+                                }
+                                break;
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Error checking admin role:', error);
+                    // Fallback: show default UI if there's an error fetching role
+                    console.log('Using default UI due to error fetching admin role');
                 }
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <div class="d-flex justify-content-between align-items-start">
-                                                        <div>
-                                                            <strong class="d-block">${item.admin_name}</strong>
-                                                            <small class="text-muted">
-                                                                <i class="fa ${item.action_icon} ${item.action_class} me-1"></i>
-                                                                ${item.action} this request
-                                                            </small>
-                                                            ${item.remarks ? `<div class="mt-1 small text-muted">"${item.remarks}"</div>` : ''}
-                                                        </div>
-                                                        <small class="text-muted text-end">${item.formatted_date}</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        `).join('');
-        }
+            }
+
+            async function loadApprovalHistory() {
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/approval-history`, {
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to fetch approval history');
+
+                    const approvalHistory = await response.json();
+
+                    // Update approvals modal
+                    const approvalsModalBody = document.querySelector('#approvalsModal .modal-body');
+                    approvalsModalBody.innerHTML = generateApprovalHistoryHTML(approvalHistory.filter(item => item.action === 'approved'));
+
+                    // Update rejections modal
+                    const rejectionsModalBody = document.querySelector('#rejectionsModal .modal-body');
+                    rejectionsModalBody.innerHTML = generateApprovalHistoryHTML(approvalHistory.filter(item => item.action === 'rejected'));
+
+                } catch (error) {
+                    console.error('Error loading approval history:', error);
+                    const modalBodies = document.querySelectorAll('#approvalsModal .modal-body, #rejectionsModal .modal-body');
+                    modalBodies.forEach(body => {
+                        body.innerHTML = '<div class="text-center text-muted py-4">Failed to load history</div>';
+                    });
+                }
+            }
 
 
+            function generateApprovalHistoryHTML(history) {
+                if (!history || history.length === 0) {
+                    return '<div class="text-center text-muted py-4">No records found</div>';
+                }
 
-        // Function to check if the current admin has already taken action on this request
-        async function checkIfAdminHasTakenAction(adminId) {
-            try {
-                const adminToken = localStorage.getItem('adminToken');
-                const requestId = window.location.pathname.split('/').pop();
-
-                // Use the approval history endpoint we created
-                const response = await fetch(`/api/admin/requisition/${requestId}/approval-history`, {
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Accept': 'application/json'
+                return history.map(item => `
+                                                    <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                                                        <div class="me-3 flex-shrink-0">
+                                                            ${item.admin_photo ?
+                        `<img src="${item.admin_photo}" class="rounded-circle" width="45" height="45" alt="${item.admin_name}" style="object-fit: cover;">` :
+                        `<div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width: 45px; height: 45px;">
+                                                                    ${item.admin_name.split(' ').map(n => n.charAt(0)).join('')}
+                                                                </div>`
                     }
-                });
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <div class="d-flex justify-content-between align-items-start">
+                                                                <div>
+                                                                    <strong class="d-block">${item.admin_name}</strong>
+                                                                    <small class="text-muted">
+                                                                        <i class="fa ${item.action_icon} ${item.action_class} me-1"></i>
+                                                                        ${item.action} this request
+                                                                    </small>
+                                                                    ${item.remarks ? `<div class="mt-1 small text-muted">"${item.remarks}"</div>` : ''}
+                                                                </div>
+                                                                <small class="text-muted text-end">${item.formatted_date}</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                `).join('');
+            }
 
-                if (!response.ok) {
-                    console.error('Failed to fetch approval history');
+
+
+            // Function to check if the current admin has already taken action on this request
+            async function checkIfAdminHasTakenAction(adminId) {
+                try {
+                    const adminToken = localStorage.getItem('adminToken');
+                    const requestId = window.location.pathname.split('/').pop();
+
+                    // Use the approval history endpoint we created
+                    const response = await fetch(`/api/admin/requisition/${requestId}/approval-history`, {
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        console.error('Failed to fetch approval history');
+                        return false;
+                    }
+
+                    const approvalHistory = await response.json();
+
+                    console.log('Approval history for request:', {
+                        requestId: requestId,
+                        adminId: adminId,
+                        approvalHistory: approvalHistory
+                    });
+
+                    // Check if current admin appears in the approval history by admin_id
+                    const hasTakenAction = approvalHistory.some(record => {
+                        return record.admin_id === adminId;
+                    });
+
+                    console.log('Admin action check result:', {
+                        adminId: adminId,
+                        hasTakenAction: hasTakenAction,
+                        approvalHistoryLength: approvalHistory.length,
+                        matchingRecords: approvalHistory.filter(record => record.admin_id === adminId)
+                    });
+
+                    return hasTakenAction;
+
+                } catch (error) {
+                    console.error('Error checking admin action:', error);
                     return false;
                 }
-
-                const approvalHistory = await response.json();
-
-                console.log('Approval history for request:', {
-                    requestId: requestId,
-                    adminId: adminId,
-                    approvalHistory: approvalHistory
-                });
-
-                // Check if current admin appears in the approval history by admin_id
-                const hasTakenAction = approvalHistory.some(record => {
-                    return record.admin_id === adminId;
-                });
-
-                console.log('Admin action check result:', {
-                    adminId: adminId,
-                    hasTakenAction: hasTakenAction,
-                    approvalHistoryLength: approvalHistory.length,
-                    matchingRecords: approvalHistory.filter(record => record.admin_id === adminId)
-                });
-
-                return hasTakenAction;
-
-            } catch (error) {
-                console.error('Error checking admin action:', error);
-                return false;
             }
-        }
 
-        // Add event listener for Finalize button (AFTER the function definition)
-        const finalizeBtn = document.getElementById('finalizeBtn');
-        if (finalizeBtn) {
-            finalizeBtn.addEventListener('click', function () {
-                finalizeModal.show();
+            // Add event listener for Finalize button (AFTER the function definition)
+            const finalizeBtn = document.getElementById('finalizeBtn');
+            if (finalizeBtn) {
+                finalizeBtn.addEventListener('click', function () {
+                    finalizeModal.show();
+                });
+            }
+
+
+
+            // Check admin role and update UI (AFTER event listeners are set up)
+            checkAdminRoleAndUpdateUI();
+
+
+            // Handle status option clicks
+            statusOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    const action = this.dataset.value;
+                    handleStatusAction(action);
+                });
             });
-        }
 
-
-
-        // Check admin role and update UI (AFTER event listeners are set up)
-        checkAdminRoleAndUpdateUI();
-
-
-        // Handle status option clicks
-        statusOptions.forEach(option => {
-            option.addEventListener('click', function () {
-                const action = this.dataset.value;
-                handleStatusAction(action);
+            document.getElementById('closeForm').addEventListener('click', function () {
+                closeForm();
             });
-        });
 
-        document.getElementById('closeForm').addEventListener('click', function () {
-            closeForm();
-        });
+            // Add event listeners for status options in the More Actions dropdown
 
-        // Add event listeners for status options in the More Actions dropdown
+            document.querySelectorAll('#moreActionsBtn + .dropdown-menu .status-option').forEach(option => {
+                option.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const action = this.dataset.value;
 
-        document.querySelectorAll('#moreActionsBtn + .dropdown-menu .status-option').forEach(option => {
-            option.addEventListener('click', function (e) {
-                e.preventDefault();
-                const action = this.dataset.value;
+                    // SPECIAL CASE: Handle Scheduled with custom modal
+                    if (action === 'Scheduled') {
+                        handleMarkScheduled();
+                        return;
+                    }
 
-                // SPECIAL CASE: Handle Scheduled with custom modal
-                if (action === 'Scheduled') {
-                    handleMarkScheduled();
-                    return;
-                }
+                    // Check if we're dealing with Late status and current status is already Late
+                    const statusBadge = document.getElementById('statusBadge');
+                    const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
 
-                // Check if we're dealing with Late status and current status is already Late
+                    if (action === 'Late' && currentStatusName === 'Late') {
+                        handleUnmarkLate();
+                    } else {
+                        handleStatusAction(action);
+                    }
+                });
+            });
+
+
+            // Function to handle different status actions
+            function handleStatusAction(action) {
                 const statusBadge = document.getElementById('statusBadge');
                 const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
 
-                if (action === 'Late' && currentStatusName === 'Late') {
-                    handleUnmarkLate();
-                } else {
-                    handleStatusAction(action);
-                }
-            });
-        });
-
-
-        // Function to handle different status actions
-        function handleStatusAction(action) {
-            const statusBadge = document.getElementById('statusBadge');
-            const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
-
-            // Get current status ID from the request data
-            const currentRequest = allRequests.find(req => req.request_id == requestId);
-            const currentStatusId = currentRequest ? currentRequest.form_details.status.id : null;
-
-            // Check if user is Head Admin (you'll need to implement this check)
-            const isHeadAdmin = checkIfHeadAdmin();
-
-            function checkIfHeadAdmin() {
-                try {
-                    // Get admin data from localStorage or make an API call
-                    const adminData = JSON.parse(localStorage.getItem('adminProfile') || '{}');
-                    return adminData.role?.role_title === 'Head Admin';
-                } catch (error) {
-                    console.error('Error checking Head Admin status:', error);
-                    return false;
-                }
-            }
-
-            if (isHeadAdmin) {
-                // Head Admin specific restrictions based on status_id
-                switch (currentStatusId) {
-                    case 'Awaiting Payment': // Assuming status_id for Awaiting Payment
-                        if (action === 'Ongoing' || action === 'Late') {
-                            showToast('This action is not available for forms with Awaiting Payment status.', 'error');
-                            return;
-                        }
-                        break;
-
-                    case 'Scheduled': // Assuming status_id for Scheduled
-                        if (action === 'Scheduled' || action === 'Late') {
-                            showToast('This action is not available for forms with Scheduled status.', 'error');
-                            return;
-                        }
-                        // Disable finalize button for Scheduled status
-                        const finalizeBtn = document.getElementById('finalizeBtn');
-                        if (finalizeBtn && action === 'Finalize') {
-                            showToast('Cannot finalize a form that is already Scheduled.', 'error');
-                            return;
-                        }
-                        break;
-
-                    case 'Ongoing': // Assuming status_id for Ongoing
-                        // For Ongoing status, replace Finalize with Mark Late
-                        if (action === 'Finalize') {
-                            // Instead of finalizing, mark as late
-                            handleStatusAction('Late');
-                            return;
-                        }
-                        break;
-                }
-            }
-
-            // SPECIAL CASE: Handle Scheduled status with custom modal
-            if (action === 'Scheduled') {
-                handleMarkScheduled();
-                return; // Exit early to prevent the generic status modal from showing
-            }
-
-            // For all other statuses, use the generic status update modal
-            switch (action) {
-                case 'Ongoing':
-                case 'Late':
-                    showStatusUpdateModal(action);
-                    break;
-
-                case 'Finalize Form':
-                    if (currentStatusName === 'Pending Approval') {
-                        finalizeModal.show();
-                    } else {
-                        showToast('This form is already finalized.', 'error');
-                    }
-                    break;
-
-                case 'Set Penalty Fee':
-                    // Prompt user for penalty amount
-                    const penaltyAmount = prompt('Enter late penalty amount:');
-                    if (penaltyAmount !== null && penaltyAmount !== '') {
-                        const amount = parseFloat(penaltyAmount);
-                        if (!isNaN(amount) && amount >= 0) { // allow 0
-                            addLatePenalty(amount);
-                        } else {
-                            showToast('Please enter a valid penalty amount (0 or greater).', 'error');
-                        }
-                    }
-                    break;
-
-                case 'Close':
-                    closeForm();
-                    break;
-
-                default:
-                    console.log('Unknown action:', action);
-            }
-        }
-
-        // Confirm mark scheduled
-        document.getElementById('confirmMarkScheduled').addEventListener('click', async function () {
-            const btn = this;
-            const spinner = btn.querySelector('.spinner-border');
-            const originalText = btn.innerHTML;
-
-            const officialReceiptNum = document.getElementById('officialReceiptNum').value.trim();
-            const calendarTitle = document.getElementById('scheduledCalendarTitle').value.trim();
-            const calendarDescription = document.getElementById('scheduledCalendarDescription').value.trim();
-
-            if (!officialReceiptNum) {
-                showToast('Please enter an official receipt number', 'error');
-                return;
-            }
-
-            // Show loading state
-            btn.disabled = true;
-            spinner.classList.remove('d-none');
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
-
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/mark-scheduled`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        official_receipt_num: officialReceiptNum,
-                        calendar_title: calendarTitle || null,
-                        calendar_description: calendarDescription || null
-                    })
-                });
-
-                const contentType = response.headers.get('content-type');
-                let responseData;
-
-                if (contentType && contentType.includes('application/json')) {
-                    responseData = await response.json();
-                } else {
-                    const textResponse = await response.text();
-                    throw new Error(textResponse || 'Non-JSON response from server');
-                }
-
-                if (!response.ok) {
-                    const errorMessage = responseData.error ||
-                        responseData.message ||
-                        JSON.stringify(responseData) ||
-                        'Failed to mark as scheduled';
-                    throw new Error(errorMessage);
-                }
-
-                showToast('Request marked as scheduled successfully! Official receipt generated.', 'success');
-                markScheduledModal.hide();
-
-                // Clear form
-                document.getElementById('officialReceiptNum').value = '';
-                document.getElementById('scheduledCalendarTitle').value = '';
-                document.getElementById('scheduledCalendarDescription').value = '';
-
-                // Refresh the page to show updated status
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-
-            } catch (error) {
-                console.error('Error marking as scheduled:', error);
-                showToast('Error: ' + error.message, 'error');
-
-                // Reset button state on error
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-                spinner.classList.add('d-none');
-            }
-        });
-
-        // Update your loadComments function to load both comments and fees
-        async function loadMixedActivity() {
-            try {
-                const container = document.getElementById('formRemarks');
-                container.innerHTML = `
-                                                                    <div class="comment-loading">
-                                                                        <div class="spinner-border text-primary" role="status">
-                                                                            <span class="visually-hidden">Loading activity...</span>
-                                                                        </div>
-                                                                    </div>
-                                                                `;
-
-                const commentsResponse = await fetch(`/api/admin/requisition/${requestId}/comments`, {
-                    headers: { 'Authorization': `Bearer ${adminToken}`, 'Accept': 'application/json' }
-                });
-
-                const feesResponse = await fetch(`/api/admin/requisition/${requestId}/fees`, {
-                    headers: { 'Authorization': `Bearer ${adminToken}`, 'Accept': 'application/json' }
-                });
-
-                const commentsResult = await commentsResponse.json();
-                const feesResult = await feesResponse.json();
-
-                currentComments = commentsResult.comments || [];
-                currentFees = feesResult || [];
-
-                document.getElementById('commentCount').textContent = currentComments.length;
-
-                // Initially show all
-                displayMixedActivity(currentComments, currentFees, 'all');
-                scrollToBottom();
-
-            } catch (error) {
-                console.error('Error loading activity:', error);
-                container.innerHTML = `
-                                                                    <div class="empty-comments text-danger">
-                                                                        <i class="bi bi-exclamation-triangle"></i>
-                                                                        <p>Failed to load activity.</p>
-                                                                    </div>
-                                                                `;
-            }
-        }
-
-        function scrollToBottom() {
-            const container = document.querySelector('.comments-container');
-            if (container) {
-                container.scrollTop = container.scrollHeight;
-            }
-        }
-
-        // Function to display mixed comments and actions
-        function displayMixedActivity(comments, fees, filter = 'all') {
-            const container = document.getElementById('formRemarks');
-
-            if (comments.length === 0 && fees.length === 0) {
-                container.innerHTML = `
-                                                                    <div class="empty-comments">
-                                                                        <i class="bi bi-chat"></i>
-                                                                        <p>No action has been taken in this form yet.</p>
-                                                                    </div>
-                                                                `;
-                return;
-            }
-
-            // Combine comments and fees
-            let allActivities = [];
-
-            if (filter === 'all' || filter === 'comment') {
-                comments.forEach(comment => {
-                    allActivities.push({
-                        type: 'comment',
-                        data: comment,
-                        timestamp: new Date(comment.created_at)
-                    });
-                });
-            }
-
-            if (filter === 'all' || filter === 'fee') {
-                fees.forEach(fee => {
-                    allActivities.push({
-                        type: 'fee',
-                        data: fee,
-                        timestamp: new Date(fee.created_at)
-                    });
-                });
-            }
-
-            // Sort by timestamp
-            allActivities.sort((a, b) => a.timestamp - b.timestamp);
-
-            // Render HTML
-            container.innerHTML = allActivities.map(activity => {
-                return activity.type === 'comment'
-                    ? generateCommentHTML(activity.data)
-                    : generateFeeHTML(activity.data);
-            }).join('');
-        }
-
-        document.getElementById('activityFilter').addEventListener('change', function () {
-            const filter = this.value; // all / comment / fee
-            displayMixedActivity(currentComments, currentFees, filter);
-        });
-
-        // Function to generate comment HTML
-        function generateCommentHTML(comment) {
-            return `
-                                                            <div class="comment mb-3">
-                                                                <div class="d-flex align-items-start">
-                                                                    <!-- Admin Profile Picture -->
-                                                                    <div class="me-2 flex-shrink-0">
-                                                                        ${comment.admin.photo_url ?
-                    `<img src="${comment.admin.photo_url}" class="rounded-circle" width="40" height="40" alt="${comment.admin.first_name}'s profile picture" style="object-fit: cover;">` :
-                    `<div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width: 40px; height: 40px; font-size: 1rem;">
-                                                                                ${comment.admin.first_name.charAt(0)}${comment.admin.last_name.charAt(0)}
-                                                                            </div>`
-                }
-                                                                    </div>
-
-                                                                    <!-- Message Bubble -->
-                                                                    <div class="flex-grow-1">
-                                                                        <div class="d-flex align-items-center mb-1">
-                                                                            <strong class="me-2" style="font-size: 0.85rem;">${comment.admin.first_name} ${comment.admin.last_name}</strong>
-                                                                            <small class="text-muted">${formatTimeAgo(comment.created_at)}</small>
-                                                                        </div>
-                                                                        <div class="message-bubble bg-primary text-white p-3 rounded-3" style="max-width: 80%; border-bottom-left-radius: 4px !important;">
-                                                                            <p class="mb-0" style="white-space: pre-wrap; line-height: 1.4;">${escapeHtml(comment.comment)}</p>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            `;
-        }
-
-        // Function to generate fee/action HTML
-        function generateFeeHTML(fee) {
-            const amount = parseFloat(fee.type === 'discount' ? fee.discount_amount : fee.fee_amount);
-            const typeName = fee.type === 'discount' ? 'Discount' : 'Additional fee';
-            const adminName = fee.added_by?.name || 'Admin';
-
-            let message = '';
-            let amountDisplay = '';
-
-            if (fee.type === 'discount') {
-                if (fee.discount_type === 'Percentage') {
-                    // Percentage discount: remove .00 and add % symbol
-                    amountDisplay = `${parseFloat(amount)}%`;
-                    message = `${adminName} added a discount - ${fee.label}: ${amountDisplay}`;
-                } else {
-                    // Fixed discount: show with ₱ symbol
-                    amountDisplay = `₱${parseFloat(amount).toFixed(2)}`;
-                    message = `${adminName} added a discount - ${fee.label}: ${amountDisplay}`;
-                }
-            } else if (fee.type === 'fee') {
-                // Regular fee
-                amountDisplay = `₱${parseFloat(amount).toFixed(2)}`;
-                message = `${adminName} added a fee - ${fee.label}: ${amountDisplay}`;
-            } else if (fee.type === 'mixed') {
-                // Mixed fee and discount
-                const feePart = fee.fee_amount > 0 ? `₱${parseFloat(fee.fee_amount).toFixed(2)}` : '';
-                const discountPart = fee.discount_amount > 0 ?
-                    (fee.discount_type === 'Percentage' ?
-                        `${parseFloat(fee.discount_amount)}%` :
-                        `₱${parseFloat(fee.discount_amount).toFixed(2)}`) : '';
-                amountDisplay = `${feePart} ${discountPart}`.trim();
-                message = `${adminName} added a mixed fee - ${fee.label}: ${amountDisplay}`;
-            }
-
-            return `
-                        <div class="comment mb-3">
-                            <div class="d-flex align-items-start">
-                                <!-- Icon Circle -->
-                                <div class="me-2 flex-shrink-0">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center" 
-                                         style="width: 40px; height: 40px; font-size: 1rem; background-color: #d4edda; color: #28a745;">
-                                        <i class="fa fa-money-bill"></i>
-                                    </div>
-                                </div>
-
-                                <!-- Action Bubble -->
-                                <div class="flex-grow-1">
-                                    <div class="message-bubble bg-info text-white p-3 rounded-3" 
-                                         style="max-width: 80%; border-bottom-left-radius: 4px !important;">
-                                        <p class="mb-1" style="white-space: normal; line-height: 1.4;">
-                                            ${message}
-                                        </p>
-                                        <small class="text-dark">
-                                            ${formatTimeAgo(fee.created_at)}
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-        }
-
-        // Helper function to format time ago (e.g., "2 minutes ago")
-        function formatTimeAgo(timestamp) {
-            const now = new Date();
-            const commentTime = new Date(timestamp);
-            const diffInSeconds = Math.floor((now - commentTime) / 1000);
-
-            if (diffInSeconds < 60) {
-                return 'just now';
-            } else if (diffInSeconds < 3600) {
-                const minutes = Math.floor(diffInSeconds / 60);
-                return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
-            } else if (diffInSeconds < 86400) {
-                const hours = Math.floor(diffInSeconds / 3600);
-                return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
-            } else if (diffInSeconds < 604800) {
-                const days = Math.floor(diffInSeconds / 86400);
-                return `${days} day${days !== 1 ? 's' : ''} ago`;
-            } else {
-                return commentTime.toLocaleDateString();
-            }
-        }
-
-        // Helper function to escape HTML
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Auto-resize textarea
-        commentTextarea.addEventListener('input', function () {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
-
-        // Send comment
-        commentSendBtn.addEventListener('click', async function () {
-            const commentText = commentTextarea.value.trim();
-
-            if (!commentText) {
-                showToast('Please enter a comment', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/comment`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        comment: commentText
-                    })
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(result.message || 'Failed to add comment');
-                }
-
-                if (result.success) {
-                    // Clear textarea and reset height
-                    commentTextarea.value = '';
-                    commentTextarea.style.height = 'auto';
-
-                    // Reload comments to show the new one
-                    loadMixedActivity();
-
-                    // Show success message
-                    showToast('Comment added successfully', 'success');
-                }
-
-            } catch (error) {
-                console.error('Error adding comment:', error);
-                showToast('Failed to add comment: ' + error.message, 'error');
-            }
-        });
-
-        // Allow sending with Enter key (but allow Shift+Enter for new lines)
-        commentTextarea.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                commentSendBtn.click();
-            }
-        });
-
-        // Simple toast notification function
-        window.showToast = function (message, type = 'success', duration = 3000) {
-            const toast = document.createElement('div');
-
-            // Toast base styles
-            toast.className = `toast align-items-center border-0 position-fixed start-0 mb-2`;
-            toast.style.zIndex = '1100';
-            toast.style.bottom = '0';
-            toast.style.left = '0';
-            toast.style.margin = '1rem';
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(20px)';
-            toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-            toast.setAttribute('role', 'alert');
-            toast.setAttribute('aria-live', 'assertive');
-            toast.setAttribute('aria-atomic', 'true');
-
-            // Colors
-            const bgColor = type === 'success' ? '#004183ff' : '#dc3545';
-            toast.style.backgroundColor = bgColor;
-            toast.style.color = '#fff';
-            toast.style.minWidth = '250px';
-            toast.style.borderRadius = '0.3rem';
-
-            toast.innerHTML = `
-                                                                                                                                                                            <div class="d-flex align-items-center px-3 py-1"> 
-                                                                                                                                                                                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
-                                                                                                                                                                                <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
-                                                                                                                                                                                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
-                                                                                                                                                                            </div>
-                                                                                                                                                                            <div class="loading-bar" style="
-                                                                                                                                                                                height: 3px;
-                                                                                                                                                                                background: rgba(255,255,255,0.7);
-                                                                                                                                                                                width: 100%;
-                                                                                                                                                                                transition: width ${duration}ms linear;
-                                                                                                                                                                            "></div>
-                                                                                                                                                                        `;
-
-            document.body.appendChild(toast);
-
-            // Bootstrap toast instance
-            const bsToast = new bootstrap.Toast(toast, { autohide: false });
-            bsToast.show();
-
-            // Float up appear animation
-            requestAnimationFrame(() => {
-                toast.style.opacity = '1';
-                toast.style.transform = 'translateY(0)';
-            });
-
-            // Start loading bar animation
-            const loadingBar = toast.querySelector('.loading-bar');
-            requestAnimationFrame(() => {
-                loadingBar.style.width = '0%';
-            });
-
-            // Remove after duration
-            setTimeout(() => {
-                // Float down disappear animation
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-
-                setTimeout(() => {
-                    bsToast.hide();
-                    toast.remove();
-                }, 400);
-            }, duration);
-        };
-
-
-        // Load comments when page loads
-        loadMixedActivity();
-
-        // Function to refresh all fee displays including the total
-        async function refreshAllFeeDisplays() {
-            try {
-                // Fetch updated request data
-                const response = await fetch(`/api/admin/requisition-forms/${requestId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    const requestData = await response.json();
-
-                    // Update the total approved fee in both locations
-                    const totalFee = parseFloat(requestData.fees.approved_fee).toFixed(2);
-                    document.getElementById('totalApprovedFee').textContent = `₱${totalFee}`;
-                    document.getElementById('feeBreakdownTotal').textContent = `₱${totalFee}`;
-
-                    // Update additional fees display
-                    if (requestData.fees.requisition_fees) {
-                        updateAdditionalFees(requestData.fees.requisition_fees);
-                    }
-
-                    // Update base fees display
-                    if (requestData.requested_items) {
-                        updateBaseFees(requestData.requested_items, requestData.schedule);
-                    }
-
-                    // Refresh activity timeline
-                    await loadMixedActivity();
-                }
-            } catch (error) {
-                console.error('Error refreshing fee displays:', error);
-            }
-        }
-
-
-        // Function to show status update modal
-        function showStatusUpdateModal(status) {
-            const modalContent = document.getElementById('statusModalContent');
-            const statusBadge = document.getElementById('statusBadge');
-            const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
-
-            if (currentStatusName === 'Pending Approval' && status !== 'Cancel Form') {
-                showToast('Finalize the form first', 'error');
-                return;
-            }
-
-            // Set modal content based on selected status
-            switch (status) {
-                case 'Scheduled':
-                    modalContent.innerHTML = `
-                                                            <div class="text-center">
-                                                                <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
-                                                                <p>Are you sure? This action cannot be undone.</p>
-                                                                <p class="text-muted small">
-                                                                    This will set the form's status to <strong>Scheduled</strong>.
-                                                                    The request can still be cancelled if an emergency happens. 
-                                                                    If such a situation occurs, make sure to contact the requester about refund details and settle it in the business office on campus before closing the form.
-                                                                </p>
-                                                            </div>
-                                                        `;
-                    break;
-                case 'Ongoing':
-                    modalContent.innerHTML = `
-                                                            <div class="text-center">
-                                                                <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
-                                                                <p>Are you sure? This action cannot be undone.</p>
-                                                                <p class="text-muted small">
-                                                                    Sets the form status to <strong>Ongoing</strong>. Use this to manually set it if not already done. 
-                                                                </p>
-                                                            </div>
-                                                        `;
-                    break;
-                case 'Late':
-                    modalContent.innerHTML = `
-                                                            <div class="text-center">
-                                                                <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
-                                                                <p>Are you sure? This action cannot be undone.</p>
-                                                                <p class="text-muted small">
-                                                                    This will set the form's status to <strong>Late</strong> and mark it as overdue.
-                                                                </p>
-                                                            </div>
-                                                            <div class="mt-4">
-                                                                <div class="mb-3">
-                                                                    <label for="latePenaltyAmount" class="form-label">Late Penalty Amount (Optional)</label>
-                                                                    <div class="input-group">
-                                                                        <span class="input-group-text">₱</span>
-                                                                        <input type="number" class="form-control" id="latePenaltyAmount" 
-                                                                               placeholder="Enter penalty amount" step="0.01" min="0" value="0">
-                                                                    </div>
-                                                                    <small class="text-muted">Enter the late penalty amount to be added to the fees (leave as 0 for no penalty).</small>
-                                                                </div>
-                                                            </div>
-                                                        `;
-                    break;
-                case 'Cancel Form':
-                    modalContent.innerHTML = `
-                                                            <div class="text-center">
-                                                                <i class="fa fa-exclamation-circle fa-3x text-danger mb-3"></i>
-                                                                <p>Are you sure? This action cannot be undone.</p>
-                                                                <p class="text-muted small">
-                                                                    This will <strong class="text-danger">cancel</strong> the form and set its status to <strong>Cancelled</strong>.
-                                                                    Note: This action cannot be undone. The requester will be notified about the cancellation.
-                                                                </p>
-                                                            </div>
-                                                        `;
-                    break;
-            }
-
-            selectedStatus = status;
-            statusUpdateModal.show();
-        }
-
-        // Confirm status update
-        document.getElementById('confirmStatusUpdate').addEventListener('click', async function () {
-            if (!selectedStatus) return;
-
-            const btn = this;
-            const originalText = btn.innerHTML;
-            const adminToken = localStorage.getItem('adminToken');
-
-            try {
-                // Show loading state
-                btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
-
-                // Prepare request data
-                const requestData = {
-                    status_name: selectedStatus
-                };
-
-                // Add late penalty fee for Late status
-                if (selectedStatus === 'Late') {
-                    const penaltyAmount = document.getElementById('latePenaltyAmount').value;
-                    if (penaltyAmount && parseFloat(penaltyAmount) > 0) {
-                        requestData.late_penalty_fee = parseFloat(penaltyAmount);
-                    }
-                }
-
-                const statusResponse = await fetch(`/api/admin/requisition/${requestId}/update-status`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                });
-
-                const contentType = statusResponse.headers.get('content-type');
-                let statusResponseData;
-
-                if (contentType && contentType.includes('application/json')) {
-                    statusResponseData = await statusResponse.json();
-                } else {
-                    const textResponse = await statusResponse.text();
-                    throw new Error(textResponse || 'Non-JSON response from server');
-                }
-
-                if (!statusResponse.ok) {
-                    const errorMessage = statusResponseData.error ||
-                        statusResponseData.message ||
-                        JSON.stringify(statusResponseData) ||
-                        'Failed to update status';
-                    throw new Error(errorMessage);
-                }
-
-                showToast('Status updated successfully!', 'success');
-                statusUpdateModal.hide();
-                selectedStatus = '';
-
-                // Refresh the entire page to show updated status and UI
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-
-                // Refresh the page to show updated status and fees
-                fetchRequestDetails();
-
-                // Update the dropdown text after status change
-                updateStatusDropdownText();
-
-            } catch (error) {
-                console.error('Error updating status:', error);
-                console.error('Status update details:', {
-                    requestId: requestId,
-                    status: selectedStatus,
-                    error: error.message
-                });
-                showToast('Error: ' + error.message, 'error');
-            } finally {
-                // Reset button state
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
-        });
-
-
-        // Update the closeForm function to use the modal
-        async function closeForm() {
-            closeFormModal.show();
-        }
-
-        function handleUnmarkLate() {
-            const modalContent = document.getElementById('statusModalContent');
-
-            modalContent.innerHTML = `
-                                                    <div class="text-center">
-                                                        <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
-                                                        <p>Are you sure you want to unmark this form as late/damaged?</p>
-                                                        <p class="text-muted small">
-                                                            This will set the form's status back to <strong>Ongoing</strong>, remove the late flag, 
-                                                            and reset any penalty fees to zero.
-                                                        </p>
-                                                    </div>
-                                                `;
-
-            selectedStatus = 'Ongoing'; // Set to Ongoing to unmark late
-            statusUpdateModal.show();
-        }
-
-        // Add event listener for the confirm button
-document.getElementById('confirmCloseForm').addEventListener('click', async function () {
-    const btn = this;
-    const spinner = btn.querySelector('.spinner-border');
-    const originalText = btn.innerHTML;
-
-    // Show loading state
-    btn.disabled = true;
-    spinner.classList.remove('d-none');
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Closing...';
-
-    const adminToken = localStorage.getItem('adminToken');
-
-    try {
-        const response = await fetch(`/api/admin/requisition/${requestId}/close`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${adminToken}`,
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.details || 'Failed to close form');
-        }
-
-        closeFormModal.hide();
-        showToast('Form closed successfully!', 'success');
-
-        // REDIRECT to manage-requests instead of refreshing
-        setTimeout(() => {
-            window.location.href = '/admin/manage-requests';
-        }, 1500);
-
-    } catch (error) {
-        console.error('Error closing form:', error);
-        showToast('Error: ' + error.message, 'error');
-
-        // Reset button state on error
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-        spinner.classList.add('d-none');
-    }
-});
-
-        // Also update the event listener for the close form option in the dropdown
-        document.getElementById('closeForm').addEventListener('click', function (e) {
-            e.preventDefault();
-            closeForm();
-        });
-
-        // Function to add late penalty
-        async function addLatePenalty(penaltyAmount) {
-            const adminToken = localStorage.getItem('adminToken');
-
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/late-penalty`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        penalty_amount: penaltyAmount
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.details || 'Failed to add late penalty');
-                }
-
-                showToast('Late penalty added successfully!', 'success');
-                // Refresh the page to show updated fees
-                fetchRequestDetails();
-
-            } catch (error) {
-                console.error('Error adding late penalty:', error);
-                showToast('Error: ' + error.message, 'error');
-            }
-        }
-
-        document.getElementById('confirmFinalize').addEventListener('click', async function (e) {
-            e.preventDefault();
-
-            const btn = document.getElementById('confirmFinalize');
-
-            const calendarTitle = document.getElementById('calendarTitle').value.trim();
-            let calendarDescription = document.getElementById('calendarDescription').value.trim();
-            const adminToken = localStorage.getItem('adminToken');
-
-            // Title validation
-            if (!calendarTitle || calendarTitle.length > 50) {
-                showToast('Calendar Title is required and must not exceed 50 characters.', 'error');
-                document.getElementById('calendarTitle').focus();
-                return;
-            }
-
-            // Description nullable
-            if (!calendarDescription) {
-                calendarDescription = null;
-            } else if (calendarDescription.length > 100) {
-                showToast('Calendar Description must not exceed 100 characters.', 'error');
-                document.getElementById('calendarDescription').focus();
-                return;
-            }
-
-            // Disable button and show spinner - USING THE SAME PATTERN AS checkAvailability
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Finalizing...';
-            btn.disabled = true;
-
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/finalize`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        calendar_title: calendarTitle,
-                        calendar_description: calendarDescription
-                    })
-                });
-
-                const contentType = response.headers.get('content-type');
-                let responseData;
-
-                if (contentType && contentType.includes('application/json')) {
-                    responseData = await response.json();
-                } else {
-                    const textResponse = await response.text();
-                    throw new Error(textResponse || 'Non-JSON response from server');
-                }
-
-                if (!response.ok) {
-                    const errorMessage = responseData.error ||
-                        responseData.message ||
-                        (responseData.details ? JSON.stringify(responseData.details) : 'Failed to finalize request');
-                    throw new Error(errorMessage);
-                }
-
-                // Successful finalization
-                finalizeModal.hide();
-                document.getElementById('calendarTitle').value = '';
-                document.getElementById('calendarDescription').value = '';
-                fetchRequestDetails();
-                showToast('Form finalized successfully!', 'success');
-
-            } catch (error) {
-                console.error('Error finalizing request:', error);
-                console.error('Finalize request details:', {
-                    requestId: requestId,
-                    calendarTitle: calendarTitle,
-                    calendarDescription: calendarDescription,
-                    error: error.message
-                });
-                showToast('Error: ' + error.message, 'error');
-            } finally {
-                // Re-enable button and restore original text - USING THE SAME PATTERN AS checkAvailability
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
-        });
-
-
-
-
-        // Handle individual waiver checkbox changes
-        async function handleWaiverChange(checkbox) {
-            const type = checkbox.dataset.type;
-            const id = parseInt(checkbox.dataset.id);
-            const isWaived = checkbox.checked;
-
-            // Update UI immediately for better UX
-            const itemRow = checkbox.closest('.item-row');
-            if (itemRow) {
-                if (isWaived) {
-                    itemRow.classList.add('waived');
-                } else {
-                    itemRow.classList.remove('waived');
-                }
-            }
-
-            // Collect ALL waived items (both checked ones)
-            const waivedFacilities = [];
-            const waivedEquipment = [];
-
-            document.querySelectorAll('.waiver-checkbox').forEach(cb => {
-                const itemId = parseInt(cb.dataset.id);
-                const itemType = cb.dataset.type;
-
-                if (cb.checked) {
-                    if (itemType === 'facility') {
-                        waivedFacilities.push(itemId);
-                    } else if (itemType === 'equipment') {
-                        waivedEquipment.push(itemId);
-                    }
-                }
-            });
-
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/waive`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        waived_facilities: waivedFacilities,
-                        waived_equipment: waivedEquipment
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    let errorMessage = 'Failed to update waiver status';
-                    if (errorData.details) {
-                        if (typeof errorData.details === 'object') {
-                            errorMessage = Object.values(errorData.details).flat().join(', ');
-                        } else {
-                            errorMessage = errorData.details;
-                        }
-                    } else if (errorData.error) {
-                        errorMessage = errorData.error;
-                    }
-                    throw new Error(errorMessage);
-                }
-
-                const result = await response.json();
-
-                // Refresh ALL fee displays including the total
-                await refreshAllFeeDisplays();
-
-                // Show appropriate success message based on action
-                if (type === 'facility') {
-                    const facilityName = itemRow ? itemRow.querySelector('.item-name').textContent : 'Facility';
-                    if (isWaived) {
-                        showToast(`${facilityName} waived successfully.`, 'success');
-                    } else {
-                        showToast(`${facilityName} waiver removed.`, 'success');
-                    }
-                } else if (type === 'equipment') {
-                    const equipmentName = itemRow ? itemRow.querySelector('.item-name').textContent : 'Equipment';
-                    if (isWaived) {
-                        showToast(`${equipmentName} waived successfully.`, 'success');
-                    } else {
-                        showToast(`${equipmentName} waiver removed.`, 'success');
-                    }
-                }
-
-                console.log('Sending waiver request:', {
-                    waived_facilities: waivedFacilities,
-                    waived_equipment: waivedEquipment
-                });
-
-            } catch (error) {
-                console.error('Error updating waiver:', error);
-                // Revert checkbox state on error
-                checkbox.checked = !isWaived;
-                if (itemRow) {
-                    itemRow.classList.toggle('waived');
-                }
-                showToast('Failed to update waiver: ' + error.message, 'error');
-            }
-        }
-        document.getElementById('waiveAllSwitch').addEventListener('change', function () {
-            handleWaiveAll(this);
-        });
-
-        // Handle "Waive All" toggle switch
-        async function handleWaiveAll(switchElement) {
-            const waiveAll = switchElement.checked;
-
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/waive`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        waive_all: waiveAll
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.details || 'Failed to update waiver status');
-                }
-
-                const result = await response.json();
-
-                // Update all checkboxes to match the "waive all" state
-                document.querySelectorAll('.waiver-checkbox').forEach(checkbox => {
-                    checkbox.checked = waiveAll;
-                    const itemRow = checkbox.closest('.item-row');
-                    if (itemRow) {
-                        if (waiveAll) {
-                            itemRow.classList.add('waived');
-                        } else {
-                            itemRow.classList.remove('waived');
-                        }
-                    }
-                });
-
-                // Refresh ALL fee displays including the total
-                await refreshAllFeeDisplays();
-
-                // Show success message
-                if (waiveAll) {
-                    showToast('All items waived successfully.', 'success');
-                } else {
-                    showToast('All waivers removed.', 'success');
-                }
-
-            } catch (error) {
-                console.error('Error updating waive all:', error);
-                // Revert switch state on error
-                switchElement.checked = !waiveAll;
-                showToast('Failed to update waive all: ' + error.message, 'error');
-            }
-        }
-
-        // A map to get user-friendly names for fee types
-        const feeTypeNames = {
-            additional: 'Additional fee',
-            discount: 'Discount',
-        };
-
-
-
-        // Remove the togglePlaceholder function entirely and replace it with:
-        function updateFeesDisplay() {
-            const feesContainer = document.getElementById('additionalFeesContainer');
-            // This function can be used to update the fees display if needed
-            // But we don't need the placeholder logic anymore
-        }
-
-        // Show the modal when "Add Fee" is clicked
-        addFeeBtn.addEventListener("click", function () {
-            feeModal.show();
-        });
-
-
-        // Handle fee type change to show/hide discount type
-        feeTypeSelect.addEventListener('change', function () {
-            discountTypeSection.style.display = this.value === 'discount' ? 'block' : 'none';
-        });
-
-
-        // Save Fee button logic
-        saveFeeBtn.addEventListener("click", async function () {
-            const type = feeTypeSelect.value;
-            const value = parseFloat(feeValueInput.value);
-            const label = document.getElementById('feeLabel').value;
-            const discountType = document.getElementById('discountType').value;
-
-            if (!type || !value || !label) {
-                showToast("Please fill all required fields.", "success");
-                return;
-            }
-
-            try {
-                let endpoint = '';
-                let requestData = {};
-
-                // Determine which API endpoint to call based on fee type
-                switch (type) {
-                    case 'additional':
-                        endpoint = `/api/admin/requisition/${requestId}/fee`;
-                        requestData = {
-                            label: label,
-                            fee_amount: value
-                        };
-                        break;
-                    case 'discount':
-                        endpoint = `/api/admin/requisition/${requestId}/discount`;
-                        requestData = {
-                            label: label,
-                            discount_amount: value,
-                            discount_type: discountType
-                        };
-                        break;
-                }
-
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.details || 'Failed to add fee/discount');
-                }
-
-                const result = await response.json();
-
-                // Reset and close modal
-                feeValueInput.value = "";
-                feeTypeSelect.value = "";
-                document.getElementById('feeLabel').value = "";
-                discountTypeSection.style.display = 'none';
-                feeModal.hide();
-
-                // Show success message
-                showToast('Fee/discount added successfully', 'success');
-
-                // Refresh ALL fee displays including the total
-                await refreshAllFeeDisplays();
-
-            } catch (error) {
-                console.error('Error adding fee/discount:', error);
-                console.error('Fee addition details:', {
-                    type: type,
-                    value: value,
-                    label: label,
-                    discountType: discountType,
-                    error: error.message
-                });
-                showToast('Failed to add fee/discount: ' + error.message, 'error');
-            }
-        });
-
-        // Document preview functionality - clean overlay for PDFs and images
-        document.addEventListener('click', function (event) {
-            // Check if the click is on a button that has data-bs-target="#documentModal" 
-            // and data-document-url attributes
-            let button = null;
-
-            if (event.target.matches('[data-bs-target="#documentModal"]')) {
-                button = event.target;
-            } else if (event.target.closest('[data-bs-target="#documentModal"]')) {
-                button = event.target.closest('[data-bs-target="#documentModal"]');
-            }
-
-            if (button && button.hasAttribute('data-document-url')) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                const documentUrl = button.getAttribute('data-document-url');
-                const documentTitle = button.getAttribute('data-document-title');
-                const fileExtension = documentUrl.split('.').pop().toLowerCase();
-                const isPDF = fileExtension === 'pdf';
-                const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension);
-
-                // Disable main page scrolling
-                const originalBodyStyles = {
-                    overflow: document.body.style.overflow,
-                    position: document.body.style.position,
-                    width: document.body.style.width,
-                    height: document.body.style.height
-                };
-
-                document.body.style.overflow = 'hidden';
-                document.body.style.position = 'fixed';
-                document.body.style.width = '100%';
-                document.body.style.height = '100%';
-
-                // Create overlay container
-                const overlay = document.createElement('div');
-                overlay.style.position = 'fixed';
-                overlay.style.top = '0';
-                overlay.style.left = '0';
-                overlay.style.width = '100%';
-                overlay.style.height = '100%';
-                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
-                overlay.style.zIndex = '9999';
-                overlay.style.display = 'flex';
-                overlay.style.justifyContent = 'center';
-                overlay.style.alignItems = 'center';
-                overlay.style.cursor = 'pointer';
-
-                // Close overlay when clicking on the background
-                overlay.onclick = function (event) {
-                    if (event.target === overlay) {
-                        closeOverlay();
-                    }
-                };
-
-                // Close on ESC key
-                const handleEscape = function (event) {
-                    if (event.key === 'Escape') {
-                        closeOverlay();
-                    }
-                };
-                document.addEventListener('keydown', handleEscape);
-
-                // Function to close overlay and restore scrolling
-                function closeOverlay() {
-                    document.body.removeChild(overlay);
-                    document.removeEventListener('keydown', handleEscape);
-
-                    // Restore original body styles
-                    document.body.style.overflow = originalBodyStyles.overflow || '';
-                    document.body.style.position = originalBodyStyles.position || '';
-                    document.body.style.width = originalBodyStyles.width || '';
-                    document.body.style.height = originalBodyStyles.height || '';
-                }
-
-                // Create close button (positioned absolutely in the top right corner)
-                const closeButton = document.createElement('button');
-                closeButton.innerHTML = '&times;';
-                closeButton.style.position = 'absolute';
-                closeButton.style.top = '20px';
-                closeButton.style.right = '20px';
-                closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
-                closeButton.style.color = 'white';
-                closeButton.style.border = 'none';
-                closeButton.style.borderRadius = '50%';
-                closeButton.style.width = '40px';
-                closeButton.style.height = '40px';
-                closeButton.style.fontSize = '24px';
-                closeButton.style.cursor = 'pointer';
-                closeButton.style.transition = 'background 0.2s';
-                closeButton.style.zIndex = '10000';
-                closeButton.onmouseover = function () {
-                    this.style.background = 'rgba(255, 255, 255, 0.3)';
-                };
-                closeButton.onmouseout = function () {
-                    this.style.background = 'rgba(255, 255, 255, 0.2)';
-                };
-                closeButton.onclick = function (e) {
-                    e.stopPropagation();
-                    closeOverlay();
-                };
-                overlay.appendChild(closeButton);
-
-                // Create loading indicator container
-                const loadingContainer = document.createElement('div');
-                loadingContainer.style.display = 'flex';
-                loadingContainer.style.flexDirection = 'column';
-                loadingContainer.style.alignItems = 'center';
-                loadingContainer.style.justifyContent = 'center';
-                loadingContainer.style.position = 'absolute';
-                loadingContainer.style.zIndex = '1000';
-
-                // Create loading indicator
-                const loadingIndicator = document.createElement('div');
-                loadingIndicator.className = 'spinner-border text-light';
-                loadingIndicator.style.width = '3rem';
-                loadingIndicator.style.height = '3rem';
-                loadingContainer.appendChild(loadingIndicator);
-
-                // Create loading text
-                const loadingText = document.createElement('div');
-                loadingText.textContent = 'Loading document...';
-                loadingText.style.color = 'white';
-                loadingText.style.marginTop = '1.5rem';
-                loadingText.style.fontSize = '1.1rem';
-                loadingContainer.appendChild(loadingText);
-
-                // Create troubleshooting text (only shown during loading)
-                const troubleText = document.createElement('div');
-                troubleText.innerHTML = '<p class="text-light text-center mt-2" style="font-size: 0.9rem;">If the document doesn\'t load, try <a href="' + documentUrl + '" target="_blank" style="color: #328bffff; text-decoration: underline;">opening in a new tab</a> or refreshing the page.</p>';
-                troubleText.style.color = 'white';
-                troubleText.style.marginTop = '0.5rem';
-                troubleText.style.textAlign = 'center';
-                loadingContainer.appendChild(troubleText);
-
-                overlay.appendChild(loadingContainer);
-
-                // Function to remove loading elements
-                function removeLoadingElements() {
-                    loadingContainer.remove();
-                }
-
-                if (isPDF) {
-                    // For PDF files - Google Docs viewer in full overlay
-                    const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(documentUrl)}&embedded=true`;
-
-                    const iframe = document.createElement('iframe');
-                    iframe.src = viewerUrl;
-                    iframe.style.width = '90%';
-                    iframe.style.height = '90%';
-                    iframe.style.border = 'none';
-                    iframe.style.borderRadius = '8px';
-                    iframe.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
-                    iframe.style.opacity = '0';
-                    iframe.style.transition = 'opacity 0.3s ease-in-out';
-
-                    iframe.onload = function () {
-                        // Hide loading elements when iframe loads
-                        removeLoadingElements();
-                        iframe.style.opacity = '1';
-                    };
-
-                    overlay.appendChild(iframe);
-
-                } else if (isImage) {
-                    // For image files - centered image with close button
-                    const imageContainer = document.createElement('div');
-                    imageContainer.style.position = 'relative';
-                    imageContainer.style.maxWidth = '90%';
-                    imageContainer.style.maxHeight = '90%';
-
-                    const img = document.createElement('img');
-                    img.src = documentUrl;
-                    img.alt = documentTitle;
-                    img.style.maxWidth = '100%';
-                    img.style.maxHeight = '90vh';
-                    img.style.borderRadius = '8px';
-                    img.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
-                    img.style.objectFit = 'contain';
-                    img.style.opacity = '0';
-                    img.style.transition = 'opacity 0.3s ease-in-out';
-
-                    img.onload = function () {
-                        // Hide loading elements when image loads
-                        removeLoadingElements();
-                        img.style.opacity = '1';
-                    };
-
-                    img.onerror = function () {
-                        // If image fails to load, show error message
-                        loadingIndicator.style.display = 'none';
-                        loadingText.textContent = 'Failed to load image. Please try opening in a new tab.';
-                        loadingText.style.color = '#ff6b6b';
-                        // Keep the troubleshooting text visible for errors
-                    };
-
-                    imageContainer.appendChild(img);
-                    overlay.appendChild(imageContainer);
-
-                } else {
-                    // For other file types - download link
-                    removeLoadingElements();
-
-                    const downloadContainer = document.createElement('div');
-                    downloadContainer.style.background = 'white';
-                    downloadContainer.style.padding = '2rem';
-                    downloadContainer.style.borderRadius = '8px';
-                    downloadContainer.style.textAlign = 'center';
-
-                    const message = document.createElement('p');
-                    message.textContent = 'This file type cannot be previewed.';
-                    message.style.marginBottom = '1rem';
-
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = documentUrl;
-                    downloadLink.className = 'btn btn-primary';
-                    downloadLink.innerHTML = '<i class="bi bi-download"></i> Download File';
-                    downloadLink.download = documentTitle;
-                    downloadLink.onclick = function () {
-                        closeOverlay();
-                    };
-
-                    downloadContainer.appendChild(message);
-                    downloadContainer.appendChild(downloadLink);
-                    overlay.appendChild(downloadContainer);
-                }
-
-                // Add to document body
-                document.body.appendChild(overlay);
-            }
-        });
-
-        // Initialize compact calendar
-        let calendar;
-        function initializeCalendar() {
-            const calendarEl = document.getElementById('calendar');
-            const currentRequest = allRequests.find(req => req.request_id == requestId);
-            if (!calendarEl) return;
-
-            // Get status names to exclude
-            const excludedStatuses = ['Late', 'Returned', 'Late Return', 'Completed'];
-
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
-                initialDate: currentRequest.schedule.start_date,
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                buttonText: {
-                    today: 'Today',
-                    month: 'Month',
-                    week: 'Week',
-                    day: 'Day'
-                },
-                titleFormat: {
-                    year: 'numeric',
-                    month: 'short'
-                },
-                height: '100%',
-                handleWindowResize: true,
-                windowResizeDelay: 200,
-                aspectRatio: null,
-                expandRows: true,
-                events: [],
-                eventClick: function (info) {
-                    const request = allRequests.find(req => req.request_id == info.event.extendedProps.requestId);
-                    if (request) {
-                        showEventModal(request);
-                    }
-                },
-                eventDidMount: function (info) {
-                    // Add custom styling based on status
-                    const request = allRequests.find(req => req.request_id == info.event.extendedProps.requestId);
-
-                    if (request) {
-                        // Special styling for current request
-                        if (info.event.extendedProps.isCurrent) {
-                            info.el.style.backgroundColor = '#8164c4ff';
-                            info.el.style.borderColor = '#8164c4ff';
-                            info.el.style.color = '#FFFFFF';
-                            info.el.style.fontWeight = 'bold';
-                        } else {
-                            info.el.style.backgroundColor = request.form_details.status.color;
-                            info.el.style.borderColor = request.form_details.status.color;
-                        }
-                    }
-                },
-                datesSet: function (info) {
-                    // Force refresh of calendar rendering
-                    calendar.updateSize();
-                },
-                viewDidMount: function (info) {
-                    // Ensure proper initial rendering
-                    setTimeout(() => calendar.updateSize(), 0);
-                },
-                eventTimeFormat: {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                },
-                slotMinTime: '00:00:00',
-                slotMaxTime: '24:00:00',
-                allDaySlot: false,
-                nowIndicator: true,
-                navLinks: true,
-                dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric' },
-                views: {
-                    dayGridMonth: {
-                        dayHeaderFormat: {
-                            weekday: 'short'
-                        }
-                    }
-                },
-                eventDisplay: 'block'
-            });
-
-            calendar.render();
-
-            // Update calendar with filtered events
-            if (calendar) {
-                calendar.removeAllEvents();
-
-                // Filter requests to exclude the specified statuses AND exclude current request from regular events
-                const filteredRequests = allRequests.filter(req => {
-                    const statusName = req.form_details.status.name;
-
-                    // Skip if status is in excluded list
-                    if (excludedStatuses.includes(statusName)) {
+                // Get current status ID from the request data
+                const currentRequest = allRequests.find(req => req.request_id == requestId);
+                const currentStatusId = currentRequest ? currentRequest.form_details.status.id : null;
+
+                // Check if user is Head Admin (you'll need to implement this check)
+                const isHeadAdmin = checkIfHeadAdmin();
+
+                function checkIfHeadAdmin() {
+                    try {
+                        // Get admin data from localStorage or make an API call
+                        const adminData = JSON.parse(localStorage.getItem('adminProfile') || '{}');
+                        return adminData.role?.role_title === 'Head Admin';
+                    } catch (error) {
+                        console.error('Error checking Head Admin status:', error);
                         return false;
                     }
+                }
 
-                    // Skip the current request (we'll add it separately with special styling)
-                    if (req.request_id == requestId) {
-                        return false;
-                    }
-
-                    // Include all other requests
-                    return true;
-                });
-
-                console.log('Filtered calendar events:', {
-                    totalRequests: allRequests.length,
-                    filteredRequests: filteredRequests.length,
-                    excludedStatuses: excludedStatuses,
-                    filteredRequestIds: filteredRequests.map(r => r.request_id),
-                    currentRequestId: requestId
-                });
-
-                // Add filtered events to calendar (excluding current request)
-                filteredRequests.forEach(req => {
-                    const calendarTitle = req.form_details.calendar_info.title || 'No Calendar Title';
-
-                    calendar.addEvent({
-                        title: calendarTitle,
-                        start: `${req.schedule.start_date}T${req.schedule.start_time}`,
-                        end: `${req.schedule.end_date}T${req.schedule.end_time}`,
-                        extendedProps: {
-                            status: req.form_details.status.name,
-                            requestId: req.request_id,
-                            isCurrent: false
-                        },
-                        description: req.form_details.calendar_info.description
-                    });
-                });
-
-                // Add current request with special styling (only once)
-                const currentCalendarTitle = currentRequest.form_details.calendar_info.title || 'No Calendar Title';
-
-                calendar.addEvent({
-                    title: 'Current Request', // You can change this to currentCalendarTitle if you prefer
-                    start: `${currentRequest.schedule.start_date}T${currentRequest.schedule.start_time}`,
-                    end: `${currentRequest.schedule.end_date}T${currentRequest.schedule.end_time}`,
-                    extendedProps: {
-                        status: currentRequest.form_details.status.name,
-                        requestId: currentRequest.request_id,
-                        isCurrent: true
-                    },
-                    color: '#FF6B35', // Different color for current request
-                    textColor: '#FFFFFF',
-                    description: currentRequest.form_details.calendar_info.description
-                });
-            }
-        }
-
-        // Function to show event details in modal
-        function showEventModal(request) {
-            // Format request ID with leading zeros
-            const formattedRequestId = String(request.request_id).padStart(4, '0');
-            // Handle empty calendar title
-            const calendarTitle = request.form_details.calendar_info.title || 'No Calendar Title';
-            // Update modal title with request ID and calendar title
-            document.getElementById('eventModalTitle').textContent =
-                `Request ID #${formattedRequestId} (${request.form_details.calendar_info.title})`;
-
-            document.getElementById('modalRequester').textContent = `${request.user_details.first_name} ${request.user_details.last_name}`;
-            document.getElementById('modalPurpose').textContent = request.form_details.purpose;
-            document.getElementById('modalParticipants').textContent = request.form_details.num_participants;
-            document.getElementById('modalStatus').innerHTML = `
-                                                                <span class="badge" style="background-color: ${request.form_details.status.color}">
-                                                                    ${request.form_details.status.name}
-                                                                </span>
-                                                            `;
-            document.getElementById('modalFee').textContent = `₱${request.fees.tentative_fee}`;
-            document.getElementById('modalApprovals').textContent = `${request.approval_info.approval_count}`;
-
-            // Format requested items for the right column
-            let itemsHtml = '';
-
-            if (request.requested_items.facilities.length > 0) {
-                itemsHtml += '<div class="fw-bold small mb-1">Facilities:</div>';
-                itemsHtml += request.requested_items.facilities.map(f =>
-                    `<div class="mb-1 small">• ${f.name} | ₱${f.fee}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}${f.is_waived ? ' <span class="text-muted">(Waived)</span>' : ''}</div>`
-                ).join('');
-            }
-
-            if (request.requested_items.equipment.length > 0) {
-                itemsHtml += '<div class="fw-bold small mt-2 mb-1">Equipment:</div>';
-                itemsHtml += request.requested_items.equipment.map(e =>
-                    `<div class="mb-1 small">• ${e.name} × ${e.quantity || 1} | ₱${e.fee}${e.rate_type === 'Per Hour' ? '/hour' : '/event'}${e.is_waived ? ' <span class="text-muted">(Waived)</span>' : ''}</div>`
-                ).join('');
-            }
-
-            document.getElementById('modalItems').innerHTML = itemsHtml || '<p class="text-muted small">No items requested</p>';
-
-            // Set up view details button
-            document.getElementById('modalViewDetails').onclick = function () {
-                window.location.href = `/admin/requisition/${request.request_id}`;
-            };
-
-            eventModal.show();
-        }
-
-        // Function to update additional fees display
-        function updateAdditionalFees(requisitionFees) {
-            const additionalFeesContainer = document.getElementById('additionalFeesContainer');
-
-            // Clear existing content
-            additionalFeesContainer.innerHTML = '';
-
-            if (requisitionFees && requisitionFees.length > 0) {
-                requisitionFees.forEach((fee, index) => {
-                    const feeElement = document.createElement('div');
-                    feeElement.className = 'fee-item d-flex justify-content-between align-items-center mb-1';
-
-                    let amountText = '';
-                    if (fee.type === 'fee') {
-                        amountText = `₱${parseFloat(fee.fee_amount).toFixed(2)}`;
-                    } else if (fee.type === 'discount') {
-                        if (fee.discount_type === 'Percentage') {
-                            // Remove .00 for percentage discounts
-                            amountText = `${parseFloat(fee.discount_amount)}%`;
-                        } else {
-                            amountText = `-₱${parseFloat(fee.discount_amount).toFixed(2)}`;
-                        }
-                    } else if (fee.type === 'mixed') {
-                        const feePart = fee.fee_amount > 0 ? `₱${parseFloat(fee.fee_amount).toFixed(2)}` : '';
-                        const discountPart = fee.discount_amount > 0 ?
-                            (fee.discount_type === 'Percentage' ?
-                                `-${parseFloat(fee.discount_amount)}%` :
-                                `-₱${parseFloat(fee.discount_amount).toFixed(2)}`) : '';
-                        amountText = `${feePart} ${discountPart}`.trim();
-                    }
-
-                    feeElement.innerHTML = `
-                                <span class="item-name">${fee.label}</span>
-                                <span class="d-flex align-items-center">
-                                    <span class="item-price me-2">${amountText}</span>
-                                    <button class="btn btn-sm btn-danger delete-fee-btn" data-fee-id="${fee.fee_id}" data-fee-type="${fee.type}">
-                                        <i class="fa fa-times"></i>
-                                    </button>
-                                </span>
-                            `;
-
-                    additionalFeesContainer.appendChild(feeElement);
-                });
-
-                // Handle delete click
-                additionalFeesContainer.querySelectorAll('.delete-fee-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const feeId = e.currentTarget.dataset.feeId;
-                        const feeType = e.currentTarget.dataset.feeType;
-
-                        if (!feeId) {
-                            console.error('No fee ID found for deletion');
-                            showToast('Cannot delete fee that does not exist.', 'error');
-                            return;
-                        }
-
-                        try {
-                            const response = await fetch(`/api/admin/requisition/${requestId}/fee/${feeId}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Authorization': `Bearer ${adminToken}`,
-                                    'Accept': 'application/json'
-                                }
-                            });
-
-                            if (!response.ok) {
-                                const errorData = await response.json();
-                                throw new Error(errorData.details || 'Failed to delete fee');
+                if (isHeadAdmin) {
+                    // Head Admin specific restrictions based on status_id
+                    switch (currentStatusId) {
+                        case 'Awaiting Payment': // Assuming status_id for Awaiting Payment
+                            if (action === 'Ongoing' || action === 'Late') {
+                                showToast('This action is not available for forms with Awaiting Payment status.', 'error');
+                                return;
                             }
+                            break;
 
-                            const result = await response.json();
+                        case 'Scheduled': // Assuming status_id for Scheduled
+                            if (action === 'Scheduled' || action === 'Late') {
+                                showToast('This action is not available for forms with Scheduled status.', 'error');
+                                return;
+                            }
+                            // Disable finalize button for Scheduled status
+                            const finalizeBtn = document.getElementById('finalizeBtn');
+                            if (finalizeBtn && action === 'Finalize') {
+                                showToast('Cannot finalize a form that is already Scheduled.', 'error');
+                                return;
+                            }
+                            break;
 
-                            // Show success message
-                            showToast('Fee removed successfully', 'success');
+                        case 'Ongoing': // Assuming status_id for Ongoing
+                            // For Ongoing status, replace Finalize with Mark Late
+                            if (action === 'Finalize') {
+                                // Instead of finalizing, mark as late
+                                handleStatusAction('Late');
+                                return;
+                            }
+                            break;
+                    }
+                }
 
-                            // Refresh ALL fee displays including the total
-                            await refreshAllFeeDisplays();
+                // SPECIAL CASE: Handle Scheduled status with custom modal
+                if (action === 'Scheduled') {
+                    handleMarkScheduled();
+                    return; // Exit early to prevent the generic status modal from showing
+                }
 
-                        } catch (error) {
-                            console.error('Error removing fee:', error);
-                            console.error('Fee deletion details:', {
-                                feeId: feeId,
-                                feeType: feeType,
-                                requestId: requestId,
-                                error: error.message
-                            });
-                            showToast('Failed to remove fee: ' + error.message, 'error');
+                // For all other statuses, use the generic status update modal
+                switch (action) {
+                    case 'Ongoing':
+                    case 'Late':
+                        showStatusUpdateModal(action);
+                        break;
+
+                    case 'Finalize Form':
+                        if (currentStatusName === 'Pending Approval') {
+                            finalizeModal.show();
+                        } else {
+                            showToast('This form is already finalized.', 'error');
                         }
-                    });
-                });
-            } else {
-                // Show empty message
-                additionalFeesContainer.innerHTML = `
-                            <div class="text-center text-muted py-4">
-                                <i class="fa fa-coins fa-2x d-block mb-2"></i>
-                                <p class="mb-0">No additional fees or discounts</p>
-                            </div>
-                        `;
-            }
-        }
+                        break;
 
-        // Update the dropdown menu text dynamically based on current status
-        function updateStatusDropdownText() {
-            const statusBadge = document.getElementById('statusBadge');
-            const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
-            const lateOption = document.getElementById('statusLate');
+                    case 'Set Penalty Fee':
+                        // Prompt user for penalty amount
+                        const penaltyAmount = prompt('Enter late penalty amount:');
+                        if (penaltyAmount !== null && penaltyAmount !== '') {
+                            const amount = parseFloat(penaltyAmount);
+                            if (!isNaN(amount) && amount >= 0) { // allow 0
+                                addLatePenalty(amount);
+                            } else {
+                                showToast('Please enter a valid penalty amount (0 or greater).', 'error');
+                            }
+                        }
+                        break;
 
-            if (lateOption) {
-                if (currentStatusName === 'Late') {
-                    lateOption.innerHTML = '<i class="bi bi-check-circle me-2"></i> Unmark Late';
-                    lateOption.dataset.value = 'Late'; // Keep the same data value
-                } else {
-                    lateOption.innerHTML = '<i class="bi bi-exclamation-circle me-2"></i> Mark Late';
-                    lateOption.dataset.value = 'Late';
+                    case 'Close':
+                        closeForm();
+                        break;
+
+                    default:
+                        console.log('Unknown action:', action);
                 }
             }
-        }
 
-        function updateStatusDisplay(request) {
-            const hasEquipment = request.requested_items.equipment && request.requested_items.equipment.length > 0;
-            const isScheduled = request.form_details.status.name === 'Scheduled';
-
-            const equipmentStatusPill = document.getElementById('equipmentStatusPill');
-
-            if (hasEquipment && isScheduled) {
-                // Create equipment status pill if it doesn't exist
-                if (!equipmentStatusPill) {
-                    const pill = document.createElement('div');
-                    pill.id = 'equipmentStatusPill';
-                    pill.className = 'px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center hover-pointer';
-                    pill.setAttribute('role', 'button');
-                    pill.setAttribute('data-bs-toggle', 'modal');
-                    pill.setAttribute('data-bs-target', '#equipmentStatusModal');
-                    pill.innerHTML = `
-                        <i class="fa fa-tools me-1"></i>
-                        <span class="me-2">Equipment Status</span>
-                    `;
-                    const cardBody = document.querySelector('.card-body.d-flex.flex-wrap.gap-2.justify-content-start');
-                    if (cardBody) {
-
-                        cardBody.appendChild(pill);
-                    }
-                }
-
-                // Load equipment status when pill is clicked
-                document.getElementById('equipmentStatusPill').addEventListener('click', loadEquipmentStatus);
-            } else if (equipmentStatusPill) {
-                equipmentStatusPill.remove();
-            }
-        }
-
-        async function loadEquipmentStatus() {
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/equipment-status`, {
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (!response.ok) throw new Error('Failed to fetch equipment status');
-
-                const data = await response.json();
-                const content = document.getElementById('equipmentStatusContent');
-
-                if (data.equipment_status && data.equipment_status.length > 0) {
-                    let html = '<div class="table-responsive"><table class="table table-sm">';
-                    html += '<thead><tr><th>Equipment</th><th>Item ID</th><th>Condition</th></tr></thead><tbody>';
-
-                    data.equipment_status.forEach(item => {
-                        html += `
-                                <tr>
-                                    <td>${item.equipment_name}</td>
-                                    <td>#${item.item_id}</td>
-                                    <td>
-                                        <span class="badge" style="background-color: ${item.condition_color}">
-                                            ${item.condition_name}
-                                        </span>
-                                    </td>
-                                </tr>
-                            `;
-                    });
-
-                    html += '</tbody></table></div>';
-                    content.innerHTML = html;
-                } else {
-                    content.innerHTML = '<div class="text-center text-muted py-4">No equipment assigned to this request.</div>';
-                }
-
-            } catch (error) {
-                console.error('Error loading equipment status:', error);
-                document.getElementById('equipmentStatusContent').innerHTML =
-                    '<div class="text-center text-danger py-4">Failed to load equipment status.</div>';
-            }
-        }
-
-
-
-        async function fetchRequestDetails() {
-            try {
-                // Ensure loading state is visible and content is hidden
-                document.getElementById('loadingState').style.display = 'block';
-                document.getElementById('contentState').style.display = 'none';
-
-                const response = await fetch(`/api/admin/requisition-forms`, {
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (!response.ok) throw new Error('Failed to fetch request details');
-
-                allRequests = await response.json();
-                const request = allRequests.find(req => req.request_id == requestId);
-                if (!request) throw new Error('Request not found');
-
-                updateStatusDisplay(request);
-
-                // Update approval counts for the finalize modal
-                updateApprovalCounts(
-                    request.approval_info.approval_count,
-                    request.approval_info.rejection_count
-                );
-
-                // Update request ID in title
-                document.getElementById('requestIdTitle').textContent = 'RID #' + String(requestId).padStart(4, '0');
-
-
-                // Update status badge
-                const statusBadge = document.getElementById('statusBadge');
-                statusBadge.textContent = request.form_details.status.name;
-                statusBadge.style.backgroundColor = request.form_details.status.color;
-
-                // Update fees display
-                document.getElementById('totalApprovedFee').textContent = `₱${parseFloat(request.fees.approved_fee).toFixed(2)}`;
-                document.getElementById('feeBreakdownTotal').textContent = `₱${parseFloat(request.fees.approved_fee).toFixed(2)}`;
-
-                // Contact information
-                document.getElementById('formDetails').innerHTML = `
-                                            <table class="table table-borderless mb-0 small text-start align-top">
-                                                <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            <div><strong>Requester</strong></div>
-                                                            <div>${request.user_details.first_name} ${request.user_details.last_name}</div>
-                                                        </td>
-                                                        <td>
-                                                            <div><strong>School ID</strong></div>
-                                                            <div>${request.user_details.school_id || 'N/A'}</div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>
-                                                            <div><strong>Email</strong></div>
-                                                            <div>${request.user_details.email}</div>
-                                                        </td>
-                                                        <td>
-                                                            <div><strong>Organization</strong></div>
-                                                            <div>${request.user_details.organization_name || 'N/A'}</div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>
-                                                            <div><strong>User Type</strong></div>
-                                                            <div>${request.user_details.user_type}</div>
-                                                        </td>
-                                                        <td>
-                                                            <div><strong>Contact Number</strong></div>
-                                                            <div>${request.user_details.contact_number || 'N/A'}</div>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        `;
-
-          // Event details
-document.getElementById('eventDetails').innerHTML = `
-<table class="table table-borderless mb-0 small text-start align-top">
-    <tbody>
-        <tr>
-            <td>
-                <div><strong>Endorser</strong></div>
-                <div>${request.documents.endorser || 'N/A'}</div>
-            </td>
-            <td>
-                <div><strong>Date Endorsed</strong></div>
-                <div>${formatDateEndorsed(request.documents.date_endorsed) || 'N/A'}</div>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <div><strong>Rental Purpose</strong></div>
-                <div>${request.form_details.purpose}</div>
-            </td>
-            <td>
-                <div><strong>Participants</strong></div>
-                <div>${request.form_details.num_participants}</div>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <div><strong>Number of Tables</strong></div>
-                <div>${request.form_details.num_tables || 0}</div>
-            </td>
-            <td>
-                <div><strong>Number of Chairs</strong></div>
-                <div>${request.form_details.num_chairs || 0}</div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <div><strong>Additional Requests</strong></div>
-                <div>${request.form_details.additional_requests || 'No additional requests.'}</div>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <div><strong>Start Schedule</strong></div>
-                <div>${formatStartDateTime(request.schedule)}</div>
-            </td>
-            <td>
-                <div><strong>End Schedule</strong></div>
-                <div>${formatEndDateTime(request.schedule)}</div>
-            </td>
-        </tr>
-    </tbody>
-</table>
-`;
-                // Update requested items with fee breakdown
-                document.getElementById('requestedItems').innerHTML = `
-                                            <div class="mb-3">
-                                                ${request.requested_items.facilities.length > 0 ? `
-                                                    <h6 class="fw-bold d-flex justify-content-between align-items-center mb-2" style="font-size:0.85rem; padding:0 0.5rem;">Facilities:</h6>
-                                                    ${request.requested_items.facilities.map(f =>
-                    `<div class="d-flex align-items-center mb-2 item-row" style="padding:0 0.5rem;">
-                                                            <span class="item-name">${f.name}</span>
-                                                            <span style="flex:1; border-bottom: 1px dashed #ccc; margin: 0 0.5rem;"></span>
-                                                            <span class="item-price">₱${f.fee}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
-                                                        </div>`
-                ).join('')}
-                                                ` : ''}
-
-                                                ${request.requested_items.equipment.length > 0 ? `
-                                                    <h6 class="fw-bold d-flex justify-content-between align-items-center mt-3 mb-2" style="font-size:0.85rem; padding:0 0.5rem;">Equipment:</h6>
-                                                    ${request.requested_items.equipment.map(e =>
-                    `<div class="d-flex align-items-center mb-2 item-row" style="padding:0 0.5rem;">
-                                                            <span class="item-name">${e.name} × ${e.quantity || 1}</span>
-                                                            <span style="flex:1; border-bottom: 1px dashed #ccc; margin: 0 0.5rem;"></span>
-                                                            <span class="item-price">₱${e.fee}${e.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
-                                                        </div>`
-                ).join('')}
-                                                ` : ''}
-                                            </div>
-                                        `;
-
-                // Update status cards
-                document.getElementById('approvalsCount').textContent = request.approval_info.approval_count;
-                document.getElementById('rejectionsCount').textContent = request.approval_info.rejection_count;
-                document.getElementById('isLateStatus').textContent = request.status_tracking.is_late ? 'Late' : 'Not Late';
-
-                // Update document cards
-                document.getElementById('formalLetterDocument').innerHTML = request.documents.formal_letter.url ?
-                    `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                                                data-document-url="${request.documents.formal_letter.url}" data-document-title="Formal Letter">
-                                                Uploaded
-                                            </button>` :
-                    '<span class="badge bg-secondary">Not uploaded</span>';
-
-                document.getElementById('facilityLayoutDocument').innerHTML = request.documents.facility_layout.url ?
-                    `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                                                data-document-url="${request.documents.facility_layout.url}" data-document-title="Facility Setup">
-                                                Uploaded
-                                            </button>` :
-                    '<span class="badge bg-secondary">Not uploaded</span>';
-
-                document.getElementById('proofOfPaymentDocument').innerHTML = request.documents.proof_of_payment.url ?
-                    `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                                                data-document-url="${request.documents.proof_of_payment.url}" data-document-title="Proof of Payment">
-                                                Uploaded
-                                            </button>` :
-                    '<span class="badge bg-secondary">Not uploaded</span>';
-
-                // Official Receipt - Check both uploaded document AND generated receipt number
-                const officialReceiptContainer = document.getElementById('officialReceiptDocument');
-                if (request.documents.official_receipt.url) {
-                    // If official receipt document is uploaded
-                    officialReceiptContainer.innerHTML =
-                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
-                                        data-document-url="${request.documents.official_receipt.url}" data-document-title="Official Receipt">
-                                        Uploaded
-                                    </button>`;
-                } else if (request.form_details.official_receipt_num) {
-                    // If official receipt number exists (form is scheduled), show the generate receipt button
-                    const receiptNum = request.form_details.official_receipt_num;
-                    officialReceiptContainer.innerHTML =
-                        `<a href="/official-receipt/${requestId}" target="_blank" class="btn btn-sm btn-success">
-                                        <i class="fas fa-receipt me-1"></i> View Receipt
-                                    </a>
-                                    <small class="text-muted d-block mt-1">OR: ${receiptNum}</small>`;
-                } else {
-                    // No official receipt available
-                    officialReceiptContainer.innerHTML = '<span class="badge bg-secondary">Not available</span>';
-                }
-
-                // Update document icons
-                updateDocumentIcons(request.documents);
-
-                // Load additional data and wait for completion
-                await Promise.all([
-                    loadMixedActivity(),
-                    loadApprovalHistory(),
-                    updateBaseFees(request.requested_items, request.schedule)
-                ]);
-
-                // Ensure misc fees are updated
-                if (request.fees && request.fees.requisition_fees) {
-                    updateAdditionalFees(request.fees.requisition_fees);
-                }
-
-                // Update dropdown text
-                updateStatusDropdownText();
-
-                // Check admin role and update UI
-                await checkAdminRoleAndUpdateUI();
-
-                // Initialize calendar
-                setTimeout(() => {
-                    initializeCalendar();
-                }, 100);
-
-                // ONLY NOW show content after everything is properly loaded
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('contentState').style.display = 'block';
-
-                // Now that container is visible, initialize calendar
-                initializeCalendar(request.schedule);
-
-
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Failed to load request details', 'error');
-
-                // Show error state
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('contentState').innerHTML = `
-                                            <div class="alert alert-danger">
-                                                Failed to load request details. Please try refreshing the page.
-                                            </div>
-                                        `;
-                document.getElementById('contentState').style.display = 'block';
-            }
-        }
-
-        // Add this helper function for document icons
-        function updateDocumentIcons(documents) {
-            // Formal Letter
-            const formalLetterIcon = document.getElementById('formalLetterIcon');
-            if (documents.formal_letter.url) {
-                formalLetterIcon.classList.remove('text-muted');
-                formalLetterIcon.classList.add('text-primary');
-            }
-
-            // Facility Layout
-            const facilityLayoutIcon = document.getElementById('facilityLayoutIcon');
-            if (documents.facility_layout.url) {
-                facilityLayoutIcon.classList.remove('text-muted');
-                facilityLayoutIcon.classList.add('text-primary');
-            }
-
-            // Proof of Payment
-            const proofOfPaymentIcon = document.getElementById('proofOfPaymentIcon');
-            if (documents.proof_of_payment.url) {
-                proofOfPaymentIcon.classList.remove('text-muted');
-                proofOfPaymentIcon.classList.add('text-primary');
-            }
-
-            // Official Receipt
-            const officialReceiptIcon = document.getElementById('officialReceiptIcon');
-            if (documents.official_receipt.url) {
-                officialReceiptIcon.classList.remove('text-muted');
-                officialReceiptIcon.classList.add('text-primary');
-            }
-        }
-
-        // Add this function to calculate rental duration
-        function calculateRentalDuration(startDate, startTime, endDate, endTime) {
-            const start = new Date(`${startDate}T${startTime}`);
-            const end = new Date(`${endDate}T${endTime}`);
-
-            const durationInHours = Math.round((end - start) / (1000 * 60 * 60) * 100) / 100;
-            const formattedStart = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const formattedEnd = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            return {
-                hours: durationInHours,
-                formatted: `${durationInHours} hours (${formattedStart} – ${formattedEnd})`
-            };
-        }
-
-        // Function to update base fees display
-        function updateBaseFees(requestedItems, schedule) {
-            const facilitiesContainer = document.getElementById('facilitiesFees');
-            const equipmentContainer = document.getElementById('equipmentFees');
-
-            // Clear existing content
-            facilitiesContainer.innerHTML = '';
-            equipmentContainer.innerHTML = '';
-
-            // Calculate rental duration for hourly rate calculations
-            const startDateTime = new Date(`${schedule.start_date}T${schedule.start_time}`);
-            const endDateTime = new Date(`${schedule.end_date}T${schedule.end_time}`);
-            const durationHours = Math.max(0, (endDateTime - startDateTime) / (1000 * 60 * 60));
-
-            let totalBaseFees = 0;
-
-            // Add facilities with proper rate type logic and waiver checkboxes
-            if (requestedItems.facilities && requestedItems.facilities.length > 0) {
-                requestedItems.facilities.forEach(facility => {
-                    const facilityElement = document.createElement('div');
-                    facilityElement.className = `fee-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ${facility.is_waived ? 'waived' : ''}`;
-
-                    let feeAmount = parseFloat(facility.fee);
-                    let itemTotal = 0;
-                    let rateDescription = '';
-
-                    if (facility.rate_type === 'Per Hour' && durationHours > 0) {
-                        itemTotal = feeAmount * durationHours;
-                        rateDescription = `₱${feeAmount.toLocaleString()}/hr × ${durationHours.toFixed(1)} hrs`;
-                        if (!facility.is_waived) totalBaseFees += itemTotal;
-                    } else {
-                        itemTotal = feeAmount;
-                        rateDescription = `₱${feeAmount.toLocaleString()}/event`;
-                        if (!facility.is_waived) totalBaseFees += itemTotal;
-                    }
-
-                    facilityElement.innerHTML = `
-                                                                                                                                            <div class="d-flex align-items-center">
-                                                                                                                                                <div class="form-check me-2">
-                                                                                                                                                    <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                                                                                                                        data-type="facility" 
-                                                                                                                                                        data-id="${facility.requested_facility_id}"
-                                                                                                                                                        ${facility.is_waived ? 'checked' : ''}>
-                                                                                                                                                </div>
-                                                                                                                                                <span class="item-name">${facility.name}</span>
-                                                                                                                                            </div>
-                                                                                                                                            <div class="text-end">
-                                                                                                                                                <small>${rateDescription}</small>
-                                                                                                                                                <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
-                                                                                                                                            </div>
-                                                                                                                                        `;
-                    facilitiesContainer.appendChild(facilityElement);
-                });
-            }
-
-            // Add equipment with proper rate type logic and waiver checkboxes
-            if (requestedItems.equipment && requestedItems.equipment.length > 0) {
-                requestedItems.equipment.forEach(equipment => {
-                    const equipmentElement = document.createElement('div');
-                    equipmentElement.className = `fee-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ${equipment.is_waived ? 'waived' : ''}`;
-
-                    let unitFee = parseFloat(equipment.fee);
-                    const quantity = equipment.quantity || 1;
-                    let itemTotal = 0;
-                    let rateDescription = '';
-
-                    if (equipment.rate_type === 'Per Hour' && durationHours > 0) {
-                        itemTotal = (unitFee * durationHours) * quantity;
-                        rateDescription = `₱${unitFee.toLocaleString()}/hr × ${durationHours.toFixed(1)} hrs × ${quantity}`;
-                        if (!equipment.is_waived) totalBaseFees += itemTotal;
-                    } else {
-                        itemTotal = unitFee * quantity;
-                        rateDescription = `₱${unitFee.toLocaleString()}/event × ${quantity}`;
-                        if (!equipment.is_waived) totalBaseFees += itemTotal;
-                    }
-
-                    equipmentElement.innerHTML = `
-                                                                                                                                            <div class="d-flex align-items-center">
-                                                                                                                                                <div class="form-check me-2">
-                                                                                                                                                    <input class="form-check-input waiver-checkbox" type="checkbox" 
-                                                                                                                                                        data-type="equipment" 
-                                                                                                                                                        data-id="${equipment.requested_equipment_id}"
-                                                                                                                                                        ${equipment.is_waived ? 'checked' : ''}>
-                                                                                                                                                </div>
-                                                                                                                                                <span class="item-name">
-                                                                                                                                                    ${equipment.name} ${quantity > 1 ? `(×${quantity})` : ''}
-                                                                                                                                                </span>
-                                                                                                                                            </div>
-                                                                                                                                            <div class="text-end">
-                                                                                                                                                <small>${rateDescription}</small>
-                                                                                                                                                <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
-                                                                                                                                            </div>
-                                                                                                                                        `;
-                    equipmentContainer.appendChild(equipmentElement);
-                });
-            }
-
-            // Add event listeners to waiver checkboxes in the Fee Breakdown
-            document.querySelectorAll('#baseFeesContainer .waiver-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', function () {
-                    handleWaiverChange(this);
-                });
-            });
-
-            // Debug logging for backend troubleshooting
-            console.log('Base Fees Update:', {
-                facilities: requestedItems.facilities?.map(f => ({
-                    id: f.requested_facility_id,
-                    name: f.name,
-                    fee: f.fee,
-                    rate_type: f.rate_type,
-                    is_waived: f.is_waived
-                })),
-                equipment: requestedItems.equipment?.map(e => ({
-                    id: e.requested_equipment_id,
-                    name: e.name,
-                    fee: e.fee,
-                    rate_type: e.rate_type,
-                    quantity: e.quantity,
-                    is_waived: e.is_waived
-                })),
-                durationHours: durationHours,
-                totalBaseFees: totalBaseFees
-            });
-        }
-
-        function formatDateEndorsed(dateString) {
-            if (!dateString || dateString === 'N/A') return 'N/A';
-
-            try {
-                const date = new Date(dateString);
-                const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                return date.toLocaleDateString('en-US', options);
-            } catch (error) {
-                console.error('Error formatting date endorsed:', error);
-                return dateString; // Return original if formatting fails
-            }
-        }
-
-        function formatStartDateTime(schedule) {
-            const startDate = new Date(schedule.start_date + 'T' + schedule.start_time);
-            const dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-            const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
-
-            return `${startDate.toLocaleDateString('en-US', dateOptions)} | ${startDate.toLocaleTimeString('en-US', timeOptions)}`;
-        }
-
-        function formatEndDateTime(schedule) {
-            const endDate = new Date(schedule.end_date + 'T' + schedule.end_time);
-            const dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-            const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
-
-            return `${endDate.toLocaleDateString('en-US', dateOptions)} | ${endDate.toLocaleTimeString('en-US', timeOptions)}`;
-        }
-
-
-
-
-
-
-
-        // Function to load and display fees
-
-        async function loadFees() {
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/fees`, {
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (!response.ok) throw new Error('Failed to fetch fees');
-
-                const fees = await response.json();
-
-                // Clear existing fees
-                feesContainer.innerHTML = '';
-
-                if (fees.length === 0) {
-                    // No need for placeholder anymore since we're using mixed activity display
+            // Confirm mark scheduled
+            document.getElementById('confirmMarkScheduled').addEventListener('click', async function () {
+                const btn = this;
+                const spinner = btn.querySelector('.spinner-border');
+                const originalText = btn.innerHTML;
+
+                const officialReceiptNum = document.getElementById('officialReceiptNum').value.trim();
+                const calendarTitle = document.getElementById('scheduledCalendarTitle').value.trim();
+                const calendarDescription = document.getElementById('scheduledCalendarDescription').value.trim();
+
+                if (!officialReceiptNum) {
+                    showToast('Please enter an official receipt number', 'error');
                     return;
                 }
 
-                // Add each fee to the container
-                for (const fee of fees) {
-                    const feeItem = await createFeeItem(fee);
-                    feesContainer.appendChild(feeItem);
+                // Show loading state
+                btn.disabled = true;
+                spinner.classList.remove('d-none');
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/mark-scheduled`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            official_receipt_num: officialReceiptNum,
+                            calendar_title: calendarTitle || null,
+                            calendar_description: calendarDescription || null
+                        })
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    let responseData;
+
+                    if (contentType && contentType.includes('application/json')) {
+                        responseData = await response.json();
+                    } else {
+                        const textResponse = await response.text();
+                        throw new Error(textResponse || 'Non-JSON response from server');
+                    }
+
+                    if (!response.ok) {
+                        const errorMessage = responseData.error ||
+                            responseData.message ||
+                            JSON.stringify(responseData) ||
+                            'Failed to mark as scheduled';
+                        throw new Error(errorMessage);
+                    }
+
+                    showToast('Request marked as scheduled successfully! Official receipt generated.', 'success');
+                    markScheduledModal.hide();
+
+                    // Clear form
+                    document.getElementById('officialReceiptNum').value = '';
+                    document.getElementById('scheduledCalendarTitle').value = '';
+                    document.getElementById('scheduledCalendarDescription').value = '';
+
+                    // Refresh the page to show updated status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Error marking as scheduled:', error);
+                    showToast('Error: ' + error.message, 'error');
+
+                    // Reset button state on error
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    spinner.classList.add('d-none');
                 }
-
-            } catch (error) {
-                console.error('Error loading fees:', error);
-            }
-        }
-
-        // Function to create a fee item element
-        async function createFeeItem(fee) {
-            const feeItem = document.createElement("div");
-            feeItem.className = "fee-item d-flex align-items-start p-2 mb-2 rounded";
-            feeItem.dataset.feeId = fee.fee_id;
-
-            const timestamp = new Date(fee.created_at).toLocaleString('en-US', {
-                month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
             });
 
-            // Ensure amount is a number before using toFixed()
-            const amount = parseFloat(fee.type === 'discount' ? fee.discount_amount : fee.fee_amount);
-            const typeName = fee.type === 'discount' ? 'Discount' : 'Additional fee';
-
-            // Use the admin info from the fee response if available
-            let adminName = fee.added_by?.name || 'Admin';
-            let adminPhoto = null;
-
-            // If we don't have admin info from the fee response, try to get it
-            if (!fee.added_by) {
+            // Update your loadComments function to load both comments and fees
+            async function loadMixedActivity() {
                 try {
-                    const adminResponse = await fetch('/api/admin/profile', {
+                    const container = document.getElementById('formRemarks');
+                    container.innerHTML = `
+                                                                            <div class="comment-loading">
+                                                                                <div class="spinner-border text-primary" role="status">
+                                                                                    <span class="visually-hidden">Loading activity...</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        `;
+
+                    const commentsResponse = await fetch(`/api/admin/requisition/${requestId}/comments`, {
+                        headers: { 'Authorization': `Bearer ${adminToken}`, 'Accept': 'application/json' }
+                    });
+
+                    const feesResponse = await fetch(`/api/admin/requisition/${requestId}/fees`, {
+                        headers: { 'Authorization': `Bearer ${adminToken}`, 'Accept': 'application/json' }
+                    });
+
+                    const commentsResult = await commentsResponse.json();
+                    const feesResult = await feesResponse.json();
+
+                    currentComments = commentsResult.comments || [];
+                    currentFees = feesResult || [];
+
+                    document.getElementById('commentCount').textContent = currentComments.length;
+
+                    // Initially show all
+                    displayMixedActivity(currentComments, currentFees, 'all');
+                    scrollToBottom();
+
+                } catch (error) {
+                    console.error('Error loading activity:', error);
+                    container.innerHTML = `
+                                                                            <div class="empty-comments text-danger">
+                                                                                <i class="bi bi-exclamation-triangle"></i>
+                                                                                <p>Failed to load activity.</p>
+                                                                            </div>
+                                                                        `;
+                }
+            }
+
+            function scrollToBottom() {
+                const container = document.querySelector('.comments-container');
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }
+
+            // Function to display mixed comments and actions
+            function displayMixedActivity(comments, fees, filter = 'all') {
+                const container = document.getElementById('formRemarks');
+
+                if (comments.length === 0 && fees.length === 0) {
+                    container.innerHTML = `
+                                                                            <div class="empty-comments">
+                                                                                <i class="bi bi-chat"></i>
+                                                                                <p>No action has been taken in this form yet.</p>
+                                                                            </div>
+                                                                        `;
+                    return;
+                }
+
+                // Combine comments and fees
+                let allActivities = [];
+
+                if (filter === 'all' || filter === 'comment') {
+                    comments.forEach(comment => {
+                        allActivities.push({
+                            type: 'comment',
+                            data: comment,
+                            timestamp: new Date(comment.created_at)
+                        });
+                    });
+                }
+
+                if (filter === 'all' || filter === 'fee') {
+                    fees.forEach(fee => {
+                        allActivities.push({
+                            type: 'fee',
+                            data: fee,
+                            timestamp: new Date(fee.created_at)
+                        });
+                    });
+                }
+
+                // Sort by timestamp
+                allActivities.sort((a, b) => a.timestamp - b.timestamp);
+
+                // Render HTML
+                container.innerHTML = allActivities.map(activity => {
+                    return activity.type === 'comment'
+                        ? generateCommentHTML(activity.data)
+                        : generateFeeHTML(activity.data);
+                }).join('');
+            }
+
+            document.getElementById('activityFilter').addEventListener('change', function () {
+                const filter = this.value; // all / comment / fee
+                displayMixedActivity(currentComments, currentFees, filter);
+            });
+
+            // Function to generate comment HTML
+            function generateCommentHTML(comment) {
+                return `
+                                                                    <div class="comment mb-3">
+                                                                        <div class="d-flex align-items-start">
+                                                                            <!-- Admin Profile Picture -->
+                                                                            <div class="me-2 flex-shrink-0">
+                                                                                ${comment.admin.photo_url ?
+                        `<img src="${comment.admin.photo_url}" class="rounded-circle" width="40" height="40" alt="${comment.admin.first_name}'s profile picture" style="object-fit: cover;">` :
+                        `<div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width: 40px; height: 40px; font-size: 1rem;">
+                                                                                        ${comment.admin.first_name.charAt(0)}${comment.admin.last_name.charAt(0)}
+                                                                                    </div>`
+                    }
+                                                                            </div>
+
+                                                                            <!-- Message Bubble -->
+                                                                            <div class="flex-grow-1">
+                                                                                <div class="d-flex align-items-center mb-1">
+                                                                                    <strong class="me-2" style="font-size: 0.85rem;">${comment.admin.first_name} ${comment.admin.last_name}</strong>
+                                                                                    <small class="text-muted">${formatTimeAgo(comment.created_at)}</small>
+                                                                                </div>
+                                                                                <div class="message-bubble bg-primary text-white p-3 rounded-3" style="max-width: 80%; border-bottom-left-radius: 4px !important;">
+                                                                                    <p class="mb-0" style="white-space: pre-wrap; line-height: 1.4;">${escapeHtml(comment.comment)}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    `;
+            }
+
+
+            // Function to generate fee/action HTML
+            function generateFeeHTML(fee) {
+                const amount = parseFloat(fee.type === 'discount' ? fee.discount_amount : fee.fee_amount);
+                const typeName = fee.type === 'discount' ? 'Discount' : 'Additional fee';
+                const adminName = fee.added_by?.name || 'Admin';
+
+                let message = '';
+                let amountDisplay = '';
+
+                if (fee.type === 'discount') {
+                    if (fee.discount_type === 'Percentage') {
+                        // Remove .00 for percentage discounts
+                        amountDisplay = `${parseFloat(amount)}%`;
+                        message = `${adminName} added a discount - ${fee.label}: ${amountDisplay}`;
+                    } else {
+                        // Fixed discount: use formatMoney
+                        amountDisplay = `-${formatMoney(amount)}`;
+                        message = `${adminName} added a discount - ${fee.label}: ${amountDisplay}`;
+                    }
+                } else if (fee.type === 'fee') {
+                    // Regular fee: use formatMoney
+                    amountDisplay = `${formatMoney(amount)}`;
+                    message = `${adminName} added a fee - ${fee.label}: ${amountDisplay}`;
+                } else if (fee.type === 'mixed') {
+                    // Mixed fee and discount
+                    const feePart = fee.fee_amount > 0 ? `${formatMoney(fee.fee_amount)}` : '';
+                    const discountPart = fee.discount_amount > 0 ?
+                        (fee.discount_type === 'Percentage' ?
+                            `-${parseFloat(fee.discount_amount)}%` :
+                            `-${formatMoney(fee.discount_amount)}`) : '';
+                    amountDisplay = `${feePart} ${discountPart}`.trim();
+                    message = `${adminName} added a mixed fee - ${fee.label}: ${amountDisplay}`;
+                }
+
+                return `
+            <div class="comment mb-3">
+                <div class="d-flex align-items-start">
+                    <!-- Icon Circle -->
+                    <div class="me-2 flex-shrink-0">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 40px; height: 40px; font-size: 1rem; background-color: #d4edda; color: #28a745;">
+                            <i class="fa fa-money-bill"></i>
+                        </div>
+                    </div>
+
+                    <!-- Action Bubble -->
+                    <div class="flex-grow-1">
+                        <div class="message-bubble bg-info text-white p-3 rounded-3" 
+                             style="max-width: 80%; border-bottom-left-radius: 4px !important;">
+                            <p class="mb-1" style="white-space: normal; line-height: 1.4;">
+                                ${message}
+                            </p>
+                            <small class="text-dark">
+                                ${formatTimeAgo(fee.created_at)}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+            }
+
+            // Helper function to format time ago (e.g., "2 minutes ago")
+            function formatTimeAgo(timestamp) {
+                const now = new Date();
+                const commentTime = new Date(timestamp);
+                const diffInSeconds = Math.floor((now - commentTime) / 1000);
+
+                if (diffInSeconds < 60) {
+                    return 'just now';
+                } else if (diffInSeconds < 3600) {
+                    const minutes = Math.floor(diffInSeconds / 60);
+                    return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+                } else if (diffInSeconds < 86400) {
+                    const hours = Math.floor(diffInSeconds / 3600);
+                    return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+                } else if (diffInSeconds < 604800) {
+                    const days = Math.floor(diffInSeconds / 86400);
+                    return `${days} day${days !== 1 ? 's' : ''} ago`;
+                } else {
+                    return commentTime.toLocaleDateString();
+                }
+            }
+
+            // Helper function to escape HTML
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Auto-resize textarea
+            commentTextarea.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            // Send comment
+            commentSendBtn.addEventListener('click', async function () {
+                const commentText = commentTextarea.value.trim();
+
+                if (!commentText) {
+                    showToast('Please enter a comment', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/comment`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            comment: commentText
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.message || 'Failed to add comment');
+                    }
+
+                    if (result.success) {
+                        // Clear textarea and reset height
+                        commentTextarea.value = '';
+                        commentTextarea.style.height = 'auto';
+
+                        // Reload comments to show the new one
+                        loadMixedActivity();
+
+                        // Show success message
+                        showToast('Comment added successfully', 'success');
+                    }
+
+                } catch (error) {
+                    console.error('Error adding comment:', error);
+                    showToast('Failed to add comment: ' + error.message, 'error');
+                }
+            });
+
+            // Allow sending with Enter key (but allow Shift+Enter for new lines)
+            commentTextarea.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    commentSendBtn.click();
+                }
+            });
+
+            // Simple toast notification function
+            window.showToast = function (message, type = 'success', duration = 3000) {
+                const toast = document.createElement('div');
+
+                // Toast base styles
+                toast.className = `toast align-items-center border-0 position-fixed start-0 mb-2`;
+                toast.style.zIndex = '1100';
+                toast.style.bottom = '0';
+                toast.style.left = '0';
+                toast.style.margin = '1rem';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+                toast.setAttribute('role', 'alert');
+                toast.setAttribute('aria-live', 'assertive');
+                toast.setAttribute('aria-atomic', 'true');
+
+                // Colors
+                const bgColor = type === 'success' ? '#004183ff' : '#dc3545';
+                toast.style.backgroundColor = bgColor;
+                toast.style.color = '#fff';
+                toast.style.minWidth = '250px';
+                toast.style.borderRadius = '0.3rem';
+
+                toast.innerHTML = `
+                                                                                                                                                                                    <div class="d-flex align-items-center px-3 py-1"> 
+                                                                                                                                                                                        <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                                                                                                                                                                                        <div class="toast-body flex-grow-1" style="padding: 0.25rem 0;">${message}</div>
+                                                                                                                                                                                        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                    <div class="loading-bar" style="
+                                                                                                                                                                                        height: 3px;
+                                                                                                                                                                                        background: rgba(255,255,255,0.7);
+                                                                                                                                                                                        width: 100%;
+                                                                                                                                                                                        transition: width ${duration}ms linear;
+                                                                                                                                                                                    "></div>
+                                                                                                                                                                                `;
+
+                document.body.appendChild(toast);
+
+                // Bootstrap toast instance
+                const bsToast = new bootstrap.Toast(toast, { autohide: false });
+                bsToast.show();
+
+                // Float up appear animation
+                requestAnimationFrame(() => {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateY(0)';
+                });
+
+                // Start loading bar animation
+                const loadingBar = toast.querySelector('.loading-bar');
+                requestAnimationFrame(() => {
+                    loadingBar.style.width = '0%';
+                });
+
+                // Remove after duration
+                setTimeout(() => {
+                    // Float down disappear animation
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(20px)';
+
+                    setTimeout(() => {
+                        bsToast.hide();
+                        toast.remove();
+                    }, 400);
+                }, duration);
+            };
+
+
+            // Load comments when page loads
+            loadMixedActivity();
+
+            // Function to refresh all fee displays including the total
+            async function refreshAllFeeDisplays() {
+                try {
+                    // Fetch updated request data
+                    const response = await fetch(`/api/admin/requisition-forms/${requestId}`, {
                         headers: {
                             'Authorization': `Bearer ${adminToken}`,
                             'Accept': 'application/json'
                         }
                     });
 
-                    if (adminResponse.ok) {
-                        const adminData = await adminResponse.json();
-                        adminName = `${adminData.first_name}${adminData.middle_name ? ' ' + adminData.middle_name : ''} ${adminData.last_name}`;
-                        adminPhoto = adminData.photo_url;
+                    if (response.ok) {
+                        const requestData = await response.json();
+
+                        // Update the total approved fee in both locations
+                        const totalFee = formatMoney(requestData.fees.approved_fee);
+                        document.getElementById('totalApprovedFee').textContent = `₱${totalFee}`;
+                        document.getElementById('feeBreakdownTotal').textContent = `₱${totalFee}`;
+
+                        // Update additional fees display
+                        if (requestData.fees.requisition_fees) {
+                            updateAdditionalFees(requestData.fees.requisition_fees);
+                        }
+
+                        // Update base fees display
+                        if (requestData.requested_items) {
+                            updateBaseFees(requestData.requested_items, requestData.schedule);
+                        }
+
+                        // Refresh activity timeline
+                        await loadMixedActivity();
                     }
                 } catch (error) {
-                    console.error('Failed to fetch admin info:', error);
+                    console.error('Error refreshing fee displays:', error);
                 }
-            } else {
-                // Use the admin info from the fee response
-                adminName = fee.added_by.name;
             }
 
-            feeItem.innerHTML = `
-                                                                                                                                                                                                                                                                                                                                                                                                                ${adminPhoto ?
-                    `<img src="${adminPhoto}" class="rounded-circle me-3" width="32" height="32" alt="Admin Photo">` :
-                    `<i class="bi bi-person-circle fs-5 me-3 text-secondary"></i>`
+
+            // Function to show status update modal
+            function showStatusUpdateModal(status) {
+                const modalContent = document.getElementById('statusModalContent');
+                const statusBadge = document.getElementById('statusBadge');
+                const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
+
+                if (currentStatusName === 'Pending Approval' && status !== 'Cancel Form') {
+                    showToast('Finalize the form first', 'error');
+                    return;
                 }
-                                                                                                                                                                                                                                                                                                                                                                                                                <div class="flex-grow-1">
-                                                                                                                                                                                                                                                                                                                                                                                                                    <div class="d-flex justify-content-between align-items-center">
-                                                                                                                                                                                                                                                                                                                                                                                                                        <div>
-                                                                                                                                                                                                                                                                                                                                                                                                                            <small class="text-muted fst-italic">
-                                                                                                                                                                                                                                                                                                                                                                                                                                ${fee.label} (${typeName}) of ₱${amount.toFixed(2)} added by <strong>${adminName}</strong>
-                                                                                                                                                                                                                                                                                                                                                                                                                            </small>
+
+                // Set modal content based on selected status
+                switch (status) {
+                    case 'Scheduled':
+                        modalContent.innerHTML = `
+                                                                    <div class="text-center">
+                                                                        <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                                                                        <p>Are you sure? This action cannot be undone.</p>
+                                                                        <p class="text-muted small">
+                                                                            This will set the form's status to <strong>Scheduled</strong>.
+                                                                            The request can still be cancelled if an emergency happens. 
+                                                                            If such a situation occurs, make sure to contact the requester about refund details and settle it in the business office on campus before closing the form.
+                                                                        </p>
+                                                                    </div>
+                                                                `;
+                        break;
+                    case 'Ongoing':
+                        modalContent.innerHTML = `
+                                                                    <div class="text-center">
+                                                                        <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                                                                        <p>Are you sure? This action cannot be undone.</p>
+                                                                        <p class="text-muted small">
+                                                                            Sets the form status to <strong>Ongoing</strong>. Use this to manually set it if not already done. 
+                                                                        </p>
+                                                                    </div>
+                                                                `;
+                        break;
+                    case 'Late':
+                        modalContent.innerHTML = `
+                                                                    <div class="text-center">
+                                                                        <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                                                                        <p>Are you sure? This action cannot be undone.</p>
+                                                                        <p class="text-muted small">
+                                                                            This will set the form's status to <strong>Late</strong> and mark it as overdue.
+                                                                        </p>
+                                                                    </div>
+                                                                    <div class="mt-4">
+                                                                        <div class="mb-3">
+                                                                            <label for="latePenaltyAmount" class="form-label">Late Penalty Amount (Optional)</label>
+                                                                            <div class="input-group">
+                                                                                <span class="input-group-text">₱</span>
+                                                                                <input type="number" class="form-control" id="latePenaltyAmount" 
+                                                                                       placeholder="Enter penalty amount" step="0.01" min="0" value="0">
+                                                                            </div>
+                                                                            <small class="text-muted">Enter the late penalty amount to be added to the fees (leave as 0 for no penalty).</small>
+                                                                        </div>
+                                                                    </div>
+                                                                `;
+                        break;
+                    case 'Cancel Form':
+                        modalContent.innerHTML = `
+                                                                    <div class="text-center">
+                                                                        <i class="fa fa-exclamation-circle fa-3x text-danger mb-3"></i>
+                                                                        <p>Are you sure? This action cannot be undone.</p>
+                                                                        <p class="text-muted small">
+                                                                            This will <strong class="text-danger">cancel</strong> the form and set its status to <strong>Cancelled</strong>.
+                                                                            Note: This action cannot be undone. The requester will be notified about the cancellation.
+                                                                        </p>
+                                                                    </div>
+                                                                `;
+                        break;
+                }
+
+                selectedStatus = status;
+                statusUpdateModal.show();
+            }
+
+            // Confirm status update
+            document.getElementById('confirmStatusUpdate').addEventListener('click', async function () {
+                if (!selectedStatus) return;
+
+                const btn = this;
+                const originalText = btn.innerHTML;
+                const adminToken = localStorage.getItem('adminToken');
+
+                try {
+                    // Show loading state
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+
+                    // Prepare request data
+                    const requestData = {
+                        status_name: selectedStatus
+                    };
+
+                    // Add late penalty fee for Late status
+                    if (selectedStatus === 'Late') {
+                        const penaltyAmount = document.getElementById('latePenaltyAmount').value;
+                        if (penaltyAmount && parseFloat(penaltyAmount) > 0) {
+                            requestData.late_penalty_fee = parseFloat(penaltyAmount);
+                        }
+                    }
+
+                    const statusResponse = await fetch(`/api/admin/requisition/${requestId}/update-status`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    const contentType = statusResponse.headers.get('content-type');
+                    let statusResponseData;
+
+                    if (contentType && contentType.includes('application/json')) {
+                        statusResponseData = await statusResponse.json();
+                    } else {
+                        const textResponse = await statusResponse.text();
+                        throw new Error(textResponse || 'Non-JSON response from server');
+                    }
+
+                    if (!statusResponse.ok) {
+                        const errorMessage = statusResponseData.error ||
+                            statusResponseData.message ||
+                            JSON.stringify(statusResponseData) ||
+                            'Failed to update status';
+                        throw new Error(errorMessage);
+                    }
+
+                    showToast('Status updated successfully!', 'success');
+                    statusUpdateModal.hide();
+                    selectedStatus = '';
+
+                    // Refresh the entire page to show updated status and UI
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+
+                    // Refresh the page to show updated status and fees
+                    fetchRequestDetails();
+
+                    // Update the dropdown text after status change
+                    updateStatusDropdownText();
+
+                } catch (error) {
+                    console.error('Error updating status:', error);
+                    console.error('Status update details:', {
+                        requestId: requestId,
+                        status: selectedStatus,
+                        error: error.message
+                    });
+                    showToast('Error: ' + error.message, 'error');
+                } finally {
+                    // Reset button state
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            });
+
+
+            // Update the closeForm function to use the modal
+            async function closeForm() {
+                closeFormModal.show();
+            }
+
+            function handleUnmarkLate() {
+                const modalContent = document.getElementById('statusModalContent');
+
+                modalContent.innerHTML = `
+                                                            <div class="text-center">
+                                                                <i class="fa fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                                                                <p>Are you sure you want to unmark this form as late/damaged?</p>
+                                                                <p class="text-muted small">
+                                                                    This will set the form's status back to <strong>Ongoing</strong>, remove the late flag, 
+                                                                    and reset any penalty fees to zero.
+                                                                </p>
+                                                            </div>
+                                                        `;
+
+                selectedStatus = 'Ongoing'; // Set to Ongoing to unmark late
+                statusUpdateModal.show();
+            }
+
+            // Add event listener for the confirm button
+            document.getElementById('confirmCloseForm').addEventListener('click', async function () {
+                const btn = this;
+                const spinner = btn.querySelector('.spinner-border');
+                const originalText = btn.innerHTML;
+
+                // Show loading state
+                btn.disabled = true;
+                spinner.classList.remove('d-none');
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Closing...';
+
+                const adminToken = localStorage.getItem('adminToken');
+
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/close`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.details || 'Failed to close form');
+                    }
+
+                    closeFormModal.hide();
+                    showToast('Form closed successfully!', 'success');
+
+                    // REDIRECT to manage-requests instead of refreshing
+                    setTimeout(() => {
+                        window.location.href = '/admin/manage-requests';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Error closing form:', error);
+                    showToast('Error: ' + error.message, 'error');
+
+                    // Reset button state on error
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    spinner.classList.add('d-none');
+                }
+            });
+
+            // Also update the event listener for the close form option in the dropdown
+            document.getElementById('closeForm').addEventListener('click', function (e) {
+                e.preventDefault();
+                closeForm();
+            });
+
+            // Function to add late penalty
+            async function addLatePenalty(penaltyAmount) {
+                const adminToken = localStorage.getItem('adminToken');
+
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/late-penalty`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            penalty_amount: penaltyAmount
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.details || 'Failed to add late penalty');
+                    }
+
+                    showToast('Late penalty added successfully!', 'success');
+                    // Refresh the page to show updated fees
+                    fetchRequestDetails();
+
+                } catch (error) {
+                    console.error('Error adding late penalty:', error);
+                    showToast('Error: ' + error.message, 'error');
+                }
+            }
+
+            document.getElementById('confirmFinalize').addEventListener('click', async function (e) {
+                e.preventDefault();
+
+                const btn = document.getElementById('confirmFinalize');
+
+                const calendarTitle = document.getElementById('calendarTitle').value.trim();
+                let calendarDescription = document.getElementById('calendarDescription').value.trim();
+                const adminToken = localStorage.getItem('adminToken');
+
+                // Title validation
+                if (!calendarTitle || calendarTitle.length > 50) {
+                    showToast('Calendar Title is required and must not exceed 50 characters.', 'error');
+                    document.getElementById('calendarTitle').focus();
+                    return;
+                }
+
+                // Description nullable
+                if (!calendarDescription) {
+                    calendarDescription = null;
+                } else if (calendarDescription.length > 100) {
+                    showToast('Calendar Description must not exceed 100 characters.', 'error');
+                    document.getElementById('calendarDescription').focus();
+                    return;
+                }
+
+                // Disable button and show spinner - USING THE SAME PATTERN AS checkAvailability
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Finalizing...';
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/finalize`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            calendar_title: calendarTitle,
+                            calendar_description: calendarDescription
+                        })
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    let responseData;
+
+                    if (contentType && contentType.includes('application/json')) {
+                        responseData = await response.json();
+                    } else {
+                        const textResponse = await response.text();
+                        throw new Error(textResponse || 'Non-JSON response from server');
+                    }
+
+                    if (!response.ok) {
+                        const errorMessage = responseData.error ||
+                            responseData.message ||
+                            (responseData.details ? JSON.stringify(responseData.details) : 'Failed to finalize request');
+                        throw new Error(errorMessage);
+                    }
+
+                    // Successful finalization
+                    finalizeModal.hide();
+                    document.getElementById('calendarTitle').value = '';
+                    document.getElementById('calendarDescription').value = '';
+                    fetchRequestDetails();
+                    showToast('Form finalized successfully!', 'success');
+
+                } catch (error) {
+                    console.error('Error finalizing request:', error);
+                    console.error('Finalize request details:', {
+                        requestId: requestId,
+                        calendarTitle: calendarTitle,
+                        calendarDescription: calendarDescription,
+                        error: error.message
+                    });
+                    showToast('Error: ' + error.message, 'error');
+                } finally {
+                    // Re-enable button and restore original text - USING THE SAME PATTERN AS checkAvailability
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            });
+
+
+
+
+            // Handle individual waiver checkbox changes
+            async function handleWaiverChange(checkbox) {
+                const type = checkbox.dataset.type;
+                const id = parseInt(checkbox.dataset.id);
+                const isWaived = checkbox.checked;
+
+                // Update UI immediately for better UX
+                const itemRow = checkbox.closest('.item-row');
+                if (itemRow) {
+                    if (isWaived) {
+                        itemRow.classList.add('waived');
+                    } else {
+                        itemRow.classList.remove('waived');
+                    }
+                }
+
+                // Collect ALL waived items (both checked ones)
+                const waivedFacilities = [];
+                const waivedEquipment = [];
+
+                document.querySelectorAll('.waiver-checkbox').forEach(cb => {
+                    const itemId = parseInt(cb.dataset.id);
+                    const itemType = cb.dataset.type;
+
+                    if (cb.checked) {
+                        if (itemType === 'facility') {
+                            waivedFacilities.push(itemId);
+                        } else if (itemType === 'equipment') {
+                            waivedEquipment.push(itemId);
+                        }
+                    }
+                });
+
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/waive`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            waived_facilities: waivedFacilities,
+                            waived_equipment: waivedEquipment
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        let errorMessage = 'Failed to update waiver status';
+                        if (errorData.details) {
+                            if (typeof errorData.details === 'object') {
+                                errorMessage = Object.values(errorData.details).flat().join(', ');
+                            } else {
+                                errorMessage = errorData.details;
+                            }
+                        } else if (errorData.error) {
+                            errorMessage = errorData.error;
+                        }
+                        throw new Error(errorMessage);
+                    }
+
+                    const result = await response.json();
+
+                    // Refresh ALL fee displays including the total
+                    await refreshAllFeeDisplays();
+
+                    // Show appropriate success message based on action
+                    if (type === 'facility') {
+                        const facilityName = itemRow ? itemRow.querySelector('.item-name').textContent : 'Facility';
+                        if (isWaived) {
+                            showToast(`${facilityName} waived successfully.`, 'success');
+                        } else {
+                            showToast(`${facilityName} waiver removed.`, 'success');
+                        }
+                    } else if (type === 'equipment') {
+                        const equipmentName = itemRow ? itemRow.querySelector('.item-name').textContent : 'Equipment';
+                        if (isWaived) {
+                            showToast(`${equipmentName} waived successfully.`, 'success');
+                        } else {
+                            showToast(`${equipmentName} waiver removed.`, 'success');
+                        }
+                    }
+
+                    console.log('Sending waiver request:', {
+                        waived_facilities: waivedFacilities,
+                        waived_equipment: waivedEquipment
+                    });
+
+                } catch (error) {
+                    console.error('Error updating waiver:', error);
+                    // Revert checkbox state on error
+                    checkbox.checked = !isWaived;
+                    if (itemRow) {
+                        itemRow.classList.toggle('waived');
+                    }
+                    showToast('Failed to update waiver: ' + error.message, 'error');
+                }
+            }
+            document.getElementById('waiveAllSwitch').addEventListener('change', function () {
+                handleWaiveAll(this);
+            });
+
+            // Handle "Waive All" toggle switch
+            async function handleWaiveAll(switchElement) {
+                const waiveAll = switchElement.checked;
+
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/waive`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            waive_all: waiveAll
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.details || 'Failed to update waiver status');
+                    }
+
+                    const result = await response.json();
+
+                    // Update all checkboxes to match the "waive all" state
+                    document.querySelectorAll('.waiver-checkbox').forEach(checkbox => {
+                        checkbox.checked = waiveAll;
+                        const itemRow = checkbox.closest('.item-row');
+                        if (itemRow) {
+                            if (waiveAll) {
+                                itemRow.classList.add('waived');
+                            } else {
+                                itemRow.classList.remove('waived');
+                            }
+                        }
+                    });
+
+                    // Refresh ALL fee displays including the total
+                    await refreshAllFeeDisplays();
+
+                    // Show success message
+                    if (waiveAll) {
+                        showToast('All items waived successfully.', 'success');
+                    } else {
+                        showToast('All waivers removed.', 'success');
+                    }
+
+                } catch (error) {
+                    console.error('Error updating waive all:', error);
+                    // Revert switch state on error
+                    switchElement.checked = !waiveAll;
+                    showToast('Failed to update waive all: ' + error.message, 'error');
+                }
+            }
+
+            // A map to get user-friendly names for fee types
+            const feeTypeNames = {
+                additional: 'Additional fee',
+                discount: 'Discount',
+            };
+
+
+
+            // Remove the togglePlaceholder function entirely and replace it with:
+            function updateFeesDisplay() {
+                const feesContainer = document.getElementById('additionalFeesContainer');
+                // This function can be used to update the fees display if needed
+                // But we don't need the placeholder logic anymore
+            }
+
+            // Show the modal when "Add Fee" is clicked
+            addFeeBtn.addEventListener("click", function () {
+                feeModal.show();
+            });
+
+
+            // Handle fee type change to show/hide discount type
+            feeTypeSelect.addEventListener('change', function () {
+                discountTypeSection.style.display = this.value === 'discount' ? 'block' : 'none';
+            });
+
+
+            // Save Fee button logic
+            saveFeeBtn.addEventListener("click", async function () {
+                const type = feeTypeSelect.value;
+                const value = parseFloat(feeValueInput.value);
+                const label = document.getElementById('feeLabel').value;
+                const discountType = document.getElementById('discountType').value;
+
+                if (!type || !value || !label) {
+                    showToast("Please fill all required fields.", "success");
+                    return;
+                }
+
+                try {
+                    let endpoint = '';
+                    let requestData = {};
+
+                    // Determine which API endpoint to call based on fee type
+                    switch (type) {
+                        case 'additional':
+                            endpoint = `/api/admin/requisition/${requestId}/fee`;
+                            requestData = {
+                                label: label,
+                                fee_amount: value
+                            };
+                            break;
+                        case 'discount':
+                            endpoint = `/api/admin/requisition/${requestId}/discount`;
+                            requestData = {
+                                label: label,
+                                discount_amount: value,
+                                discount_type: discountType
+                            };
+                            break;
+                    }
+
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.details || 'Failed to add fee/discount');
+                    }
+
+                    const result = await response.json();
+
+                    // Reset and close modal
+                    feeValueInput.value = "";
+                    feeTypeSelect.value = "";
+                    document.getElementById('feeLabel').value = "";
+                    discountTypeSection.style.display = 'none';
+                    feeModal.hide();
+
+                    // Show success message
+                    showToast('Fee/discount added successfully', 'success');
+
+                    // Refresh ALL fee displays including the total
+                    await refreshAllFeeDisplays();
+
+                } catch (error) {
+                    console.error('Error adding fee/discount:', error);
+                    console.error('Fee addition details:', {
+                        type: type,
+                        value: value,
+                        label: label,
+                        discountType: discountType,
+                        error: error.message
+                    });
+                    showToast('Failed to add fee/discount: ' + error.message, 'error');
+                }
+            });
+
+            // Document preview functionality - clean overlay for PDFs and images
+            document.addEventListener('click', function (event) {
+                // Check if the click is on a button that has data-bs-target="#documentModal" 
+                // and data-document-url attributes
+                let button = null;
+
+                if (event.target.matches('[data-bs-target="#documentModal"]')) {
+                    button = event.target;
+                } else if (event.target.closest('[data-bs-target="#documentModal"]')) {
+                    button = event.target.closest('[data-bs-target="#documentModal"]');
+                }
+
+                if (button && button.hasAttribute('data-document-url')) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const documentUrl = button.getAttribute('data-document-url');
+                    const documentTitle = button.getAttribute('data-document-title');
+                    const fileExtension = documentUrl.split('.').pop().toLowerCase();
+                    const isPDF = fileExtension === 'pdf';
+                    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension);
+
+                    // Disable main page scrolling
+                    const originalBodyStyles = {
+                        overflow: document.body.style.overflow,
+                        position: document.body.style.position,
+                        width: document.body.style.width,
+                        height: document.body.style.height
+                    };
+
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.position = 'fixed';
+                    document.body.style.width = '100%';
+                    document.body.style.height = '100%';
+
+                    // Create overlay container
+                    const overlay = document.createElement('div');
+                    overlay.style.position = 'fixed';
+                    overlay.style.top = '0';
+                    overlay.style.left = '0';
+                    overlay.style.width = '100%';
+                    overlay.style.height = '100%';
+                    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+                    overlay.style.zIndex = '9999';
+                    overlay.style.display = 'flex';
+                    overlay.style.justifyContent = 'center';
+                    overlay.style.alignItems = 'center';
+                    overlay.style.cursor = 'pointer';
+
+                    // Close overlay when clicking on the background
+                    overlay.onclick = function (event) {
+                        if (event.target === overlay) {
+                            closeOverlay();
+                        }
+                    };
+
+                    // Close on ESC key
+                    const handleEscape = function (event) {
+                        if (event.key === 'Escape') {
+                            closeOverlay();
+                        }
+                    };
+                    document.addEventListener('keydown', handleEscape);
+
+                    // Function to close overlay and restore scrolling
+                    function closeOverlay() {
+                        document.body.removeChild(overlay);
+                        document.removeEventListener('keydown', handleEscape);
+
+                        // Restore original body styles
+                        document.body.style.overflow = originalBodyStyles.overflow || '';
+                        document.body.style.position = originalBodyStyles.position || '';
+                        document.body.style.width = originalBodyStyles.width || '';
+                        document.body.style.height = originalBodyStyles.height || '';
+                    }
+
+                    // Create close button (positioned absolutely in the top right corner)
+                    const closeButton = document.createElement('button');
+                    closeButton.innerHTML = '&times;';
+                    closeButton.style.position = 'absolute';
+                    closeButton.style.top = '20px';
+                    closeButton.style.right = '20px';
+                    closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+                    closeButton.style.color = 'white';
+                    closeButton.style.border = 'none';
+                    closeButton.style.borderRadius = '50%';
+                    closeButton.style.width = '40px';
+                    closeButton.style.height = '40px';
+                    closeButton.style.fontSize = '24px';
+                    closeButton.style.cursor = 'pointer';
+                    closeButton.style.transition = 'background 0.2s';
+                    closeButton.style.zIndex = '10000';
+                    closeButton.onmouseover = function () {
+                        this.style.background = 'rgba(255, 255, 255, 0.3)';
+                    };
+                    closeButton.onmouseout = function () {
+                        this.style.background = 'rgba(255, 255, 255, 0.2)';
+                    };
+                    closeButton.onclick = function (e) {
+                        e.stopPropagation();
+                        closeOverlay();
+                    };
+                    overlay.appendChild(closeButton);
+
+                    // Create loading indicator container
+                    const loadingContainer = document.createElement('div');
+                    loadingContainer.style.display = 'flex';
+                    loadingContainer.style.flexDirection = 'column';
+                    loadingContainer.style.alignItems = 'center';
+                    loadingContainer.style.justifyContent = 'center';
+                    loadingContainer.style.position = 'absolute';
+                    loadingContainer.style.zIndex = '1000';
+
+                    // Create loading indicator
+                    const loadingIndicator = document.createElement('div');
+                    loadingIndicator.className = 'spinner-border text-light';
+                    loadingIndicator.style.width = '3rem';
+                    loadingIndicator.style.height = '3rem';
+                    loadingContainer.appendChild(loadingIndicator);
+
+                    // Create loading text
+                    const loadingText = document.createElement('div');
+                    loadingText.textContent = 'Loading document...';
+                    loadingText.style.color = 'white';
+                    loadingText.style.marginTop = '1.5rem';
+                    loadingText.style.fontSize = '1.1rem';
+                    loadingContainer.appendChild(loadingText);
+
+                    // Create troubleshooting text (only shown during loading)
+                    const troubleText = document.createElement('div');
+                    troubleText.innerHTML = '<p class="text-light text-center mt-2" style="font-size: 0.9rem;">If the document doesn\'t load, try <a href="' + documentUrl + '" target="_blank" style="color: #328bffff; text-decoration: underline;">opening in a new tab</a> or refreshing the page.</p>';
+                    troubleText.style.color = 'white';
+                    troubleText.style.marginTop = '0.5rem';
+                    troubleText.style.textAlign = 'center';
+                    loadingContainer.appendChild(troubleText);
+
+                    overlay.appendChild(loadingContainer);
+
+                    // Function to remove loading elements
+                    function removeLoadingElements() {
+                        loadingContainer.remove();
+                    }
+
+                    if (isPDF) {
+                        // For PDF files - Google Docs viewer in full overlay
+                        const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(documentUrl)}&embedded=true`;
+
+                        const iframe = document.createElement('iframe');
+                        iframe.src = viewerUrl;
+                        iframe.style.width = '90%';
+                        iframe.style.height = '90%';
+                        iframe.style.border = 'none';
+                        iframe.style.borderRadius = '8px';
+                        iframe.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
+                        iframe.style.opacity = '0';
+                        iframe.style.transition = 'opacity 0.3s ease-in-out';
+
+                        iframe.onload = function () {
+                            // Hide loading elements when iframe loads
+                            removeLoadingElements();
+                            iframe.style.opacity = '1';
+                        };
+
+                        overlay.appendChild(iframe);
+
+                    } else if (isImage) {
+                        // For image files - centered image with close button
+                        const imageContainer = document.createElement('div');
+                        imageContainer.style.position = 'relative';
+                        imageContainer.style.maxWidth = '90%';
+                        imageContainer.style.maxHeight = '90%';
+
+                        const img = document.createElement('img');
+                        img.src = documentUrl;
+                        img.alt = documentTitle;
+                        img.style.maxWidth = '100%';
+                        img.style.maxHeight = '90vh';
+                        img.style.borderRadius = '8px';
+                        img.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
+                        img.style.objectFit = 'contain';
+                        img.style.opacity = '0';
+                        img.style.transition = 'opacity 0.3s ease-in-out';
+
+                        img.onload = function () {
+                            // Hide loading elements when image loads
+                            removeLoadingElements();
+                            img.style.opacity = '1';
+                        };
+
+                        img.onerror = function () {
+                            // If image fails to load, show error message
+                            loadingIndicator.style.display = 'none';
+                            loadingText.textContent = 'Failed to load image. Please try opening in a new tab.';
+                            loadingText.style.color = '#ff6b6b';
+                            // Keep the troubleshooting text visible for errors
+                        };
+
+                        imageContainer.appendChild(img);
+                        overlay.appendChild(imageContainer);
+
+                    } else {
+                        // For other file types - download link
+                        removeLoadingElements();
+
+                        const downloadContainer = document.createElement('div');
+                        downloadContainer.style.background = 'white';
+                        downloadContainer.style.padding = '2rem';
+                        downloadContainer.style.borderRadius = '8px';
+                        downloadContainer.style.textAlign = 'center';
+
+                        const message = document.createElement('p');
+                        message.textContent = 'This file type cannot be previewed.';
+                        message.style.marginBottom = '1rem';
+
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = documentUrl;
+                        downloadLink.className = 'btn btn-primary';
+                        downloadLink.innerHTML = '<i class="bi bi-download"></i> Download File';
+                        downloadLink.download = documentTitle;
+                        downloadLink.onclick = function () {
+                            closeOverlay();
+                        };
+
+                        downloadContainer.appendChild(message);
+                        downloadContainer.appendChild(downloadLink);
+                        overlay.appendChild(downloadContainer);
+                    }
+
+                    // Add to document body
+                    document.body.appendChild(overlay);
+                }
+            });
+
+            // Initialize compact calendar
+            let calendar;
+            function initializeCalendar() {
+                const calendarEl = document.getElementById('calendar');
+                const currentRequest = allRequests.find(req => req.request_id == requestId);
+                if (!calendarEl) return;
+
+                // Get status names to exclude
+                const excludedStatuses = ['Late', 'Returned', 'Late Return', 'Completed'];
+
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'timeGridWeek',
+                    initialDate: currentRequest.schedule.start_date,
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    buttonText: {
+                        today: 'Today',
+                        month: 'Month',
+                        week: 'Week',
+                        day: 'Day'
+                    },
+                    titleFormat: {
+                        year: 'numeric',
+                        month: 'short'
+                    },
+                    height: '100%',
+                    handleWindowResize: true,
+                    windowResizeDelay: 200,
+                    aspectRatio: null,
+                    expandRows: true,
+                    events: [],
+                    eventClick: function (info) {
+                        const request = allRequests.find(req => req.request_id == info.event.extendedProps.requestId);
+                        if (request) {
+                            showEventModal(request);
+                        }
+                    },
+                    eventDidMount: function (info) {
+                        // Add custom styling based on status
+                        const request = allRequests.find(req => req.request_id == info.event.extendedProps.requestId);
+
+                        if (request) {
+                            // Special styling for current request
+                            if (info.event.extendedProps.isCurrent) {
+                                info.el.style.backgroundColor = '#8164c4ff';
+                                info.el.style.borderColor = '#8164c4ff';
+                                info.el.style.color = '#FFFFFF';
+                                info.el.style.fontWeight = 'bold';
+                            } else {
+                                info.el.style.backgroundColor = request.form_details.status.color;
+                                info.el.style.borderColor = request.form_details.status.color;
+                            }
+                        }
+                    },
+                    datesSet: function (info) {
+                        // Force refresh of calendar rendering
+                        calendar.updateSize();
+                    },
+                    viewDidMount: function (info) {
+                        // Ensure proper initial rendering
+                        setTimeout(() => calendar.updateSize(), 0);
+                    },
+                    eventTimeFormat: {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    },
+                    slotMinTime: '00:00:00',
+                    slotMaxTime: '24:00:00',
+                    allDaySlot: false,
+                    nowIndicator: true,
+                    navLinks: true,
+                    dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric' },
+                    views: {
+                        dayGridMonth: {
+                            dayHeaderFormat: {
+                                weekday: 'short'
+                            }
+                        }
+                    },
+                    eventDisplay: 'block'
+                });
+
+                calendar.render();
+
+                // Update calendar with filtered events
+                if (calendar) {
+                    calendar.removeAllEvents();
+
+                    // Filter requests to exclude the specified statuses AND exclude current request from regular events
+                    const filteredRequests = allRequests.filter(req => {
+                        const statusName = req.form_details.status.name;
+
+                        // Skip if status is in excluded list
+                        if (excludedStatuses.includes(statusName)) {
+                            return false;
+                        }
+
+                        // Skip the current request (we'll add it separately with special styling)
+                        if (req.request_id == requestId) {
+                            return false;
+                        }
+
+                        // Include all other requests
+                        return true;
+                    });
+
+                    console.log('Filtered calendar events:', {
+                        totalRequests: allRequests.length,
+                        filteredRequests: filteredRequests.length,
+                        excludedStatuses: excludedStatuses,
+                        filteredRequestIds: filteredRequests.map(r => r.request_id),
+                        currentRequestId: requestId
+                    });
+
+                    // Add filtered events to calendar (excluding current request)
+                    filteredRequests.forEach(req => {
+                        const calendarTitle = req.form_details.calendar_info.title || 'No Calendar Title';
+
+                        calendar.addEvent({
+                            title: calendarTitle,
+                            start: `${req.schedule.start_date}T${req.schedule.start_time}`,
+                            end: `${req.schedule.end_date}T${req.schedule.end_time}`,
+                            extendedProps: {
+                                status: req.form_details.status.name,
+                                requestId: req.request_id,
+                                isCurrent: false
+                            },
+                            description: req.form_details.calendar_info.description
+                        });
+                    });
+
+                    // Add current request with special styling (only once)
+                    const currentCalendarTitle = currentRequest.form_details.calendar_info.title || 'No Calendar Title';
+
+                    calendar.addEvent({
+                        title: 'Current Request', // You can change this to currentCalendarTitle if you prefer
+                        start: `${currentRequest.schedule.start_date}T${currentRequest.schedule.start_time}`,
+                        end: `${currentRequest.schedule.end_date}T${currentRequest.schedule.end_time}`,
+                        extendedProps: {
+                            status: currentRequest.form_details.status.name,
+                            requestId: currentRequest.request_id,
+                            isCurrent: true
+                        },
+                        color: '#FF6B35', // Different color for current request
+                        textColor: '#FFFFFF',
+                        description: currentRequest.form_details.calendar_info.description
+                    });
+                }
+            }
+
+            // Function to show event details in modal
+            function showEventModal(request) {
+                // Format request ID with leading zeros
+                const formattedRequestId = String(request.request_id).padStart(4, '0');
+                // Handle empty calendar title
+                const calendarTitle = request.form_details.calendar_info.title || 'No Calendar Title';
+                // Update modal title with request ID and calendar title
+                document.getElementById('eventModalTitle').textContent =
+                    `Request ID #${formattedRequestId} (${request.form_details.calendar_info.title})`;
+
+                document.getElementById('modalRequester').textContent = `${request.user_details.first_name} ${request.user_details.last_name}`;
+                document.getElementById('modalPurpose').textContent = request.form_details.purpose;
+                document.getElementById('modalParticipants').textContent = request.form_details.num_participants;
+                document.getElementById('modalStatus').innerHTML = `
+                                                                        <span class="badge" style="background-color: ${request.form_details.status.color}">
+                                                                            ${request.form_details.status.name}
+                                                                        </span>
+                                                                    `;
+                document.getElementById('modalFee').textContent = `${formatMoney(request.fees.tentative_fee)}`;
+                document.getElementById('modalApprovals').textContent = `${request.approval_info.approval_count}`;
+
+                // Format requested items for the right column
+                let itemsHtml = '';
+
+                if (request.requested_items.facilities.length > 0) {
+                    itemsHtml += '<div class="fw-bold small mb-1">Facilities:</div>';
+                    itemsHtml += request.requested_items.facilities.map(f =>
+                        `<div class="mb-1 small">• ${f.name} | ${formatMoney(f.fee)}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}${f.is_waived ? ' <span class="text-muted">(Waived)</span>' : ''}</div>`
+                    ).join('');
+                }
+
+                if (request.requested_items.equipment.length > 0) {
+                    itemsHtml += '<div class="fw-bold small mt-2 mb-1">Equipment:</div>';
+                    itemsHtml += request.requested_items.equipment.map(e =>
+                        `<div class="mb-1 small">• ${e.name} × ${e.quantity || 1} | ${formatMoney(e.fee)}${e.rate_type === 'Per Hour' ? '/hour' : '/event'}${e.is_waived ? ' <span class="text-muted">(Waived)</span>' : ''}</div>`
+                    ).join('');
+                }
+
+                document.getElementById('modalItems').innerHTML = itemsHtml || '<p class="text-muted small">No items requested</p>';
+
+                // Set up view details button
+                document.getElementById('modalViewDetails').onclick = function () {
+                    window.location.href = `/admin/requisition/${request.request_id}`;
+                };
+
+                eventModal.show();
+            }
+
+            // Function to update additional fees display
+            function updateAdditionalFees(requisitionFees) {
+                const additionalFeesContainer = document.getElementById('additionalFeesContainer');
+
+                // Clear existing content
+                additionalFeesContainer.innerHTML = '';
+
+                if (requisitionFees && requisitionFees.length > 0) {
+                    requisitionFees.forEach((fee, index) => {
+                        const feeElement = document.createElement('div');
+                        feeElement.className = 'fee-item d-flex justify-content-between align-items-center mb-1';
+
+                        let amountText = '';
+                        if (fee.type === 'fee') {
+                            amountText = `${formatMoney(fee.fee_amount)}`;
+                        } else if (fee.type === 'discount') {
+                            if (fee.discount_type === 'Percentage') {
+                                // Remove .00 for percentage discounts
+                                amountText = `${parseFloat(fee.discount_amount)}%`;
+                            } else {
+                                amountText = `-${formatMoney(fee.discount_amount)}`;
+                            }
+                        } else if (fee.type === 'mixed') {
+                            const feePart = fee.fee_amount > 0 ? `${formatMoney(fee.fee_amount)}` : '';
+                            const discountPart = fee.discount_amount > 0 ?
+                                (fee.discount_type === 'Percentage' ?
+                                    `-${parseFloat(fee.discount_amount)}%` :
+                                    `-₱${parseFloat(fee.discount_amount).toFixed(2)}`) : '';
+                            amountText = `${feePart} ${discountPart}`.trim();
+                        }
+
+                        feeElement.innerHTML = `
+                                        <span class="item-name">${fee.label}</span>
+                                        <span class="d-flex align-items-center">
+                                            <span class="item-price me-2">${amountText}</span>
+                                            <button class="btn btn-sm btn-danger delete-fee-btn" data-fee-id="${fee.fee_id}" data-fee-type="${fee.type}">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+                                        </span>
+                                    `;
+
+                        additionalFeesContainer.appendChild(feeElement);
+                    });
+
+                    // Handle delete click
+                    additionalFeesContainer.querySelectorAll('.delete-fee-btn').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const feeId = e.currentTarget.dataset.feeId;
+                            const feeType = e.currentTarget.dataset.feeType;
+
+                            if (!feeId) {
+                                console.error('No fee ID found for deletion');
+                                showToast('Cannot delete fee that does not exist.', 'error');
+                                return;
+                            }
+
+                            try {
+                                const response = await fetch(`/api/admin/requisition/${requestId}/fee/${feeId}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Authorization': `Bearer ${adminToken}`,
+                                        'Accept': 'application/json'
+                                    }
+                                });
+
+                                if (!response.ok) {
+                                    const errorData = await response.json();
+                                    throw new Error(errorData.details || 'Failed to delete fee');
+                                }
+
+                                const result = await response.json();
+
+                                // Show success message
+                                showToast('Fee removed successfully', 'success');
+
+                                // Refresh ALL fee displays including the total
+                                await refreshAllFeeDisplays();
+
+                            } catch (error) {
+                                console.error('Error removing fee:', error);
+                                console.error('Fee deletion details:', {
+                                    feeId: feeId,
+                                    feeType: feeType,
+                                    requestId: requestId,
+                                    error: error.message
+                                });
+                                showToast('Failed to remove fee: ' + error.message, 'error');
+                            }
+                        });
+                    });
+                } else {
+                    // Show empty message
+                    additionalFeesContainer.innerHTML = `
+                                    <div class="text-center text-muted py-4">
+                                        <i class="fa fa-coins fa-2x d-block mb-2"></i>
+                                        <p class="mb-0">No additional fees or discounts</p>
+                                    </div>
+                                `;
+                }
+            }
+
+            // Update the dropdown menu text dynamically based on current status
+            function updateStatusDropdownText() {
+                const statusBadge = document.getElementById('statusBadge');
+                const currentStatusName = statusBadge ? statusBadge.textContent.trim() : '';
+                const lateOption = document.getElementById('statusLate');
+
+                if (lateOption) {
+                    if (currentStatusName === 'Late') {
+                        lateOption.innerHTML = '<i class="bi bi-check-circle me-2"></i> Unmark Late';
+                        lateOption.dataset.value = 'Late'; // Keep the same data value
+                    } else {
+                        lateOption.innerHTML = '<i class="bi bi-exclamation-circle me-2"></i> Mark Late';
+                        lateOption.dataset.value = 'Late';
+                    }
+                }
+            }
+
+            function updateStatusDisplay(request) {
+                const hasEquipment = request.requested_items.equipment && request.requested_items.equipment.length > 0;
+                const isScheduled = request.form_details.status.name === 'Scheduled';
+
+                const equipmentStatusPill = document.getElementById('equipmentStatusPill');
+
+                if (hasEquipment && isScheduled) {
+                    // Create equipment status pill if it doesn't exist
+                    if (!equipmentStatusPill) {
+                        const pill = document.createElement('div');
+                        pill.id = 'equipmentStatusPill';
+                        pill.className = 'px-3 py-1 bg-secondary-subtle text-dark rounded-pill d-inline-flex align-items-center hover-pointer';
+                        pill.setAttribute('role', 'button');
+                        pill.setAttribute('data-bs-toggle', 'modal');
+                        pill.setAttribute('data-bs-target', '#equipmentStatusModal');
+                        pill.innerHTML = `
+                                <i class="fa fa-tools me-1"></i>
+                                <span class="me-2">Equipment Status</span>
+                            `;
+                        const cardBody = document.querySelector('.card-body.d-flex.flex-wrap.gap-2.justify-content-start');
+                        if (cardBody) {
+
+                            cardBody.appendChild(pill);
+                        }
+                    }
+
+                    // Load equipment status when pill is clicked
+                    document.getElementById('equipmentStatusPill').addEventListener('click', loadEquipmentStatus);
+                } else if (equipmentStatusPill) {
+                    equipmentStatusPill.remove();
+                }
+            }
+
+            async function loadEquipmentStatus() {
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/equipment-status`, {
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to fetch equipment status');
+
+                    const data = await response.json();
+                    const content = document.getElementById('equipmentStatusContent');
+
+                    if (data.equipment_status && data.equipment_status.length > 0) {
+                        let html = '<div class="table-responsive"><table class="table table-sm">';
+                        html += '<thead><tr><th>Equipment</th><th>Item ID</th><th>Condition</th></tr></thead><tbody>';
+
+                        data.equipment_status.forEach(item => {
+                            html += `
+                                        <tr>
+                                            <td>${item.equipment_name}</td>
+                                            <td>#${item.item_id}</td>
+                                            <td>
+                                                <span class="badge" style="background-color: ${item.condition_color}">
+                                                    ${item.condition_name}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    `;
+                        });
+
+                        html += '</tbody></table></div>';
+                        content.innerHTML = html;
+                    } else {
+                        content.innerHTML = '<div class="text-center text-muted py-4">No equipment assigned to this request.</div>';
+                    }
+
+                } catch (error) {
+                    console.error('Error loading equipment status:', error);
+                    document.getElementById('equipmentStatusContent').innerHTML =
+                        '<div class="text-center text-danger py-4">Failed to load equipment status.</div>';
+                }
+            }
+
+
+
+            async function fetchRequestDetails() {
+                try {
+                    // Ensure loading state is visible and content is hidden
+                    document.getElementById('loadingState').style.display = 'block';
+                    document.getElementById('contentState').style.display = 'none';
+
+                    const response = await fetch(`/api/admin/requisition-forms`, {
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to fetch request details');
+
+                    allRequests = await response.json();
+                    const request = allRequests.find(req => req.request_id == requestId);
+                    if (!request) throw new Error('Request not found');
+
+                    updateStatusDisplay(request);
+
+                    // Update approval counts for the finalize modal
+                    updateApprovalCounts(
+                        request.approval_info.approval_count,
+                        request.approval_info.rejection_count
+                    );
+
+                    // Update request ID in title
+                    document.getElementById('requestIdTitle').textContent = 'RID #' + String(requestId).padStart(4, '0');
+
+
+                    // Update status badge
+                    const statusBadge = document.getElementById('statusBadge');
+                    statusBadge.textContent = request.form_details.status.name;
+                    statusBadge.style.backgroundColor = request.form_details.status.color;
+
+                    // Update fees display
+                    document.getElementById('totalApprovedFee').textContent = formatMoney(request.fees.approved_fee);
+                    document.getElementById('feeBreakdownTotal').textContent = formatMoney(request.fees.approved_fee);
+
+                    // Contact information
+                    document.getElementById('formDetails').innerHTML = `
+                                                    <table class="table table-borderless mb-0 small text-start align-top">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>
+                                                                    <div><strong>Requester</strong></div>
+                                                                    <div>${request.user_details.first_name} ${request.user_details.last_name}</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div><strong>School ID</strong></div>
+                                                                    <div>${request.user_details.school_id || 'N/A'}</div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div><strong>Email</strong></div>
+                                                                    <div>${request.user_details.email}</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div><strong>Organization</strong></div>
+                                                                    <div>${request.user_details.organization_name || 'N/A'}</div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div><strong>User Type</strong></div>
+                                                                    <div>${request.user_details.user_type}</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div><strong>Contact Number</strong></div>
+                                                                    <div>${request.user_details.contact_number || 'N/A'}</div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                `;
+
+                    // Event details
+                    document.getElementById('eventDetails').innerHTML = `
+        <table class="table table-borderless mb-0 small text-start align-top">
+            <tbody>
+                <tr>
+                    <td>
+                        <div><strong>Endorser</strong></div>
+                        <div>${request.documents.endorser || 'N/A'}</div>
+                    </td>
+                    <td>
+                        <div><strong>Date Endorsed</strong></div>
+                        <div>${formatDateEndorsed(request.documents.date_endorsed) || 'N/A'}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div><strong>Rental Purpose</strong></div>
+                        <div>${request.form_details.purpose}</div>
+                    </td>
+                    <td>
+                        <div><strong>Participants</strong></div>
+                        <div>${request.form_details.num_participants}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div><strong>Number of Tables</strong></div>
+                        <div>${request.form_details.num_tables || 0}</div>
+                    </td>
+                    <td>
+                        <div><strong>Number of Chairs</strong></div>
+                        <div>${request.form_details.num_chairs || 0}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div><strong>Additional Requests</strong></div>
+                        <div>${request.form_details.additional_requests || 'No additional requests.'}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div><strong>Start Schedule</strong></div>
+                        <div>${formatStartDateTime(request.schedule)}</div>
+                    </td>
+                    <td>
+                        <div><strong>End Schedule</strong></div>
+                        <div>${formatEndDateTime(request.schedule)}</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        `;
+                    // Update requested items with fee breakdown
+                    document.getElementById('requestedItems').innerHTML = `
+                                                    <div class="mb-3">
+                                                        ${request.requested_items.facilities.length > 0 ? `
+                                                            <h6 class="fw-bold d-flex justify-content-between align-items-center mb-2" style="font-size:0.85rem; padding:0 0.5rem;">Facilities:</h6>
+                                                            ${request.requested_items.facilities.map(f =>
+                        `<div class="d-flex align-items-center mb-2 item-row" style="padding:0 0.5rem;">
+                                                                    <span class="item-name">${f.name}</span>
+                                                                    <span style="flex:1; border-bottom: 1px dashed #ccc; margin: 0 0.5rem;"></span>
+                                                                    <span class="item-price">${formatMoney(f.fee)}${f.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
+                                                                </div>`
+                    ).join('')}
+                                                        ` : ''}
+
+                                                        ${request.requested_items.equipment.length > 0 ? `
+                                                            <h6 class="fw-bold d-flex justify-content-between align-items-center mt-3 mb-2" style="font-size:0.85rem; padding:0 0.5rem;">Equipment:</h6>
+                                                            ${request.requested_items.equipment.map(e =>
+                        `<div class="d-flex align-items-center mb-2 item-row" style="padding:0 0.5rem;">
+                                                                    <span class="item-name">${e.name} × ${e.quantity || 1}</span>
+                                                                    <span style="flex:1; border-bottom: 1px dashed #ccc; margin: 0 0.5rem;"></span>
+                                                                    <span class="item-price">${formatMoney(e.fee)}${e.rate_type === 'Per Hour' ? '/hour' : '/event'}</span>
+                                                                </div>`
+                    ).join('')}
+                                                        ` : ''}
+                                                    </div>
+                                                `;
+
+                    // Update status cards
+                    document.getElementById('approvalsCount').textContent = request.approval_info.approval_count;
+                    document.getElementById('rejectionsCount').textContent = request.approval_info.rejection_count;
+                    document.getElementById('isLateStatus').textContent = request.status_tracking.is_late ? 'Late' : 'Not Late';
+
+                    // Update document cards
+                    document.getElementById('formalLetterDocument').innerHTML = request.documents.formal_letter.url ?
+                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                                                        data-document-url="${request.documents.formal_letter.url}" data-document-title="Formal Letter">
+                                                        Uploaded
+                                                    </button>` :
+                        '<span class="badge bg-secondary">Not uploaded</span>';
+
+                    document.getElementById('facilityLayoutDocument').innerHTML = request.documents.facility_layout.url ?
+                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                                                        data-document-url="${request.documents.facility_layout.url}" data-document-title="Facility Setup">
+                                                        Uploaded
+                                                    </button>` :
+                        '<span class="badge bg-secondary">Not uploaded</span>';
+
+                    document.getElementById('proofOfPaymentDocument').innerHTML = request.documents.proof_of_payment.url ?
+                        `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                                                        data-document-url="${request.documents.proof_of_payment.url}" data-document-title="Proof of Payment">
+                                                        Uploaded
+                                                    </button>` :
+                        '<span class="badge bg-secondary">Not uploaded</span>';
+
+                    // Official Receipt - Check both uploaded document AND generated receipt number
+                    const officialReceiptContainer = document.getElementById('officialReceiptDocument');
+                    if (request.documents.official_receipt.url) {
+                        // If official receipt document is uploaded
+                        officialReceiptContainer.innerHTML =
+                            `<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" 
+                                                data-document-url="${request.documents.official_receipt.url}" data-document-title="Official Receipt">
+                                                Uploaded
+                                            </button>`;
+                    } else if (request.form_details.official_receipt_num) {
+                        // If official receipt number exists (form is scheduled), show the generate receipt button
+                        const receiptNum = request.form_details.official_receipt_num;
+                        officialReceiptContainer.innerHTML =
+                            `<a href="/official-receipt/${requestId}" target="_blank" class="btn btn-sm btn-success">
+                                                <i class="fas fa-receipt me-1"></i> View Receipt
+                                            </a>
+                                            <small class="text-muted d-block mt-1">OR: ${receiptNum}</small>`;
+                    } else {
+                        // No official receipt available
+                        officialReceiptContainer.innerHTML = '<span class="badge bg-secondary">Not available</span>';
+                    }
+
+                    // Update document icons
+                    updateDocumentIcons(request.documents);
+
+                    // Load additional data and wait for completion
+                    await Promise.all([
+                        loadMixedActivity(),
+                        loadApprovalHistory(),
+                        updateBaseFees(request.requested_items, request.schedule)
+                    ]);
+
+                    // Ensure misc fees are updated
+                    if (request.fees && request.fees.requisition_fees) {
+                        updateAdditionalFees(request.fees.requisition_fees);
+                    }
+
+                    // Update dropdown text
+                    updateStatusDropdownText();
+
+                    // Check admin role and update UI
+                    await checkAdminRoleAndUpdateUI();
+
+                    // Initialize calendar
+                    setTimeout(() => {
+                        initializeCalendar();
+                    }, 100);
+
+                    // ONLY NOW show content after everything is properly loaded
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('contentState').style.display = 'block';
+
+                    // Now that container is visible, initialize calendar
+                    initializeCalendar(request.schedule);
+
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Failed to load request details', 'error');
+
+                    // Show error state
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('contentState').innerHTML = `
+                                                    <div class="alert alert-danger">
+                                                        Failed to load request details. Please try refreshing the page.
+                                                    </div>
+                                                `;
+                    document.getElementById('contentState').style.display = 'block';
+                }
+            }
+
+            // Add this helper function for document icons
+            function updateDocumentIcons(documents) {
+                // Formal Letter
+                const formalLetterIcon = document.getElementById('formalLetterIcon');
+                if (documents.formal_letter.url) {
+                    formalLetterIcon.classList.remove('text-muted');
+                    formalLetterIcon.classList.add('text-primary');
+                }
+
+                // Facility Layout
+                const facilityLayoutIcon = document.getElementById('facilityLayoutIcon');
+                if (documents.facility_layout.url) {
+                    facilityLayoutIcon.classList.remove('text-muted');
+                    facilityLayoutIcon.classList.add('text-primary');
+                }
+
+                // Proof of Payment
+                const proofOfPaymentIcon = document.getElementById('proofOfPaymentIcon');
+                if (documents.proof_of_payment.url) {
+                    proofOfPaymentIcon.classList.remove('text-muted');
+                    proofOfPaymentIcon.classList.add('text-primary');
+                }
+
+                // Official Receipt
+                const officialReceiptIcon = document.getElementById('officialReceiptIcon');
+                if (documents.official_receipt.url) {
+                    officialReceiptIcon.classList.remove('text-muted');
+                    officialReceiptIcon.classList.add('text-primary');
+                }
+            }
+
+            // Add this function to calculate rental duration
+            function calculateRentalDuration(startDate, startTime, endDate, endTime) {
+                const start = new Date(`${startDate}T${startTime}`);
+                const end = new Date(`${endDate}T${endTime}`);
+
+                const durationInHours = Math.round((end - start) / (1000 * 60 * 60) * 100) / 100;
+                const formattedStart = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const formattedEnd = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                return {
+                    hours: durationInHours,
+                    formatted: `${durationInHours} hours (${formattedStart} – ${formattedEnd})`
+                };
+            }
+
+            // Function to update base fees display
+            function updateBaseFees(requestedItems, schedule) {
+                const facilitiesContainer = document.getElementById('facilitiesFees');
+                const equipmentContainer = document.getElementById('equipmentFees');
+
+                // Clear existing content
+                facilitiesContainer.innerHTML = '';
+                equipmentContainer.innerHTML = '';
+
+                // Calculate rental duration for hourly rate calculations
+                const startDateTime = new Date(`${schedule.start_date}T${schedule.start_time}`);
+                const endDateTime = new Date(`${schedule.end_date}T${schedule.end_time}`);
+                const durationHours = Math.max(0, (endDateTime - startDateTime) / (1000 * 60 * 60));
+
+                let totalBaseFees = 0;
+
+                // Add facilities with proper rate type logic and waiver checkboxes
+                if (requestedItems.facilities && requestedItems.facilities.length > 0) {
+                    requestedItems.facilities.forEach(facility => {
+                        const facilityElement = document.createElement('div');
+                        facilityElement.className = `fee-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ${facility.is_waived ? 'waived' : ''}`;
+
+                        let feeAmount = parseFloat(facility.fee);
+                        let itemTotal = 0;
+                        let rateDescription = '';
+
+                        if (facility.rate_type === 'Per Hour' && durationHours > 0) {
+                            itemTotal = feeAmount * durationHours;
+                            rateDescription = `${formatMoney(feeAmount)}/hr × ${durationHours.toFixed(1)} hrs`;
+                            if (!facility.is_waived) totalBaseFees += itemTotal;
+                        } else {
+                            itemTotal = feeAmount;
+                            rateDescription = `₱${feeAmount.toLocaleString()}/event`;
+                            if (!facility.is_waived) totalBaseFees += itemTotal;
+                        }
+
+                        facilityElement.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <div class="form-check me-2">
+                                    <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                        data-type="facility" 
+                                        data-id="${facility.requested_facility_id}"
+                                        ${facility.is_waived ? 'checked' : ''}>
+                                </div>
+                                <span class="item-name">${facility.name}</span>
+                            </div>
+                            <div class="text-end">
+                                <small>${rateDescription}</small>
+                                <div><strong>${formatMoney(itemTotal)}</strong></div>
+                            </div>
+                        `;
+                        facilitiesContainer.appendChild(facilityElement);
+                    });
+                }
+
+                // Add equipment with proper rate type logic and waiver checkboxes
+                if (requestedItems.equipment && requestedItems.equipment.length > 0) {
+                    requestedItems.equipment.forEach(equipment => {
+                        const equipmentElement = document.createElement('div');
+                        equipmentElement.className = `fee-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ${equipment.is_waived ? 'waived' : ''}`;
+
+                        let unitFee = parseFloat(equipment.fee);
+                        const quantity = equipment.quantity || 1;
+                        let itemTotal = 0;
+                        let rateDescription = '';
+
+                        if (equipment.rate_type === 'Per Hour' && durationHours > 0) {
+                            itemTotal = (unitFee * durationHours) * quantity;
+                            rateDescription = `₱${unitFee.toLocaleString()}/hr × ${durationHours.toFixed(1)} hrs × ${quantity}`;
+                            if (!equipment.is_waived) totalBaseFees += itemTotal;
+                        } else {
+                            itemTotal = unitFee * quantity;
+                            rateDescription = `₱${unitFee.toLocaleString()}/event × ${quantity}`;
+                            if (!equipment.is_waived) totalBaseFees += itemTotal;
+                        }
+
+                        equipmentElement.innerHTML = `
+                                                                                                                                                    <div class="d-flex align-items-center">
+                                                                                                                                                        <div class="form-check me-2">
+                                                                                                                                                            <input class="form-check-input waiver-checkbox" type="checkbox" 
+                                                                                                                                                                data-type="equipment" 
+                                                                                                                                                                data-id="${equipment.requested_equipment_id}"
+                                                                                                                                                                ${equipment.is_waived ? 'checked' : ''}>
+                                                                                                                                                        </div>
+                                                                                                                                                        <span class="item-name">
+                                                                                                                                                            ${equipment.name} ${quantity > 1 ? `(×${quantity})` : ''}
+                                                                                                                                                        </span>
+                                                                                                                                                    </div>
+                                                                                                                                                    <div class="text-end">
+                                                                                                                                                        <small>${rateDescription}</small>
+                                                                                                                                                        <div><strong>₱${itemTotal.toLocaleString()}</strong></div>
+                                                                                                                                                    </div>
+                                                                                                                                                `;
+                        equipmentContainer.appendChild(equipmentElement);
+                    });
+                }
+
+                // Add event listeners to waiver checkboxes in the Fee Breakdown
+                document.querySelectorAll('#baseFeesContainer .waiver-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function () {
+                        handleWaiverChange(this);
+                    });
+                });
+
+                // Debug logging for backend troubleshooting
+                console.log('Base Fees Update:', {
+                    facilities: requestedItems.facilities?.map(f => ({
+                        id: f.requested_facility_id,
+                        name: f.name,
+                        fee: f.fee,
+                        rate_type: f.rate_type,
+                        is_waived: f.is_waived
+                    })),
+                    equipment: requestedItems.equipment?.map(e => ({
+                        id: e.requested_equipment_id,
+                        name: e.name,
+                        fee: e.fee,
+                        rate_type: e.rate_type,
+                        quantity: e.quantity,
+                        is_waived: e.is_waived
+                    })),
+                    durationHours: durationHours,
+                    totalBaseFees: totalBaseFees
+                });
+            }
+
+            function formatDateEndorsed(dateString) {
+                if (!dateString || dateString === 'N/A') return 'N/A';
+
+                try {
+                    const date = new Date(dateString);
+                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    return date.toLocaleDateString('en-US', options);
+                } catch (error) {
+                    console.error('Error formatting date endorsed:', error);
+                    return dateString; // Return original if formatting fails
+                }
+            }
+
+            function formatStartDateTime(schedule) {
+                const startDate = new Date(schedule.start_date + 'T' + schedule.start_time);
+                const dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+                const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+
+                return `${startDate.toLocaleDateString('en-US', dateOptions)} | ${startDate.toLocaleTimeString('en-US', timeOptions)}`;
+            }
+
+            function formatEndDateTime(schedule) {
+                const endDate = new Date(schedule.end_date + 'T' + schedule.end_time);
+                const dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+                const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+
+                return `${endDate.toLocaleDateString('en-US', dateOptions)} | ${endDate.toLocaleTimeString('en-US', timeOptions)}`;
+            }
+
+
+
+
+
+
+
+            // Function to load and display fees
+
+            async function loadFees() {
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/fees`, {
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to fetch fees');
+
+                    const fees = await response.json();
+
+                    // Clear existing fees
+                    feesContainer.innerHTML = '';
+
+                    if (fees.length === 0) {
+                        // No need for placeholder anymore since we're using mixed activity display
+                        return;
+                    }
+
+                    // Add each fee to the container
+                    for (const fee of fees) {
+                        const feeItem = await createFeeItem(fee);
+                        feesContainer.appendChild(feeItem);
+                    }
+
+                } catch (error) {
+                    console.error('Error loading fees:', error);
+                }
+            }
+
+            // Function to create a fee item element
+            async function createFeeItem(fee) {
+                const feeItem = document.createElement("div");
+                feeItem.className = "fee-item d-flex align-items-start p-2 mb-2 rounded";
+                feeItem.dataset.feeId = fee.fee_id;
+
+                const timestamp = new Date(fee.created_at).toLocaleString('en-US', {
+                    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                // Ensure amount is a number before using toFixed()
+                const amount = parseFloat(fee.type === 'discount' ? fee.discount_amount : fee.fee_amount);
+                const typeName = fee.type === 'discount' ? 'Discount' : 'Additional fee';
+
+                // Use the admin info from the fee response if available
+                let adminName = fee.added_by?.name || 'Admin';
+                let adminPhoto = null;
+
+                // If we don't have admin info from the fee response, try to get it
+                if (!fee.added_by) {
+                    try {
+                        const adminResponse = await fetch('/api/admin/profile', {
+                            headers: {
+                                'Authorization': `Bearer ${adminToken}`,
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (adminResponse.ok) {
+                            const adminData = await adminResponse.json();
+                            adminName = `${adminData.first_name}${adminData.middle_name ? ' ' + adminData.middle_name : ''} ${adminData.last_name}`;
+                            adminPhoto = adminData.photo_url;
+                        }
+                    } catch (error) {
+                        console.error('Failed to fetch admin info:', error);
+                    }
+                } else {
+                    // Use the admin info from the fee response
+                    adminName = fee.added_by.name;
+                }
+
+                feeItem.innerHTML = `
+                                                                                                                                                                                                                                                                                                                                                                                                                        ${adminPhoto ?
+                        `<img src="${adminPhoto}" class="rounded-circle me-3" width="32" height="32" alt="Admin Photo">` :
+                        `<i class="bi bi-person-circle fs-5 me-3 text-secondary"></i>`
+                    }
+                                                                                                                                                                                                                                                                                                                                                                                                                        <div class="flex-grow-1">
+                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                                                                                                                                                                                                                                                                                                                                                                                <div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                    <small class="text-muted fst-italic">
+                                                                                                                                                                                                                                                                                                                                                                                                                                        ${fee.label} (${typeName}) of ₱${amount.toFixed(2)} added by <strong>${adminName}</strong>
+                                                                                                                                                                                                                                                                                                                                                                                                                                    </small>
+                                                                                                                                                                                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                <button class="btn btn-sm remove-btn text-secondary p-0 border-0">
+                                                                                                                                                    <i class="bi bi-x-lg"></i>
+                                                                                                                                                </button>
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                </button>
+                                                                                                                                                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                            <small class="text-muted fst-italic">${timestamp}</small>
                                                                                                                                                                                                                                                                                                                                                                                                                         </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                        <button class="btn btn-sm remove-btn text-secondary p-0 border-0">
-                                                                                                                                            <i class="bi bi-x-lg"></i>
-                                                                                                                                        </button>
+                                                                                                                                                                                                                                                                                                                                                                                                                    `;
 
+                // Add remove functionality for regular fees
+                feeItem.querySelector(".remove-btn").addEventListener("click", async function () {
+                    try {
+                        const deleteResponse = await fetch(`/api/admin/requisition/${requestId}/fee/${fee.fee_id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${adminToken}`,
+                                'Accept': 'application/json'
+                            }
+                        });
 
-                                                                                                                                                                                                                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                    <small class="text-muted fst-italic">${timestamp}</small>
-                                                                                                                                                                                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                                                                                                                                                                                            `;
+                        if (!deleteResponse.ok) {
+                            throw new Error('Failed to delete fee from database');
+                        }
 
-            // Add remove functionality for regular fees
-            feeItem.querySelector(".remove-btn").addEventListener("click", async function () {
+                        feeItem.remove();
+                        // Remove this line: togglePlaceholder();
+                        fetchRequestDetails(); // Refresh fee breakdown
+
+                    } catch (error) {
+                        console.error('Error removing fee:', error);
+                        showToast('Failed to remove fee: ' + error.message, 'error');
+                    }
+                });
+
+                return feeItem;
+            }
+
+            let currentApprovalCount = 0;
+            let currentRejectionCount = 0;
+
+            // Update approval counts when data is loaded
+            function updateApprovalCounts(approvalCount, rejectionCount) {
+                currentApprovalCount = approvalCount;
+                currentRejectionCount = rejectionCount;
+                document.getElementById('currentApprovalCount').textContent = approvalCount;
+                document.getElementById('currentRejectionCount').textContent = rejectionCount;
+            }
+
+            // Approve button handler
+            document.getElementById('approveBtn').addEventListener('click', function () {
+                approveModal.show();
+            });
+
+            // Reject button handler (from dropdown)
+            document.getElementById('rejectBtn').addEventListener('click', function () {
+                rejectModal.show();
+            });
+
+            // Confirm approve action
+            document.getElementById('confirmApprove').addEventListener('click', async function () {
+                const remarks = document.getElementById('approveRemarks').value;
+                const adminToken = localStorage.getItem('adminToken');
+
                 try {
-                    const deleteResponse = await fetch(`/api/admin/requisition/${requestId}/fee/${fee.fee_id}`, {
-                        method: 'DELETE',
+                    const response = await fetch(`/api/admin/requisition/${requestId}/approve`, {
+                        method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
                             'Accept': 'application/json'
-                        }
+                        },
+                        body: JSON.stringify({
+                            remarks: remarks
+                        })
                     });
 
-                    if (!deleteResponse.ok) {
-                        throw new Error('Failed to delete fee from database');
+                    console.log('Response status:', response.status, response.statusText);
+
+                    // First, check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    let responseData;
+
+                    if (contentType && contentType.includes('application/json')) {
+                        responseData = await response.json();
+                        console.log('Response JSON:', responseData);
+                    } else {
+                        // If not JSON, get the text response
+                        const textResponse = await response.text();
+                        console.log('Response text:', textResponse);
+                        throw new Error(textResponse || 'Non-JSON response from server');
                     }
 
-                    feeItem.remove();
-                    // Remove this line: togglePlaceholder();
-                    fetchRequestDetails(); // Refresh fee breakdown
+                    if (!response.ok) {
+                        // Check for different error response formats
+                        const errorMessage = responseData.error ||
+                            responseData.message ||
+                            JSON.stringify(responseData) ||
+                            'Failed to approve request';
+                        throw new Error(errorMessage);
+                    }
+
+                    showToast('Request approved successfully!', 'success');
+                    approveModal.hide();
+
+                    // Refresh everything
+                    fetchRequestDetails();
+                    loadMixedActivity(); // Refresh activity timeline
+                    loadApprovalHistory(); // Refresh approval history
+                    checkAdminRoleAndUpdateUI(); // Update UI to hide buttons
 
                 } catch (error) {
-                    console.error('Error removing fee:', error);
-                    showToast('Failed to remove fee: ' + error.message, 'error');
+                    console.error('Error approving request:', error);
+                    showToast('Error: ' + error.message, 'error');
                 }
             });
 
-            return feeItem;
-        }
+            // Confirm reject action
+            document.getElementById('confirmReject').addEventListener('click', async function () {
+                const remarks = document.getElementById('rejectRemarks').value;
+                const adminToken = localStorage.getItem('adminToken');
 
-        let currentApprovalCount = 0;
-        let currentRejectionCount = 0;
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/reject`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            remarks: remarks
+                        })
+                    });
 
-        // Update approval counts when data is loaded
-        function updateApprovalCounts(approvalCount, rejectionCount) {
-            currentApprovalCount = approvalCount;
-            currentRejectionCount = rejectionCount;
-            document.getElementById('currentApprovalCount').textContent = approvalCount;
-            document.getElementById('currentRejectionCount').textContent = rejectionCount;
-        }
+                    // First, check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    let responseData;
 
-        // Approve button handler
-        document.getElementById('approveBtn').addEventListener('click', function () {
-            approveModal.show();
+                    if (contentType && contentType.includes('application/json')) {
+                        responseData = await response.json();
+                    } else {
+                        // If not JSON, get the text response
+                        const textResponse = await response.text();
+                        throw new Error(textResponse || 'Non-JSON response from server');
+                    }
+
+                    if (!response.ok) {
+                        const errorMessage = responseData.error ||
+                            responseData.message ||
+                            JSON.stringify(responseData) ||
+                            'Failed to reject request';
+                        throw new Error(errorMessage);
+                    }
+
+                    showToast('Request rejected successfully!', 'success');
+                    rejectModal.hide();
+
+                    // Refresh everything
+                    fetchRequestDetails();
+                    loadMixedActivity(); // Refresh activity timeline
+                    loadApprovalHistory(); // Refresh approval history
+                    checkAdminRoleAndUpdateUI(); // Update UI to hide buttons
+
+                } catch (error) {
+                    console.error('Error rejecting request:', error);
+                    showToast('Error: ' + error.message, 'error');
+                }
+            });
+
+            fetchRequestDetails();
         });
 
-        // Reject button handler (from dropdown)
-        document.getElementById('rejectBtn').addEventListener('click', function () {
-            rejectModal.show();
-        });
-
-        // Confirm approve action
-        document.getElementById('confirmApprove').addEventListener('click', async function () {
-            const remarks = document.getElementById('approveRemarks').value;
-            const adminToken = localStorage.getItem('adminToken');
-
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/approve`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        remarks: remarks
-                    })
-                });
-
-                console.log('Response status:', response.status, response.statusText);
-
-                // First, check if response is JSON
-                const contentType = response.headers.get('content-type');
-                let responseData;
-
-                if (contentType && contentType.includes('application/json')) {
-                    responseData = await response.json();
-                    console.log('Response JSON:', responseData);
-                } else {
-                    // If not JSON, get the text response
-                    const textResponse = await response.text();
-                    console.log('Response text:', textResponse);
-                    throw new Error(textResponse || 'Non-JSON response from server');
-                }
-
-                if (!response.ok) {
-                    // Check for different error response formats
-                    const errorMessage = responseData.error ||
-                        responseData.message ||
-                        JSON.stringify(responseData) ||
-                        'Failed to approve request';
-                    throw new Error(errorMessage);
-                }
-
-                showToast('Request approved successfully!', 'success');
-                approveModal.hide();
-
-                // Refresh everything
-                fetchRequestDetails();
-                loadMixedActivity(); // Refresh activity timeline
-                loadApprovalHistory(); // Refresh approval history
-                checkAdminRoleAndUpdateUI(); // Update UI to hide buttons
-
-            } catch (error) {
-                console.error('Error approving request:', error);
-                showToast('Error: ' + error.message, 'error');
-            }
-        });
-
-        // Confirm reject action
-        document.getElementById('confirmReject').addEventListener('click', async function () {
-            const remarks = document.getElementById('rejectRemarks').value;
-            const adminToken = localStorage.getItem('adminToken');
-
-            try {
-                const response = await fetch(`/api/admin/requisition/${requestId}/reject`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        remarks: remarks
-                    })
-                });
-
-                // First, check if response is JSON
-                const contentType = response.headers.get('content-type');
-                let responseData;
-
-                if (contentType && contentType.includes('application/json')) {
-                    responseData = await response.json();
-                } else {
-                    // If not JSON, get the text response
-                    const textResponse = await response.text();
-                    throw new Error(textResponse || 'Non-JSON response from server');
-                }
-
-                if (!response.ok) {
-                    const errorMessage = responseData.error ||
-                        responseData.message ||
-                        JSON.stringify(responseData) ||
-                        'Failed to reject request';
-                    throw new Error(errorMessage);
-                }
-
-                showToast('Request rejected successfully!', 'success');
-                rejectModal.hide();
-
-                // Refresh everything
-                fetchRequestDetails();
-                loadMixedActivity(); // Refresh activity timeline
-                loadApprovalHistory(); // Refresh approval history
-                checkAdminRoleAndUpdateUI(); // Update UI to hide buttons
-
-            } catch (error) {
-                console.error('Error rejecting request:', error);
-                showToast('Error: ' + error.message, 'error');
-            }
-        });
-
-        fetchRequestDetails();
-    });
-    
     </script>
 @endsection

@@ -1,3 +1,30 @@
+<style>
+/* Style the 'How to book?' trigger text */
+.navbar .how-to-book {
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+    color: #4d4d4dff;
+}
+
+.custom-tooltip .tooltip-inner {
+    background-color: #000000; /* black background */
+    color: #ffffff;            /* white text */
+    font-size: 0.85rem;
+    padding: 0.75rem 0.75rem;  /* reduce top/bottom padding */
+    line-height: 1.2;          /* tighten spacing */
+    max-width: 300px;
+    text-align: left;
+    white-space: pre-line;     /* preserves line breaks */
+}
+
+.custom-tooltip .tooltip-arrow::before {
+    border-bottom-color: #000000; /* match arrow to bg */
+}
+
+
+</style>
+
 <header class="top-header-bar">
     <div class="container d-flex justify-content-between align-items-center">
         <div class="cpu-brand">
@@ -80,12 +107,36 @@
                 </li>
             </ul>
 
-            <a href="{{ url('reservation-form') }}" class="btn btn-book-now ms-lg-3">Book Now</a>
+<div class="d-flex align-items-center ms-lg-3">
+<span class="me-2 how-to-book d-flex align-items-center" 
+      data-bs-toggle="tooltip" 
+      data-bs-placement="bottom" 
+      data-bs-custom-class="custom-tooltip"
+      title="1. Browse the catalog and add venues or equipment to your booking cart.
+2. Go to the reservation form via 'Book Now' or your cart.
+3. Fill in required booking data and check item availability for your timeslot.
+4. Read reservation policies before submitting.">
+    How to book? 
+    <i class="bi bi-question-circle ms-1" style="font-size: 0.9rem;"></i>
+</span>
+
+
+
+    <a href="{{ url('reservation-form') }}" class="btn btn-book-now">Book Now</a>
+</div>
+
+
         </div>
     </div>
 </nav>
 
 <script>
+    // Initialize Bootstrap tooltips
+const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+tooltipTriggerList.map(function (el) {
+    return new bootstrap.Tooltip(el);
+});
+
     // Initialize Bootstrap dropdowns
     document.addEventListener('DOMContentLoaded', function () {
         const dropdownElements = document.querySelectorAll('.dropdown-toggle');

@@ -5,6 +5,18 @@
 @section('content')
   <link rel="stylesheet" href="{{ asset('css/public/global-styles.css') }}" />
   <style>
+    .catalog-dropdown .dropdown-menu {
+    min-width: 100%; /* matches the button width */
+}
+
+.catalog-dropdown .dropdown-item {
+}
+
+.catalog-dropdown .dropdown-item:hover,
+.catalog-dropdown .dropdown-item:focus {
+    background: #e6e6e6;
+}
+
     body {
       background-color: rgba(0, 0, 0, 0.4);
       background-image: url("{{ asset('assets/homepage.jpg') }}");
@@ -145,11 +157,22 @@
     }
   </style>
 
-  <section class="hero-section text-white text-center">
-    <h2 class="fw-bold">Simplify the way you book university facilities,<br>equipment, and services — all in one
-      platform,<br>anytime, anywhere.</h2>
-    <a href="reservation-form" class="btn btn-warning mt-3 fw-bold">Start Booking</a>
-  </section>
+<section class="hero-section text-white text-center">
+  <h2 class="fw-bold">Simplify the way you book university facilities,<br>equipment, and services — all in one
+    platform,<br>anytime, anywhere.</h2>
+
+<div class="dropdown mt-3 catalog-dropdown">
+  <button class="btn btn-warning fw-bold dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Start Browsing
+  </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="facility-catalog">Facility Catalog</a></li>
+    <li><a class="dropdown-item" href="equipment-catalog">Equipment Catalog</a></li>
+  </ul>
+</div>
+
+</section>
+
 
   <section class="catalog-section container text-center">
     <h4 class="fw-bold mb-2">Explore Available Resources</h4>

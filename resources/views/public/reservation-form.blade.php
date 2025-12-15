@@ -19,16 +19,26 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
     rel="stylesheet" />
   <style>
-.btn-outline-primary {
-    border: none !important;
-    background: transparent !important;
-    color: #003366 !important;
-}
+    .endorser-tooltip {
+      font-size: 0.9rem;
+      opacity: 0.75;
+      cursor: pointer;
+    }
 
-.btn-outline-primary:hover {
-    background: #e6e6e6 !important;
-    color: #003366 !important;
-}
+    .endorser-tooltip:hover {
+      opacity: 1;
+    }
+
+    .btn-outline-primary {
+      border: none !important;
+      background: transparent !important;
+      color: #003366 !important;
+    }
+
+    .btn-outline-primary:hover {
+      background: #e6e6e6 !important;
+      color: #003366 !important;
+    }
 
 
     /* Loading Spinner Styles */
@@ -1084,9 +1094,16 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label">Endorser Name</label>
+                  <label class="form-label d-flex align-items-center">
+                    Endorser Name
+                    <i class="bi bi-question-circle ms-1 endorser-tooltip" data-bs-toggle="tooltip"
+                      data-bs-placement="right" data-bs-custom-class="custom-tooltip"
+                      title="Provide the name of the individual who endorsed or authorized your planned event."></i>
+                  </label>
+
                   <input name="endorser" type="text" class="form-control" placeholder="Endorser Name" maxlength="50" />
                 </div>
+
 
                 <div class="col-md-6">
                   <label class="form-label">Date Endorsed</label>
@@ -1388,6 +1405,7 @@
     const equipmentList = document.getElementById('equipmentList');
     const feeDisplay = document.getElementById('feeDisplay');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
 
     // Ensure the form always starts at Step 1 when page loads
     window.addEventListener('load', function () {
@@ -2015,6 +2033,10 @@
 
     // ========== INITIALIZATION ==========
     document.addEventListener('DOMContentLoaded', function () {
+
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+      tooltipTriggerList.map(el => new bootstrap.Tooltip(el))
+
       // Initialize step system
       showStep(1);
 
