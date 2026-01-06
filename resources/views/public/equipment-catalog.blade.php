@@ -1055,7 +1055,7 @@ async function addToForm(id, type, quantity = 1) {
     }
 
     // Generate button HTML based on selection state
-   function getEquipmentButtonHtml(equipment) {
+function getEquipmentButtonHtml(equipment) {
   const isSelected = selectedItems.some(
     item => item.type === 'equipment' && parseInt(item.equipment_id) === equipment.equipment_id
   );
@@ -1069,45 +1069,41 @@ async function addToForm(id, type, quantity = 1) {
   const isUnavailable = equipment.status.status_id !== 1 || maxQty === 0;
 
   if (isUnavailable) {
-return `
-<div class="d-flex gap-2 align-items-center">
-  <input type="number" 
-   class="form-control quantity-input" 
-   value="${currentQty}" 
-   min="1" 
-   max="${maxQty}"
-   style="width: 70px;"
-   ${isUnavailable ? 'disabled' : ''}>
-  <button class="btn btn-primary add-remove-btn form-action-btn" 
-  data-id="${equipment.equipment_id}" 
-  data-type="equipment" 
-  data-action="add"
-  ${isUnavailable ? 'disabled' : ''}>
-  Add
-  </button>
-</div>
-`;
+    return `
+    <div class="d-flex gap-2 align-items-center">
+      <input type="number" 
+       class="form-control quantity-input" 
+       value="${currentQty}" 
+       min="1" 
+       max="${maxQty}"
+       style="width: 70px;"
+       disabled>
+      <button class="btn btn-secondary form-action-btn" 
+      disabled
+      style="cursor: not-allowed; opacity: 0.65;">
+      Unavailable
+      </button>
+    </div>
+    `;
   }
 
   if (isSelected) {
-return `
-<div class="d-flex gap-2 align-items-center">
-  <input type="number" 
-   class="form-control quantity-input" 
-   value="${currentQty}" 
-   min="1" 
-   max="${maxQty}"
-   style="width: 70px;"
-   ${isUnavailable ? 'disabled' : ''}>
-  <button class="btn btn-primary add-remove-btn form-action-btn" 
-  data-id="${equipment.equipment_id}" 
-  data-type="equipment" 
-  data-action="add"
-  ${isUnavailable ? 'disabled' : ''}>
-  Add
-  </button>
-</div>
-`;
+    return `
+    <div class="d-flex gap-2 align-items-center">
+      <input type="number" 
+       class="form-control quantity-input" 
+       value="${currentQty}" 
+       min="1" 
+       max="${maxQty}"
+       style="width: 70px;">
+      <button class="btn btn-danger add-remove-btn form-action-btn" 
+      data-id="${equipment.equipment_id}" 
+      data-type="equipment" 
+      data-action="remove">
+      Remove
+      </button>
+    </div>
+    `;
   } else {
     return `
     <div class="d-flex gap-2 align-items-center">

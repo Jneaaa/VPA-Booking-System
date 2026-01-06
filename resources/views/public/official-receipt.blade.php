@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Central Philippine University - Official Receipt & Permit</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Screen Styles */
@@ -175,6 +176,58 @@
             flex: 0 0 auto;
             min-width: 160px;
         }
+    /* PRINT STYLES ONLY */
+    @media print {
+        /* Hide ALL buttons and print container */
+        .print-button-container,
+        .btn,
+        button,
+        #downloadPdf {
+            display: none !important;
+        }
+        
+        /* Hide the small disclaimer text if you don't want it printed */
+        body > small.text-center.mt-4.text-muted.d-block {
+            display: none !important;
+        }
+        
+        /* Optional: Keep only receipt and permit */
+        /* Uncomment if you want to hide everything else */
+        /*
+        body > *:not(.document-container):not(.permit-container) {
+            display: none !important;
+        }
+        */
+        
+        /* Ensure receipt and permit print properly */
+        .document-container,
+        .permit-container {
+            display: block !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 15px !important;
+            page-break-after: always !important;
+        }
+        
+        /* Clean print page */
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+    }
+    .btn-primary {
+    background-color: #003366;
+    border-color: #003366;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: #002244;
+    border-color: #002244;
+}
+
     </style>
 </head>
 
@@ -184,7 +237,7 @@
         <div class="document-header">
             <img src="{{ asset('assets/cpu-logo.png') }}" alt="CPU Logo"
                 style="width: 100px; height: auto; margin-bottom: 10px;">
-            <h2>Official Receipt</h2>
+            <h2>Payment Receipt</h2>
             <p>Booking Reference: <strong>#{{ $receiptData['official_receipt_num'] ?? 'N/A' }}</strong></p>
         </div>
 
@@ -350,7 +403,7 @@
                                 <img src="{{ $admin['signature_url'] }}" alt="Signature">
                             @else
                                 <div style="width: 100%; height: 100%; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
-                                    <small class="text-muted">No Signature</small>
+                                    <small class="text-muted">Approved</small>
                                 </div>
                             @endif
                         </div>
@@ -374,7 +427,7 @@
                                 <img src="{{ $admin['signature_url'] }}" alt="Signature">
                             @else
                                 <div style="width: 100%; height: 100%; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
-                                    <small class="text-muted">No Signature</small>
+                                    <small class="text-muted">Approved</small>
                                 </div>
                             @endif
                         </div>
@@ -398,7 +451,7 @@
                                 <img src="{{ $admin['signature_url'] }}" alt="Signature">
                             @else
                                 <div style="width: 100%; height: 100%; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
-                                    <small class="text-muted">No Signature</small>
+                                    <small class="text-muted">Approved</small>
                                 </div>
                             @endif
                         </div>
@@ -422,7 +475,7 @@
                                 <img src="{{ $admin['signature_url'] }}" alt="Signature">
                             @else
                                 <div style="width: 100%; height: 100%; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
-                                    <small class="text-muted">No Signature</small>
+                                    <small class="text-muted">Approved</small>
                                 </div>
                             @endif
                         </div>
@@ -437,16 +490,17 @@
 </div>
     </div>
 
-    <small class="text-center mt-4 text-muted d-block">
-        This reservation has been officially approved and payment confirmed. Please present your permit on your
-        scheduled date.
-    </small>
+<small class="text-center mt-4 text-muted d-block" style="color: green !important;">
+    <i class="fa-solid fa-circle-check me-1"></i>
+    This reservation has been officially approved and payment confirmed. Please present your permit on your scheduled date.
+</small>
+
 
     <div class="print-button-container">
-        <button type="button" class="btn btn-secondary me-2" onclick="window.history.back()">Back to My
-            Bookings</button>
-        <button type="button" class="btn btn-primary me-2" onclick="window.print()">Print Receipt & Permit</button>
-        <button type="button" class="btn btn-success" id="downloadPdf">Download as PDF</button>
+        <a href="{{ url('/user-feedback') }}" class="btn btn-secondary me-2">
+    Rate Our Services
+</a>
+        <button type="button" class="btn btn-primary" id="downloadPdf">Download as PDF</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

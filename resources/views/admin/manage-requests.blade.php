@@ -4,6 +4,15 @@
 
 @section('content')
   <style>
+    .cursor-pointer {
+      cursor: pointer;
+    }
+
+    .cursor-pointer:hover {
+      text-decoration: underline;
+      color: #0f4580ff;
+    }
+
     .request-badge {
       position: absolute;
       top: -5px;
@@ -35,14 +44,16 @@
     }
 
     .btn-secondary:hover {
-  background-color: #c3c8ccff; /* slightly darker */
-  color: #111214ff;
-}
+      background-color: #c3c8ccff;
+      /* slightly darker */
+      color: #111214ff;
+    }
 
-.btn-secondary:active {
-  background-color: #b0b6bbff; /* deeper shade for pressed effect */
-  color: #0f1011ff;
-}
+    .btn-secondary:active {
+      background-color: #b0b6bbff;
+      /* deeper shade for pressed effect */
+      color: #0f1011ff;
+    }
 
     /* Filter bar styles */
     .filter-bar {
@@ -122,7 +133,7 @@
       gap: 1rem;
       overflow-y: auto;
       max-height: calc(100vh - 300px);
-      padding: 1rem; /* Added padding for requisitionContainer */
+      padding: 1rem;
     }
 
     /* Center content for empty state */
@@ -182,58 +193,57 @@
   </style>
 
   <main>
-      <div class="card-header">
-        <!-- Filter Bar with Search aligned right -->
-        <div class="d-flex flex-column w-100">
-          <div class="d-flex flex-wrap align-items-center justify-content-between w-100 gap-2 filter-row">
-            <!-- Left side: filters + layout toggle -->
-            <div class="d-flex flex-wrap align-items-center gap-2">
-              <select class="form-select filter-select" id="statusFilter">
-                <option value="all">All Statuses</option>
-                <!-- Only Pending Approval and Awaiting Payment will be shown -->
-              </select>
+    <div class="card-header">
+      <!-- Filter Bar with Search aligned right -->
+      <div class="d-flex flex-column w-100">
+        <div class="d-flex flex-wrap align-items-center justify-content-between w-100 gap-2 filter-row">
+          <!-- Left side: filters + layout toggle -->
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <select class="form-select filter-select" id="statusFilter">
+              <option value="all">All Statuses</option>
+              <!-- Only Pending Approval and Awaiting Payment will be shown -->
+            </select>
 
 
-              <select class="form-select filter-select" id="sortFilter">
-                <option value="status">By Date</option>
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-              </select>
+            <select class="form-select filter-select" id="sortFilter">
+              <option value="status">By Date</option>
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
 
-              <div class="btn-group" role="group">
-                <button type="button" class="btn layout-toggle-btn" data-layout="detailed">
-                  <i class="bi bi-list-ul"></i> Detailed
-                </button>
-                <button type="button" class="btn layout-toggle-btn active" data-layout="compact">
-                  <i class="bi bi-grid"></i> Compact
-                </button>
-              </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn layout-toggle-btn" data-layout="compact">
+                <i class="bi bi-list-ul"></i> Compact
+              </button>
+              <button type="button" class="btn layout-toggle-btn active" data-layout="detailed">
+                <i class="bi bi-grid"></i> Detailed
+              </button>
             </div>
+          </div>
 
-            <!-- Right side: search -->
-            <div class="search-container">
-              <input type="search" class="form-control" id="searchInput"
-                placeholder="Search by request number...">
-              <button class="btn btn-primary" id="searchButton">Search</button>
-            </div>
+          <!-- Right side: search -->
+          <div class="search-container">
+            <input type="search" class="form-control" id="searchInput" placeholder="Search by request number...">
+            <button class="btn btn-primary" id="searchButton">Search</button>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="card-body p-0">
-        <!-- Content Area -->
-        <div class="content-area">
-          <div id="requisitionContainer">
-            <!-- Loading state initially -->
-            <div class="loading-spinner">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-              <p class="mt-2">Loading Requisitions...</p>
+    <div class="card-body p-0">
+      <!-- Content Area -->
+      <div class="content-area">
+        <div id="requisitionContainer">
+          <!-- Loading state initially -->
+          <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
+            <p class="mt-2">Loading Requisitions...</p>
           </div>
         </div>
       </div>
+    </div>
 
     <!-- Modal definitions remain the same -->
     <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
@@ -244,58 +254,60 @@
       <!-- ... existing modal content ... -->
     </div>
 
-<!-- Approval History Modal -->
-<div class="modal fade" id="approvalHistoryModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <!-- Approval History Modal -->
+    <div class="modal fade" id="approvalHistoryModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Approval History</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <ul class="nav nav-tabs" id="approvalHistoryTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="approvals-tab" data-bs-toggle="tab" data-bs-target="#approvals" type="button" role="tab" aria-controls="approvals" aria-selected="true">
-                            <i class="bi bi-hand-thumbs-up text-success me-1"></i>
-                            Approvals <span class="badge bg-success ms-1" id="approvalsTabCount">0</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="rejections-tab" data-bs-toggle="tab" data-bs-target="#rejections" type="button" role="tab" aria-controls="rejections" aria-selected="false">
-                            <i class="bi bi-hand-thumbs-down text-danger me-1"></i>
-                            Rejections <span class="badge bg-danger ms-1" id="rejectionsTabCount">0</span>
-                        </button>
-                    </li>
-                </ul>
-                <div class="tab-content mt-3" id="approvalHistoryContent">
-                    <div class="tab-pane fade show active" id="approvals" role="tabpanel" aria-labelledby="approvals-tab">
-                        <div id="approvalsHistoryContent">
-                            <div class="text-center text-muted py-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <p class="mt-2">Loading approvals...</p>
-                            </div>
-                        </div>
+          <div class="modal-header">
+            <h5 class="modal-title">Approval History</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <ul class="nav nav-tabs" id="approvalHistoryTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="approvals-tab" data-bs-toggle="tab" data-bs-target="#approvals"
+                  type="button" role="tab" aria-controls="approvals" aria-selected="true">
+                  <i class="bi bi-hand-thumbs-up text-success me-1"></i>
+                  Approvals <span class="badge bg-success ms-1" id="approvalsTabCount">0</span>
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rejections-tab" data-bs-toggle="tab" data-bs-target="#rejections"
+                  type="button" role="tab" aria-controls="rejections" aria-selected="false">
+                  <i class="bi bi-hand-thumbs-down text-danger me-1"></i>
+                  Rejections <span class="badge bg-danger ms-1" id="rejectionsTabCount">0</span>
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content mt-3" id="approvalHistoryContent">
+              <div class="tab-pane fade show active" id="approvals" role="tabpanel" aria-labelledby="approvals-tab">
+                <div id="approvalsHistoryContent">
+                  <div class="text-center text-muted py-4">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
                     </div>
-                    <div class="tab-pane fade" id="rejections" role="tabpanel" aria-labelledby="rejections-tab">
-                        <div id="rejectionsHistoryContent">
-                            <div class="text-center text-muted py-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <p class="mt-2">Loading rejections...</p>
-                            </div>
-                        </div>
-                    </div>
+                    <p class="mt-2">Loading approvals...</p>
+                  </div>
                 </div>
+              </div>
+              <div class="tab-pane fade" id="rejections" role="tabpanel" aria-labelledby="rejections-tab">
+                <div id="rejectionsHistoryContent">
+                  <div class="text-center text-muted py-4">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading rejections...</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
         </div>
+      </div>
     </div>
-</div>
   </main>
 
 @endsection
@@ -304,31 +316,31 @@
   <script>
 
     // Update the showApprovalHistory function
-function showApprovalHistory(requestId) {
-    const modal = new bootstrap.Modal(document.getElementById('approvalHistoryModal'));
-    loadApprovalHistory(requestId);
-    modal.show();
-}
+    function showApprovalHistory(requestId) {
+      const modal = new bootstrap.Modal(document.getElementById('approvalHistoryModal'));
+      loadApprovalHistory(requestId);
+      modal.show();
+    }
 
-// Function to load approval history
-async function loadApprovalHistory(requestId) {
-    try {
+    // Function to load approval history
+    async function loadApprovalHistory(requestId) {
+      try {
         const adminToken = localStorage.getItem('adminToken');
         if (!adminToken) {
-            throw new Error('No authentication token found');
+          throw new Error('No authentication token found');
         }
 
         console.log('Fetching approval history for request:', requestId);
-        
+
         const response = await fetch(`/api/admin/requisition/${requestId}/approval-history`, {
-            headers: {
-                'Authorization': `Bearer ${adminToken}`,
-                'Accept': 'application/json'
-            }
+          headers: {
+            'Authorization': `Bearer ${adminToken}`,
+            'Accept': 'application/json'
+          }
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const approvalHistory = await response.json();
@@ -346,51 +358,50 @@ async function loadApprovalHistory(requestId) {
         document.getElementById('approvalsHistoryContent').innerHTML = generateApprovalHistoryHTML(approvals);
         document.getElementById('rejectionsHistoryContent').innerHTML = generateApprovalHistoryHTML(rejections);
 
-    } catch (error) {
+      } catch (error) {
         console.error('Error loading approval history:', error);
         const errorHtml = `<div class="text-center text-danger py-4">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            Failed to load history: ${error.message}
-        </div>`;
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                      Failed to load history: ${error.message}
+                  </div>`;
         document.getElementById('approvalsHistoryContent').innerHTML = errorHtml;
         document.getElementById('rejectionsHistoryContent').innerHTML = errorHtml;
+      }
     }
-}
 
-// Function to generate approval history HTML (same as in request-view.blade.php)
-function generateApprovalHistoryHTML(history) {
-    if (!history || history.length === 0) {
+    // Function to generate approval history HTML (same as in request-view.blade.php)
+    function generateApprovalHistoryHTML(history) {
+      if (!history || history.length === 0) {
         return '<div class="text-center text-muted py-4">No records found</div>';
+      }
+
+      return history.map(item => `
+                  <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                      <div class="me-3 flex-shrink-0">
+                          ${item.admin_photo ?
+          `<img src="${item.admin_photo}" class="rounded-circle" width="45" height="45" alt="${item.admin_name}" style="object-fit: cover;">` :
+          `<div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width: 45px; height: 45px;">
+                                  ${item.admin_name.split(' ').map(n => n.charAt(0)).join('')}
+                              </div>`
+        }
+                      </div>
+                      <div class="flex-grow-1">
+                          <div class="d-flex justify-content-between align-items-start">
+                              <div>
+                                  <strong class="d-block">${item.admin_name}</strong>
+                                  <small class="text-muted">
+                                      <i class="fa ${item.action_icon} ${item.action_class} me-1"></i>
+                                      ${item.action} this request
+                                  </small>
+                                  ${item.remarks ? `<div class="mt-1 small text-muted">"${item.remarks}"</div>` : ''}
+                              </div>
+                              <small class="text-muted text-end">${item.formatted_date}</small>
+                          </div>
+                      </div>
+                  </div>
+              `).join('');
     }
-
-    return history.map(item => `
-        <div class="d-flex align-items-center mb-3 p-2 border rounded">
-            <div class="me-3 flex-shrink-0">
-                ${item.admin_photo ?
-                    `<img src="${item.admin_photo}" class="rounded-circle" width="45" height="45" alt="${item.admin_name}" style="object-fit: cover;">` :
-                    `<div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width: 45px; height: 45px;">
-                        ${item.admin_name.split(' ').map(n => n.charAt(0)).join('')}
-                    </div>`
-                }
-            </div>
-            <div class="flex-grow-1">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <strong class="d-block">${item.admin_name}</strong>
-                        <small class="text-muted">
-                            <i class="fa ${item.action_icon} ${item.action_class} me-1"></i>
-                            ${item.action} this request
-                        </small>
-                        ${item.remarks ? `<div class="mt-1 small text-muted">"${item.remarks}"</div>` : ''}
-                    </div>
-                    <small class="text-muted text-end">${item.formatted_date}</small>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-    // Define handleManage globally so it can be accessed by onclick
+    
     function handleManage(requestId) {
       if (!requestId) {
         console.error('No request ID provided');
@@ -400,47 +411,47 @@ function generateApprovalHistoryHTML(history) {
       window.location.href = `/admin/requisition/${requestId}`;
     }
 
-   function showApprovalHistory(requestId) {
-    console.log('Showing approval history for request:', requestId);
-    
-    // Initialize the modal
-    const modalElement = document.getElementById('approvalHistoryModal');
-    if (!modalElement) {
+    function showApprovalHistory(requestId) {
+      console.log('Showing approval history for request:', requestId);
+
+      // Initialize the modal
+      const modalElement = document.getElementById('approvalHistoryModal');
+      if (!modalElement) {
         console.error('Modal element not found');
         return;
+      }
+
+      const modal = new bootstrap.Modal(modalElement);
+
+      // Set loading state
+      document.getElementById('approvalsHistoryContent').innerHTML = `
+                  <div class="text-center text-muted py-4">
+                      <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                      </div>
+                      <p class="mt-2">Loading approvals...</p>
+                  </div>
+              `;
+
+      document.getElementById('rejectionsHistoryContent').innerHTML = `
+                  <div class="text-center text-muted py-4">
+                      <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                      </div>
+                      <p class="mt-2">Loading rejections...</p>
+                  </div>
+              `;
+
+      // Reset tab counts
+      document.getElementById('approvalsTabCount').textContent = '0';
+      document.getElementById('rejectionsTabCount').textContent = '0';
+
+      // Show the modal first
+      modal.show();
+
+      // Then load the data
+      loadApprovalHistory(requestId);
     }
-    
-    const modal = new bootstrap.Modal(modalElement);
-    
-    // Set loading state
-    document.getElementById('approvalsHistoryContent').innerHTML = `
-        <div class="text-center text-muted py-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Loading approvals...</p>
-        </div>
-    `;
-    
-    document.getElementById('rejectionsHistoryContent').innerHTML = `
-        <div class="text-center text-muted py-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Loading rejections...</p>
-        </div>
-    `;
-    
-    // Reset tab counts
-    document.getElementById('approvalsTabCount').textContent = '0';
-    document.getElementById('rejectionsTabCount').textContent = '0';
-    
-    // Show the modal first
-    modal.show();
-    
-    // Then load the data
-    loadApprovalHistory(requestId);
-}
 
     document.addEventListener('DOMContentLoaded', function () {
       const requisitionContainer = document.getElementById('requisitionContainer');
@@ -449,7 +460,8 @@ function generateApprovalHistoryHTML(history) {
       const sortFilter = document.getElementById('sortFilter');
       const searchInput = document.getElementById('searchInput');
       const searchButton = document.getElementById('searchButton');
-      
+
+      let abortController = new AbortController();
       let unreadRequests = new Set();
       let currentLayout = 'compact'; // Set compact as default
       let formsData = []; // Store forms data to avoid refetching
@@ -498,22 +510,22 @@ function generateApprovalHistoryHTML(history) {
 
         if (forms.length === 0) {
           requisitionContainer.innerHTML = `
-                <div class="empty-state">
-                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                    <p class="mt-3 text-muted">No requisitions found matching your criteria.</p>
-                </div>
-            `;
+                          <div class="empty-state">
+                              <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                              <p class="mt-3 text-muted">No requisitions found matching your criteria.</p>
+                          </div>
+                      `;
           return;
         }
 
         if (currentLayout === 'compact') {
-          requisitionContainer.classList.add('cards-grid');
-          requisitionContainer.classList.remove('overflow-auto');
-        } else {
           requisitionContainer.classList.remove('cards-grid');
           requisitionContainer.classList.add('overflow-auto');
           requisitionContainer.style.maxHeight = 'calc(100vh - 300px)';
-          requisitionContainer.style.padding = '1rem'; // Added padding for detailed layout
+          requisitionContainer.style.padding = '1rem';
+        } else {
+          requisitionContainer.classList.add('cards-grid');
+          requisitionContainer.classList.remove('overflow-auto');
         }
 
         forms.forEach(form => {
@@ -526,82 +538,63 @@ function generateApprovalHistoryHTML(history) {
 
           if (currentLayout === 'compact') {
             cardHtml = `
-                    <div class="card requisition-card compact-card mb-1 ${isUnread ? 'unread-card' : ''}" 
-                         data-request-id="${form.request_id}">
-                        ${isUnread ? '<span class="request-badge"></span>' : ''}
-                        <div class="card-body p-1">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <h5 class="card-title mb-0 fw-bold">Request #${requestNumber}</h5>
-
-                                <!-- Circle action buttons -->
-                                <div class="d-flex gap-1">
-                                    <button class="btn btn-sm btn-secondary circle-btn view-history-btn"
-                                            data-request-id="${form.request_id}" 
-                                            title="Approval History">
-                                        <i class="bi bi-clock-history"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-primary circle-btn manage-btn"
-                                            data-request-id="${form.request_id}" 
-                                            title="Manage Request">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="compact-info-column">
-                                <div>
-                                    <span class="card-label">Status:</span> 
-                                    <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
-                                </div>
-                                <div>
-                                    <span class="card-label">Requester:</span> ${form.requester || 'N/A'}
-                                </div>
-                                <div>
-                                    <span class="card-label">Purpose:</span> ${form.purpose || 'N/A'}
-                                </div>
-                                <div>
-                                    <span class="card-label">Approvals:</span> ${form.approvals || '0'}
-                                </div>
-                                <div>
-                                    <span class="card-label">Rejections:</span> ${form.rejections || '0'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+          <div class="card requisition-card ${isUnread ? 'unread-card' : ''}" 
+               data-request-id="${form.request_id}">
+              ${isUnread ? '<span class="request-badge"></span>' : ''}
+              <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                          <h5 class="card-title mb-0 cursor-pointer request-title d-inline" 
+                              data-request-id="${form.request_id}">Request #${requestNumber}</h5>
+                          <span class="badge ms-2" style="background-color: ${statusColor}">${statusName}</span>
+                      </div>
+                      <button class="btn btn-secondary view-history-btn" 
+                              data-request-id="${form.request_id}">View Approval History</button>
+                  </div>
+              </div>
+          </div>
+        `;
           } else {
             cardHtml = `
-      <div class="card requisition-card ${isUnread ? 'unread-card' : ''}" 
+      <div class="card requisition-card compact-card mb-1 ${isUnread ? 'unread-card' : ''}" 
            data-request-id="${form.request_id}">
           ${isUnread ? '<span class="request-badge"></span>' : ''}
-          <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                  <h5 class="card-title mb-0">Request #${requestNumber}</h5>
-                  <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
-              </div>
+          <div class="card-body p-1">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                  <h5 class="card-title mb-0 fw-bold cursor-pointer request-title" 
+                      data-request-id="${form.request_id}">Request #${requestNumber}</h5>
 
-              <div class="row mb-3">
-                  <div class="col-md-6">
-                      <p class="mb-2"><span class="card-label">Requester:</span> ${form.requester}</p>
-                      <p class="mb-2"><span class="card-label">Purpose:</span> ${form.purpose}</p>
-                      <p class="mb-2"><span class="card-label">Schedule:</span> ${form.schedule}</p>
-                  </div>
-                  <div class="col-md-6">
-                      <p class="mb-2"><span class="card-label">Facilities:</span> ${form.requested_items}</p>
-                      <p class="mb-2"><span class="card-label">Tentative Fee:</span> ₱${form.tentative_fee}</p>
-                      <p class="mb-2"><span class="card-label">Approvals:</span> ${form.approvals}</p>
+                  <!-- Only history button remains -->
+                  <div class="d-flex gap-1">
+                      <button class="btn btn-sm btn-secondary circle-btn view-history-btn"
+                              data-request-id="${form.request_id}" 
+                              title="Approval History">
+                          <i class="bi bi-clock-history"></i>
+                      </button>
                   </div>
               </div>
 
-              <div class="d-flex gap-2">
-                  <button class="btn btn-primary manage-btn" 
-                          data-request-id="${form.request_id}">Review Request</button>
-                  <button class="btn btn-secondary view-history-btn" 
-                          data-request-id="${form.request_id}">View Approval History</button>
+              <div class="compact-info-column">
+                  <div>
+                      <span class="card-label">Status:</span> 
+                      <span class="badge" style="background-color: ${statusColor}">${statusName}</span>
+                  </div>
+                  <div>
+                      <span class="card-label">Requester:</span> ${form.requester || 'N/A'}
+                  </div>
+                  <div>
+                      <span class="card-label">Purpose:</span> ${form.purpose || 'N/A'}
+                  </div>
+                  <div>
+                      <span class="card-label">Approvals:</span> ${form.approvals || '0'}
+                  </div>
+                  <div>
+                      <span class="card-label">Rejections:</span> ${form.rejections || '0'}
+                  </div>
               </div>
           </div>
       </div>
-    `;
+  `;
           }
 
           requisitionContainer.innerHTML += cardHtml;
@@ -610,23 +603,21 @@ function generateApprovalHistoryHTML(history) {
       }
 
       function addCardEventListeners() {
-        // REMOVED: Card click to mark as read - now only the manage button will mark as read
-
-        // Manage button - now marks as read
-document.querySelectorAll('.manage-btn').forEach(btn => {
-  btn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    const requestId = this.getAttribute('data-request-id');
-    handleManage(requestId);
-  });
-});
-
         // History button - does NOT mark as read
         document.querySelectorAll('.view-history-btn').forEach(btn => {
           btn.addEventListener('click', function (e) {
             e.stopPropagation();
             const requestId = this.getAttribute('data-request-id');
             showApprovalHistory(requestId);
+          });
+        });
+
+        // Title click for both layouts (compact and detailed)
+        document.querySelectorAll('.request-title').forEach(title => {
+          title.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const requestId = this.getAttribute('data-request-id');
+            handleManage(requestId);
           });
         });
       }
@@ -777,15 +768,20 @@ document.querySelectorAll('.manage-btn').forEach(btn => {
 
       async function fetchAndDisplayForms(showLoading = true) {
         try {
+
+          // Abort any previous request
+          abortController.abort();
+          abortController = new AbortController();
+
           if (showLoading) {
             requisitionContainer.innerHTML = `
-                      <div class="loading-spinner">
-                          <div class="spinner-border text-primary" role="status">
-                              <span class="visually-hidden">Loading...</span>
-                          </div>
-                          <p class="mt-2">Loading Requisitions...</p>
-                      </div>
-                  `;
+                                <div class="loading-spinner">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2">Loading Requisitions...</p>
+                                </div>
+                            `;
           }
 
           const adminToken = localStorage.getItem('adminToken');
@@ -797,7 +793,8 @@ document.querySelectorAll('.manage-btn').forEach(btn => {
             headers: {
               'Authorization': `Bearer ${adminToken}`,
               'Accept': 'application/json'
-            }
+            },
+            signal: abortController.signal
           });
 
           if (!response.ok) {
@@ -805,6 +802,7 @@ document.querySelectorAll('.manage-btn').forEach(btn => {
           }
 
           const newFormsData = await response.json();
+
 
           // Check for new requests and add to unread set
           const currentRequestIds = new Set(formsData.map(form => form.request_id.toString()));
@@ -821,8 +819,11 @@ document.querySelectorAll('.manage-btn').forEach(btn => {
           applyFilters();
 
         } catch (error) {
-          console.error('Error fetching forms:', error);
-          requisitionContainer.innerHTML = '<div class="alert alert-danger">Failed to load requisitions. Please try again later.</div>';
+          // Don't show error if it's an abort error
+          if (error.name !== 'AbortError') {
+            console.error('Error fetching forms:', error);
+            requisitionContainer.innerHTML = '<div class="alert alert-danger">Failed to load requisitions. Please try again later.</div>';
+          }
         }
       }
 
@@ -849,9 +850,16 @@ document.querySelectorAll('.manage-btn').forEach(btn => {
       });
 
       // Refresh every 30 seconds without showing loading spinner
-      setInterval(() => {
+      let refreshInterval = setInterval(() => {
         fetchAndDisplayForms(false);
       }, 30000);
+
+      // Clean up on page unload
+      window.addEventListener('beforeunload', function () {
+        clearInterval(refreshInterval);
+        abortController.abort();
+      });
+
     });
   </script>
 @endsection

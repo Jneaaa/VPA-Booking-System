@@ -16,8 +16,8 @@ class AdminSeeder extends Seeder
     {
         DB::table('admins')->insert([
             [
-                'first_name' => 'Engr. Dany',
-                'last_name' => 'Molina (VP)',
+                'first_name' => 'Dany',
+                'last_name' => 'Molina',
                 'middle_name' => 'C.',
                 'title' => 'Vice President of Administration',
                 'signature_url' => 'https://res.cloudinary.com/dn98ntlkd/image/upload/v1761686795/ysejb5cpn9rtuzwfkyue.png',

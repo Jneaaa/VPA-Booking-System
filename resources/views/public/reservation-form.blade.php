@@ -19,6 +19,28 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css"
     rel="stylesheet" />
   <style>
+    /* Style the 'How to book?' trigger text */
+.navbar .how-to-book {
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+    color: #4d4d4dff;
+}
+
+.custom-tooltip .tooltip-inner {
+    background-color: #000000; /* black background */
+    color: #ffffff;            /* white text */
+    font-size: 0.85rem;
+    padding: 0.75rem 0.75rem;  /* reduce top/bottom padding */
+    line-height: 1.2;          /* tighten spacing */
+    max-width: 300px;
+    text-align: left;
+    white-space: pre-line;     /* preserves line breaks */
+}
+
+.custom-tooltip .tooltip-arrow::before {
+    border-bottom-color: #000000; /* match arrow to bg */
+}
     .endorser-tooltip {
       font-size: 0.9rem;
       opacity: 0.75;
@@ -714,8 +736,17 @@
               href="{{ url('user-feedback') }}">Rate Our Services</a>
           </li>
         </ul>
-
-        <a href="{{ url('facility-catalog') }}" class="btn btn-book-now ms-lg-3">Back To Catalog</a>
+        <div class="d-flex align-items-center">
+          <span class="me-2 how-to-book d-flex align-items-center" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            data-bs-custom-class="custom-tooltip" title="1. Browse the catalog and add venues or equipment to your booking cart.
+2. Go to the reservation form via 'Book Now' or your cart.
+3. Fill in required booking data and check item availability for your timeslot.
+4. Read reservation policies before submitting.">
+            How to book?
+            <i class="bi bi-question-circle ms-1" style="font-size: 0.9rem;"></i>
+          </span>
+          <a href="{{ url('facility-catalog') }}" class="btn btn-book-now">Back To Catalog</a>
+        </div>
       </div>
     </div>
   </nav>
@@ -1405,6 +1436,12 @@
     const equipmentList = document.getElementById('equipmentList');
     const feeDisplay = document.getElementById('feeDisplay');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        // Initialize Bootstrap tooltips
+const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+tooltipTriggerList.map(function (el) {
+    return new bootstrap.Tooltip(el);
+});
 
 
     // Ensure the form always starts at Step 1 when page loads

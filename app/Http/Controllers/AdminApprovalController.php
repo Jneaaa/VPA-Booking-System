@@ -1859,9 +1859,6 @@ class AdminApprovalController extends Controller
                 'formStatus'
             ])->findOrFail($requestId);
 
-            // Update equipment conditions to "In Use"
-            $this->updateEquipmentConditions($form);
-
             // Update form with official receipt number and status
             $scheduledStatus = FormStatus::where('status_name', 'Scheduled')->first();
             if (!$scheduledStatus) {
@@ -1917,54 +1914,6 @@ class AdminApprovalController extends Controller
 
             return response()->json([
                 'error' => 'Failed to mark form as scheduled',
-                'details' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function getEquipmentStatus($requestId)
-    {
-        try {
-            $form = RequisitionForm::with([
-                'requestedEquipment.equipment.items.condition'
-            ])->findOrFail($requestId);
-
-            $equipmentStatus = [];
-
-            foreach ($form->requestedEquipment as $reqEquipment) {
-                $equipment = $reqEquipment->equipment;
-
-                // Get items that are currently marked as "In Use" (condition_id = 6)
-                // for this equipment type (we assume they're being used for this request)
-                $inUseItems = \App\Models\EquipmentItem::where('equipment_id', $equipment->equipment_id)
-                    ->where('condition_id', 6) // In Use
-                    ->with('condition')
-                    ->limit($reqEquipment->quantity) // Only show up to the requested quantity
-                    ->get();
-
-                foreach ($inUseItems as $item) {
-                    $equipmentStatus[] = [
-                        'equipment_name' => $equipment->equipment_name,
-                        'item_id' => $item->item_id,
-                        'condition_name' => $item->condition->condition_name,
-                        'condition_color' => $item->condition->color_code
-                    ];
-                }
-            }
-
-            return response()->json([
-                'equipment_status' => $equipmentStatus,
-                'has_equipment' => count($equipmentStatus) > 0
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Failed to fetch equipment status', [
-                'request_id' => $requestId,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'error' => 'Failed to fetch equipment status',
                 'details' => $e->getMessage()
             ], 500);
         }
@@ -2143,68 +2092,6 @@ public function generateOfficialReceipt($requestId)
         }
 
         return $breakdown;
-    }
-
-    private function updateEquipmentConditions($form)
-    {
-        try {
-            \Log::debug('Updating equipment conditions for scheduled form', [
-                'request_id' => $form->request_id
-            ]);
-
-            // Get all requested equipment for this form
-            $requestedEquipment = $form->requestedEquipment;
-
-            foreach ($requestedEquipment as $reqEquipment) {
-                // Get the equipment type
-                $equipment = $reqEquipment->equipment;
-
-                // Get available equipment items for this equipment type with conditions 1, 2, or 3
-                $availableItems = \App\Models\EquipmentItem::where('equipment_id', $equipment->equipment_id)
-                    ->whereIn('condition_id', [1, 2, 3]) // New, Good, Fair
-                    ->orderBy('condition_id', 'asc') // Prefer better condition first
-                    ->limit($reqEquipment->quantity)
-                    ->get();
-
-                \Log::debug('Found available equipment items', [
-                    'equipment_id' => $equipment->equipment_id,
-                    'required_quantity' => $reqEquipment->quantity,
-                    'available_count' => $availableItems->count(),
-                    'item_ids' => $availableItems->pluck('item_id')
-                ]);
-
-                if ($availableItems->count() < $reqEquipment->quantity) {
-                    \Log::warning('Not enough available equipment items', [
-                        'equipment_id' => $equipment->equipment_id,
-                        'required' => $reqEquipment->quantity,
-                        'available' => $availableItems->count()
-                    ]);
-                    // Continue with available items
-                }
-
-                // Update each item to "In Use" (condition_id = 6)
-                foreach ($availableItems as $item) {
-                    $item->condition_id = 6; // In Use
-                    $item->save();
-
-                    \Log::debug('Updated equipment item condition', [
-                        'item_id' => $item->item_id,
-                        'old_condition' => $item->getOriginal('condition_id'),
-                        'new_condition' => $item->condition_id
-                    ]);
-                }
-            }
-
-            return true;
-
-        } catch (\Exception $e) {
-            \Log::error('Failed to update equipment conditions', [
-                'request_id' => $form->request_id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return false;
-        }
     }
 
     public function updateCalendarInfo(Request $request, $requestId)
