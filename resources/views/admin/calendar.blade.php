@@ -425,7 +425,15 @@
                     id="filterLate" checked>
                   <label class="form-check-label" for="filterLate">Late Events</label>
                 </div>
+
+                <hr class="my-3">
+<h6 class="fw-bold mb-2">Filter by Facility</h6>
+<div class="filter-list mb-3" id="facilityFilterList" style="max-height: 200px; overflow-y: auto;">
+    <!-- Facilities will be populated by JavaScript -->
+</div>
+                
               </div>
+              
             </div>
           </div>
         </div>
@@ -625,6 +633,7 @@
     let currentRequestId = null;
     let originalCalendarTitle = '';
     let originalCalendarDescription = '';
+    
     const adminToken = localStorage.getItem('adminToken');
     const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
 

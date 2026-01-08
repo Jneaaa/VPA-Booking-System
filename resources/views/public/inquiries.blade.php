@@ -100,25 +100,12 @@
 
     <!-- Start Main Content -->
     <main class="main-content-wrapper container">
-        <h1 class=" text-primary">Guidelines on the Charges for the Use of CPU Facilities</h1>
-
-                <!-- Note Section -->
-        <div class="highlight">
-            <div class="d-flex align-items-start">
-                <i class="fas fa-info-circle text-primary mt-1" style="font-size: 1.5rem;"></i>
-                <div>
-                    <h5 class="text-primary mb-2">Important Note</h5>
-                    <p class="mb-0"><strong>All bookings are subject to availability</strong> and must comply with the general reservation policies of the university. For detailed booking procedures, eligibility requirements, and to check real-time availability, please refer to the main booking policies page or contact the facilities management office.</p>
-                </div>
-            </div>
-        </div>
-
-        <br>
+        <h1 class="mb-4 text-primary">Guidelines on the Charges for the Use of CPU Facilities</h1>
 
         <!-- Row 1: Cards 1-3 -->
         <div class="row mb-4">
             <!-- Card 1 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-2">
                 <div class="card policy-card">
                     <div class="card-body">
                         <div class="text-center card-icon">
@@ -137,7 +124,7 @@
             </div>
 
             <!-- Card 2 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-2">
                 <div class="card policy-card">
                     <div class="card-body">
                         <div class="text-center card-icon">
@@ -157,7 +144,7 @@
             </div>
 
             <!-- Card 3 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-2">
                 <div class="card policy-card">
                     <div class="card-body">
                         <div class="text-center card-icon">
@@ -181,7 +168,7 @@
         <!-- Row 2: Cards 4-6 -->
         <div class="row mb-4">
             <!-- Card 4 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-2">
                 <div class="card policy-card">
                     <div class="card-body">
                         <div class="text-center card-icon">
@@ -201,7 +188,7 @@
             </div>
 
             <!-- Card 5 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-2">
                 <div class="card policy-card">
                     <div class="card-body">
                         <div class="text-center card-icon">
@@ -221,7 +208,7 @@
             </div>
 
             <!-- Card 6 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-2">
                 <div class="card policy-card">
                     <div class="card-body">
                         <div class="text-center card-icon">
@@ -244,7 +231,7 @@
         <!-- Row 3: Cards 7-9 -->
         <div class="row mb-4">
             <!-- Card 7 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-2">
                 <div class="card policy-card">
                     <div class="card-body">
                         <div class="text-center card-icon">
@@ -264,7 +251,7 @@
             </div>
 
             <!-- Card 8 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-2">
                 <div class="card policy-card">
                     <div class="card-body">
                         <div class="text-center card-icon">
@@ -285,7 +272,7 @@
             </div>
 
             <!-- Card 9 -->
-            <div class="col-lg-4 col-md-6 mb-4">
+            <div class="col-lg-4 col-md-6 mb-2">
                 <div class="card policy-card">
                     <div class="card-body">
                         <div class="text-center card-icon">
@@ -305,5 +292,17 @@
                 </div>
             </div>
         </div>
+
+        <!-- Note Section -->
+        <div class="highlight">
+            <div class="d-flex align-items-start">
+                <i class="fas fa-info-circle text-primary me-3 mt-1" style="font-size: 1.5rem;"></i>
+                <div>
+                    <h5 class="text-primary mb-2">Important Note</h5>
+                    <p class="mb-0"><strong>All bookings are subject to availability</strong> and must comply with the general reservation policies of the university. For detailed booking procedures, eligibility requirements, and to check real-time availability, please refer to the main booking policies page or contact the facilities management office.</p>
+                </div>
+            </div>
+        </div>
+
     </main>
 @endsection

@@ -92,6 +92,8 @@
                         About Services
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item {{ Request::is('inquiries') ? 'active' : '' }}"
+                                href="{{ url('inquiries') }}">Guidelines</a></li>
                         <li><a class="dropdown-item {{ Request::is('about-facilities') ? 'active' : '' }}"
                                 href="{{ url('about-facilities') }}">Facilities</a></li>
                         <li><a class="dropdown-item {{ Request::is('about-equipment') ? 'active' : '' }}"
