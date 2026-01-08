@@ -304,6 +304,31 @@
     .loading .calendar-content {
       display: none;
     }
+    /* Event Modal Edit Mode Styles */
+#modalCalendarTitle:not([readonly]),
+#modalCalendarDescription:not([readonly]) {
+    color: #000 !important;
+    background-color: #fff !important;
+    border-color: #4272b1ff !important;
+    box-shadow: 0 0 0 0.2rem rgba(66, 114, 177, 0.25) !important;
+}
+
+/* Make sure the readonly state is properly styled */
+#modalCalendarTitle[readonly],
+#modalCalendarDescription[readonly] {
+    color: #6c757d !important;
+    background-color: #f8f9fa !important;
+    cursor: default;
+}
+
+/* Focus state for better UX */
+#modalCalendarTitle:focus,
+#modalCalendarDescription:focus {
+    color: #000 !important;
+    border-color: #4272b1ff !important;
+    box-shadow: 0 0 0 0.2rem rgba(66, 114, 177, 0.25) !important;
+    outline: 0;
+}
   </style>
 
 
@@ -431,7 +456,26 @@
           </div>
         </div>
       </div>
+          <!-- Admin Reservations Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Admin Reservations</h5>
+            </div>
+            <div class="card-body">
+                <!-- Content will go here -->
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-calendar-event fs-1 mb-3"></i>
+                    <p class="mb-0">Admin reservations content will be displayed here</p>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+    </div>
+
+
 
     <!-- Event Details Modal -->
     <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
@@ -558,6 +602,7 @@
               </table>
             </div>
           </div>
+          
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" id="modalViewDetails">View Full Details</button>
@@ -797,7 +842,7 @@
             setTimeout(() => calendar.updateSize(), 0);
           },
           eventTimeFormat: {
-            hour: '2-digit',
+            hour: 'numeric',
             minute: '2-digit',
             hour12: true
           },
@@ -807,16 +852,66 @@
           nowIndicator: true,
           navLinks: true,
           dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric' },
-          views: {
-            dayGridMonth: {
-              dayHeaderFormat: {
-                weekday: 'short'
-              }
+views: {
+    dayGridMonth: {
+        dayHeaderFormat: {
+            weekday: 'short'
+        },
+        eventContent: function(arg) {
+            // Create a wrapper that preserves the default content but adds wrapping
+            const arrayOfDomNodes = [];
+            
+            // Add time element for timed events
+            if (arg.event.start && !arg.event.allDay) {
+                // Format start time without leading zeros
+                const startTime = arg.event.start.toLocaleTimeString('en-US', { 
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true 
+                }).replace(/^0/, ''); // Remove leading zero if present
+                
+                let timeText = startTime;
+                
+                // Add end time if it exists
+                if (arg.event.end) {
+                    // Format end time without leading zeros
+                    const endTime = arg.event.end.toLocaleTimeString('en-US', { 
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true 
+                    }).replace(/^0/, ''); // Remove leading zero if present
+                    timeText = `${startTime} - ${endTime}`;
+                }
+                
+                const timeEl = document.createElement('div');
+                timeEl.classList.add('fc-event-time');
+                timeEl.style.fontSize = '0.75em';
+                timeEl.style.fontWeight = '500';
+                timeEl.style.marginBottom = '1px';
+                timeEl.style.opacity = '0.9';
+                timeEl.innerText = timeText;
+                arrayOfDomNodes.push(timeEl);
             }
-          },
+            
+            // Add title with wrapping
+            const titleEl = document.createElement('div');
+            titleEl.classList.add('fc-event-title');
+            titleEl.style.whiteSpace = 'normal';
+            titleEl.style.wordWrap = 'break-word';
+            titleEl.style.fontSize = '0.85em';
+            titleEl.style.lineHeight = '1.2';
+            
+            if (arg.event.title) {
+                titleEl.innerText = arg.event.title;
+            }
+            arrayOfDomNodes.push(titleEl);
+            
+            return { domNodes: arrayOfDomNodes };
+        }
+    }
+},
           eventDisplay: 'block',
-          dayMaxEvents: true,
-          moreLinkClick: 'popover'
+          dayMaxEvents: false,
         });
 
         calendar.render();

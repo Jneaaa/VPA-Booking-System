@@ -42,6 +42,8 @@ Route::get('/', function () {
     Route::view('/your-bookings', 'public.your-bookings');
     Route::view('/user-payment', 'public.user-payment');
     Route::view('/policies', 'public.policies');
+    Route::view('/inquiries', 'public.inquiries');
+    Route::view('/about-personnel', 'public.about-personnel');
     Route::get('/official-receipt/{requestId}', [App\Http\Controllers\AdminApprovalController::class, 'generateOfficialReceipt'])
         ->name('official-receipt');
 
