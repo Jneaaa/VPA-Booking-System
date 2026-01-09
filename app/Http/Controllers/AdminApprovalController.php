@@ -74,7 +74,6 @@ class AdminApprovalController extends Controller
                 });
 
             return response()->json($approvals);
-
         } catch (\Exception $e) {
             \Log::error('Failed to fetch approval history', [
                 'request_id' => $requestId,
@@ -180,8 +179,8 @@ class AdminApprovalController extends Controller
                     ],
                     'form_details' => [
                         'num_participants' => $form->num_participants,
-                         'num_tables' => $form->num_tables, 
-                         'num_chairs' => $form->num_chairs,
+                        'num_tables' => $form->num_tables,
+                        'num_chairs' => $form->num_chairs,
                         'purpose' => $form->purpose->purpose_name,
                         'additional_requests' => $form->additional_requests,
                         'status' => [
@@ -203,25 +202,26 @@ class AdminApprovalController extends Controller
                     ],
                     'requested_items' => [
                         'facilities' => $form->requestedFacilities->map(function ($facility) {
-                        return [
-                            'requested_facility_id' => $facility->requested_facility_id,
-                            'name' => $facility->facility->facility_name,
-                            'fee' => $facility->facility->external_fee,
-                            'rate_type' => $facility->facility->rate_type,
-                            'is_waived' => $facility->is_waived
-                        ];
-                    }),
+                            return [
+                                'requested_facility_id' => $facility->requested_facility_id,
+                                'facility_id' => $facility->facility_id,
+                                'name' => $facility->facility->facility_name,
+                                'fee' => $facility->facility->external_fee,
+                                'rate_type' => $facility->facility->rate_type,
+                                'is_waived' => $facility->is_waived
+                            ];
+                        }),
                         'equipment' => $form->requestedEquipment->map(function ($equipment) {
-                        return [
-                            'requested_equipment_id' => $equipment->requested_equipment_id, // Single ID
-                            'name' => $equipment->equipment->equipment_name,
-                            'quantity' => $equipment->quantity,
-                            'fee' => $equipment->equipment->external_fee,
-                            'rate_type' => $equipment->equipment->rate_type,
-                            'is_waived' => $equipment->is_waived,
-                            'total_fee' => $equipment->equipment->external_fee * $equipment->quantity
-                        ];
-                    })
+                            return [
+                                'requested_equipment_id' => $equipment->requested_equipment_id,
+                                'name' => $equipment->equipment->equipment_name,
+                                'quantity' => $equipment->quantity,
+                                'fee' => $equipment->equipment->external_fee,
+                                'rate_type' => $equipment->equipment->rate_type,
+                                'is_waived' => $equipment->is_waived,
+                                'total_fee' => $equipment->equipment->external_fee * $equipment->quantity
+                            ];
+                        })
                     ],
                     'fees' => [
                         'tentative_fee' => $totalTentativeFee,
@@ -347,7 +347,6 @@ class AdminApprovalController extends Controller
                 });
 
             return $overlappingRequests;
-
         } catch (\Exception $e) {
             \Log::error('Error finding overlapping requests', [
                 'request_id' => $currentForm->request_id,
@@ -555,7 +554,6 @@ class AdminApprovalController extends Controller
             ]);
 
             return response()->json($response);
-
         } catch (\Exception $e) {
             \Log::error('Failed to fetch requisition form by ID', [
                 'request_id' => $requestId,
@@ -611,7 +609,6 @@ class AdminApprovalController extends Controller
                 'message' => 'Request approved successfully',
                 'approval_id' => $approval->id
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Failed to approve request', [
                 'request_id' => $requestId,
@@ -667,7 +664,6 @@ class AdminApprovalController extends Controller
                 'message' => 'Request rejected successfully',
                 'rejection_id' => $rejection->id
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Failed to reject request', [
                 'request_id' => $requestId,
@@ -726,9 +722,9 @@ class AdminApprovalController extends Controller
                 // Group equipment by name and sum quantities
                 $equipmentGroups = $form->requestedEquipment->groupBy('equipment.equipment_name')
                     ->map(function ($group) {
-                    $totalQuantity = $group->sum('quantity');
-                    return $group->first()->equipment->equipment_name . ' (×' . $totalQuantity . ')';
-                });
+                        $totalQuantity = $group->sum('quantity');
+                        return $group->first()->equipment->equipment_name . ' (×' . $totalQuantity . ')';
+                    });
 
                 // Format requested items
                 $requestedItems = collect([
@@ -781,7 +777,6 @@ class AdminApprovalController extends Controller
                 });
 
             return response()->json($fees);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to fetch fees',
@@ -822,7 +817,6 @@ class AdminApprovalController extends Controller
                 'fee' => $fee,
                 'updated_approved_fee' => $approvedFee
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to add fee',
@@ -852,7 +846,6 @@ class AdminApprovalController extends Controller
                 'message' => 'Fee removed successfully',
                 'updated_approved_fee' => $approvedFee
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to remove fee',
@@ -895,7 +888,6 @@ class AdminApprovalController extends Controller
                 'discount_type' => $validatedData['discount_type'],
                 'updated_approved_fee' => $approvedFee
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to add discount',
@@ -936,7 +928,6 @@ class AdminApprovalController extends Controller
                 'penalty_amount' => $form->late_penalty_fee,
                 'updated_approved_fee' => $approvedFee
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to add late penalty',
@@ -966,7 +957,6 @@ class AdminApprovalController extends Controller
                 'updated_approved_fee' => $approvedFee,
                 'is_late' => $form->is_late // Include current late status in response
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to remove late penalty',
@@ -1102,7 +1092,6 @@ class AdminApprovalController extends Controller
                 'updated_approved_fee' => $approvedFee,
                 'tentative_fee' => $this->calculateTentativeFee($requestId)
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Failed to waive items', [
@@ -1137,7 +1126,6 @@ class AdminApprovalController extends Controller
                 'message' => 'Comment added successfully',
                 'comment' => $comment
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to add comment',
@@ -1154,7 +1142,6 @@ class AdminApprovalController extends Controller
                 ->get();
 
             return response()->json($comments);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to fetch comments',
@@ -1248,7 +1235,6 @@ class AdminApprovalController extends Controller
                     'request_id' => $requestId,
                     'approved_fee' => $form->approved_fee
                 ]);
-
             } catch (\Exception $emailError) {
                 \Log::error('Failed to send approval email', [
                     'request_id' => $requestId,
@@ -1263,7 +1249,6 @@ class AdminApprovalController extends Controller
                 'new_status' => 'Awaiting Payment',
                 'approved_fee' => $form->approved_fee
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Finalize form validation failed', [
                 'request_id' => $requestId,
@@ -1275,7 +1260,6 @@ class AdminApprovalController extends Controller
                 'error' => 'Validation failed',
                 'details' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             \Log::error('Failed to finalize form', [
                 'request_id' => $requestId,
@@ -1336,7 +1320,6 @@ class AdminApprovalController extends Controller
                 'message' => 'Request cancelled successfully',
                 'request_id' => $requestId
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Failed to cancel request via public route', [
@@ -1388,7 +1371,6 @@ class AdminApprovalController extends Controller
                 'message' => 'Form cancelled successfully',
                 'request_id' => $requestId
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Failed to cancel form as admin', [
@@ -1433,7 +1415,6 @@ class AdminApprovalController extends Controller
                 'message' => 'Form closed successfully',
                 'form' => $form
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to close form',
@@ -1478,7 +1459,6 @@ class AdminApprovalController extends Controller
                 'late_penalty_fee' => $form->late_penalty_fee,
                 'updated_approved_fee' => $approvedFee
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to mark equipment as returned',
@@ -1593,7 +1573,6 @@ class AdminApprovalController extends Controller
                 'late_penalty_fee' => $form->late_penalty_fee,
                 'updated_approved_fee' => $approvedFee
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Status update validation failed', [
                 'request_id' => $requestId,
@@ -1605,7 +1584,6 @@ class AdminApprovalController extends Controller
                 'error' => 'Validation failed',
                 'details' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             \Log::error('Failed to update status', [
                 'request_id' => $requestId,
@@ -1648,7 +1626,6 @@ class AdminApprovalController extends Controller
                 'recipient' => $userEmail,
                 'request_id' => $form->request_id
             ]);
-
         } catch (\Exception $emailError) {
             \Log::error('Failed to send late penalty email', [
                 'request_id' => $form->request_id,
@@ -1753,7 +1730,6 @@ class AdminApprovalController extends Controller
             ]);
 
             return $total;
-
         } catch (\Exception $e) {
             \Log::error('Error in calculateBaseFees', [
                 'request_id' => $form->request_id ?? 'unknown',
@@ -1892,7 +1868,6 @@ class AdminApprovalController extends Controller
                 'official_receipt_num' => $form->official_receipt_num,
                 'new_status' => 'Scheduled'
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Mark as scheduled validation failed', [
                 'request_id' => $requestId,
@@ -1903,7 +1878,6 @@ class AdminApprovalController extends Controller
                 'error' => 'Validation failed',
                 'details' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             \Log::error('Failed to mark form as scheduled', [
                 'request_id' => $requestId,
@@ -1948,7 +1922,6 @@ class AdminApprovalController extends Controller
                 'request_id' => $form->request_id,
                 'official_receipt_num' => $form->official_receipt_num
             ]);
-
         } catch (\Exception $emailError) {
             \Log::error('Failed to send scheduled confirmation email', [
                 'request_id' => $form->request_id,
@@ -1957,96 +1930,95 @@ class AdminApprovalController extends Controller
             ]);
         }
     }
-public function generateOfficialReceipt($requestId)
-{
-    try {
-        \Log::debug('=== GENERATE OFFICIAL RECEIPT CALLED ===', [
-            'request_id' => $requestId,
-            'full_url' => request()->fullUrl(),
-            'method' => request()->method()
-        ]);
+    public function generateOfficialReceipt($requestId)
+    {
+        try {
+            \Log::debug('=== GENERATE OFFICIAL RECEIPT CALLED ===', [
+                'request_id' => $requestId,
+                'full_url' => request()->fullUrl(),
+                'method' => request()->method()
+            ]);
 
-        $form = RequisitionForm::with([
-            'requestedFacilities.facility',
-            'requestedEquipment.equipment',
-            'purpose',
-            'requisitionFees',
-            'formStatus',
-            'requisitionApprovals.approvedBy' // Load the approval relationships
-        ])->findOrFail($requestId);
+            $form = RequisitionForm::with([
+                'requestedFacilities.facility',
+                'requestedEquipment.equipment',
+                'purpose',
+                'requisitionFees',
+                'formStatus',
+                'requisitionApprovals.approvedBy' // Load the approval relationships
+            ])->findOrFail($requestId);
 
-        // Check if official receipt number exists
-        if (empty($form->official_receipt_num)) {
-            abort(404, 'Official receipt not generated yet');
+            // Check if official receipt number exists
+            if (empty($form->official_receipt_num)) {
+                abort(404, 'Official receipt not generated yet');
+            }
+
+            // Calculate total fee
+            $totalFee = $form->approved_fee;
+
+            // Get all admins who approved this request with their approval dates
+            $approvingAdmins = $form->requisitionApprovals
+                ->whereNotNull('approved_by')
+                ->map(function ($approval) {
+                    return [
+                        'admin' => $approval->approvedBy,
+                        'date_approved' => $approval->date_updated ? Carbon::parse($approval->date_updated)->format('M j, Y') : 'N/A'
+                    ];
+                })
+                ->filter(function ($item) {
+                    return !is_null($item['admin']); // Remove null admins
+                })
+                ->unique(function ($item) {
+                    return $item['admin']->admin_id; // Remove duplicates by admin_id
+                });
+
+            // Prepare receipt data
+            $receiptData = [
+                'official_receipt_num' => $form->official_receipt_num,
+                'user_name' => $form->first_name . ' ' . $form->last_name,
+                'user_email' => $form->email,
+                'organization_name' => $form->organization_name,
+                'contact_number' => $form->contact_number,
+                'request_id' => $form->request_id,
+                'facility_name' => $form->requestedFacilities->first()->facility->facility_name ?? 'N/A',
+                'purpose' => $form->purpose->purpose_name,
+                'num_participants' => $form->num_participants,
+                'total_fee' => $totalFee,
+                'issued_date' => $form->updated_at->format('F j, Y'),
+                'schedule' => Carbon::parse($form->start_date)->format('F j, Y') . ' — ' .
+                    Carbon::parse($form->start_time)->format('g:i A') . ' to ' .
+                    Carbon::parse($form->end_time)->format('g:i A'),
+                'start_schedule' => Carbon::parse($form->start_date)->format('F j, Y') . ' — ' .
+                    Carbon::parse($form->start_time)->format('g:i A'),
+                'end_schedule' => Carbon::parse($form->end_date)->format('F j, Y') . ' — ' .
+                    Carbon::parse($form->end_time)->format('g:i A'),
+                'fee_breakdown' => $this->getFeeBreakdown($form),
+                'approving_admins' => $approvingAdmins->map(function ($item) {
+                    return [
+                        'name' => $item['admin']->first_name . ' ' . $item['admin']->last_name,
+                        'title' => $item['admin']->title ?? 'Administrator',
+                        'signature_url' => $item['admin']->signature_url,
+                        'date_approved' => $item['date_approved']
+                    ];
+                })->toArray()
+            ];
+
+            \Log::debug('Approving admins found', [
+                'count' => count($receiptData['approving_admins']),
+                'admins' => $receiptData['approving_admins']
+            ]);
+
+            return view('public.official-receipt', compact('receiptData'));
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate official receipt', [
+                'request_id' => $requestId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            abort(404, 'Receipt not found');
         }
-
-        // Calculate total fee
-        $totalFee = $form->approved_fee;
-
-        // Get all admins who approved this request with their approval dates
-        $approvingAdmins = $form->requisitionApprovals
-            ->whereNotNull('approved_by')
-            ->map(function ($approval) {
-                return [
-                    'admin' => $approval->approvedBy,
-                    'date_approved' => $approval->date_updated ? Carbon::parse($approval->date_updated)->format('M j, Y') : 'N/A'
-                ];
-            })
-            ->filter(function ($item) {
-                return !is_null($item['admin']); // Remove null admins
-            })
-            ->unique(function ($item) {
-                return $item['admin']->admin_id; // Remove duplicates by admin_id
-            });
-
-        // Prepare receipt data
-        $receiptData = [
-            'official_receipt_num' => $form->official_receipt_num,
-            'user_name' => $form->first_name . ' ' . $form->last_name,
-            'user_email' => $form->email,
-            'organization_name' => $form->organization_name,
-            'contact_number' => $form->contact_number,
-            'request_id' => $form->request_id,
-            'facility_name' => $form->requestedFacilities->first()->facility->facility_name ?? 'N/A',
-            'purpose' => $form->purpose->purpose_name,
-            'num_participants' => $form->num_participants,
-            'total_fee' => $totalFee,
-            'issued_date' => $form->updated_at->format('F j, Y'),
-            'schedule' => Carbon::parse($form->start_date)->format('F j, Y') . ' — ' .
-                Carbon::parse($form->start_time)->format('g:i A') . ' to ' .
-                Carbon::parse($form->end_time)->format('g:i A'),
-            'start_schedule' => Carbon::parse($form->start_date)->format('F j, Y') . ' — ' .
-                Carbon::parse($form->start_time)->format('g:i A'),
-            'end_schedule' => Carbon::parse($form->end_date)->format('F j, Y') . ' — ' .
-                Carbon::parse($form->end_time)->format('g:i A'),
-            'fee_breakdown' => $this->getFeeBreakdown($form),
-            'approving_admins' => $approvingAdmins->map(function ($item) {
-                return [
-                    'name' => $item['admin']->first_name . ' ' . $item['admin']->last_name,
-                    'title' => $item['admin']->title ?? 'Administrator',
-                    'signature_url' => $item['admin']->signature_url,
-                    'date_approved' => $item['date_approved']
-                ];
-            })->toArray()
-        ];
-
-        \Log::debug('Approving admins found', [
-            'count' => count($receiptData['approving_admins']),
-            'admins' => $receiptData['approving_admins']
-        ]);
-
-        return view('public.official-receipt', compact('receiptData'));
-
-    } catch (\Exception $e) {
-        \Log::error('Failed to generate official receipt', [
-            'request_id' => $requestId,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        abort(404, 'Receipt not found');
     }
-}
 
     private function getFeeBreakdown($form)
     {
@@ -2138,7 +2110,6 @@ public function generateOfficialReceipt($requestId)
                 'calendar_title' => $form->calendar_title,
                 'calendar_description' => $form->calendar_description
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Calendar info update validation failed', [
                 'request_id' => $requestId,
@@ -2149,7 +2120,6 @@ public function generateOfficialReceipt($requestId)
                 'error' => 'Validation failed',
                 'details' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             \Log::error('Failed to update calendar info', [
                 'request_id' => $requestId,
@@ -2250,24 +2220,24 @@ public function generateOfficialReceipt($requestId)
                     ],
                     'requested_items' => [
                         'facilities' => $form->requestedFacilities->map(function ($facility) {
-                        return [
-                            'requested_facility_id' => $facility->requested_facility_id,
-                            'name' => $facility->facility->facility_name,
-                            'fee' => $facility->facility->external_fee,
-                            'rate_type' => $facility->facility->rate_type,
-                            'is_waived' => $facility->is_waived
-                        ];
-                    }),
+                            return [
+                                'requested_facility_id' => $facility->requested_facility_id,
+                                'name' => $facility->facility->facility_name,
+                                'fee' => $facility->facility->external_fee,
+                                'rate_type' => $facility->facility->rate_type,
+                                'is_waived' => $facility->is_waived
+                            ];
+                        }),
                         'equipment' => $form->requestedEquipment->map(function ($equipment) {
-                        return [
-                            'requested_equipment_id' => $equipment->requested_equipment_id,
-                            'name' => $equipment->equipment->equipment_name,
-                            'quantity' => $equipment->quantity,
-                            'fee' => $equipment->equipment->external_fee,
-                            'rate_type' => $equipment->equipment->rate_type,
-                            'is_waived' => $equipment->is_waived
-                        ];
-                    })
+                            return [
+                                'requested_equipment_id' => $equipment->requested_equipment_id,
+                                'name' => $equipment->equipment->equipment_name,
+                                'quantity' => $equipment->quantity,
+                                'fee' => $equipment->equipment->external_fee,
+                                'rate_type' => $equipment->equipment->rate_type,
+                                'is_waived' => $equipment->is_waived
+                            ];
+                        })
                     ],
                     'fees' => [
                         'tentative_fee' => $totalTentativeFee,
@@ -2398,7 +2368,6 @@ public function generateOfficialReceipt($requestId)
             ];
 
             return response()->json($result);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Form not found',
@@ -2444,7 +2413,6 @@ public function generateOfficialReceipt($requestId)
                 'success' => true,
                 'message' => 'Receipt uploaded successfully'
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Receipt upload validation failed', [
                 'request_id' => $requestId,
@@ -2456,7 +2424,6 @@ public function generateOfficialReceipt($requestId)
                 'message' => 'Validation failed',
                 'errors' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             \Log::error('Failed to upload payment receipt', [
                 'request_id' => $requestId,
@@ -2552,7 +2519,6 @@ public function generateOfficialReceipt($requestId)
                 'processed' => $formsToMarkLate->count(),
                 'marked_late' => $markedLateCount
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Failed to automatically mark late forms', [
                 'error' => $e->getMessage(),
@@ -2600,7 +2566,6 @@ public function generateOfficialReceipt($requestId)
                 'recipient' => $userEmail,
                 'request_id' => $form->request_id
             ]);
-
         } catch (\Exception $emailError) {
             \Log::error('Failed to send automated late penalty email', [
                 'request_id' => $form->request_id,
@@ -2683,7 +2648,6 @@ public function generateOfficialReceipt($requestId)
                 'processed' => $formsToMarkOngoing->count(),
                 'marked_ongoing' => $markedOngoingCount
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Failed to automatically mark ongoing forms', [
                 'error' => $e->getMessage(),
@@ -2730,7 +2694,6 @@ public function generateOfficialReceipt($requestId)
                 'recipient' => $userEmail,
                 'request_id' => $form->request_id
             ]);
-
         } catch (\Exception $emailError) {
             \Log::error('Failed to send ongoing status email', [
                 'request_id' => $form->request_id,
@@ -2755,7 +2718,6 @@ public function generateOfficialReceipt($requestId)
                 'ongoing_forms' => json_decode($ongoingResult->getContent(), true),
                 'late_forms' => json_decode($lateResult->getContent(), true)
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Failed to run automatic status updates', [
                 'error' => $e->getMessage()
@@ -2767,6 +2729,4 @@ public function generateOfficialReceipt($requestId)
             ], 500);
         }
     }
-
-
 }

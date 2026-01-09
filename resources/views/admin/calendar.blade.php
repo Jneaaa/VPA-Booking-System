@@ -329,6 +329,35 @@
     box-shadow: 0 0 0 0.2rem rgba(66, 114, 177, 0.25) !important;
     outline: 0;
 }
+
+
+.facility-item .form-check-label {
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.facility-item .form-check-input:checked + .form-check-label {
+    font-weight: bold;
+    color: #004183;
+}
+
+#facilityFilterList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#facilityFilterList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#facilityFilterList::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+#facilityFilterList::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
   </style>
 
 
@@ -464,23 +493,7 @@
           </div>
         </div>
       </div>
-          <!-- Admin Reservations Section -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Admin Reservations</h5>
-            </div>
-            <div class="card-body">
-                <!-- Content will go here -->
-                <div class="text-center text-muted py-4">
-                    <i class="bi bi-calendar-event fs-1 mb-3"></i>
-                    <p class="mb-0">Admin reservations content will be displayed here</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
     </div>
 
 
@@ -633,6 +646,10 @@
     let currentRequestId = null;
     let originalCalendarTitle = '';
     let originalCalendarDescription = '';
+    let allFacilities = [];
+    let filteredFacilities = [];
+    let selectedFacilityIds = [];
+
     
     const adminToken = localStorage.getItem('adminToken');
     const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
@@ -928,45 +945,121 @@ views: {
       }
 
       // Filter and update calendar events
-      function updateCalendarEvents() {
-        if (!calendar) return;
-
-        calendar.removeAllEvents();
-
-        // Filter requests by status
-        filteredRequests = allRequests.filter(req => {
-          const statusName = req.form_details.status.name;
-          const showScheduled = document.getElementById('filterScheduled').checked;
-          const showOngoing = document.getElementById('filterOngoing').checked;
-          const showLate = document.getElementById('filterLate').checked;
-
-          return (statusName === 'Scheduled' && showScheduled) ||
-            (statusName === 'Ongoing' && showOngoing) ||
-            (statusName === 'Late' && showLate);
+ function updateCalendarEvents() {
+    if (!calendar) return;
+    
+    calendar.removeAllEvents();
+    
+    // Filter requests by status AND facility
+    filteredRequests = allRequests.filter(req => {
+        // Status filtering (existing logic)
+        const statusName = req.form_details.status.name;
+        const showScheduled = document.getElementById('filterScheduled').checked;
+        const showOngoing = document.getElementById('filterOngoing').checked;
+        const showLate = document.getElementById('filterLate').checked;
+        
+        const statusMatch = (statusName === 'Scheduled' && showScheduled) ||
+                           (statusName === 'Ongoing' && showOngoing) ||
+                           (statusName === 'Late' && showLate);
+        
+        if (!statusMatch) return false;
+        
+        // Facility filtering - check if "All Facilities" is selected
+        const allFacilitiesCheckbox = document.getElementById('allFacilities');
+        if (allFacilitiesCheckbox && allFacilitiesCheckbox.checked) {
+            return true; // Show all events when "All Facilities" is checked
+        }
+        
+        // If specific facilities are selected
+        if (selectedFacilityIds.length === 0) {
+            return true; // Show all events when no specific facilities selected
+        }
+        
+        // Check if this request includes any of the selected facilities
+        // Now we have facility_id in the response
+        const requestedFacilities = req.requested_items?.facilities || [];
+        
+        console.log(`Request #${req.request_id} has facilities:`, 
+            requestedFacilities.map(f => ({ 
+                facility_id: f.facility_id, 
+                name: f.name 
+            })));
+        
+        const hasSelectedFacility = requestedFacilities.some(facility => {
+            // Get the facility_id from the response
+            const facilityId = facility.facility_id;
+            if (!facilityId) {
+                console.warn('Facility missing ID:', facility);
+                return false;
+            }
+            
+            // Check if this facility ID is in our selected list
+            const isSelected = selectedFacilityIds.includes(facilityId.toString());
+            if (isSelected) {
+                console.log(`✓ Request #${req.request_id} includes selected facility: ${facilityId} (${facility.name})`);
+            }
+            return isSelected;
         });
-
-        // Add filtered events to calendar
-        filteredRequests.forEach(req => {
-          const calendarTitle = req.form_details.calendar_info?.title ||
+        
+        if (!hasSelectedFacility && selectedFacilityIds.length > 0) {
+            console.log(`✗ Request #${req.request_id} does NOT include any selected facilities`);
+        }
+        
+        return hasSelectedFacility;
+    });
+    
+    console.log('Total filtered requests:', filteredRequests.length);
+    console.log('Selected facility IDs:', selectedFacilityIds);
+    
+    // Add filtered events to calendar
+    filteredRequests.forEach(req => {
+        const calendarTitle = req.form_details.calendar_info?.title ||
             `Request #${String(req.request_id).padStart(4, '0')}`;
-
-          calendar.addEvent({
+        
+        calendar.addEvent({
             title: calendarTitle,
             start: `${req.schedule.start_date}T${req.schedule.start_time}`,
             end: `${req.schedule.end_date}T${req.schedule.end_time}`,
             extendedProps: {
-              status: req.form_details.status.name,
-              requestId: req.request_id
+                status: req.form_details.status.name,
+                requestId: req.request_id
             },
             description: req.form_details.calendar_info?.description,
             color: req.form_details.status.color
-          });
         });
+    });
+    
+    // Update mini calendar to reflect event changes
+    updateMiniCalendar();
+}
 
-        // Update mini calendar to reflect event changes
-        updateMiniCalendar();
-      }
 
+function debugDataStructures() {
+    console.log('=== DEBUG: Data Structures ===');
+    
+    // Check facilities structure
+    if (allFacilities.length > 0) {
+        console.log('All facilities (ID : Name):');
+        allFacilities.forEach(f => {
+            console.log(`  ${f.facility_id || f.id} : ${f.facility_name || f.name}`);
+        });
+    }
+    
+    // Check request structure
+    if (allRequests.length > 0) {
+        const sampleRequest = allRequests[0];
+        
+        // Check the requested_items structure
+        if (sampleRequest.requested_items && sampleRequest.requested_items.facilities) {
+            console.log('Requested facilities in sample request:');
+            sampleRequest.requested_items.facilities.forEach((facility, index) => {
+                console.log(`  ${index + 1}. ${facility.name} (facility_id: ${facility.facility_id})`);
+            });
+        }
+    }
+    
+    console.log('=== END DEBUG ===');
+}
 // One-time event listener setup with protection
 let eventListenersSetup = false;
 
@@ -1198,41 +1291,237 @@ async function saveEdit(fieldType) {
         eventModal.show();
     }
 
-      // Fetch all requisition forms
-      async function fetchRequisitionForms() {
-        try {
-
-          // Generate skeleton days immediately
-          generateSkeletonDays();
-
-          const response = await fetch('/api/admin/requisition-forms', {
+    // Add this function to fetch facilities
+async function fetchFacilities() {
+    try {
+        const response = await fetch('/api/facilities', {
             headers: {
-              'Authorization': `Bearer ${adminToken}`,
-              'Accept': 'application/json'
+                'Authorization': `Bearer ${adminToken}`,
+                'Accept': 'application/json'
             }
-          });
-
-          if (!response.ok) {
-            throw new Error(`Failed to fetch requisition forms: ${response.status} ${response.statusText}`);
-          }
-
-          allRequests = await response.json();
-
-          // Initialize calendars after data is loaded
-          initializeMiniCalendar();
-          initializeCalendar();
-
-          // Hide skeletons and show content
-          hideSkeletons();
-
-        } catch (error) {
-          console.error('Error fetching requisition forms:', error);
-          showToast('Failed to load calendar data', 'error');
-
-          // Still hide skeletons even on error
-          hideSkeletons();
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch facilities');
         }
-      }
+        
+        const data = await response.json();
+        allFacilities = data.data || [];
+        renderFacilityFilters();
+    } catch (error) {
+        console.error('Error fetching facilities:', error);
+        showToast('Failed to load facility filters', 'error');
+    }
+}
+
+function renderFacilityFilters() {
+    const facilityFilterList = document.getElementById('facilityFilterList');
+    if (!facilityFilterList) return;
+    
+    facilityFilterList.innerHTML = '';
+    
+    // "All Facilities" option
+    const allFacilitiesItem = document.createElement('div');
+    allFacilitiesItem.className = 'facility-item';
+    allFacilitiesItem.innerHTML = `
+        <div class="form-check">
+            <input class="form-check-input facility-filter" type="checkbox" id="allFacilities" value="All" checked>
+            <label class="form-check-label" for="allFacilities">All Facilities</label>
+        </div>
+    `;
+    facilityFilterList.appendChild(allFacilitiesItem);
+    
+    // Render facility checkboxes
+    allFacilities.forEach(facility => {
+        // Get the ID - use facility_id from the /api/facilities response
+        const facilityId = facility.facility_id || facility.id;
+        const facilityName = facility.facility_name || facility.name;
+        
+        if (!facilityId) {
+            console.warn('Facility missing ID:', facility);
+            return;
+        }
+        
+        const facilityItem = document.createElement('div');
+        facilityItem.className = 'facility-item mb-1';
+        facilityItem.innerHTML = `
+            <div class="form-check">
+                <input class="form-check-input facility-filter" type="checkbox" 
+                       id="facility${facilityId}" 
+                       value="${facilityId}"
+                       data-name="${facilityName}">
+                <label class="form-check-label small" for="facility${facilityId}" 
+                       title="${facilityName}">
+                    ${facilityName.length > 25 ? 
+                      facilityName.substring(0, 25) + '...' : 
+                      facilityName}
+                </label>
+            </div>
+        `;
+        facilityFilterList.appendChild(facilityItem);
+    });
+    
+    // Add event listeners for facility filtering
+    setupFacilityFilterListeners();
+}
+
+// Add this function to setup facility filter event listeners
+function setupFacilityFilterListeners() {
+    const allFacilitiesCheckbox = document.getElementById('allFacilities');
+    const facilityCheckboxes = Array.from(document.querySelectorAll('.facility-filter')).filter(
+        cb => cb.id !== 'allFacilities'
+    );
+    
+    // Initialize selectedFacilityIds
+    selectedFacilityIds = [];
+    
+    // When "All Facilities" is checked/unchecked
+    if (allFacilitiesCheckbox) {
+        allFacilitiesCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Uncheck all individual facility checkboxes
+                facilityCheckboxes.forEach(cb => {
+                    cb.checked = false;
+                });
+                selectedFacilityIds = [];
+            }
+            updateCalendarEvents();
+        });
+    }
+    
+    // When individual facility checkboxes change
+    facilityCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const facilityId = this.value;
+            const facilityName = this.dataset.name;
+            
+            if (this.checked) {
+                // Uncheck "All Facilities"
+                if (allFacilitiesCheckbox) {
+                    allFacilitiesCheckbox.checked = false;
+                }
+                // Add to selected facilities if not already there
+                if (!selectedFacilityIds.includes(facilityId)) {
+                    selectedFacilityIds.push(facilityId);
+                    console.log(`Added facility: ${facilityId} (${facilityName})`);
+                }
+            } else {
+                // Remove from selected facilities
+                selectedFacilityIds = selectedFacilityIds.filter(id => id !== facilityId);
+                console.log(`Removed facility: ${facilityId} (${facilityName})`);
+                
+                // If no facilities selected, check "All Facilities"
+                if (selectedFacilityIds.length === 0 && allFacilitiesCheckbox) {
+                    allFacilitiesCheckbox.checked = true;
+                }
+            }
+            
+            console.log('Currently selected facility IDs:', selectedFacilityIds);
+            updateCalendarEvents();
+        });
+    });
+}
+
+function testFacilityFiltering() {
+    console.log('=== TEST: Facility Filtering ===');
+    
+    if (allRequests.length === 0 || allFacilities.length === 0) {
+        console.log('Not enough data to test');
+        return;
+    }
+    
+    // Test with first facility
+    const testFacility = allFacilities[0];
+    const testFacilityId = testFacility.facility_id || testFacility.id;
+    const testFacilityName = testFacility.facility_name || testFacility.name;
+    
+    console.log(`Testing with facility: ${testFacilityId} (${testFacilityName})`);
+    
+    // Count how many requests include this facility
+    const requestsWithFacility = allRequests.filter(req => {
+        const requestedFacilities = req.requested_items?.facilities || [];
+        return requestedFacilities.some(f => 
+            f.facility_id === testFacilityId
+        );
+    });
+    
+    console.log(`Found ${requestsWithFacility.length} requests with facility ${testFacilityId}`);
+    
+    if (requestsWithFacility.length > 0) {
+        console.log('Sample matching requests:', 
+            requestsWithFacility.slice(0, 3).map(r => ({
+                id: r.request_id,
+                facilities: r.requested_items.facilities.map(f => ({
+                    facility_id: f.facility_id,
+                    name: f.name
+                }))
+            }))
+        );
+    }
+    
+    console.log('=== END TEST ===');
+}
+
+      // Fetch all requisition forms
+  async function fetchRequisitionForms() {
+    try {
+        // Generate skeleton days immediately
+        generateSkeletonDays();
+        
+        // Fetch both requisition forms and facilities in parallel
+        const [formsResponse, facilitiesResponse] = await Promise.all([
+            fetch('/api/admin/requisition-forms', {
+                headers: {
+                    'Authorization': `Bearer ${adminToken}`,
+                    'Accept': 'application/json'
+                }
+            }),
+            fetch('/api/facilities', {
+                headers: {
+                    'Authorization': `Bearer ${adminToken}`,
+                    'Accept': 'application/json'
+                }
+            })
+        ]);
+        
+        if (!formsResponse.ok) {
+            throw new Error(`Failed to fetch requisition forms: ${formsResponse.status}`);
+        }
+        
+        allRequests = await formsResponse.json();
+        console.log('Loaded requests:', allRequests.length);
+        
+        if (facilitiesResponse.ok) {
+            const facilitiesData = await facilitiesResponse.json();
+            allFacilities = facilitiesData.data || [];
+            console.log('Loaded facilities:', allFacilities.length);
+        } else {
+            console.warn('Failed to fetch facilities, continuing without facility filter');
+            allFacilities = [];
+        }
+        
+        // Debug the data structures
+        debugDataStructures();
+        
+        // Run test to verify filtering logic
+        testFacilityFiltering();
+        
+        // Initialize everything
+        initializeMiniCalendar();
+        initializeCalendar();
+        renderFacilityFilters();
+        
+        // Hide skeletons and show content
+        hideSkeletons();
+        
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        showToast('Failed to load calendar data', 'error');
+        
+        // Still hide skeletons even on error
+        hideSkeletons();
+    }
+}
 
       // Event filter change handler
       document.querySelectorAll('.event-filter-checkbox').forEach(checkbox => {
