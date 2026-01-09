@@ -286,6 +286,17 @@
     opacity: 0.6;
     pointer-events: none;
 }
+@media (max-width: 768px) {
+    .left-column p,
+    .right-column p {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .left-column p:last-child,
+    .right-column p:last-child {
+        margin-bottom: 0 !important;
+    }
+}
     </style>
 
     <main class="main-content">
@@ -789,27 +800,52 @@ function hideLoading() {
     }
 
     // Function to convert 12-hour time to 24-hour time (same as in reservation form)
-    function convertTo24Hour(time12h) {
-        if (!time12h) return '';
+   function convertTo24Hour(time12h) {
+    if (!time12h) return '';
 
-        if (time12h.includes(':')) {
-            const [timePart, modifier] = time12h.split(' ');
-            if (!modifier) return timePart;
+    // If it's already in 24-hour format (contains : but no AM/PM)
+    if (time12h.includes(':') && !time12h.includes('AM') && !time12h.includes('PM')) {
+        return time12h; // Already in 24-hour format
+    }
 
-            let [hours, minutes] = timePart.split(':');
-            hours = parseInt(hours, 10);
+    // Convert from 12-hour to 24-hour
+    if (time12h.includes(':')) {
+        const [timePart, modifier] = time12h.split(' ');
+        if (!modifier) return timePart;
 
-            if (modifier === 'PM' && hours !== 12) {
-                hours += 12;
-            } else if (modifier === 'AM' && hours === 12) {
-                hours = 0;
-            }
+        let [hours, minutes] = timePart.split(':');
+        hours = parseInt(hours, 10);
 
-            return `${hours.toString().padStart(2, '0')}:${minutes}`;
+        if (modifier === 'PM' && hours !== 12) {
+            hours += 12;
+        } else if (modifier === 'AM' && hours === 12) {
+            hours = 0;
         }
 
-        return time12h;
+        return `${hours.toString().padStart(2, '0')}:${minutes}`;
     }
+
+    return time12h;
+}
+
+function convertTo12Hour(time24h) {
+    if (!time24h) return '';
+    
+    // Remove seconds if present
+    let time = time24h;
+    if (time.length > 5) {
+        time = time.substring(0, 5);
+    }
+    
+    const [hours, minutes] = time.split(':');
+    let hour = parseInt(hours, 10);
+    const suffix = hour >= 12 ? 'PM' : 'AM';
+    
+    // Convert to 12-hour format
+    hour = hour % 12 || 12;
+    
+    return `${hour}:${minutes} ${suffix}`;
+}
 
     // Function to generate fee breakdown HTML
     function generateFeeBreakdown(form) {
@@ -912,100 +948,136 @@ function hideLoading() {
     }
 
     function displayForms() {
-        const requisitionList = document.querySelector('.requisition-list');
-        if (!requisitionList) return;
+    const requisitionList = document.querySelector('.requisition-list');
+    if (!requisitionList) return;
 
-        requisitionList.innerHTML = '';
+    requisitionList.innerHTML = '';
 
-        allForms.forEach(form => {
-            // Update the safety check to match the new structure
-            if (!form.form_status || !form.purpose) {
-                console.error('Invalid form structure:', form);
-                return;
-            }
+    allForms.forEach(form => {
+        // Update the safety check to match the new structure
+        if (!form.form_status || !form.purpose) {
+            console.error('Invalid form structure:', form);
+            return;
+        }
 
-            const statusClass = form.form_status.status_name.toLowerCase().replace(/\s+/g, '-');
-            const statusName = form.form_status.status_name;
+        const statusClass = form.form_status.status_name.toLowerCase().replace(/\s+/g, '-');
+        const statusName = form.form_status.status_name;
 
-            // Calculate total fee
-            const totalFee = calculateTotalFee(form);
+        // Calculate total fee
+        const totalFee = calculateTotalFee(form);
 
-            let footerButtons = '';
+        let footerButtons = '';
 
-            if (['Pending Approval', 'Scheduled'].includes(statusName)) {
-                footerButtons = `
-                        <div class="card-footer">
-                            <button class="btn btn-sm btn-danger" onclick="showCancelModal(${form.request_id})">Cancel Request</button>
-                        </div>
-                    `;
-            } else if (statusName === 'Awaiting Payment') {
-                footerButtons = `
-                        <div class="card-footer">
-                            <button class="btn btn-sm btn-success" onclick="showUploadModal(${form.request_id})">Upload Receipt</button>
-                            <button class="btn btn-sm btn-danger" onclick="showCancelModal(${form.request_id})">Cancel Request</button>
-                        </div>
-                    `;
-            } else {
-                footerButtons = '<div class="card-footer"></div>';
-            }
-
-            const facilitiesList = form.requested_facilities && form.requested_facilities.length > 0
-                ? form.requested_facilities.map(f => `<li>${f.facility_name}</li>`).join('')
-                : '<p class="no-items mb-0">No facilities requested</p>';
-
-            const equipmentList = form.requested_equipment && form.requested_equipment.length > 0
-                ? form.requested_equipment.map(e => `<li>${e.equipment_name}</li>`).join('')
-                : '<p class="no-items mb-0">No equipment requested</p>';
-
-            const purpose = form.purpose.purpose_name || 'No purpose specified';
-
-            // Format dates properly
-            const formatDate = (dateString) => {
-                return new Date(dateString).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            };
-
-            // Format time properly (remove seconds if present)
-            const formatTime = (timeString) => {
-                return timeString.substring(0, 5); // Get only HH:MM
-            };
-
-            const card = `
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <span class="request-id">Request ID #${form.request_id.toString().padStart(4, '0')}</span>
-                            <span class="status-badge ${statusClass}">${statusName}</span>
-                        </div>
-                        <div class="card-body">
-<div class="left-column">
-  <p class="mb-1"><strong>Purpose:</strong> ${purpose}</p>
-  <p class="mb-1"><strong>Start Schedule:</strong> ${formatDate(form.start_date)}, ${formatTime(form.start_time)}</p>
-  <p class="mb-1"><strong>End Schedule:</strong> ${formatDate(form.end_date)}, ${formatTime(form.end_time)}</p>
-  <p class="mb-0"><strong>Total Fee:</strong> ₱${totalFee.toLocaleString('en-PH', { 
-    minimumFractionDigits: 2, 
-    maximumFractionDigits: 2 
-  })}</p>
-</div>
-<div class="right-column">
-  <h6 class="fw-bold">Request Details</h6>
-  <p class="mb-1"><strong>Facilities:</strong></p>
-  <ul class="mb-2">${facilitiesList}</ul>
-  <p class="mb-1"><strong>Equipment:</strong></p>
-  <ul class="mb-0">${equipmentList}</ul>
-</div>
-
-                        </div>
-                        ${footerButtons}
+        if (['Pending Approval', 'Scheduled'].includes(statusName)) {
+            footerButtons = `
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-danger" onclick="showCancelModal(${form.request_id})">Cancel Request</button>
                     </div>
                 `;
+        } else if (statusName === 'Awaiting Payment') {
+            footerButtons = `
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-success" onclick="showUploadModal(${form.request_id})">Upload Receipt</button>
+                        <button class="btn btn-sm btn-danger" onclick="showCancelModal(${form.request_id})">Cancel Request</button>
+                    </div>
+                `;
+        } else {
+            footerButtons = '<div class="card-footer"></div>';
+        }
 
-            requisitionList.innerHTML += card;
-        });
-    }
+        const facilitiesList = form.requested_facilities && form.requested_facilities.length > 0
+            ? form.requested_facilities.map(f => `<li>${f.facility_name}</li>`).join('')
+            : '<p class="no-items mb-0">No facilities requested</p>';
 
+        const equipmentList = form.requested_equipment && form.requested_equipment.length > 0
+            ? form.requested_equipment.map(e => `<li>${e.equipment_name}</li>`).join('')
+            : '<p class="no-items mb-0">No equipment requested</p>';
+
+        const purpose = form.purpose.purpose_name || 'No purpose specified';
+
+        // Format dates properly
+        const formatDate = (dateString) => {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        };
+
+        // Format time to standard 12-hour format with AM/PM
+        const formatTime = (timeString) => {
+            // If timeString is already in 12-hour format (contains AM/PM), return as is
+            if (timeString.includes('AM') || timeString.includes('PM')) {
+                return timeString;
+            }
+            
+            // Convert military time (HH:MM:SS or HH:MM) to 12-hour format
+            let time = timeString;
+            // Remove seconds if present
+            if (time.length > 5) {
+                time = time.substring(0, 5);
+            }
+            
+            const [hours, minutes] = time.split(':');
+            let hour = parseInt(hours, 10);
+            const suffix = hour >= 12 ? 'PM' : 'AM';
+            
+            // Convert to 12-hour format
+            hour = hour % 12 || 12;
+            
+            return `${hour}:${minutes} ${suffix}`;
+        };
+
+        // Extract requester details - check for both old and new structure
+        let organizationName = '';
+        let requesterName = '';
+        
+        // Check for user_details structure (from controller)
+        if (form.user_details) {
+            organizationName = form.user_details.organization_name || '';
+            requesterName = `${form.user_details.first_name || ''} ${form.user_details.last_name || ''}`.trim();
+        } 
+        // Check for older structure
+        else if (form.organization_name || form.first_name || form.last_name) {
+            organizationName = form.organization_name || '';
+            requesterName = `${form.first_name || ''} ${form.last_name || ''}`.trim();
+        }
+
+        const card = `
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <span class="request-id">Request ID #${form.request_id.toString().padStart(4, '0')}</span>
+                        <span class="status-badge ${statusClass}">${statusName}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="left-column">
+                            <!-- Added organization and requester name -->
+                            ${organizationName ? `<p class="mb-1"><strong>Organization:</strong> ${organizationName}</p>` : ''}
+                            ${requesterName ? `<p class="mb-1"><strong>Requester:</strong> ${requesterName}</p>` : ''}
+                            
+                            <p class="mb-1"><strong>Purpose:</strong> ${purpose}</p>
+                            <p class="mb-1"><strong>Start Schedule:</strong> ${formatDate(form.start_date)}, ${formatTime(form.start_time)}</p>
+                            <p class="mb-1"><strong>End Schedule:</strong> ${formatDate(form.end_date)}, ${formatTime(form.end_time)}</p>
+                            <p class="mb-0"><strong>Total Fee:</strong> ₱${totalFee.toLocaleString('en-PH', { 
+                                minimumFractionDigits: 2, 
+                                maximumFractionDigits: 2 
+                            })}</p>
+                        </div>
+                        <div class="right-column">
+                            <h6 class="fw-bold">Request Details</h6>
+                            <p class="mb-1"><strong>Facilities:</strong></p>
+                            <ul class="mb-2">${facilitiesList}</ul>
+                            <p class="mb-1"><strong>Equipment:</strong></p>
+                            <ul class="mb-0">${equipmentList}</ul>
+                        </div>
+                    </div>
+                    ${footerButtons}
+                </div>
+            `;
+
+        requisitionList.innerHTML += card;
+    });
+}
     function showCancelModal(requestId) {
         currentRequestId = requestId;
         const cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));

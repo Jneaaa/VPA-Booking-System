@@ -196,8 +196,9 @@
         }
 
         #sidebar .nav-link.active {
-            background-color: rgba(80, 128, 206, 0.1);
+            background-color: #105ba7ff;
             font-weight: 500;
+            color: white;
         }
 
         /* Hidden nav items */
@@ -515,25 +516,7 @@
                     <div class="skeleton skeleton-text" style="width: 70px; height: 16px;"></div>
                 </div>
             </li>
-            <li class="nav-item mb-1" id="calendar-nav-item" style="display: none;">
-                <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/calendar*') ? 'active' : '' }}"
-                    href="{{ url('/admin/calendar') }}">
-                    <div class="d-flex align-items-center">
-                        <div class="nav-icon p-1 rounded me-2">
-                            <i class="fa-solid fa-calendar me-1"></i>
-                        </div>
-                        <span>Events Calendar</span>
-                    </div>
-                </a>
-            </li>
-
-            <li class="nav-item mb-1 nav-link-skeleton" id="requisitions-nav-skeleton">
-                <div class="d-flex align-items-center py-1 px-2">
-                    <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
-                    <div class="skeleton skeleton-text" style="width: 80px; height: 16px;"></div>
-                </div>
-            </li>
-<li class="nav-item mb-1" id="requisitions-nav-item" style="display: none;">
+            <li class="nav-item mb-1" id="requisitions-nav-item" style="display: none;">
     <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/manage-requests*') ? 'active' : '' }}"
         href="{{ url('/admin/manage-requests') }}" id="requisitionsNavLink">
         <div class="d-flex align-items-center position-relative w-100">
@@ -541,7 +524,7 @@
                 <div class="nav-icon p-1 rounded me-2">
                     <i class="fa-solid fa-file-lines me-2"></i>
                 </div>
-                <span>Requisitions</span>
+                <span>Pending Forms</span>
             </div>
           <span id="requisitionNotificationBadge" class="badge bg-danger position-absolute rounded-pill" 
        style="display: none; right: 10px; top: 50%; transform: translateY(-50%); min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; padding: 0 4px;">0</span>
@@ -552,6 +535,24 @@
                 <div class="d-flex align-items-center py-1 px-2">
                     <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
                     <div class="skeleton skeleton-text" style="width: 70px; height: 16px;"></div>
+                </div>
+            </li>
+            <li class="nav-item mb-1" id="calendar-nav-item" style="display: none;">
+                <a class="nav-link py-1 px-2 rounded-2 {{ Request::is('admin/calendar*') ? 'active' : '' }}"
+                    href="{{ url('/admin/calendar') }}">
+                    <div class="d-flex align-items-center">
+                        <div class="nav-icon p-1 rounded me-2">
+                            <i class="fa-solid fa-calendar me-1"></i>
+                        </div>
+                        <span>Ongoing Events</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="nav-item mb-1 nav-link-skeleton" id="requisitions-nav-skeleton">
+                <div class="d-flex align-items-center py-1 px-2">
+                    <div class="skeleton skeleton-circle me-2" style="width: 20px; height: 20px;"></div>
+                    <div class="skeleton skeleton-text" style="width: 80px; height: 16px;"></div>
                 </div>
             </li>
             <li class="nav-item mb-1" id="facilities-nav-item" style="display: none;">

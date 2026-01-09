@@ -198,6 +198,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/requisition-forms', [AdminApprovalController::class, 'pendingRequests']);
     Route::get('/admin/requisition-forms/{requestId}', [AdminApprovalController::class, 'getRequisitionFormById']);
     Route::put('admin/requisition-forms/{requestId}/calendar-info', [AdminApprovalController::class, 'updateCalendarInfo']);
+    Route::post('/admin/requisition-forms', [AdminApprovalController::class, 'createReservation']);
     Route::get('/admin/simplified-forms', [AdminApprovalController::class, 'getSimplifiedForms']);
     Route::get('/admin/completed-requests', [AdminApprovalController::class, 'completedRequests']);
     Route::get('/admin/archives', [RequisitionFormController::class, 'getArchivedRequisitions']);

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('request_id');
             $table->unsignedBigInteger('added_by');
             $table->string('label', 50);
+            $table->string('account_num', 10)->nullable();
             $table->decimal('fee_amount', 10, 2)->default(0.00);
             $table->decimal('discount_amount', 10, 2)->default(0.00);
             $table->enum('discount_type', ['Fixed', 'Percentage'])->nullable();

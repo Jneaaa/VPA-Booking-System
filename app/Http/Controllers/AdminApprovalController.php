@@ -147,6 +147,7 @@ class AdminApprovalController extends Controller
                     return [
                         'fee_id' => $fee->fee_id,
                         'label' => $fee->label,
+                        'account_num' => $fee->account_num,
                         'fee_amount' => (float) $fee->fee_amount,
                         'discount_amount' => (float) $fee->discount_amount,
                         'discount_type' => $fee->discount_type,
@@ -406,6 +407,7 @@ class AdminApprovalController extends Controller
                 return [
                     'fee_id' => $fee->fee_id,
                     'label' => $fee->label,
+                    'account_num' => $fee->account_num, 
                     'fee_amount' => (float) $fee->fee_amount,
                     'discount_amount' => (float) $fee->discount_amount,
                     'discount_type' => $fee->discount_type,
@@ -763,6 +765,7 @@ class AdminApprovalController extends Controller
                     return [
                         'fee_id' => $fee->fee_id,
                         'label' => $fee->label,
+                        'account_num' => $fee->account_num,
                         'fee_amount' => $fee->fee_amount,
                         'discount_amount' => $fee->discount_amount,
                         'discount_type' => $fee->discount_type,
@@ -792,6 +795,7 @@ class AdminApprovalController extends Controller
             $validatedData = $request->validate([
                 'label' => 'required|string|max:50',
                 'fee_amount' => 'required|numeric|min:0.01',
+                'account_num' => 'nullable|string|max:10', // Add this line
             ]);
 
             $admin = auth()->user();
@@ -802,6 +806,7 @@ class AdminApprovalController extends Controller
                 'label' => $validatedData['label'],
                 'fee_amount' => $validatedData['fee_amount'],
                 'discount_amount' => 0,
+                'account_num' => $validatedData['account_num'] ?? null, // Add this line
             ]);
 
             // Recalculate approved fee
@@ -861,6 +866,7 @@ class AdminApprovalController extends Controller
                 'label' => 'required|string|max:50',
                 'discount_amount' => 'required|numeric|min:0.01',
                 'discount_type' => 'required|in:Fixed,Percentage',
+                'account_num' => 'nullable|string|max:10', // Add this line
             ]);
 
             $admin = auth()->user();
@@ -872,6 +878,7 @@ class AdminApprovalController extends Controller
                 'fee_amount' => 0,
                 'discount_amount' => $validatedData['discount_amount'],
                 'discount_type' => $validatedData['discount_type'],
+                'account_num' => $validatedData['account_num'] ?? null, // Add this line
             ]);
 
             // Recalculate approved fee
@@ -895,7 +902,6 @@ class AdminApprovalController extends Controller
             ], 500);
         }
     }
-
 
     public function addLatePenalty(Request $request, $requestId)
     {
@@ -1151,130 +1157,364 @@ class AdminApprovalController extends Controller
     }
 
 
-    public function finalizeForm(Request $request, $requestId)
-    {
+public function finalizeForm(Request $request, $requestId)
+{
+    try {
+        \Log::debug('Finalize form attempt', [
+            'request_id' => $requestId,
+            'admin_id' => auth()->id(),
+            'input_data' => $request->all()
+        ]);
+
+        // Remove 'remarks' from validation
+        $validatedData = $request->validate([
+            'calendar_title' => 'sometimes|string|max:50|nullable',
+            'calendar_description' => 'sometimes|string|max:100|nullable',
+        ]);
+
+        \Log::debug('Validation passed', ['validated_data' => $validatedData]);
+
+        $adminId = auth()->id();
+
+        if (!$adminId) {
+            \Log::warning('Admin not authenticated during finalization');
+            return response()->json(['error' => 'Admin not authenticated'], 401);
+        }
+
+        $form = RequisitionForm::with([
+            'requestedFacilities.facility',
+            'requestedEquipment.equipment',
+            'requisitionFees'
+        ])->findOrFail($requestId);
+
+        \Log::debug('Form found', [
+            'current_status' => $form->status_id,
+            'is_finalized' => $form->is_finalized,
+            'current_approved_fee' => $form->approved_fee
+        ]);
+
+        // Update form fields
+        $form->is_finalized = true;
+        $form->finalized_at = now();
+        $form->finalized_by = $adminId;
+        $form->status_id = FormStatus::where('status_name', 'Awaiting Payment')->first()->status_id;
+
+        if (!empty($validatedData['calendar_title'])) {
+            $form->calendar_title = $validatedData['calendar_title'];
+        }
+
+        if (!empty($validatedData['calendar_description'])) {
+            $form->calendar_description = $validatedData['calendar_description'];
+        }
+
+        $form->approved_fee = $this->calculateApprovedFee($form);
+        $form->save();
+
+        \Log::debug('Form finalized successfully', [
+            'new_status' => $form->status_id,
+            'calendar_title' => $form->calendar_title,
+            'approved_fee' => $form->approved_fee
+        ]);
+
+
+
+        // Prepare email data
         try {
-            \Log::debug('Finalize form attempt', [
-                'request_id' => $requestId,
-                'admin_id' => auth()->id(),
-                'input_data' => $request->all()
-            ]);
+            $userName = $form->first_name . ' ' . $form->last_name;
+            $userEmail = $form->email;
 
-            // Remove 'remarks' from validation
-            $validatedData = $request->validate([
-                'calendar_title' => 'sometimes|string|max:50|nullable',
-                'calendar_description' => 'sometimes|string|max:100|nullable',
-            ]);
-
-            \Log::debug('Validation passed', ['validated_data' => $validatedData]);
-
-            $adminId = auth()->id();
-
-            if (!$adminId) {
-                \Log::warning('Admin not authenticated during finalization');
-                return response()->json(['error' => 'Admin not authenticated'], 401);
-            }
-
-            $form = RequisitionForm::with([
-                'requestedFacilities.facility',
-                'requestedEquipment.equipment',
-                'requisitionFees'
-            ])->findOrFail($requestId);
-
-            \Log::debug('Form found', [
-                'current_status' => $form->status_id,
-                'is_finalized' => $form->is_finalized,
-                'current_approved_fee' => $form->approved_fee
-            ]);
-
-            // Update form fields
-            $form->is_finalized = true;
-            $form->finalized_at = now();
-            $form->finalized_by = $adminId;
-            $form->status_id = FormStatus::where('status_name', 'Awaiting Payment')->first()->status_id;
-
-            if (!empty($validatedData['calendar_title'])) {
-                $form->calendar_title = $validatedData['calendar_title'];
-            }
-
-            if (!empty($validatedData['calendar_description'])) {
-                $form->calendar_description = $validatedData['calendar_description'];
-            }
-
-            $form->approved_fee = $this->calculateApprovedFee($form);
-            $form->save();
-
-            \Log::debug('Form finalized successfully', [
-                'new_status' => $form->status_id,
-                'calendar_title' => $form->calendar_title,
-                'approved_fee' => $form->approved_fee
-            ]);
-
-            // Email notification
-            try {
-                $userName = $form->first_name . ' ' . $form->last_name;
-                $userEmail = $form->email;
-
-                $emailData = [
-                    'user_name' => $userName,
-                    'request_id' => $requestId,
-                    'approved_fee' => $form->approved_fee,
-                    'payment_deadline' => now()->addDays(5)->format('F j, Y'),
-                    'access_code' => $form->access_code // Add access_code to email data
-                ];
-
-                \Log::debug('Sending email with data', $emailData);
-
-                \Mail::send('emails.booking-approved', $emailData, function ($message) use ($userEmail, $userName) {
-                    $message->to($userEmail, $userName)
-                        ->subject('Your Booking Request Has Been Approved – Payment Required');
+            // Calculate base fee (sum of unwaived facilities and equipment)
+            $baseFee = $form->requestedFacilities->sum(function ($facility) {
+                    return $facility->is_waived ? 0 : $facility->facility->external_fee;
+                }) + $form->requestedEquipment->sum(function ($equipment) {
+                    return $equipment->is_waived ? 0 : ($equipment->equipment->external_fee * $equipment->quantity);
                 });
 
-                \Log::debug('Approval email sent successfully', [
-                    'recipient' => $userEmail,
-                    'request_id' => $requestId,
-                    'approved_fee' => $form->approved_fee
-                ]);
-            } catch (\Exception $emailError) {
-                \Log::error('Failed to send approval email', [
-                    'request_id' => $requestId,
-                    'error' => $emailError->getMessage(),
-                    'recipient' => $form->email,
-                    'trace' => $emailError->getTraceAsString()
-                ]);
-            }
+            // Calculate booking duration in hours
+$startDateTime = new \DateTime($form->start_date . ' ' . $form->start_time);
+$endDateTime = new \DateTime($form->end_date . ' ' . $form->end_time);
+$duration = $startDateTime->diff($endDateTime);
+$bookingDurationHours = $duration->h + ($duration->days * 24);
 
-            return response()->json([
-                'message' => 'Form finalized successfully',
-                'new_status' => 'Awaiting Payment',
+// Format schedule dates/times for display
+$scheduleStart = $startDateTime->format('F j, Y \a\t g:i A');
+$scheduleEnd = $endDateTime->format('F j, Y \a\t g:i A');
+
+// Calculate base fee with proper rate type handling
+$baseFee = 0;
+
+// Prepare facilities breakdown with rate type handling
+$facilitiesBreakdown = $form->requestedFacilities->map(function ($facility) use ($bookingDurationHours) {
+    $unitFee = $facility->facility->external_fee;
+    
+    // Calculate total fee based on rate type
+    if ($facility->facility->rate_type === 'Per Hour') {
+        $totalFee = $unitFee * $bookingDurationHours;
+    } else {
+        $totalFee = $unitFee; // Per Event
+    }
+    
+    // If waived, set to 0
+    if ($facility->is_waived) {
+        $totalFee = 0;
+    } else {
+        // Add to base fee total
+        $GLOBALS['baseFee'] += $totalFee;
+    }
+    
+    return [
+        'facility_name' => $facility->facility->facility_name,
+        'unit_fee' => $unitFee,
+        'rate_type' => $facility->facility->rate_type,
+        'total_fee' => $totalFee,
+        'is_waived' => $facility->is_waived
+    ];
+})->toArray();
+
+// Prepare equipment breakdown with rate type handling
+$equipmentBreakdown = $form->requestedEquipment->map(function ($equipment) use ($bookingDurationHours) {
+    $unitFee = $equipment->equipment->external_fee;
+    $quantity = $equipment->quantity;
+    
+    // Calculate total fee based on rate type
+    if ($equipment->equipment->rate_type === 'Per Hour') {
+        $totalFee = $unitFee * $bookingDurationHours * $quantity;
+    } else {
+        $totalFee = $unitFee * $quantity; // Per Event
+    }
+    
+    // If waived, set to 0
+    if ($equipment->is_waived) {
+        $totalFee = 0;
+    } else {
+        // Add to base fee total
+        $GLOBALS['baseFee'] += $totalFee;
+    }
+    
+    return [
+        'equipment_name' => $equipment->equipment->equipment_name,
+        'unit_fee' => $unitFee,
+        'quantity' => $quantity,
+        'rate_type' => $equipment->equipment->rate_type,
+        'total_fee' => $totalFee,
+        'is_waived' => $equipment->is_waived
+    ];
+})->toArray();
+
+// Format requisition fees with account numbers for email
+$additionalFees = $form->requisitionFees->map(function ($fee) {
+    return [
+        'label' => $fee->label,
+        'account_num' => $fee->account_num,
+        'fee_amount' => (float) $fee->fee_amount,
+        'discount_amount' => (float) $fee->discount_amount,
+        'discount_type' => $fee->discount_type,
+        'discount_percentage' => $fee->discount_type === 'Percentage' ? $fee->discount_amount : null
+    ];
+})->toArray();
+
+$emailData = [
+    'user_name' => $userName,
+    'request_id' => $requestId,
+    'approved_fee' => $form->approved_fee,
+    'base_fee' => $baseFee,
+    'late_penalty_fee' => $form->late_penalty_fee,
+    'payment_deadline' => now()->addDays(5)->format('F j, Y'),
+    'access_code' => $form->access_code,
+    'booking_duration' => $bookingDurationHours,
+    'schedule_start' => $scheduleStart,
+    'schedule_end' => $scheduleEnd,
+    'requested_facilities' => $form->requestedFacilities->map(function ($facility) {
+        return [
+            'facility_name' => $facility->facility->facility_name,
+            'is_waived' => $facility->is_waived
+        ];
+    })->toArray(),
+    'requested_equipment' => $form->requestedEquipment->map(function ($equipment) {
+        return [
+            'equipment_name' => $equipment->equipment->equipment_name,
+            'quantity' => $equipment->quantity,
+            'is_waived' => $equipment->is_waived
+        ];
+    })->toArray(),
+    'facilities_breakdown' => $facilitiesBreakdown,
+    'equipment_breakdown' => $equipmentBreakdown,
+    'additional_fees' => $additionalFees
+];
+
+            \Log::debug('Sending email with data', $emailData);
+
+            \Mail::send('emails.booking-approved', $emailData, function ($message) use ($userEmail, $userName) {
+                $message->to($userEmail, $userName)
+                    ->subject('Your Booking Request Has Been Approved – Payment Required');
+            });
+
+            \Log::debug('Approval email sent successfully', [
+                'recipient' => $userEmail,
+                'request_id' => $requestId,
                 'approved_fee' => $form->approved_fee
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Finalize form validation failed', [
+        } catch (\Exception $emailError) {
+            \Log::error('Failed to send approval email', [
                 'request_id' => $requestId,
-                'errors' => $e->errors(),
-                'input_data' => $request->all()
+                'error' => $emailError->getMessage(),
+                'recipient' => $form->email,
+                'trace' => $emailError->getTraceAsString()
             ]);
-
-            return response()->json([
-                'error' => 'Validation failed',
-                'details' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            \Log::error('Failed to finalize form', [
-                'request_id' => $requestId,
-                'admin_id' => auth()->id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'input_data' => $request->all()
-            ]);
-
-            return response()->json([
-                'error' => 'Failed to finalize form',
-                'details' => $e->getMessage()
-            ], 500);
         }
+
+        return response()->json([
+            'message' => 'Form finalized successfully',
+            'new_status' => 'Awaiting Payment',
+            'approved_fee' => $form->approved_fee
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Finalize form validation failed', [
+            'request_id' => $requestId,
+            'errors' => $e->errors(),
+            'input_data' => $request->all()
+        ]);
+
+        return response()->json([
+            'error' => 'Validation failed',
+            'details' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        \Log::error('Failed to finalize form', [
+            'request_id' => $requestId,
+            'admin_id' => auth()->id(),
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'input_data' => $request->all()
+        ]);
+
+        return response()->json([
+            'error' => 'Failed to finalize form',
+            'details' => $e->getMessage()
+        ], 500);
     }
+}
+
+public function createReservation(Request $request)
+{
+    try {
+        \Log::debug('Creating admin reservation', $request->all());
+
+        DB::beginTransaction();
+
+        // Validate the request
+        $validatedData = $request->validate([
+            'user_type' => 'required|in:Internal,External',
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'email' => 'required|email|max:100',
+            'organization_name' => 'nullable|string|max:100',
+            'contact_number' => 'nullable|string|max:15',
+            'purpose_id' => 'required|exists:requisition_purposes,purpose_id',
+            'num_participants' => 'required|integer|min:1',
+            'access_code' => 'required|string|max:10|unique:requisition_forms,access_code',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'calendar_title' => 'nullable|string|max:50',
+            'calendar_description' => 'nullable|string|max:100',
+            'additional_requests' => 'nullable|string|max:250',
+            'facilities' => 'required|array|min:1',
+            'facilities.*.facility_id' => 'required|exists:facilities,facility_id',
+            'equipment' => 'array',
+            'equipment.*.equipment_id' => 'required|exists:equipment,equipment_id',
+            'equipment.*.quantity' => 'required|integer|min:1',
+            'status_id' => 'required|exists:form_statuses,status_id',
+        ]);
+
+        // Create the requisition form
+        $requisitionForm = RequisitionForm::create([
+            'user_type' => $validatedData['user_type'],
+            'first_name' => $validatedData['first_name'],
+            'last_name' => $validatedData['last_name'],
+            'email' => $validatedData['email'],
+            'organization_name' => $validatedData['organization_name'] ?? null,
+            'contact_number' => $validatedData['contact_number'] ?? null,
+            'purpose_id' => $validatedData['purpose_id'],
+            'num_participants' => $validatedData['num_participants'],
+            'access_code' => $validatedData['access_code'],
+            'start_date' => $validatedData['start_date'],
+            'end_date' => $validatedData['end_date'],
+            'start_time' => $validatedData['start_time'],
+            'end_time' => $validatedData['end_time'],
+            'calendar_title' => $validatedData['calendar_title'] ?? 'Admin Reservation',
+            'calendar_description' => $validatedData['calendar_description'] ?? null,
+            'additional_requests' => $validatedData['additional_requests'] ?? null,
+            'status_id' => $validatedData['status_id'],
+            'is_finalized' => true, // Admin reservations are automatically finalized
+            'finalized_at' => now(),
+            'finalized_by' => auth()->id(),
+        ]);
+
+        // Add facilities
+        foreach ($validatedData['facilities'] as $facility) {
+            RequestedFacility::create([
+                'request_id' => $requisitionForm->request_id,
+                'facility_id' => $facility['facility_id'],
+                'is_waived' => false,
+            ]);
+        }
+
+        // Add equipment
+        foreach ($validatedData['equipment'] ?? [] as $equipment) {
+            RequestedEquipment::create([
+                'request_id' => $requisitionForm->request_id,
+                'equipment_id' => $equipment['equipment_id'],
+                'quantity' => $equipment['quantity'],
+                'is_waived' => false,
+            ]);
+        }
+
+        // Create approval record for admin creation
+        RequisitionApproval::create([
+            'request_id' => $requisitionForm->request_id,
+            'approved_by' => auth()->id(),
+            'remarks' => 'Admin-created reservation',
+            'date_updated' => now(),
+        ]);
+
+        // Create comment
+        RequisitionComment::create([
+            'request_id' => $requisitionForm->request_id,
+            'admin_id' => auth()->id(),
+            'comment' => 'Admin created this reservation manually',
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Reservation created successfully',
+            'request_id' => $requisitionForm->request_id,
+            'access_code' => $requisitionForm->access_code,
+        ], 201);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack();
+        \Log::error('Validation failed for admin reservation', [
+            'errors' => $e->errors(),
+        ]);
+        return response()->json([
+            'error' => 'Validation failed',
+            'details' => $e->errors(),
+        ], 422);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Failed to create admin reservation', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        return response()->json([
+            'error' => 'Failed to create reservation',
+            'details' => $e->getMessage(),
+        ], 500);
+    }
+}
 
 
     // Add this method to the AdminApprovalController class

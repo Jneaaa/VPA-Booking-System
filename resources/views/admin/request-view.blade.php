@@ -502,59 +502,58 @@
                     </div>
 
                     <!-- Add Fee Modal -->
-                    <div class="modal fade" id="feeModal" tabindex="-1" aria-labelledby="feeModalLabel"
-                        aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="feeModalLabel">Add Fee or Discount</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <form id="feeForm">
-                                        <input type="hidden" id="feeRequestId" value="{{ $requestId }}">
-                                        <div class="mb-2">
-                                            <label for="feeType" class="form-label">Fee Type</label>
-                                            <select id="feeType" class="form-select" required>
-                                                <option value="">Select type...</option>
-                                                <option value="additional">Additional Fee
-                                                </option>
-                                                <option value="discount">Discount</option>
-                                                <option value="vat">Less VAT (12%)</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-2" id="discountTypeSection" style="display: none;">
-                                            <label for="discountType" class="form-label">Discount Type</label>
-                                            <select id="discountType" class="form-select">
-                                                <option value="Fixed">Fixed Amount</option>
-                                                <option value="Percentage">Percentage</option>
-                                            </select>
-                                        </div>
-                                        <div class="row g-2 mb-3">
-                                            <div class="col-md-6">
-                                                <label for="feeLabel" class="form-label">Fee Label</label>
-                                                <input type="text" id="feeLabel" class="form-control"
-                                                    placeholder="Fee Label" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label for="feeValue" class="form-label">Amount</label>
-                                                <input type="number" id="feeValue" class="form-control" step="0.01"
-                                                    min="0.01" placeholder="Enter amount" required>
-                                            </div>
-                                        </div>
-
-
-                                    </form>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">Cancel</button>
-                                    <button type="button" id="saveFeeBtn" class="btn btn-primary">Add</button>
-                                </div>
-                            </div>
+                   <div class="modal fade" id="feeModal" tabindex="-1" aria-labelledby="feeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feeModalLabel">Add Fee or Discount</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="feeForm">
+                    <input type="hidden" id="feeRequestId" value="{{ $requestId }}">
+                    <div class="mb-2">
+                        <label for="feeType" class="form-label">Fee Type</label>
+                        <select id="feeType" class="form-select" required>
+                            <option value="">Select type...</option>
+                            <option value="additional">Additional Fee</option>
+                            <option value="discount">Discount</option>
+                            <option value="vat">Less VAT (12%)</option>
+                        </select>
+                    </div>
+                    <div class="mb-2" id="discountTypeSection" style="display: none;">
+                        <label for="discountType" class="form-label">Discount Type</label>
+                        <select id="discountType" class="form-select">
+                            <option value="Fixed">Fixed Amount</option>
+                            <option value="Percentage">Percentage</option>
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <!-- Updated: Added Account Number field -->
+                        <div class="col-md-6">
+                            <label for="feeLabel" class="form-label">Fee Label</label>
+                            <input type="text" id="feeLabel" class="form-control" placeholder="Fee Label" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="accountNum" class="form-label">Account Number (Optional)</label>
+                            <input type="text" id="accountNum" class="form-control" placeholder="Enter account number">
                         </div>
                     </div>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label for="feeValue" class="form-label">Amount</label>
+                            <input type="number" id="feeValue" class="form-control" step="0.01" min="0.01" placeholder="Enter amount" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="saveFeeBtn" class="btn btn-primary">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
 
                     <div class="row g-2 mt-1 align-items-stretch">
                         <!-- Left Column: Activity Timeline -->
@@ -2867,83 +2866,87 @@
 
         // Save Fee button logic
         saveFeeBtn.addEventListener("click", async function() {
-            const type = feeTypeSelect.value;
-            const value = parseFloat(feeValueInput.value);
-            const label = document.getElementById('feeLabel').value;
-            const discountType = document.getElementById('discountType').value;
+    const type = feeTypeSelect.value;
+    const value = parseFloat(feeValueInput.value);
+    const label = document.getElementById('feeLabel').value;
+    const discountType = document.getElementById('discountType').value;
+    const accountNum = document.getElementById('accountNum').value.trim(); // Get account number
 
-            if (!type || !value || !label) {
-                showToast("Please fill all required fields.", "success");
-                return;
-            }
+    if (!type || !value || !label) {
+        showToast("Please fill all required fields.", "error");
+        return;
+    }
 
-            try {
-                let endpoint = '';
-                let requestData = {};
+    try {
+        let endpoint = '';
+        let requestData = {};
 
-                // Determine which API endpoint to call based on fee type
-                switch (type) {
-                    case 'additional':
-                        endpoint = `/api/admin/requisition/${requestId}/fee`;
-                        requestData = {
-                            label: label,
-                            fee_amount: value
-                        };
-                        break;
-                    case 'discount':
-                    case 'vat': // Both discount and vat use the discount API
-                        endpoint = `/api/admin/requisition/${requestId}/discount`;
-                        requestData = {
-                            label: label,
-                            discount_amount: value,
-                            discount_type: discountType
-                        };
-                        break;
-                }
-
-
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.details || 'Failed to add fee/discount');
-                }
-
-                const result = await response.json();
-
-                // Reset and close modal
-                feeValueInput.value = "";
-                feeTypeSelect.value = "";
-                document.getElementById('feeLabel').value = "";
-                discountTypeSection.style.display = 'none';
-                feeModal.hide();
-
-                // Show success message
-                showToast('Fee/discount added successfully', 'success');
-
-                // Refresh ALL fee displays including the total
-                await refreshAllFeeDisplays();
-
-            } catch (error) {
-                console.error('Error adding fee/discount:', error);
-                console.error('Fee addition details:', {
-                    type: type,
-                    value: value,
+        // Determine which API endpoint to call based on fee type
+        switch (type) {
+            case 'additional':
+                endpoint = `/api/admin/requisition/${requestId}/fee`;
+                requestData = {
                     label: label,
-                    discountType: discountType,
-                    error: error.message
-                });
-                showToast('Failed to add fee/discount: ' + error.message, 'error');
-            }
+                    fee_amount: value,
+                    account_num: accountNum || null // Include account number
+                };
+                break;
+            case 'discount':
+            case 'vat': // Both discount and vat use the discount API
+                endpoint = `/api/admin/requisition/${requestId}/discount`;
+                requestData = {
+                    label: label,
+                    discount_amount: value,
+                    discount_type: discountType,
+                    account_num: accountNum || null // Include account number
+                };
+                break;
+        }
+
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${adminToken}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestData)
         });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.details || 'Failed to add fee/discount');
+        }
+
+        const result = await response.json();
+
+        // Reset and close modal
+        feeValueInput.value = "";
+        feeTypeSelect.value = "";
+        document.getElementById('feeLabel').value = "";
+        document.getElementById('accountNum').value = ""; // Clear account number
+        discountTypeSection.style.display = 'none';
+        feeModal.hide();
+
+        // Show success message
+        showToast('Fee/discount added successfully', 'success');
+
+        // Refresh ALL fee displays including the total
+        await refreshAllFeeDisplays();
+
+    } catch (error) {
+        console.error('Error adding fee/discount:', error);
+        console.error('Fee addition details:', {
+            type: type,
+            value: value,
+            label: label,
+            accountNum: accountNum,
+            discountType: discountType,
+            error: error.message
+        });
+        showToast('Failed to add fee/discount: ' + error.message, 'error');
+    }
+});
 
         // Document preview functionality - clean overlay for PDFs and images
         document.addEventListener('click', function(event) {
@@ -3702,105 +3705,114 @@
         }
 
         // Function to update additional fees display
-        function updateAdditionalFees(requisitionFees) {
-            const additionalFeesContainer = document.getElementById('additionalFeesContainer');
+      // Function to update additional fees display
+function updateAdditionalFees(requisitionFees) {
+    const additionalFeesContainer = document.getElementById('additionalFeesContainer');
 
-            // Clear existing content
-            additionalFeesContainer.innerHTML = '';
+    // Clear existing content
+    additionalFeesContainer.innerHTML = '';
 
-            if (requisitionFees && requisitionFees.length > 0) {
-                requisitionFees.forEach((fee, index) => {
-                    const feeElement = document.createElement('div');
-                    feeElement.className = 'fee-item d-flex justify-content-between align-items-center mb-1';
+    if (requisitionFees && requisitionFees.length > 0) {
+        requisitionFees.forEach((fee, index) => {
+            const feeElement = document.createElement('div');
+            feeElement.className = 'fee-item d-flex justify-content-between align-items-center mb-1';
 
-                    let amountText = '';
-                    if (fee.type === 'fee') {
-                        amountText = `${formatMoney(fee.fee_amount)}`;
-                    } else if (fee.type === 'discount') {
-                        if (fee.discount_type === 'Percentage') {
-                            // Remove .00 for percentage discounts
-                            amountText = `${parseFloat(fee.discount_amount)}%`;
-                        } else {
-                            amountText = `-${formatMoney(fee.discount_amount)}`;
-                        }
-                    } else if (fee.type === 'mixed') {
-                        const feePart = fee.fee_amount > 0 ? `${formatMoney(fee.fee_amount)}` : '';
-                        const discountPart = fee.discount_amount > 0 ?
-                            (fee.discount_type === 'Percentage' ?
-                                `-${parseFloat(fee.discount_amount)}%` :
-                                `-₱${parseFloat(fee.discount_amount).toFixed(2)}`) : '';
-                        amountText = `${feePart} ${discountPart}`.trim();
-                    }
+            let amountText = '';
+            if (fee.type === 'fee') {
+                amountText = `${formatMoney(fee.fee_amount)}`;
+            } else if (fee.type === 'discount') {
+                if (fee.discount_type === 'Percentage') {
+                    // Remove .00 for percentage discounts
+                    amountText = `${parseFloat(fee.discount_amount)}%`;
+                } else {
+                    amountText = `-${formatMoney(fee.discount_amount)}`;
+                }
+            } else if (fee.type === 'mixed') {
+                const feePart = fee.fee_amount > 0 ? `${formatMoney(fee.fee_amount)}` : '';
+                const discountPart = fee.discount_amount > 0 ?
+                    (fee.discount_type === 'Percentage' ?
+                        `-${parseFloat(fee.discount_amount)}%` :
+                        `-₱${parseFloat(fee.discount_amount).toFixed(2)}`) : '';
+                amountText = `${feePart} ${discountPart}`.trim();
+            }
 
-                    feeElement.innerHTML = `
-                                            <span class="item-name">${fee.label}</span>
-                                            <span class="d-flex align-items-center">
-                                                <span class="item-price me-2">${amountText}</span>
-                                                <button class="btn btn-sm btn-danger delete-fee-btn" data-fee-id="${fee.fee_id}" data-fee-type="${fee.type}">
-                                                    <i class="fa fa-times"></i>
-                                                </button>
-                                            </span>
-                                        `;
+            // Create label with account number if it exists
+            let labelHtml = fee.label;
+            if (fee.account_num) {
+                labelHtml = `${fee.label} <span class="text-muted">(${fee.account_num})</span>`;
+            }
 
-                    additionalFeesContainer.appendChild(feeElement);
-                });
+            feeElement.innerHTML = `
+                <div>
+                    <span class="item-name">${labelHtml}</span>
+                </div>
+                <span class="d-flex align-items-center">
+                    <span class="item-price me-2">${amountText}</span>
+                    <button class="btn btn-sm btn-danger delete-fee-btn" data-fee-id="${fee.fee_id}" data-fee-type="${fee.type}">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </span>
+            `;
 
-                // Handle delete click
-                additionalFeesContainer.querySelectorAll('.delete-fee-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const feeId = e.currentTarget.dataset.feeId;
-                        const feeType = e.currentTarget.dataset.feeType;
+            additionalFeesContainer.appendChild(feeElement);
+        });
 
-                        if (!feeId) {
-                            console.error('No fee ID found for deletion');
-                            showToast('Cannot delete fee that does not exist.', 'error');
-                            return;
-                        }
+        // Handle delete click
+        additionalFeesContainer.querySelectorAll('.delete-fee-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const feeId = e.currentTarget.dataset.feeId;
+                const feeType = e.currentTarget.dataset.feeType;
 
-                        try {
-                            const response = await fetch(`/api/admin/requisition/${requestId}/fee/${feeId}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Authorization': `Bearer ${adminToken}`,
-                                    'Accept': 'application/json'
-                                }
-                            });
+                if (!feeId) {
+                    console.error('No fee ID found for deletion');
+                    showToast('Cannot delete fee that does not exist.', 'error');
+                    return;
+                }
 
-                            if (!response.ok) {
-                                const errorData = await response.json();
-                                throw new Error(errorData.details || 'Failed to delete fee');
-                            }
-
-                            const result = await response.json();
-
-                            // Show success message
-                            showToast('Fee removed successfully', 'success');
-
-                            // Refresh ALL fee displays including the total
-                            await refreshAllFeeDisplays();
-
-                        } catch (error) {
-                            console.error('Error removing fee:', error);
-                            console.error('Fee deletion details:', {
-                                feeId: feeId,
-                                feeType: feeType,
-                                requestId: requestId,
-                                error: error.message
-                            });
-                            showToast('Failed to remove fee: ' + error.message, 'error');
+                try {
+                    const response = await fetch(`/api/admin/requisition/${requestId}/fee/${feeId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`,
+                            'Accept': 'application/json'
                         }
                     });
-                });
-            } else {
-                // Show empty message
-                additionalFeesContainer.innerHTML = `
-                                        <div class="text-center text-muted py-4">
-                                            <i class="fa fa-coins fa-2x d-block mb-2"></i>
-                                            <p class="mb-0">No additional fees or discounts</p>
-                                        </div>
-                                    `;
-            }
-        }
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.details || 'Failed to delete fee');
+                    }
+
+                    const result = await response.json();
+
+                    // Show success message
+                    showToast('Fee removed successfully', 'success');
+
+                    // Refresh ALL fee displays including the total
+                    await refreshAllFeeDisplays();
+
+                } catch (error) {
+                    console.error('Error removing fee:', error);
+                    console.error('Fee deletion details:', {
+                        feeId: feeId,
+                        feeType: feeType,
+                        requestId: requestId,
+                        error: error.message
+                    });
+                    showToast('Failed to remove fee: ' + error.message, 'error');
+                }
+            });
+        });
+    } else {
+        // Show empty message
+        additionalFeesContainer.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fa fa-coins fa-2x d-block mb-2"></i>
+                <p class="mb-0">No additional fees or discounts</p>
+            </div>
+        `;
+    }
+}
 
         // Update the dropdown menu text dynamically based on current status
         function updateStatusDropdownText() {

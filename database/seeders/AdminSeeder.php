@@ -106,15 +106,15 @@ class AdminSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'first_name' => 'Jessica',
-                'last_name' => 'Bataclit',
-                'middle_name' => 'P.',
+                'first_name' => 'VP',
+                'last_name' => 'Administration',
+                'middle_name' => 'For',
                 'title' => 'Secretary',
                 'signature_url' => null,
                 'signature_public_id' => null,
                 'role_id' => 1,
                 'school_id' => null,
-                'email' => 'jessicabataclit@gmail.com',
+                'email' => 'vpa-sec2@cpu.edu.ph',
                 'contact_number' => null,
                 'hashed_password' => Hash::make('password123'),
                 'created_at' => now(),
@@ -135,6 +135,7 @@ class AdminSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+
         ]);
     }
 }

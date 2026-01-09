@@ -13,6 +13,7 @@ class RequisitionFee extends Model
         'request_id',
         'added_by',
         'label',
+        'account_num',
         'fee_amount',
         'discount_amount',
         'discount_type',
